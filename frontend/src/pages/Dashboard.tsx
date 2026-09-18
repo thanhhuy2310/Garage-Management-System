@@ -6,8 +6,9 @@ import {
 import { Card, StatCard, Badge, Icons } from "../components/ui";
 import {
   mockAppointments, mockRepairOrders, mockInventory,
-  chartRevenue, chartMonthly, chartServices, formatCurrency
-} from "../data";
+  mockQuotations, chartRevenue, chartMonthly, chartServices,
+  DEMO_TODAY, formatCurrency
+} from "../mock/data";
 
 const PIE_COLORS = ["#3b82f6", "#f59e0b", "#10b981", "#f97316", "#8b5cf6", "#64748b"];
 
@@ -26,10 +27,14 @@ const pieData = [
 ];
 
 const lowStock = mockInventory.filter(i => i.status === "low" || i.status === "out");
-const todayAppointments = mockAppointments.filter(a => a.date === "2024-09-17");
-const pendingQuotations = [
-  { id: "BG002", customer: "Trần Thị Bình", vehicle: "51B-789.01", total: 1100000 },
-];
+const todayAppointments = mockAppointments.filter(a => a.date === DEMO_TODAY);
+const pendingQuotations = mockQuotations
+  .filter((quotation) => quotation.status === "pending")
+  .map((quotation) => ({
+    ...quotation,
+    total: [...quotation.services, ...quotation.parts]
+      .reduce((sum, item) => sum + item.qty * item.price, 0),
+  }));
 
 type ChartPeriod = "week" | "month";
 
@@ -46,8 +51,8 @@ export default function Dashboard() {
         <StatCard label="Đang sửa chữa" value={repairStatusCount.in_progress + repairStatusCount.waiting_parts} icon={Icons.wrench} color="blue" />
         <StatCard label="Đã hoàn tất" value={repairStatusCount.completed} icon={Icons.checkCircle} color="green" />
         <StatCard label="Lịch hẹn hôm nay" value={todayAppointments.length} icon={Icons.calendar} color="navy" />
-        <StatCard label="Báo giá chờ xác nhận" value="1" icon={Icons.fileText} color="amber" />
-        <StatCard label="Doanh thu hôm nay" value="3.5M" icon={Icons.creditCard} color="green" trend="+12% so hôm qua" trendUp />
+        <StatCard label="Báo giá chờ xác nhận" value={pendingQuotations.length} icon={Icons.fileText} color="amber" />
+        <StatCard label="Doanh thu hôm nay" value={formatCurrency(chartRevenue.at(-1)?.revenue ?? 0)} icon={Icons.creditCard} color="green" trend="+12% so hôm qua" trendUp />
         <StatCard label="Phụ tùng sắp hết" value={lowStock.length} icon={Icons.alertTriangle} color="red" />
       </div>
 
