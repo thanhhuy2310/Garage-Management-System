@@ -27,7 +27,6 @@ const ROLE_AVATARS: Record<string, { bg: string; initial: string; name: string; 
   receptionist: { bg: "from-emerald-400 to-emerald-600", initial: "T", name: "Phạm Minh Tuấn", title: "NV tiếp nhận" },
   technician: { bg: "from-orange-400 to-orange-600", initial: "K", name: "Trần Văn Khoa", title: "Kỹ thuật viên" },
   warehouse: { bg: "from-amber-400 to-amber-600", initial: "N", name: "Đỗ Văn Nam", title: "NV kho" },
-  cashier: { bg: "from-pink-400 to-pink-600", initial: "H", name: "Lê Thị Hoa", title: "Thu ngân" },
 };
 
 interface SidebarProps {
@@ -37,6 +36,7 @@ interface SidebarProps {
   allowedPages?: readonly string[];
   mobileOpen?: boolean;
   onClose?: () => void;
+  onLogout?: () => void;
 }
 
 export default function Sidebar({
@@ -46,6 +46,7 @@ export default function Sidebar({
   allowedPages,
   mobileOpen = false,
   onClose,
+  onLogout,
 }: SidebarProps) {
   const avatar = ROLE_AVATARS[role] ?? ROLE_AVATARS.manager;
   const visibleNav = allowedPages
@@ -97,11 +98,11 @@ export default function Sidebar({
             <p className="truncate text-xs font-semibold text-white">{avatar.name}</p>
             <p className="truncate text-[10px] text-white/50">{avatar.title}</p>
           </div>
-          <span className="text-white/40" title="Đăng xuất">
+          <button type="button" onClick={onLogout} className="rounded p-1 text-white/40 hover:bg-white/10 hover:text-white" title="Đăng xuất" aria-label="Đăng xuất">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
             </svg>
-          </span>
+          </button>
         </div>
       </div>
     </aside>

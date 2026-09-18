@@ -35,7 +35,6 @@ const ROLE_INFO: Record<string, { label: string; name: string; initial: string; 
   receptionist: { label: "NV tiếp nhận", name: "Phạm Minh Tuấn", initial: "T", avatar: "from-emerald-400 to-emerald-600" },
   technician: { label: "Kỹ thuật viên", name: "Trần Văn Khoa", initial: "K", avatar: "from-orange-400 to-orange-600" },
   warehouse: { label: "NV kho", name: "Đỗ Văn Nam", initial: "N", avatar: "from-amber-400 to-amber-600" },
-  cashier: { label: "Thu ngân", name: "Lê Thị Hoa", initial: "H", avatar: "from-pink-400 to-pink-600" },
 };
 
 const QUICK_NOTIFICATIONS = [

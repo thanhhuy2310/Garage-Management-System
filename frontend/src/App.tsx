@@ -28,7 +28,7 @@ export type Page =
   | "history" | "notifications" | "reports" | "staff" | "settings"
   | "technician" | "design-system" | "mobile";
 
-type Role = "manager" | "technician" | "receptionist" | "cashier" | "warehouse" | "admin";
+type Role = "customer" | "receptionist" | "technician" | "warehouse" | "manager" | "admin";
 
 const PAGE_KEYS = new Set<Page>([
   "dashboard", "appointments", "reception", "repair", "quotation",
@@ -38,21 +38,30 @@ const PAGE_KEYS = new Set<Page>([
 ]);
 
 const ROLE_LABELS: Record<Role, string> = {
+  customer: "Khách hàng",
   admin: "Quản trị viên",
   manager: "Quản lý",
   receptionist: "NV tiếp nhận",
   technician: "Kỹ thuật viên",
   warehouse: "NV kho",
-  cashier: "Thu ngân",
 };
 
 const ROLE_NAV: Record<Role, Page[]> = {
-  admin: ["dashboard", "appointments", "reception", "repair", "quotation", "customers", "vehicles", "services", "inventory", "invoice", "history", "notifications", "reports", "staff", "settings", "design-system"],
-  manager: ["dashboard", "appointments", "reception", "repair", "quotation", "customers", "vehicles", "services", "inventory", "invoice", "history", "notifications", "reports", "staff"],
-  receptionist: ["appointments", "reception", "repair", "quotation", "customers", "vehicles", "invoice", "notifications"],
-  technician: ["technician", "inventory", "notifications"],
-  warehouse: ["inventory", "notifications"],
-  cashier: ["invoice", "history", "notifications"],
+  customer: ["mobile"],
+  receptionist: ["customers", "vehicles", "appointments", "reception", "repair", "quotation", "invoice", "history"],
+  technician: ["technician"],
+  warehouse: ["inventory"],
+  manager: ["dashboard", "staff", "services", "repair", "reports"],
+  admin: ["settings"],
+};
+
+const ROLE_USERNAMES: Record<Role, string> = {
+  customer: "khachhang.an",
+  receptionist: "tiepnhan",
+  technician: "ktv.khoa",
+  warehouse: "kho.nam",
+  manager: "manager",
+  admin: "admin",
 };
 
 function getPageFromHash(): Page | null {
@@ -129,7 +138,10 @@ export default function App() {
   if (!loggedIn) {
     return (
       <div className="relative">
-        <Login onLogin={handleLogin} />
+        <Login
+          onLogin={handleLogin}
+          account={{ label: ROLE_LABELS[role], username: ROLE_USERNAMES[role] }}
+        />
         <div className="fixed bottom-6 right-6 z-50">
           {showRolePicker && (
             <div className="mb-2 min-w-[200px] rounded-xl border border-[#dde3ec] bg-white p-3 shadow-xl">
@@ -154,6 +166,28 @@ export default function App() {
             <span className="text-white/60">▼</span>
           </button>
         </div>
+      </div>
+    );
+  }
+
+  const handleLogout = () => {
+    setLoggedIn(false);
+    setShowMobile(false);
+    setSidebarOpen(false);
+    window.history.replaceState(null, "", window.location.pathname);
+  };
+
+  if (role === "customer") {
+    return (
+      <div className="relative min-h-screen bg-[#f0f4f8]">
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="fixed right-4 top-4 z-50 rounded-lg bg-[#1e3a6e] px-3 py-2 text-xs font-semibold text-white shadow-lg hover:bg-[#162d56]"
+        >
+          Đăng xuất
+        </button>
+        <Suspense fallback={<PageLoading />}><MobileApp /></Suspense>
       </div>
     );
   }
@@ -192,6 +226,7 @@ export default function App() {
         allowedPages={allowedPages}
         mobileOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        onLogout={handleLogout}
       />
       {sidebarOpen && (
         <button
