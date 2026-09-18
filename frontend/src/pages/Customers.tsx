@@ -18,7 +18,7 @@ export default function Customers() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="page-toolbar">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <SearchBox value={search} onChange={setSearch} placeholder="Tên, số điện thoại..." />
           <Button variant="outline" size="sm" icon={Icons.filter}>Lọc</Button>
@@ -46,7 +46,7 @@ export default function Customers() {
                 {paged.map(customer => {
                   const vehicleCount = xe.filter(vehicle => vehicle.MaKhachHang === customer.MaKhachHang).length;
                   return (
-                  <tr key={customer.MaKhachHang} className={`cursor-pointer ${selected === customer.MaKhachHang ? "bg-blue-50" : ""}`}
+                  <tr key={customer.MaKhachHang} className={`cursor-pointer ${selected === customer.MaKhachHang ? "bg-info-soft" : ""}`}
                     onClick={() => setSelected(customer.MaKhachHang === selected ? null : customer.MaKhachHang)}>
                     <td><span className="mono text-xs text-slate-400">{customer.MaKhachHang}</span></td>
                     <td>
@@ -61,7 +61,7 @@ export default function Customers() {
                     <td className="text-slate-500">{customer.Email || "—"}</td>
                     <td className="text-slate-500 max-w-[160px] truncate">{customer.DiaChi || "—"}</td>
                     <td className="text-center">
-                      <span className="inline-flex items-center justify-center w-6 h-6 bg-[#e8eef7] text-[#1e3a6e] text-xs font-bold rounded-full">{vehicleCount}</span>
+                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary-soft text-xs font-bold text-primary">{vehicleCount}</span>
                     </td>
                     <td>
                       <div className="flex gap-1">
@@ -73,7 +73,7 @@ export default function Customers() {
                 )})}
               </tbody>
             </table>
-            <div className="flex items-center justify-between px-4 py-3 border-t border-[#dde3ec]">
+            <div className="flex items-center justify-between border-t border-border px-4 py-3">
               <p className="text-xs text-slate-500">{filtered.length} khách hàng</p>
               <Pagination page={page} total={filtered.length} perPage={PER} onChange={setPage} />
             </div>
@@ -82,11 +82,11 @@ export default function Customers() {
 
         {/* Detail panel */}
         {detail && (
-          <div className="space-y-4">
+          <div className="detail-panel space-y-4">
             <Card className="p-5">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-white">
                     {detail.HoTen.charAt(0)}
                   </div>
                   <div>
@@ -118,9 +118,9 @@ export default function Customers() {
               <div className="space-y-2">
                 {detailVehicles.map(vehicle => (
                   <div key={vehicle.MaXe} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                    <span className="text-[#1e3a6e]">{Icons.car}</span>
+                    <span className="text-primary">{Icons.car}</span>
                     <div>
-                      <p className="font-mono font-semibold text-sm text-[#1e3a6e]">{vehicle.BienSo}</p>
+                      <p className="mono text-sm font-semibold text-primary">{vehicle.BienSo}</p>
                       <p className="text-xs text-slate-500">{vehicle.HangXe} {vehicle.DongXe} {vehicle.NamSanXuat}</p>
                     </div>
                   </div>

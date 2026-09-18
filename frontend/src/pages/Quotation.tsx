@@ -22,8 +22,8 @@ export default function Quotation() {
           {mockQuotations.map(quote => {
             const t = calcTotal(quote.services, quote.parts);
             return (
-              <div key={quote.id} onClick={() => setSelected(quote.id)}
-                className={`bg-white rounded-xl border p-4 cursor-pointer transition-all hover:border-[#1e3a6e] ${selected === quote.id ? "border-[#1e3a6e] ring-1 ring-[#1e3a6e]" : "border-[#dde3ec]"}`}>
+              <button key={quote.id} type="button" onClick={() => setSelected(quote.id)} aria-pressed={selected === quote.id}
+                className={`w-full cursor-pointer rounded-lg border bg-surface p-4 text-left transition-all hover:border-primary ${selected === quote.id ? "border-primary ring-1 ring-primary" : "border-border"}`}>
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <span className="mono text-xs text-slate-400">{quote.id}</span>
@@ -34,9 +34,9 @@ export default function Quotation() {
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-xs text-slate-500">{quote.created.split("-").reverse().join("/")}</span>
-                  <span className="font-bold text-[#1e3a6e] text-sm">{formatCurrency(t)}</span>
+                  <span className="text-sm font-bold text-primary">{formatCurrency(t)}</span>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -44,7 +44,7 @@ export default function Quotation() {
         {/* Detail */}
         <div className="xl:col-span-2">
           {q ? (
-            <Card className="p-6">
+            <Card className="p-5">
               {/* Header */}
               <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
@@ -63,7 +63,7 @@ export default function Quotation() {
                     </div>
                     <div>
                       <span className="text-slate-500 text-xs">Biển số xe</span>
-                      <p className="font-mono font-semibold text-[#1e3a6e]">{q.vehicle}</p>
+                      <p className="mono font-semibold text-primary">{q.vehicle}</p>
                     </div>
                     <div>
                       <span className="text-slate-500 text-xs">Ngày lập</span>
@@ -147,7 +147,7 @@ export default function Quotation() {
               </div>
 
               {/* Total */}
-              <div className="border-t border-[#dde3ec] pt-4">
+              <div className="border-t border-border pt-4">
                 <div className="flex justify-end">
                   <div className="w-72 space-y-2">
                     <div className="flex justify-between text-sm">
@@ -158,9 +158,9 @@ export default function Quotation() {
                       <span className="text-slate-600">Tổng phụ tùng:</span>
                       <span className="font-medium">{formatCurrency(q.parts.reduce((s, x) => s + x.qty * x.price, 0))}</span>
                     </div>
-                    <div className="flex justify-between pt-2 border-t border-[#dde3ec]">
+                    <div className="flex justify-between border-t border-border pt-2">
                       <span className="font-bold text-slate-800">Tổng cộng:</span>
-                      <span className="text-xl font-bold text-[#1e3a6e]">{formatCurrency(total)}</span>
+                      <span className="text-xl font-bold text-primary">{formatCurrency(total)}</span>
                     </div>
                   </div>
                 </div>
@@ -195,7 +195,7 @@ export default function Quotation() {
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-slate-600">Tổng giá trị:</span>
-            <span className="font-bold text-[#1e3a6e]">{formatCurrency(total)}</span>
+            <span className="font-bold text-primary">{formatCurrency(total)}</span>
           </div>
           <div className="flex gap-3 pt-2">
             <Button variant="outline" className="flex-1" onClick={() => setShowConfirmModal(false)}>Hủy</Button>

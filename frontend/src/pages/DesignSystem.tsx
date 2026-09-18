@@ -163,14 +163,14 @@ export default function DesignSystem() {
         <h3 className="font-semibold text-slate-700 mb-4 pb-2 border-b border-[#dde3ec]">Color Palette</h3>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
           {[
-            { name: "Primary Navy", hex: "#1e3a6e" },
-            { name: "Primary Light", hex: "#3b6fd4" },
-            { name: "Secondary", hex: "#e8eef7" },
-            { name: "Accent Amber", hex: "#f59e0b" },
-            { name: "Success", hex: "#10b981" },
-            { name: "Warning", hex: "#f97316" },
-            { name: "Danger", hex: "#ef4444" },
-            { name: "Muted", hex: "#64748b" },
+            { name: "Primary", hex: "#17365f" },
+            { name: "Primary Hover", hex: "#102a4c" },
+            { name: "Primary Soft", hex: "#eaf0f7" },
+            { name: "Accent", hex: "#b45309" },
+            { name: "Success", hex: "#047857" },
+            { name: "Warning", hex: "#b45309" },
+            { name: "Danger", hex: "#b91c1c" },
+            { name: "Muted", hex: "#526176" },
           ].map(c => (
             <div key={c.name} className="text-center">
               <div className="w-full h-12 rounded-xl border border-[#dde3ec] mb-1.5" style={{ background: c.hex }} />
