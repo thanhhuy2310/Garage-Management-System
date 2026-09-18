@@ -135,9 +135,40 @@ export const mockAppointments = lichHen.map((appointment) => {
   };
 });
 
+export interface PhieuSuaChua {
+  MaPhieuSuaChua: string;
+  MaTiepNhan: string;
+  NgayLap: string;
+  NgayBatDau: string | null;
+  NgayHoanThanh: string | null;
+  TrangThai: RepairStatus;
+  KetQua: string | null;
+}
+
+export interface PhanCongKyThuatVien {
+  MaPhieuSuaChua: string;
+  MaKyThuatVien: string;
+  NgayPhanCong: string;
+  GhiChu: string | null;
+}
+
+export const phieuSuaChua: PhieuSuaChua[] = [
+  { MaPhieuSuaChua: "PSC001", MaTiepNhan: "TN001", NgayLap: "2024-09-15T08:30:00", NgayBatDau: "2024-09-15T14:00:00", NgayHoanThanh: null, TrangThai: "in_progress", KetQua: null },
+  { MaPhieuSuaChua: "PSC002", MaTiepNhan: "TN002", NgayLap: "2024-09-16T10:00:00", NgayBatDau: "2024-09-16T13:30:00", NgayHoanThanh: null, TrangThai: "waiting_parts", KetQua: null },
+  { MaPhieuSuaChua: "PSC003", MaTiepNhan: "TN003", NgayLap: "2024-09-14T08:45:00", NgayBatDau: "2024-09-14T09:30:00", NgayHoanThanh: "2024-09-16T15:30:00", TrangThai: "completed", KetQua: "Đã vệ sinh bugi và điều chỉnh bướm ga" },
+  { MaPhieuSuaChua: "PSC004", MaTiepNhan: "TN004", NgayLap: "2024-09-17T10:30:00", NgayBatDau: null, NgayHoanThanh: null, TrangThai: "pending", KetQua: null },
+];
+
+export const phanCongKyThuatVien: PhanCongKyThuatVien[] = [
+  { MaPhieuSuaChua: "PSC001", MaKyThuatVien: "NV002", NgayPhanCong: "2024-09-15T09:00:00", GhiChu: null },
+  { MaPhieuSuaChua: "PSC002", MaKyThuatVien: "NV003", NgayPhanCong: "2024-09-16T10:15:00", GhiChu: null },
+  { MaPhieuSuaChua: "PSC003", MaKyThuatVien: "NV004", NgayPhanCong: "2024-09-14T09:00:00", GhiChu: null },
+  { MaPhieuSuaChua: "PSC004", MaKyThuatVien: "NV002", NgayPhanCong: "2024-09-17T10:45:00", GhiChu: "Chờ kỹ thuật viên kiểm tra xe" },
+];
+
 export const mockRepairOrders = [
   {
-    id: "PSC001", vehicle: "51G-123.45", customer: "Nguyễn Văn An", customerId: "KH001",
+    id: "PSC001", receptionId: "TN001", vehicle: "51G-123.45", customer: "Nguyễn Văn An", customerId: "KH001", technicianId: "NV002",
     created: "2024-09-15", started: "2024-09-15", technician: "Trần Văn Khoa",
     status: "in_progress", km: 45200,
     items: [
@@ -149,7 +180,7 @@ export const mockRepairOrders = [
     notes: "Khách yêu cầu kiểm tra thêm hệ thống điện"
   },
   {
-    id: "PSC002", vehicle: "51B-789.01", customer: "Trần Thị Bình", customerId: "KH002",
+    id: "PSC002", receptionId: "TN002", vehicle: "51B-789.01", customer: "Trần Thị Bình", customerId: "KH002", technicianId: "NV003",
     created: "2024-09-16", started: "2024-09-16", technician: "Nguyễn Thành Long",
     status: "waiting_parts", km: 38500,
     items: [
@@ -159,7 +190,7 @@ export const mockRepairOrders = [
     notes: "Đang chờ má phanh từ kho"
   },
   {
-    id: "PSC003", vehicle: "51D-567.89", customer: "Phạm Thị Dung", customerId: "KH004",
+    id: "PSC003", receptionId: "TN003", vehicle: "51D-567.89", customer: "Phạm Thị Dung", customerId: "KH004", technicianId: "NV004",
     created: "2024-09-14", started: "2024-09-14", technician: "Lê Quang Hưng",
     status: "completed", km: 89700,
     items: [
@@ -170,7 +201,7 @@ export const mockRepairOrders = [
     notes: ""
   },
   {
-    id: "PSC004", vehicle: "51E-890.12", customer: "Hoàng Văn Em", customerId: "KH005",
+    id: "PSC004", receptionId: "TN004", vehicle: "51E-890.12", customer: "Hoàng Văn Em", customerId: "KH005", technicianId: "NV002",
     created: "2024-09-17", started: "2024-09-17", technician: "Trần Văn Khoa",
     status: "pending", km: 33400,
     items: [

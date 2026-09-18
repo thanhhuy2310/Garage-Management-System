@@ -1,8 +1,11 @@
 import React, { useState } from "react";
-import { Card, Badge, Button, Modal, Icons, TimelineItem } from "../components/ui";
-import { mockRepairOrders, mockInventory, formatCurrency } from "../data";
+import { Card, Badge, Button, Modal, Icons } from "../components/ui";
+import { mockRepairOrders, mockInventory, formatCurrency } from "../mock/data";
 
 const MY_JOBS = mockRepairOrders.filter(r => r.technician === "Trần Văn Khoa");
+const INITIAL_ITEMS_DONE = Object.fromEntries(
+  MY_JOBS.flatMap((repair) => repair.items.map((item, index) => [`${repair.id}-${index}`, item.done])),
+);
 
 function ProgressBar({ done, total }: { done: number; total: number }) {
   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
@@ -23,7 +26,7 @@ export default function TechnicianView() {
   const [selected, setSelected] = useState(MY_JOBS[0]?.id ?? null);
   const [showPartsModal, setShowPartsModal] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
-  const [itemsDone, setItemsDone] = useState<Record<string, boolean>>({});
+  const [itemsDone, setItemsDone] = useState<Record<string, boolean>>(INITIAL_ITEMS_DONE);
 
   const job = MY_JOBS.find(r => r.id === selected);
   const items = job?.items ?? [];
@@ -127,7 +130,9 @@ export default function TechnicianView() {
                             <span className={`text-sm font-medium ${done ? "text-emerald-700 line-through" : "text-slate-800"}`}>{item.name}</span>
                           </div>
                           {item.type === "parts" && (
-                            <p className="text-xs text-slate-400 mt-0.5">SL: {item.qty} · {formatCurrency(item.price)}/cái</p>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              SL: {item.qty} · {formatCurrency(item.price)}/cái · {done ? "Đã xác nhận sử dụng/thay thế" : "Chưa xác nhận sử dụng"}
+                            </p>
                           )}
                         </div>
                         {done && <span className="text-xs text-emerald-600 font-medium">✓ Đã hoàn tất</span>}
@@ -183,6 +188,7 @@ export default function TechnicianView() {
           <div className="p-3 bg-[#e8eef7] rounded-lg text-sm">
             <p className="font-medium text-[#1e3a6e]">Phiếu sửa chữa: <span className="mono">{job?.id}</span> – {job?.vehicle}</p>
           </div>
+          <p className="text-xs text-slate-500">Chỉ gửi yêu cầu khi công việc thực sự cần phụ tùng; phiếu sửa chữa không bắt buộc phải có phiếu xuất kho.</p>
           <div className="space-y-3">
             {mockInventory.slice(0, 5).map((item) => (
               <div key={item.id} className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg">

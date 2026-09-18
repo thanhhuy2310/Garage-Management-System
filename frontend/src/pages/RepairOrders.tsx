@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Card, Badge, Button, SearchBox, Modal, Icons, TimelineItem } from "../components/ui";
-import { mockRepairOrders, formatCurrency } from "../data";
+import { Card, Badge, Button, SearchBox, Modal, Icons, Select } from "../components/ui";
+import { mockRepairOrders, formatCurrency, phieuTiepNhan, xe } from "../mock/data";
 
 const STATUS_MAP: Record<string, string> = {
   pending: "Chờ xử lý",
@@ -48,6 +48,7 @@ function RepairTimeline({ status }: { status: string }) {
 export default function RepairOrders() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
 
   const selectedOrder = mockRepairOrders.find(r => r.id === selected);
 
@@ -59,7 +60,7 @@ export default function RepairOrders() {
     <div className="p-6 space-y-5">
       <div className="flex items-center justify-between">
         <SearchBox value={search} onChange={setSearch} placeholder="Tìm mã phiếu, biển số, khách hàng..." />
-        <Button icon={Icons.plus}>Tạo phiếu mới</Button>
+        <Button icon={Icons.plus} onClick={() => setShowCreate(true)}>Tạo phiếu mới</Button>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -115,7 +116,11 @@ export default function RepairOrders() {
               </div>
 
               {/* Info */}
-              <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500 mb-1">Phiếu tiếp nhận</p>
+                  <p className="font-semibold text-sm mono">{selectedOrder.receptionId}</p>
+                </div>
                 <div className="p-3 bg-slate-50 rounded-lg">
                   <p className="text-xs text-slate-500 mb-1">Ngày lập</p>
                   <p className="font-semibold text-sm">{selectedOrder.created.split("-").reverse().join("/")}</p>
@@ -204,6 +209,26 @@ export default function RepairOrders() {
           )}
         </div>
       </div>
+
+      <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Lập phiếu sửa chữa">
+        <div className="space-y-4">
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800">
+            Kiểm tra xe là bước bắt buộc trước khi lập phiếu sửa chữa.
+          </div>
+          <Select label="Phiếu tiếp nhận *" options={[
+            { value: "", label: "-- Chọn phiếu tiếp nhận --" },
+            ...phieuTiepNhan.map((reception) => {
+              const vehicle = xe.find((item) => item.MaXe === reception.MaXe);
+              return { value: reception.MaTiepNhan, label: `${reception.MaTiepNhan} – ${vehicle?.BienSo ?? reception.MaXe}` };
+            }),
+          ]} />
+          <Select label="Trạng thái ban đầu" options={[{ value: "pending", label: "Chờ xử lý" }]} />
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" onClick={() => setShowCreate(false)}>Hủy</Button>
+            <Button onClick={() => setShowCreate(false)}>Lập phiếu sửa chữa</Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
