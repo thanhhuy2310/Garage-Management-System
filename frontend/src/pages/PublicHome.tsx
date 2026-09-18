@@ -5,6 +5,7 @@ import PublicHero from "../components/PublicHero";
 import PublicParts from "../components/PublicParts";
 import PublicProcess from "../components/PublicProcess";
 import PublicServices from "../components/PublicServices";
+import PublicAboutPage from "./PublicAboutPage";
 import PublicPartsPage from "./PublicPartsPage";
 import PublicServicesPage from "./PublicServicesPage";
 
@@ -24,6 +25,9 @@ interface PublicHomeProps {
 }
 
 export default function PublicHome({ page, onNavigate, onLogin, onBook }: PublicHomeProps) {
+  if (page === "about") {
+    return <PublicAboutPage onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} />;
+  }
   if (page === "services") {
     return <PublicServicesPage onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} />;
   }
