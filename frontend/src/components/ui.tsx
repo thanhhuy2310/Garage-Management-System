@@ -8,19 +8,19 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: React.ReactNode;
 }
 export function Button({ variant = "primary", size = "md", icon, children, className = "", ...rest }: ButtonProps) {
-  const base = "inline-flex items-center gap-1.5 font-medium rounded-md transition-all cursor-pointer select-none border";
-  const sizes = { sm: "px-3 py-1.5 text-xs", md: "px-4 py-2 text-sm", lg: "px-5 py-2.5 text-base" };
+  const base = "inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold rounded-md transition-all cursor-pointer select-none border active:translate-y-px disabled:active:translate-y-0";
+  const sizes = { sm: "min-h-9 px-3 text-[13px]", md: "min-h-10 px-4 text-sm", lg: "min-h-11 px-5 text-[15px]" };
   const variants: Record<BtnVariant, string> = {
-    primary: "bg-[#1e3a6e] text-white border-[#1e3a6e] hover:bg-[#162d56] active:bg-[#0f1f3e]",
-    secondary: "bg-[#e8eef7] text-[#1e3a6e] border-[#dde3ec] hover:bg-[#dce6f5]",
+    primary: "bg-primary text-primary-foreground border-primary hover:bg-[#102a4c] active:bg-slate-950",
+    secondary: "bg-secondary text-secondary-foreground border-border hover:bg-slate-200",
     danger: "bg-red-600 text-white border-red-600 hover:bg-red-700",
     ghost: "bg-transparent text-slate-600 border-transparent hover:bg-slate-100",
     outline: "bg-white text-slate-700 border-slate-300 hover:bg-slate-50",
-    accent: "bg-amber-500 text-white border-amber-500 hover:bg-amber-600",
+    accent: "bg-amber-700 text-white border-amber-700 hover:bg-amber-800",
   };
   return (
     <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...rest}>
-      {icon && <span className="flex-shrink-0">{icon}</span>}
+      {icon && <span className="flex-shrink-0" aria-hidden="true">{icon}</span>}
       {children}
     </button>
   );
@@ -80,19 +80,26 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   icon?: React.ReactNode;
   error?: string;
+  helperText?: string;
 }
-export function Input({ label, icon, error, className = "", ...rest }: InputProps) {
+export function Input({ label, icon, error, helperText, className = "", id, ...rest }: InputProps) {
+  const generatedId = React.useId();
+  const inputId = id ?? generatedId;
+  const descriptionId = error || helperText ? `${inputId}-description` : undefined;
   return (
-    <div className="flex flex-col gap-1">
-      {label && <label className="text-xs font-medium text-slate-600">{label}</label>}
+    <div className="flex flex-col gap-1.5">
+      {label && <label htmlFor={inputId} className="text-[13px] font-medium text-slate-700">{label}</label>}
       <div className="relative">
-        {icon && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">{icon}</span>}
+        {icon && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true">{icon}</span>}
         <input
-          className={`w-full h-9 border border-[#dde3ec] rounded-md bg-white text-sm px-3 ${icon ? "pl-9" : ""} placeholder:text-slate-400 focus:border-[#3b6fd4] focus:ring-1 focus:ring-[#3b6fd4] transition-all ${error ? "border-red-400" : ""} ${className}`}
+          id={inputId}
+          aria-invalid={Boolean(error)}
+          aria-describedby={descriptionId}
+          className={`h-10 w-full rounded-md border border-border bg-white px-3 text-sm text-slate-800 shadow-sm ${icon ? "pl-9" : ""} placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition-all ${error ? "border-red-500 focus:border-red-600 focus:ring-red-600/15" : ""} ${className}`}
           {...rest}
         />
       </div>
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {(error || helperText) && <p id={descriptionId} className={`text-xs leading-relaxed ${error ? "text-red-700" : "text-slate-500"}`} role={error ? "alert" : undefined}>{error ?? helperText}</p>}
     </div>
   );
 }
@@ -101,17 +108,23 @@ export function Input({ label, icon, error, className = "", ...rest }: InputProp
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   options: { value: string; label: string }[];
+  helperText?: string;
 }
-export function Select({ label, options, className = "", ...rest }: SelectProps) {
+export function Select({ label, options, helperText, className = "", id, ...rest }: SelectProps) {
+  const generatedId = React.useId();
+  const selectId = id ?? generatedId;
   return (
-    <div className="flex flex-col gap-1">
-      {label && <label className="text-xs font-medium text-slate-600">{label}</label>}
+    <div className="flex flex-col gap-1.5">
+      {label && <label htmlFor={selectId} className="text-[13px] font-medium text-slate-700">{label}</label>}
       <select
-        className={`h-9 border border-[#dde3ec] rounded-md bg-white text-sm px-3 text-slate-700 focus:border-[#3b6fd4] focus:ring-1 focus:ring-[#3b6fd4] transition-all ${className}`}
+        id={selectId}
+        aria-describedby={helperText ? `${selectId}-description` : undefined}
+        className={`h-10 rounded-md border border-border bg-white px-3 text-sm text-slate-800 shadow-sm hover:border-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition-all ${className}`}
         {...rest}
       >
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
+      {helperText && <p id={`${selectId}-description`} className="text-xs leading-relaxed text-slate-500">{helperText}</p>}
     </div>
   );
 }
@@ -119,7 +132,7 @@ export function Select({ label, options, className = "", ...rest }: SelectProps)
 // ─── Card ───────────────────────────────────────────────────────────────────
 export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-white rounded-xl border border-[#dde3ec] card-shadow ${className}`}>
+    <div className={`rounded-lg border border-border bg-card text-card-foreground card-shadow ${className}`}>
       {children}
     </div>
   );
@@ -131,19 +144,22 @@ export function Modal({ open, onClose, title, children, width = "max-w-lg" }: {
 }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6" onClick={onClose} role="presentation">
+      <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]" />
       <div
-        className={`relative bg-white rounded-xl card-shadow-md w-full ${width} max-h-[90vh] overflow-y-auto`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dialog-title"
+        className={`relative flex max-h-[calc(100dvh-1.5rem)] w-full flex-col overflow-hidden rounded-lg bg-white card-shadow-md sm:max-h-[90vh] ${width}`}
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-5 border-b border-[#dde3ec]">
-          <h3 className="font-semibold text-slate-800">{title}</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h2 id="dialog-title" className="text-lg font-semibold text-slate-900">{title}</h2>
+          <button type="button" onClick={onClose} aria-label="Đóng hộp thoại" className="flex h-10 w-10 items-center justify-center rounded-md text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-800">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
           </button>
         </div>
-        <div className="p-5">{children}</div>
+        <div className="overflow-y-auto p-5">{children}</div>
       </div>
     </div>
   );
@@ -156,12 +172,15 @@ export function Tabs({ tabs, active, onChange }: {
   onChange: (key: string) => void;
 }) {
   return (
-    <div className="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit">
+    <div className="flex max-w-full gap-1 overflow-x-auto rounded-lg bg-slate-100 p-1" role="tablist">
       {tabs.map(t => (
         <button
           key={t.key}
+          type="button"
           onClick={() => onChange(t.key)}
-          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all flex items-center gap-1.5 ${active === t.key ? "bg-white shadow-sm text-[#1e3a6e]" : "text-slate-500 hover:text-slate-700"}`}
+          role="tab"
+          aria-selected={active === t.key}
+          className={`flex min-h-9 flex-shrink-0 items-center gap-1.5 rounded-md px-3 text-[13px] font-medium transition-all ${active === t.key ? "bg-white text-primary shadow-sm" : "text-slate-600 hover:bg-white/60 hover:text-slate-900"}`}
         >
           {t.label}
           {t.count !== undefined && (
@@ -178,16 +197,17 @@ export function SearchBox({ value, onChange, placeholder = "Tìm kiếm..." }: {
   value: string; onChange: (v: string) => void; placeholder?: string;
 }) {
   return (
-    <div className="relative">
+    <div className="relative w-full sm:w-auto">
       <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
       <input
-        type="text"
+        type="search"
+        aria-label={placeholder}
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-9 pl-9 pr-3 border border-[#dde3ec] rounded-md bg-white text-sm w-64 placeholder:text-slate-400 focus:border-[#3b6fd4] focus:ring-1 focus:ring-[#3b6fd4] transition-all"
+        className="h-10 w-full rounded-md border border-border bg-white pl-9 pr-3 text-sm shadow-sm placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition-all sm:w-72"
       />
     </div>
   );
@@ -232,18 +252,18 @@ export function StatCard({ label, value, icon, trend, trendUp, color = "blue" }:
     navy: "bg-[#e8eef7] text-[#1e3a6e]",
   };
   return (
-    <Card className="p-5">
+    <Card className="p-5 sm:p-6">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</p>
-          <p className="mt-1.5 text-2xl font-bold text-slate-800">{value}</p>
+          <p className="text-[13px] font-medium text-slate-600">{label}</p>
+          <p className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{value}</p>
           {trend && (
             <p className={`mt-1 text-xs font-medium flex items-center gap-1 ${trendUp ? "text-emerald-600" : "text-red-500"}`}>
               {trendUp ? "↑" : "↓"} {trend}
             </p>
           )}
         </div>
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconBg[color]}`}>
+        <div className={`flex h-11 w-11 items-center justify-center rounded-lg ${iconBg[color]}`} aria-hidden="true">
           {icon}
         </div>
       </div>

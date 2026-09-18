@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { GARAGE_NAME } from "../data";
+import { Icons } from "../components/ui";
 
 interface LoginProps {
   onLogin: () => void;
@@ -10,10 +11,10 @@ interface LoginProps {
 }
 
 const FEATURES = [
-  { icon: "📅", text: "Quản lý lịch hẹn" },
-  { icon: "🔧", text: "Theo dõi sửa chữa" },
-  { icon: "📦", text: "Quản lý kho" },
-  { icon: "📊", text: "Báo cáo thống kê" },
+  { icon: Icons.calendar, text: "Quản lý lịch hẹn" },
+  { icon: Icons.wrench, text: "Theo dõi sửa chữa" },
+  { icon: Icons.package, text: "Quản lý kho" },
+  { icon: Icons.barChart, text: "Báo cáo thống kê" },
 ];
 
 export default function Login({ onLogin, account }: LoginProps) {
@@ -22,6 +23,7 @@ export default function Login({ onLogin, account }: LoginProps) {
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     setUsername(account.username);
@@ -44,8 +46,8 @@ export default function Login({ onLogin, account }: LoginProps) {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
-      <section className="relative hidden w-[52%] flex-col justify-between overflow-hidden bg-[#1e3a6e] p-12 lg:flex">
+    <div className="flex min-h-dvh bg-white">
+      <section className="relative hidden w-[50%] flex-col justify-between overflow-hidden bg-primary p-10 xl:p-12 lg:flex">
         <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
           <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-white/5" />
           <div className="absolute -bottom-20 -left-20 h-96 w-96 rounded-full bg-white/5" />
@@ -53,7 +55,7 @@ export default function Login({ onLogin, account }: LoginProps) {
         </div>
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-600">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
               <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2" />
               <circle cx="7.5" cy="17.5" r="2.5" /><circle cx="17.5" cy="17.5" r="2.5" />
@@ -80,7 +82,7 @@ export default function Login({ onLogin, account }: LoginProps) {
             </g>
             <line x1="20" y1="162" x2="380" y2="162" stroke="rgba(255,255,255,0.2)" />
           </svg>
-          <h1 className="mb-3 text-3xl font-black leading-tight text-white">
+          <h1 className="mb-3 text-3xl font-bold leading-tight text-white">
             Quản lý gara<br /><span className="text-amber-400">thông minh & hiệu quả</span>
           </h1>
           <p className="max-w-sm text-sm leading-relaxed text-white/60">
@@ -91,7 +93,7 @@ export default function Login({ onLogin, account }: LoginProps) {
         <div className="relative z-10 grid grid-cols-2 gap-3">
           {FEATURES.map((feature) => (
             <div key={feature.text} className="flex items-center gap-2 text-sm text-white/70">
-              <span>{feature.icon}</span><span>{feature.text}</span>
+              <span className="text-amber-300" aria-hidden="true">{feature.icon}</span><span>{feature.text}</span>
             </div>
           ))}
         </div>
@@ -109,18 +111,21 @@ export default function Login({ onLogin, account }: LoginProps) {
             <p className="font-bold text-[#1e3a6e]">{GARAGE_NAME}</p>
           </div>
 
-          <h2 className="mb-1 text-2xl font-black text-slate-800">Đăng nhập</h2>
+          <h2 className="mb-1 text-2xl font-bold text-slate-900">Đăng nhập</h2>
           <p className="mb-2 text-sm text-slate-500">Hệ thống quản lý gara sửa chữa ô tô</p>
           <p className="mb-7 text-xs font-medium text-[#1e3a6e]">Vai trò đang chọn: {account.label}</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="username" className="mb-1.5 block text-sm font-medium text-slate-700">Tên đăng nhập</label>
-              <input id="username" value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" className="h-11 w-full rounded-xl border border-[#dde3ec] bg-white px-4 text-sm transition-all focus:border-[#1e3a6e] focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/10" />
+              <input id="username" value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" className="h-11 w-full rounded-md border border-border bg-white px-4 text-sm shadow-sm transition-all hover:border-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15" />
             </div>
             <div>
               <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-slate-700">Mật khẩu</label>
-              <input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" className="h-11 w-full rounded-xl border border-[#dde3ec] bg-white px-4 text-sm transition-all focus:border-[#1e3a6e] focus:outline-none focus:ring-2 focus:ring-[#1e3a6e]/10" />
+              <div className="relative">
+                <input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" className="h-11 w-full rounded-md border border-border bg-white px-4 pr-16 text-sm shadow-sm transition-all hover:border-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15" />
+                <button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-1 top-1/2 min-h-9 -translate-y-1/2 rounded-md px-3 text-xs font-semibold text-primary hover:bg-secondary" aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}>{showPassword ? "Ẩn" : "Hiện"}</button>
+              </div>
             </div>
 
             <div className="flex items-center justify-between">
@@ -133,12 +138,12 @@ export default function Login({ onLogin, account }: LoginProps) {
 
             {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600" role="alert">{error}</p>}
 
-            <button type="submit" disabled={loading} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1e3a6e] text-sm font-semibold text-white transition-all hover:bg-[#162d56] disabled:opacity-70">
+            <button type="submit" disabled={loading} className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-semibold text-white transition-all hover:bg-[#102a4c] disabled:opacity-70">
               {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
           </form>
 
-          <div className="mt-8 rounded-xl border border-[#dde3ec] bg-slate-50 p-4">
+          <div className="mt-8 rounded-lg border border-border bg-slate-50 p-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Tài khoản demo</p>
             <p className="text-xs text-slate-600"><strong>{account.label}:</strong> {account.username} / demo123</p>
             <p className="mt-2 text-[11px] leading-relaxed text-slate-400">Dùng nút chọn vai trò ở góc dưới để đổi actor trước khi đăng nhập.</p>

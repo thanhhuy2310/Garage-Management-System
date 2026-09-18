@@ -144,13 +144,13 @@ export default function App() {
         />
         <div className="fixed bottom-6 right-6 z-50">
           {showRolePicker && (
-            <div className="mb-2 min-w-[200px] rounded-xl border border-[#dde3ec] bg-white p-3 shadow-xl">
+            <div className="mb-2 min-w-[220px] rounded-lg border border-border bg-white p-3 shadow-xl">
               <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Đăng nhập với vai trò</p>
               {(Object.entries(ROLE_LABELS) as [Role, string][]).map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => { setRole(key); setShowRolePicker(false); }}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-all hover:bg-slate-50 ${role === key ? "font-semibold text-[#1e3a6e]" : "text-slate-700"}`}
+                  className={`flex min-h-10 w-full items-center justify-between rounded-md px-3 text-sm transition-all hover:bg-slate-50 ${role === key ? "font-semibold text-primary" : "text-slate-700"}`}
                 >
                   {label}
                   {role === key && <span className="text-[#1e3a6e]">✓</span>}
@@ -160,7 +160,7 @@ export default function App() {
           )}
           <button
             onClick={() => setShowRolePicker((previous) => !previous)}
-            className="flex w-full items-center gap-2 rounded-xl bg-[#1e3a6e] px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-[#162d56]"
+            className="flex min-h-11 w-full items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white shadow-lg transition-all hover:bg-[#102a4c]"
           >
             <span>Vai trò: {ROLE_LABELS[role]}</span>
             <span className="text-white/60">▼</span>
@@ -235,14 +235,14 @@ export default function App() {
           className="fixed inset-0 z-20 bg-slate-950/40 lg:hidden"
         />
       )}
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden lg:ml-[220px]">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden lg:ml-[240px]">
         <Header
           page={page}
           role={role}
           onMenuToggle={() => setSidebarOpen(true)}
           onMobileToggle={() => setShowMobile(true)}
         />
-        <main className="flex-1 overflow-y-auto">
+        <main id="main-content" className="flex-1 overflow-y-auto" tabIndex={-1}>
           <Suspense fallback={<PageLoading />}><PageContent page={page} /></Suspense>
         </main>
       </div>

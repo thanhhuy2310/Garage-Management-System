@@ -38,9 +38,9 @@ const ROLE_INFO: Record<string, { label: string; name: string; initial: string; 
 };
 
 const QUICK_NOTIFICATIONS = [
-  { icon: "📅", text: "Nguyễn Văn An đặt lịch bảo dưỡng lúc 08:00", time: "08:30", unread: true },
-  { icon: "🔧", text: "Phiếu PSC003 đã hoàn tất sửa chữa", time: "15:45 hôm qua", unread: true },
-  { icon: "⚠️", text: "Lọc dầu Toyota dưới mức tồn tối thiểu", time: "09:00 hôm qua", unread: false },
+  { icon: Icons.calendar, text: "Nguyễn Văn An đặt lịch bảo dưỡng lúc 08:00", time: "08:30", unread: true },
+  { icon: Icons.wrench, text: "Phiếu PSC003 đã hoàn tất sửa chữa", time: "15:45 hôm qua", unread: true },
+  { icon: Icons.alertTriangle, text: "Lọc dầu Toyota dưới mức tồn tối thiểu", time: "09:00 hôm qua", unread: false },
 ];
 
 interface HeaderProps {
@@ -60,13 +60,13 @@ export default function Header({
   const user = ROLE_INFO[role] ?? ROLE_INFO.manager;
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 flex-shrink-0 items-center justify-between border-b border-[#dde3ec] bg-white px-3 sm:px-6">
+    <header className="sticky top-0 z-20 flex min-h-16 flex-shrink-0 items-center justify-between border-b border-border bg-white px-3 sm:px-5 lg:px-6">
       <div className="flex min-w-0 items-center gap-2">
         <button
           type="button"
           onClick={onMenuToggle}
           aria-label="Mở thanh điều hướng"
-          className="mr-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 lg:hidden"
+          className="mr-1 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 lg:hidden"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="3" y1="6" x2="21" y2="6" />
@@ -74,10 +74,10 @@ export default function Header({
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        {BREADCRUMBS[page] && <span className="hidden text-xs text-slate-400 sm:inline">{BREADCRUMBS[page]} /</span>}
-        <h1 className="truncate text-sm font-semibold text-slate-800">{PAGE_TITLES[page] ?? page}</h1>
+        {BREADCRUMBS[page] && <span className="hidden text-xs text-slate-500 sm:inline">{BREADCRUMBS[page]} /</span>}
+        <h1 className="truncate text-lg font-semibold text-slate-900 sm:text-xl">{PAGE_TITLES[page] ?? page}</h1>
         {page === "dashboard" && (
-          <span className="hidden rounded-md bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-400 xl:inline">17/09/2024</span>
+          <span className="hidden rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-600 xl:inline">18/09/2026</span>
         )}
         {page === "technician" && (
           <span className="hidden rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700 sm:inline">Ca sáng 07:00–12:00</span>
@@ -91,7 +91,7 @@ export default function Header({
             type="search"
             aria-label="Tìm kiếm toàn bộ"
             placeholder="Tìm kiếm toàn bộ..."
-            className="h-8 w-48 rounded-lg border border-[#dde3ec] bg-slate-50 pl-8 pr-3 text-xs transition-all placeholder:text-slate-400 focus:border-[#3b6fd4] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#3b6fd4]"
+            className="h-10 w-52 rounded-md border border-border bg-slate-50 pl-9 pr-3 text-sm transition-all placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-600/15"
           />
         </div>
 
@@ -99,7 +99,7 @@ export default function Header({
           <button
             type="button"
             onClick={onMobileToggle}
-            className="hidden h-8 items-center gap-1.5 rounded-lg border border-[#c5d3e8] bg-[#e8eef7] px-3 text-xs font-medium text-[#1e3a6e] transition-all hover:bg-[#dce6f5] lg:flex"
+            className="hidden h-10 items-center gap-2 rounded-md border border-border bg-secondary px-3 text-[13px] font-semibold text-primary transition-all hover:bg-slate-200 lg:flex"
             title="Xem ứng dụng khách hàng"
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -115,23 +115,23 @@ export default function Header({
             onClick={() => setShowNotifications((open) => !open)}
             aria-label="Mở thông báo"
             aria-expanded={showNotifications}
-            className="relative flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-all hover:bg-slate-100"
+            className="relative flex h-10 w-10 items-center justify-center rounded-md text-slate-600 transition-all hover:bg-slate-100"
           >
             {Icons.bell}
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full border border-white bg-red-500" />
           </button>
           {showNotifications && (
-            <div className="absolute right-0 top-10 z-50 w-[min(20rem,calc(100vw-1.5rem))] rounded-xl border border-[#dde3ec] bg-white shadow-xl">
-              <div className="flex items-center justify-between border-b border-[#dde3ec] p-4">
+            <div className="absolute right-0 top-12 z-50 w-[min(22rem,calc(100vw-1.5rem))] rounded-lg border border-border bg-white shadow-xl">
+              <div className="flex items-center justify-between border-b border-border p-4">
                 <p className="text-sm font-semibold text-slate-800">Thông báo</p>
-                <button type="button" onClick={() => setShowNotifications(false)} aria-label="Đóng thông báo" className="text-lg leading-none text-slate-400 hover:text-slate-600">×</button>
+                <button type="button" onClick={() => setShowNotifications(false)} aria-label="Đóng thông báo" className="flex h-9 w-9 items-center justify-center rounded-md text-lg leading-none text-slate-500 hover:bg-slate-100 hover:text-slate-800">×</button>
               </div>
               {QUICK_NOTIFICATIONS.map((notification, index) => (
                 <div key={index} className={`flex items-start gap-3 border-b border-slate-100 p-3 last:border-0 ${notification.unread ? "bg-blue-50/50" : ""}`}>
-                  <span className="text-lg">{notification.icon}</span>
+                  <span className="mt-0.5 text-primary" aria-hidden="true">{notification.icon}</span>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs leading-relaxed text-slate-700">{notification.text}</p>
-                    <p className="mt-0.5 text-[10px] text-slate-400">{notification.time}</p>
+                    <p className="mt-1 text-xs text-slate-500">{notification.time}</p>
                   </div>
                   {notification.unread && <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />}
                 </div>
@@ -143,8 +143,8 @@ export default function Header({
         <div className="ml-1 flex items-center gap-2 border-l border-[#dde3ec] pl-2">
           <div className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${user.avatar} text-xs font-bold text-white`}>{user.initial}</div>
           <div className="hidden md:block">
-            <p className="text-xs font-semibold leading-tight text-slate-700">{user.name}</p>
-            <p className="text-[10px] leading-tight text-slate-400">{user.label}</p>
+            <p className="text-sm font-semibold leading-tight text-slate-800">{user.name}</p>
+            <p className="mt-0.5 text-xs leading-tight text-slate-500">{user.label}</p>
           </div>
         </div>
       </div>
