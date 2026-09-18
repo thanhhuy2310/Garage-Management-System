@@ -10,7 +10,7 @@ import {
   DEMO_TODAY, formatCurrency
 } from "../mock/data";
 
-const PIE_COLORS = ["#3b82f6", "#f59e0b", "#10b981", "#f97316", "#8b5cf6", "#64748b"];
+const PIE_COLORS = ["#2563eb", "#b45309", "#047857", "#f97316", "#7c3aed", "#526176"];
 
 const repairStatusCount = {
   pending: mockRepairOrders.filter(r => r.status === "pending").length,
@@ -20,10 +20,10 @@ const repairStatusCount = {
 };
 
 const pieData = [
-  { name: "Đang sửa", value: repairStatusCount.in_progress, color: "#3b82f6" },
+  { name: "Đang sửa", value: repairStatusCount.in_progress, color: "#2563eb" },
   { name: "Chờ phụ tùng", value: repairStatusCount.waiting_parts, color: "#f97316" },
-  { name: "Chờ xử lý", value: repairStatusCount.pending, color: "#f59e0b" },
-  { name: "Hoàn tất", value: repairStatusCount.completed, color: "#10b981" },
+  { name: "Chờ xử lý", value: repairStatusCount.pending, color: "#b45309" },
+  { name: "Hoàn tất", value: repairStatusCount.completed, color: "#047857" },
 ];
 
 const lowStock = mockInventory.filter(i => i.status === "low" || i.status === "out");
@@ -95,21 +95,21 @@ export default function Dashboard() {
               <AreaChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#1e3a6e" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#1e3a6e" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#17365f" stopOpacity={0.18} />
+                  <stop offset="95%" stopColor="#17365f" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey={xKey} tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false}
+              <XAxis dataKey={xKey} tick={{ fontSize: 12, fill: "#526176" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "#526176" }} axisLine={false} tickLine={false}
                 tickFormatter={(v) => v >= 1000000 ? `${(v / 1000000).toFixed(0)}M` : `${(v / 1000).toFixed(0)}k`} />
               <Tooltip
                 formatter={(v: any, name: any) => [
                   name === "revenue" ? formatCurrency(Number(v)) : v,
                   name === "revenue" ? "Doanh thu" : "Lượt"
                 ]}
-                contentStyle={{ borderRadius: 8, border: "1px solid #dde3ec", fontSize: 12 }}
+                contentStyle={{ borderRadius: 8, border: "1px solid var(--border)", fontSize: 12 }}
               />
-              <Area type="monotone" dataKey="revenue" stroke="#1e3a6e" strokeWidth={2} fill="url(#revenueGrad)" />
+              <Area type="monotone" dataKey="revenue" stroke="#17365f" strokeWidth={2} fill="url(#revenueGrad)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -124,7 +124,7 @@ export default function Dashboard() {
               <Pie data={pieData} dataKey="value" cx="50%" cy="50%" outerRadius={65} innerRadius={38} paddingAngle={3}>
                 {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
               </Pie>
-              <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #dde3ec", fontSize: 12 }} />
+              <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid var(--border)", fontSize: 12 }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -223,9 +223,9 @@ export default function Dashboard() {
           <div role="img" aria-label="Biểu đồ các dịch vụ được sử dụng nhiều nhất">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartServices} layout="vertical" margin={{ left: 0, right: 30 }}>
-              <XAxis type="number" tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
+              <XAxis type="number" tick={{ fontSize: 12, fill: "#526176" }} axisLine={false} tickLine={false} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: "#475569" }} axisLine={false} tickLine={false} width={120} />
-              <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #dde3ec", fontSize: 12 }} formatter={(v) => [`${v} lượt`, "Số lần"]} />
+              <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid var(--border)", fontSize: 12 }} formatter={(v) => [`${v} lượt`, "Số lần"]} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {chartServices.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
               </Bar>
@@ -239,12 +239,12 @@ export default function Dashboard() {
           <div role="img" aria-label="Biểu đồ doanh thu theo tháng">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartMonthly} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false}
+              <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#526176" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "#526176" }} axisLine={false} tickLine={false}
                 tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
-              <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #dde3ec", fontSize: 12 }}
+              <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid var(--border)", fontSize: 12 }}
                 formatter={(v: any) => [formatCurrency(Number(v)), "Doanh thu"]} />
-              <Bar dataKey="revenue" fill="#1e3a6e" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="revenue" fill="#17365f" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
           </div>
