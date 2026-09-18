@@ -18,17 +18,17 @@ export default function Customers() {
 
   return (
     <div className="p-6 space-y-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <SearchBox value={search} onChange={setSearch} placeholder="Tên, số điện thoại..." />
           <Button variant="outline" size="sm" icon={Icons.filter}>Lọc</Button>
         </div>
         <Button icon={Icons.plus} onClick={() => setShowAdd(true)}>Thêm khách hàng</Button>
       </div>
 
-      <div className={`grid gap-4 ${selected ? "grid-cols-3" : "grid-cols-1"}`}>
+      <div className={`grid gap-4 ${selected ? "xl:grid-cols-3" : "grid-cols-1"}`}>
         {/* Table */}
-        <div className={selected ? "col-span-2" : ""}>
+        <div className={selected ? "xl:col-span-2" : ""}>
           <Card>
             <table className="w-full data-table">
               <thead>
@@ -65,8 +65,8 @@ export default function Customers() {
                     </td>
                     <td>
                       <div className="flex gap-1">
-                        <button className="p-1.5 hover:bg-slate-100 rounded text-slate-500">{Icons.eye}</button>
-                        <button className="p-1.5 hover:bg-slate-100 rounded text-slate-500">{Icons.edit}</button>
+                        <button aria-label={`Xem khách hàng ${customer.HoTen}`} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.eye}</button>
+                        <button aria-label={`Sửa khách hàng ${customer.HoTen}`} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.edit}</button>
                       </div>
                     </td>
                   </tr>
@@ -94,7 +94,7 @@ export default function Customers() {
                     <p className="text-xs text-slate-500 mono">{detail.MaKhachHang}</p>
                   </div>
                 </div>
-                <button onClick={() => setSelected(null)} className="p-1 hover:bg-slate-100 rounded text-slate-400">✕</button>
+                <button aria-label="Đóng thông tin khách hàng" onClick={() => setSelected(null)} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
               </div>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-2 text-slate-600">
@@ -149,7 +149,7 @@ export default function Customers() {
 
       <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Thêm khách hàng mới">
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input label="Họ và tên *" placeholder="Nguyễn Văn A" />
             <Input label="Số điện thoại *" placeholder="0901234567" />
           </div>

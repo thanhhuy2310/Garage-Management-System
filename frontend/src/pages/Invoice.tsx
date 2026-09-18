@@ -29,7 +29,7 @@ export default function Invoice() {
     setShowPay(false);
   };
 
-  return <div className="p-6 grid grid-cols-3 gap-4">
+  return <div className="grid grid-cols-1 gap-4 p-6 xl:grid-cols-3">
     <div className="space-y-3">
       <div className="flex justify-between items-center"><h2 className="font-semibold">Hóa đơn</h2><Button size="sm" icon={Icons.plus}>Lập hóa đơn</Button></div>
       {hoaDon.map((item) => {
@@ -38,9 +38,9 @@ export default function Invoice() {
       })}
     </div>
 
-    <Card className="col-span-2 p-6">
+    <Card className="p-6 xl:col-span-2">
       <div className="flex justify-between mb-5"><div><div className="flex gap-3 items-center"><h2 className="text-2xl font-bold">HÓA ĐƠN {invoice.MaHoaDon}</h2><Badge variant={status} /></div><p className="text-sm text-slate-500">Ngày lập: {toDate(invoice.NgayLap)}</p></div><Button variant="outline" icon={Icons.printer}>In hóa đơn</Button></div>
-      <div className="grid grid-cols-3 gap-3 mb-5"><div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-500">Khách hàng</p><p className="font-semibold">{customer?.HoTen ?? "—"}</p></div><div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-500">Biển số</p><p className="font-semibold">{vehicle?.BienSo ?? "—"}</p></div><div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-500">Phiếu sửa chữa</p><p className="font-semibold mono">{invoice.MaPhieuSuaChua}</p></div></div>
+      <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3"><div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-500">Khách hàng</p><p className="font-semibold">{customer?.HoTen ?? "—"}</p></div><div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-500">Biển số</p><p className="font-semibold">{vehicle?.BienSo ?? "—"}</p></div><div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-500">Phiếu sửa chữa</p><p className="font-semibold mono">{invoice.MaPhieuSuaChua}</p></div></div>
       <table className="w-full data-table"><thead><tr><th>Nội dung</th><th>Loại</th><th className="text-right">Số lượng</th><th className="text-right">Đơn giá</th><th className="text-right">Thành tiền</th></tr></thead><tbody>{lines.map((line) => <tr key={line.MaChiTietBaoGia}><td>{line.NoiDung}</td><td>{line.MaDichVu ? "Dịch vụ" : "Phụ tùng"}</td><td className="text-right">{line.SoLuong}</td><td className="text-right">{formatCurrency(line.DonGia)}</td><td className="text-right font-semibold">{formatCurrency(line.SoLuong * line.DonGia)}</td></tr>)}</tbody></table>
       <div className="flex justify-end mt-4"><div className="w-80 space-y-2 text-sm"><div className="flex justify-between"><span>Tổng tiền hóa đơn</span><strong>{formatCurrency(invoice.TongTien)}</strong></div><div className="flex justify-between"><span>Đã thanh toán</span><span>{formatCurrency(paidAmount)}</span></div><div className="flex justify-between border-t pt-2 text-lg"><strong>Còn lại</strong><strong className="text-[#1e3a6e]">{formatCurrency(remaining)}</strong></div></div></div>
       {payments.length > 0 && <div className="mt-5"><p className="text-xs uppercase font-semibold text-slate-500 mb-2">Các lần thanh toán</p>{payments.map((payment) => <div key={payment.MaThanhToan} className="flex justify-between p-3 bg-emerald-50 rounded-lg text-sm"><span>{payment.MaThanhToan} · {toDate(payment.NgayThanhToan)} · {payment.PhuongThuc === "transfer" ? "Chuyển khoản" : "Tiền mặt"}</span><strong>{formatCurrency(payment.SoTien)}</strong></div>)}</div>}

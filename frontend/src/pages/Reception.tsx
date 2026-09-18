@@ -37,7 +37,7 @@ export default function Reception() {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       {/* Step indicator */}
-      <div className="flex items-center gap-2 mb-8">
+      <div className="mb-8 flex items-center gap-2 overflow-x-auto pb-2">
         {STEPS.map((s, i) => (
           <React.Fragment key={s}>
             <button onClick={() => setStep(i)} className="flex items-center gap-2">
@@ -55,8 +55,8 @@ export default function Reception() {
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-5">
-        <div className="col-span-2 space-y-4">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        <div className="space-y-4 xl:col-span-2">
           {step === 0 && (
             <Card className="p-6">
               <h3 className="font-semibold text-slate-800 mb-4">Thông tin khách hàng</h3>
@@ -92,7 +92,7 @@ export default function Reception() {
                   })),
                 ]} />
                 <div className="p-4 bg-slate-50 rounded-xl border border-[#dde3ec]">
-                  <div className="grid grid-cols-3 gap-3 text-sm">
+                  <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
                     <div><p className="text-xs text-slate-400 mb-1">Biển số</p><p className="font-mono font-bold text-[#1e3a6e]">{selectedVehicle.BienSo}</p></div>
                     <div><p className="text-xs text-slate-400 mb-1">Hãng / dòng xe</p><p className="font-medium">{selectedVehicle.HangXe} {selectedVehicle.DongXe}</p></div>
                     <div><p className="text-xs text-slate-400 mb-1">Năm sản xuất</p><p className="font-medium">{selectedVehicle.NamSanXuat}</p></div>
@@ -110,7 +110,7 @@ export default function Reception() {
             <Card className="p-6">
               <h3 className="font-semibold text-slate-800 mb-4">Lịch hẹn liên quan</h3>
               <div className="space-y-3">
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between">
+                <div className="flex flex-col gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-semibold text-slate-800">{selectedAppointment.MaLichHen} – {selectedService.TenDichVu}</p>
                     <p className="text-xs text-slate-500 mt-1">{selectedAppointment.NgayHen.split("-").reverse().join("/")} lúc {selectedAppointment.GioHen} · Trạng thái: Đã xác nhận</p>
@@ -131,7 +131,7 @@ export default function Reception() {
               <h3 className="font-semibold text-slate-800 mb-4">Tình trạng xe ban đầu</h3>
               <div className="space-y-3">
                 {["Ngoại thất xe", "Nội thất xe", "Lốp xe", "Đèn xe", "Hệ thống điện", "Hệ thống phanh"].map(item => (
-                  <div key={item} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div key={item} className="flex flex-col gap-3 rounded-lg bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
                     <span className="text-sm font-medium text-slate-700">{item}</span>
                     <div className="flex gap-2">
                       {["Tốt", "Bình thường", "Cần chú ý"].map(opt => (
@@ -154,7 +154,7 @@ export default function Reception() {
           {step === 4 && (
             <Card className="p-6">
               <h3 className="font-semibold text-slate-800 mb-4">Xác nhận phiếu tiếp nhận</h3>
-              <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+              <div className="mb-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                 <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Khách hàng</p><p className="font-semibold">{selectedCustomer.HoTen}</p></div>
                 <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Biển số xe</p><p className="font-mono font-bold text-[#1e3a6e]">{selectedVehicle.BienSo}</p></div>
                 <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Số km</p><p className="font-semibold">{selectedVehicle.SoKm?.toLocaleString("vi-VN")} km</p></div>

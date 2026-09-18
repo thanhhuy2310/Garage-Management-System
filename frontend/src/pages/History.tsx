@@ -15,14 +15,14 @@ export default function History() {
 
   return (
     <div className="p-6 space-y-5">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <SearchBox value={search} onChange={setSearch} placeholder="Biển số, khách hàng..." />
-        <input type="date" className="h-9 border border-[#dde3ec] rounded-lg px-3 text-sm" placeholder="Từ ngày" />
-        <input type="date" className="h-9 border border-[#dde3ec] rounded-lg px-3 text-sm" placeholder="Đến ngày" />
+        <input type="date" aria-label="Từ ngày" className="h-10 rounded-md border border-border bg-white px-3 text-sm shadow-sm" />
+        <input type="date" aria-label="Đến ngày" className="h-10 rounded-md border border-border bg-white px-3 text-sm shadow-sm" />
         <Button variant="outline" size="sm" icon={Icons.download}>Xuất</Button>
       </div>
 
-      <div className={`grid gap-4 ${selected ? "grid-cols-2" : "grid-cols-1"}`}>
+      <div className={`grid gap-4 ${selected ? "xl:grid-cols-2" : "grid-cols-1"}`}>
         <Card>
           <table className="w-full data-table">
             <thead>
@@ -50,7 +50,7 @@ export default function History() {
                     <td className="text-right mono text-sm">{r.km.toLocaleString("vi-VN")}</td>
                     <td className="text-slate-600">{r.technician}</td>
                     <td className="text-right font-bold">{formatCurrency(total)}</td>
-                    <td><button className="p-1.5 hover:bg-slate-100 rounded text-slate-500">{Icons.chevronRight}</button></td>
+                    <td><button aria-label={`Xem chi tiết phiếu ${r.id}`} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.chevronRight}</button></td>
                   </tr>
                 );
               })}
@@ -71,10 +71,10 @@ export default function History() {
                 <p className="font-bold text-xl text-[#1e3a6e] mono">{detail.vehicle}</p>
                 <p className="text-slate-500 text-sm">{detail.customer}</p>
               </div>
-              <button onClick={() => setSelected(null)} className="p-1 hover:bg-slate-100 rounded text-slate-400">✕</button>
+              <button aria-label="Đóng chi tiết lịch sử" onClick={() => setSelected(null)} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-5">
+            <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Ngày hoàn thành</p><p className="font-semibold">{completedAt(detail.id) ? new Date(completedAt(detail.id)!).toLocaleString("vi-VN") : "—"}</p></div>
               <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Số km</p><p className="font-semibold mono">{detail.km.toLocaleString("vi-VN")}</p></div>
               <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Kỹ thuật viên</p><p className="font-semibold">{detail.technician}</p></div>

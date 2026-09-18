@@ -18,17 +18,17 @@ export default function Staff() {
 
   return (
     <div className="p-6 space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="font-semibold text-slate-700">Danh sách nhân viên ({mockStaff.length})</h2>
         <Button icon={Icons.plus} onClick={() => setShowAdd(true)}>Thêm nhân viên</Button>
       </div>
 
-      <div className={`grid gap-4 ${selected ? "grid-cols-3" : "grid-cols-1"}`}>
-        <div className={selected ? "col-span-2" : ""}>
+      <div className={`grid gap-4 ${selected ? "xl:grid-cols-3" : "grid-cols-1"}`}>
+        <div className={selected ? "xl:col-span-2" : ""}>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {mockStaff.map(s => (
-              <div key={s.id} onClick={() => setSelected(s.id === selected ? null : s.id)}
-                className={`bg-white rounded-xl border p-5 cursor-pointer transition-all hover:border-[#1e3a6e] ${selected === s.id ? "border-[#1e3a6e] ring-1 ring-[#1e3a6e]" : "border-[#dde3ec]"}`}>
+              <button key={s.id} type="button" onClick={() => setSelected(s.id === selected ? null : s.id)} aria-pressed={selected === s.id}
+                className={`w-full rounded-lg border bg-white p-5 text-left transition-all hover:border-primary ${selected === s.id ? "border-primary ring-1 ring-primary" : "border-border"}`}>
                 <div className="flex items-start gap-3 mb-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold flex-shrink-0">
                     {s.name.charAt(0)}
@@ -43,7 +43,7 @@ export default function Staff() {
                   <Badge variant={s.status === "active" ? "completed" : "cancelled"} label={s.status === "active" ? "Đang làm" : "Nghỉ việc"} />
                 </div>
                 <div className="mt-3 text-xs text-slate-500 mono">{s.phone}</div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function Staff() {
                   <p className="text-xs text-slate-500">{ROLES[detail.role]}</p>
                 </div>
               </div>
-              <button onClick={() => setSelected(null)} className="p-1 hover:bg-slate-100 rounded text-slate-400">✕</button>
+              <button aria-label="Đóng thông tin nhân viên" onClick={() => setSelected(null)} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
             </div>
 
             <div className="space-y-2 text-sm mb-5">
@@ -101,14 +101,14 @@ export default function Staff() {
 
       <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Thêm nhân viên mới">
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input label="Họ và tên *" placeholder="Nguyễn Văn A" />
             <Input label="Số điện thoại *" placeholder="0901234567" />
           </div>
           <Input label="Email" placeholder="email@garage.vn" type="email" />
           <Input label="Chức vụ *" placeholder="Ví dụ: Nhân viên kho" />
           <Select label="Vai trò *" options={Object.entries(ROLES).map(([k, v]) => ({ value: k, label: v }))} />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input label="Tên đăng nhập *" placeholder="username" />
             <Input label="Mật khẩu *" type="password" placeholder="••••••••" />
           </div>

@@ -22,7 +22,7 @@ function RepairTimeline({ status }: { status: string }) {
   const doneIdx = status === "in_progress" ? 2 : status === "waiting_parts" ? 2 : status === "completed" ? 3 : 0;
 
   return (
-    <div className="flex items-center gap-0 w-full">
+    <div className="flex min-w-[620px] items-center gap-0">
       {steps.map((s, i) => (
         <React.Fragment key={s.key}>
           <div className="flex flex-col items-center gap-1 flex-shrink-0">
@@ -58,20 +58,20 @@ export default function RepairOrders() {
 
   return (
     <div className="p-6 space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <SearchBox value={search} onChange={setSearch} placeholder="Tìm mã phiếu, biển số, khách hàng..." />
         <Button icon={Icons.plus} onClick={() => setShowCreate(true)}>Tạo phiếu mới</Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {/* List */}
-        <div className="col-span-1 space-y-3">
+        <div className="space-y-3">
           {filtered.map(r => {
             const total = r.items.reduce((sum, i) => sum + i.qty * i.price, 0);
             const isActive = selected === r.id;
             return (
-              <div key={r.id} onClick={() => setSelected(r.id)}
-                className={`bg-white rounded-xl border p-4 cursor-pointer transition-all hover:border-[#1e3a6e] ${isActive ? "border-[#1e3a6e] ring-1 ring-[#1e3a6e]" : "border-[#dde3ec]"}`}>
+              <button key={r.id} type="button" onClick={() => setSelected(r.id)} aria-pressed={isActive}
+                className={`w-full rounded-lg border bg-white p-4 text-left transition-all hover:border-primary ${isActive ? "border-primary ring-1 ring-primary" : "border-border"}`}>
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <span className="mono text-xs text-slate-400">{r.id}</span>
@@ -84,17 +84,17 @@ export default function RepairOrders() {
                   <span className="text-xs text-slate-500">{r.technician}</span>
                   <span className="text-sm font-bold text-[#1e3a6e]">{formatCurrency(total)}</span>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
 
         {/* Detail */}
-        <div className="col-span-2">
+        <div className="xl:col-span-2">
           {selectedOrder ? (
             <Card className="p-6">
               {/* Header */}
-              <div className="flex items-start justify-between mb-6">
+              <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-1">
                     <span className="mono text-sm text-slate-400">{selectedOrder.id}</span>
@@ -110,13 +110,13 @@ export default function RepairOrders() {
               </div>
 
               {/* Timeline */}
-              <div className="mb-6 p-4 bg-slate-50 rounded-xl">
+              <div className="mb-6 overflow-x-auto rounded-lg bg-slate-50 p-4">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Tiến độ xử lý</p>
                 <RepairTimeline status={selectedOrder.status} />
               </div>
 
               {/* Info */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="p-3 bg-slate-50 rounded-lg">
                   <p className="text-xs text-slate-500 mb-1">Phiếu tiếp nhận</p>
                   <p className="font-semibold text-sm mono">{selectedOrder.receptionId}</p>
@@ -192,7 +192,7 @@ export default function RepairOrders() {
 
               {/* Actions */}
               {selectedOrder.status === "in_progress" && (
-                <div className="mt-4 flex gap-3">
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <Button variant="accent" icon={Icons.package}>Yêu cầu phụ tùng</Button>
                   <Button variant="secondary">Cập nhật tiến độ</Button>
                   <Button variant="primary" icon={Icons.checkCircle}>Hoàn tất sửa chữa</Button>
@@ -202,7 +202,7 @@ export default function RepairOrders() {
           ) : (
             <Card className="flex items-center justify-center h-64">
               <div className="text-center text-slate-400">
-                <span className="block text-4xl mb-2">📋</span>
+                <span className="mb-2 flex justify-center text-primary" aria-hidden="true">{Icons.fileText}</span>
                 <p className="text-sm">Chọn một phiếu sửa chữa để xem chi tiết</p>
               </div>
             </Card>

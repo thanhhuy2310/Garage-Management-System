@@ -12,7 +12,7 @@ export default function Quotation() {
 
   return (
     <div className="p-6">
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {/* List */}
         <div className="space-y-3">
           <div className="flex items-center justify-between mb-2">
@@ -42,17 +42,17 @@ export default function Quotation() {
         </div>
 
         {/* Detail */}
-        <div className="col-span-2">
+        <div className="xl:col-span-2">
           {q ? (
             <Card className="p-6">
               {/* Header */}
-              <div className="flex items-start justify-between mb-6">
+              <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
                     <h2 className="text-xl font-bold text-slate-800">Báo giá {q.id}</h2>
                     <Badge variant={q.status as any} />
                   </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                  <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
                     <div>
                       <span className="text-slate-500 text-xs">Phiếu sửa chữa</span>
                       <p className="font-medium mono">{q.repairId}</p>
@@ -164,10 +164,10 @@ export default function Quotation() {
 
               {/* Actions */}
               {q.status === "pending" && (
-                <div className="flex gap-3 mt-5 pt-4 border-t border-[#dde3ec]">
+                <div className="mt-5 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:flex-wrap">
                   <Button variant="outline">Lưu nháp</Button>
                   <Button variant="secondary" icon={Icons.send}>Gửi báo giá</Button>
-                  <div className="ml-auto flex gap-2">
+                  <div className="flex flex-col gap-2 sm:ml-auto sm:flex-row">
                     <Button variant="danger" icon={Icons.xCircle} onClick={() => {}}>Không xác nhận</Button>
                     <Button icon={Icons.checkCircle} onClick={() => setShowConfirmModal(true)}>Xác nhận sửa chữa</Button>
                   </div>

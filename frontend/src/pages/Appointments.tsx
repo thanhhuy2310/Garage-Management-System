@@ -47,7 +47,7 @@ export default function Appointments() {
     <div className="p-6 space-y-5">
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:w-auto">
           <Tabs tabs={VIEW_TABS} active={view} onChange={setView} />
           <SearchBox value={search} onChange={setSearch} placeholder="Tìm khách, biển số..." />
           <Select
@@ -102,8 +102,8 @@ export default function Appointments() {
                   <td><Badge variant={a.status as any} /></td>
                   <td>
                     <div className="flex items-center gap-1">
-                      <button className="p-1.5 hover:bg-slate-100 rounded-md text-slate-500" title="Xem"><span>{Icons.eye}</span></button>
-                      <button className="p-1.5 hover:bg-slate-100 rounded-md text-slate-500" title="Sửa"><span>{Icons.edit}</span></button>
+                      <button aria-label={`Xem lịch hẹn ${a.id}`} className="flex h-9 w-9 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"><span>{Icons.eye}</span></button>
+                      <button aria-label={`Sửa lịch hẹn ${a.id}`} className="flex h-9 w-9 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"><span>{Icons.edit}</span></button>
                       {a.status === "pending" && (
                         <button className="px-2 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-medium hover:bg-emerald-100 transition-all">Xác nhận</button>
                       )}
@@ -116,17 +116,17 @@ export default function Appointments() {
         </Card>
       ) : (
         /* Calendar View */
-        <Card className="p-5">
+        <Card className="overflow-x-auto p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <button className="p-1.5 border rounded-lg hover:bg-slate-50 text-slate-500">‹</button>
+              <button aria-label="Tuần trước" className="flex h-9 w-9 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">‹</button>
               <h3 className="font-semibold text-slate-800">Tuần 16 – 22 tháng 9, 2024</h3>
-              <button className="p-1.5 border rounded-lg hover:bg-slate-50 text-slate-500">›</button>
+              <button aria-label="Tuần sau" className="flex h-9 w-9 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">›</button>
             </div>
             <button className="px-3 py-1.5 text-xs bg-[#e8eef7] text-[#1e3a6e] font-medium rounded-lg hover:bg-[#dce6f5]">Hôm nay</button>
           </div>
 
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid min-w-[720px] grid-cols-7 gap-2">
             {CALENDAR_DAYS.map((d, i) => (
               <div key={d}>
                 <div className={`text-center py-2 mb-2 rounded-lg ${i === 1 ? "bg-[#1e3a6e]" : ""}`}>
@@ -151,7 +151,7 @@ export default function Appointments() {
       {/* Add Appointment Modal */}
       <Modal open={showAddModal} onClose={() => setShowAddModal(false)} title="Thêm lịch hẹn mới" width="max-w-2xl">
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Select label="Khách hàng" value={selectedCustomerId} onChange={(event) => setSelectedCustomerId(event.target.value)} options={[
               { value: "", label: "-- Chọn khách hàng --" },
               ...khachHang.map((customer) => ({ value: customer.MaKhachHang, label: customer.HoTen })),
@@ -167,7 +167,7 @@ export default function Appointments() {
             { value: "", label: "-- Chọn dịch vụ --" },
             ...dichVu.map((service) => ({ value: service.MaDichVu, label: service.TenDichVu })),
           ]} />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input label="Ngày hẹn" type="date" />
             <Input label="Giờ hẹn" type="time" />
           </div>

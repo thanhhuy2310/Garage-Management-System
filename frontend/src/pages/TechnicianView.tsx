@@ -35,13 +35,13 @@ export default function TechnicianView() {
   return (
     <div className="p-6 space-y-5">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold">K</div>
         <div>
           <h2 className="font-bold text-slate-800">Trần Văn Khoa</h2>
           <p className="text-xs text-slate-500">Kỹ thuật viên · Gara Ô Tô Thành Công</p>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
           <div className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs font-medium text-emerald-700">
             ● Ca sáng: 07:00 – 12:00
           </div>
@@ -51,7 +51,7 @@ export default function TechnicianView() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {/* Job list */}
         <div className="space-y-3">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Công việc được phân công</p>
@@ -81,7 +81,7 @@ export default function TechnicianView() {
         </div>
 
         {/* Job detail */}
-        <div className="col-span-2">
+        <div className="xl:col-span-2">
           {job ? (
             <Card className="p-6">
               {/* Header */}
