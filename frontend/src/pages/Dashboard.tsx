@@ -45,19 +45,34 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Page heading */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="ui-page-title">Tổng quan gara</h2>
+          <p className="ui-secondary-text text-sm">Số liệu vận hành trong ngày {DEMO_TODAY}</p>
+        </div>
+        <span className="mono w-fit rounded-md bg-surface-subtle px-2 py-1 text-xs text-muted-foreground">{DEMO_TODAY}</span>
+      </div>
+
       {/* Primary KPI group */}
+      <div>
+        <h3 className="ui-section-title mb-3 text-sm">Chỉ số chính hôm nay</h3>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Tiếp nhận hôm nay" value="4" icon={Icons.truck} color="navy" trend="+1 so với hôm qua" trendUp />
         <StatCard label="Đang sửa chữa" value={repairStatusCount.in_progress + repairStatusCount.waiting_parts} icon={Icons.wrench} color="blue" />
         <StatCard label="Lịch hẹn hôm nay" value={todayAppointments.length} icon={Icons.calendar} color="navy" />
-        <StatCard label="Doanh thu hôm nay" value={formatCurrency(chartRevenue.at(-1)?.revenue ?? 0)} icon={Icons.creditCard} color="green" trend="+12% so hôm qua" trendUp />
+          <StatCard label="Doanh thu hôm nay" value={formatCurrency(chartRevenue.at(-1)?.revenue ?? 0)} icon={Icons.creditCard} color="green" trend="+12% so hôm qua" trendUp />
+        </div>
       </div>
 
       {/* Secondary KPI group */}
+      <div>
+        <h3 className="ui-section-title mb-3 text-sm">Cần xử lý</h3>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Đã hoàn tất" value={repairStatusCount.completed} icon={Icons.checkCircle} color="green" />
         <StatCard label="Báo giá chờ xác nhận" value={pendingQuotations.length} icon={Icons.fileText} color="amber" />
-        <StatCard label="Phụ tùng sắp hết" value={lowStock.length} icon={Icons.alertTriangle} color="red" />
+          <StatCard label="Phụ tùng sắp hết" value={lowStock.length} icon={Icons.alertTriangle} color="red" />
+        </div>
       </div>
 
       {/* Charts row */}
