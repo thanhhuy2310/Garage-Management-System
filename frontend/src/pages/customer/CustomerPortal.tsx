@@ -3,6 +3,7 @@ import { Button, Card, Icons, Input } from "../../components/ui";
 import { GARAGE_NAME } from "../../data";
 import { khachHang } from "../../mock/data";
 import CustomerAppointments from "./CustomerAppointments";
+import CustomerHistory from "./CustomerHistory";
 import CustomerQuotations from "./CustomerQuotations";
 import CustomerTracking from "./CustomerTracking";
 
@@ -117,7 +118,7 @@ export default function CustomerPortal({ onLogout }: CustomerPortalProps) {
         {tab === "appointments" && <CustomerAppointments />}
         {tab === "quotations" && <CustomerQuotations />}
         {tab === "tracking" && <CustomerTracking />}
-        {tab === "history" && <TabPlaceholder title="Lịch sử sửa chữa" note="Toàn bộ lần sửa chữa, bảo dưỡng đã hoàn tất — hoàn thiện ở phần Repair History." />}
+        {tab === "history" && <CustomerHistory />}
         {tab === "notifications" && <TabPlaceholder title="Thông báo" note="Nhắc bảo dưỡng, trạng thái lịch hẹn, báo giá mới — hoàn thiện ở phần Notifications." />}
         {tab === "profile" && <ProfileTab />}
       </main>
