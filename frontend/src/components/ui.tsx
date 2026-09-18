@@ -330,18 +330,18 @@ export function StatCard({ label, value, icon, trend, trendUp, color = "blue" }:
     navy: "bg-[#e8eef7] text-[#1e3a6e]",
   };
   return (
-    <Card className="p-5 sm:p-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-[13px] font-medium text-slate-600">{label}</p>
-          <p className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{value}</p>
+    <Card className="h-full min-h-32 p-5">
+      <div className="flex h-full items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="min-h-10 text-[13px] font-medium leading-5 text-muted-foreground">{label}</p>
+          <p className="mt-1 whitespace-nowrap text-[26px] font-bold leading-tight tracking-tight text-foreground">{value}</p>
           {trend && (
-            <p className={`mt-1 text-xs font-medium flex items-center gap-1 ${trendUp ? "text-emerald-600" : "text-red-500"}`}>
+            <p className={`mt-1.5 flex items-center gap-1 text-xs font-medium ${trendUp ? "text-success" : "text-danger"}`}>
               {trendUp ? "↑" : "↓"} {trend}
             </p>
           )}
         </div>
-        <div className={`flex h-11 w-11 items-center justify-center rounded-lg ${iconBg[color]}`} aria-hidden="true">
+        <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${iconBg[color]}`} aria-hidden="true">
           {icon}
         </div>
       </div>

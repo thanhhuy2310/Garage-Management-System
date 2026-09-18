@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, Tooltip, ResponsiveContainer, Legend
+  XAxis, YAxis, Tooltip, ResponsiveContainer
 } from "recharts";
 import { Card, StatCard, Badge, Icons } from "../components/ui";
 import {
@@ -45,14 +45,18 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Stat cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7">
+      {/* Primary KPI group */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Tiếp nhận hôm nay" value="4" icon={Icons.truck} color="navy" trend="+1 so với hôm qua" trendUp />
         <StatCard label="Đang sửa chữa" value={repairStatusCount.in_progress + repairStatusCount.waiting_parts} icon={Icons.wrench} color="blue" />
-        <StatCard label="Đã hoàn tất" value={repairStatusCount.completed} icon={Icons.checkCircle} color="green" />
         <StatCard label="Lịch hẹn hôm nay" value={todayAppointments.length} icon={Icons.calendar} color="navy" />
-        <StatCard label="Báo giá chờ xác nhận" value={pendingQuotations.length} icon={Icons.fileText} color="amber" />
         <StatCard label="Doanh thu hôm nay" value={formatCurrency(chartRevenue.at(-1)?.revenue ?? 0)} icon={Icons.creditCard} color="green" trend="+12% so hôm qua" trendUp />
+      </div>
+
+      {/* Secondary KPI group */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard label="Đã hoàn tất" value={repairStatusCount.completed} icon={Icons.checkCircle} color="green" />
+        <StatCard label="Báo giá chờ xác nhận" value={pendingQuotations.length} icon={Icons.fileText} color="amber" />
         <StatCard label="Phụ tùng sắp hết" value={lowStock.length} icon={Icons.alertTriangle} color="red" />
       </div>
 
@@ -72,7 +76,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div role="img" aria-label={`Biểu đồ doanh thu trong ${chartPeriod === "week" ? "7 ngày" : "7 tháng"} gần nhất`}>
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={280}>
               <AreaChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
@@ -100,7 +104,7 @@ export default function Dashboard() {
         <Card className="p-5">
           <h3 className="mb-4 text-base font-semibold text-slate-900">Tình trạng sửa chữa</h3>
           <div role="img" aria-label="Biểu đồ tỷ lệ trạng thái sửa chữa">
-            <ResponsiveContainer width="100%" height={160}>
+            <ResponsiveContainer width="100%" height={190}>
               <PieChart>
               <Pie data={pieData} dataKey="value" cx="50%" cy="50%" outerRadius={65} innerRadius={38} paddingAngle={3}>
                 {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
@@ -109,7 +113,7 @@ export default function Dashboard() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="space-y-1.5 mt-2">
+          <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 xl:grid-cols-1">
             {pieData.map(d => (
               <div key={d.name} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-1.5">
@@ -131,11 +135,11 @@ export default function Dashboard() {
             <h3 className="text-base font-semibold text-slate-900">Lịch hẹn hôm nay</h3>
             <span className="text-xs text-slate-400">{todayAppointments.length} lịch hẹn</span>
           </div>
-          <div className="space-y-3">
+          <div className="divide-y divide-border">
             {todayAppointments.map(a => (
-              <div key={a.id} className="flex items-start gap-3 rounded-lg bg-slate-50 p-3 transition-colors hover:bg-slate-100">
+              <div key={a.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
                 <div className="w-10 text-center">
-                  <span className="text-xs font-mono font-semibold text-[#1e3a6e] bg-[#e8eef7] px-1.5 py-1 rounded block">{a.time}</span>
+                  <span className="mono block rounded-md bg-primary-soft px-1.5 py-1 text-xs font-semibold text-primary">{a.time}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-800 truncate">{a.customer}</p>
@@ -152,11 +156,11 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold text-slate-900">Xe đang sửa chữa</h3>
           </div>
-          <div className="space-y-3">
+          <div className="divide-y divide-border">
             {mockRepairOrders.filter(r => r.status !== "completed").map(r => (
-              <div key={r.id} className="flex items-center gap-3 rounded-lg bg-slate-50 p-3 transition-colors hover:bg-slate-100">
-                <div className="w-8 h-8 bg-[#e8eef7] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-[#1e3a6e]">{Icons.car}</span>
+              <div key={r.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary-soft">
+                  <span className="text-primary">{Icons.car}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-800">{r.vehicle}</p>
@@ -174,9 +178,9 @@ export default function Dashboard() {
             <h3 className="text-base font-semibold text-slate-900">Phụ tùng sắp hết / hết hàng</h3>
             <span className="text-xs text-amber-600 font-medium">{lowStock.length} mặt hàng</span>
           </div>
-          <div className="space-y-2">
+          <div className="divide-y divide-border">
             {lowStock.map(item => (
-              <div key={item.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              <div key={item.id} className="flex items-center justify-between gap-3 py-3 first:pt-0">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-800 truncate">{item.name}</p>
                   <p className="text-xs text-slate-500">Tồn: {item.stock} / Tối thiểu: {item.minStock}</p>
@@ -185,12 +189,12 @@ export default function Dashboard() {
               </div>
             ))}
             {pendingQuotations.map(q => (
-              <div key={q.id} className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-100">
+              <div key={q.id} className="flex items-center justify-between gap-3 py-3 last:pb-0">
                 <div>
-                  <p className="text-xs font-medium text-amber-800">Báo giá chờ xác nhận</p>
-                  <p className="text-xs text-amber-700">{q.customer} · {q.vehicle}</p>
+                  <p className="text-xs font-medium text-warning">Báo giá chờ xác nhận</p>
+                  <p className="text-xs text-muted-foreground">{q.customer} · {q.vehicle}</p>
                 </div>
-                <span className="text-xs font-bold text-amber-800">{formatCurrency(q.total)}</span>
+                <span className="whitespace-nowrap text-xs font-bold text-warning">{formatCurrency(q.total)}</span>
               </div>
             ))}
           </div>
