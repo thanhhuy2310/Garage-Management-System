@@ -1,5 +1,6 @@
 import PublicHeader, { type PublicPageKey } from "../components/PublicHeader";
 import PublicAbout from "../components/PublicAbout";
+import PublicFooter from "../components/PublicFooter";
 import PublicHero from "../components/PublicHero";
 import PublicParts from "../components/PublicParts";
 import PublicProcess from "../components/PublicProcess";
@@ -32,6 +33,7 @@ export default function PublicHome({ page, onNavigate, onLogin, onBook }: Public
           <PublicProcess onBook={onBook} />
           <PublicAbout onNavigateAbout={() => onNavigate("about")} />
           <PublicParts onBook={onBook} onViewAll={() => onNavigate("parts")} />
+          <PublicFooter onNavigate={onNavigate} onBook={onBook} />
         </main>
       ) : (
         <main className="mx-auto w-full max-w-6xl px-4 py-16 text-center">
