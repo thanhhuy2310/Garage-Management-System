@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button, Card, Icons, Input } from "../../components/ui";
 import { GARAGE_NAME } from "../../data";
 import { khachHang } from "../../mock/data";
+import CustomerAppointments from "./CustomerAppointments";
 
 export type CustomerTab = "appointments" | "quotations" | "tracking" | "history" | "notifications" | "profile";
 
@@ -111,7 +112,7 @@ export default function CustomerPortal({ onLogout }: CustomerPortalProps) {
       </header>
 
       <main className="mx-auto w-full max-w-6xl space-y-4 px-4 py-6">
-        {tab === "appointments" && <TabPlaceholder title="Lịch hẹn của tôi" note="Đặt lịch mới, xem lịch hẹn sắp tới — hoàn thiện ở phần Customer Appointments." />}
+        {tab === "appointments" && <CustomerAppointments />}
         {tab === "quotations" && <TabPlaceholder title="Báo giá" note="Xem và xác nhận báo giá — hoàn thiện ở phần Customer Quotations." />}
         {tab === "tracking" && <TabPlaceholder title="Tiến độ sửa chữa" note="Theo dõi xe đang sửa theo thời gian thực — hoàn thiện ở phần Repair Tracking." />}
         {tab === "history" && <TabPlaceholder title="Lịch sử sửa chữa" note="Toàn bộ lần sửa chữa, bảo dưỡng đã hoàn tất — hoàn thiện ở phần Repair History." />}
