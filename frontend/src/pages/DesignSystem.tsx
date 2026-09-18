@@ -61,7 +61,7 @@ export default function DesignSystem() {
       {/* Inputs */}
       <section>
         <h3 className="font-semibold text-slate-700 mb-4 pb-2 border-b border-[#dde3ec]">Form Controls</h3>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Input label="Input thường" placeholder="Nhập nội dung..." />
           <Input label="Có icon" placeholder="Tìm kiếm..." icon={Icons.search} />
           <Input label="Có lỗi" placeholder="Nhập số điện thoại" error="Số điện thoại không hợp lệ" />
@@ -93,7 +93,7 @@ export default function DesignSystem() {
       {/* Stat Cards */}
       <section>
         <h3 className="font-semibold text-slate-700 mb-4 pb-2 border-b border-[#dde3ec]">Statistic Cards</h3>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label="Xe tiếp nhận" value="4" icon={Icons.truck} color="navy" trend="+1 hôm qua" trendUp />
           <StatCard label="Đang sửa chữa" value="3" icon={Icons.wrench} color="blue" />
           <StatCard label="Doanh thu" value="3.5M" icon={Icons.creditCard} color="green" trend="+12%" trendUp />
@@ -128,8 +128,8 @@ export default function DesignSystem() {
                   <td><Badge variant={row.status} label={row.status === "completed" ? "Đang làm" : "Hoạt động"} /></td>
                   <td>
                     <div className="flex gap-1">
-                      <button className="p-1.5 hover:bg-slate-100 rounded text-slate-500">{Icons.eye}</button>
-                      <button className="p-1.5 hover:bg-slate-100 rounded text-slate-500">{Icons.edit}</button>
+                      <button aria-label={`Xem ${row.name}`} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.eye}</button>
+                      <button aria-label={`Sửa ${row.name}`} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.edit}</button>
                     </div>
                   </td>
                 </tr>
@@ -161,7 +161,7 @@ export default function DesignSystem() {
       {/* Color palette */}
       <section>
         <h3 className="font-semibold text-slate-700 mb-4 pb-2 border-b border-[#dde3ec]">Color Palette</h3>
-        <div className="grid grid-cols-8 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
           {[
             { name: "Primary Navy", hex: "#1e3a6e" },
             { name: "Primary Light", hex: "#3b6fd4" },
@@ -184,7 +184,7 @@ export default function DesignSystem() {
       {/* Empty + Modal */}
       <section>
         <h3 className="font-semibold text-slate-700 mb-4 pb-2 border-b border-[#dde3ec]">Feedback States</h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Card><EmptyState message="Không có dữ liệu để hiển thị" /></Card>
           <Card className="p-5">
             <Button onClick={() => setModalOpen(true)}>Mở Modal</Button>

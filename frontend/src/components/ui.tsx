@@ -142,19 +142,44 @@ export function Card({ children, className = "" }: { children: React.ReactNode; 
 export function Modal({ open, onClose, title, children, width = "max-w-lg" }: {
   open: boolean; onClose: () => void; title: string; children: React.ReactNode; width?: string;
 }) {
+  const titleId = React.useId();
+  const dialogRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", handleKeyDown);
+    window.requestAnimationFrame(() => dialogRef.current?.focus());
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6" onClick={onClose} role="presentation">
       <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]" />
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="dialog-title"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         className={`relative flex max-h-[calc(100dvh-1.5rem)] w-full flex-col overflow-hidden rounded-lg bg-white card-shadow-md sm:max-h-[90vh] ${width}`}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
-          <h2 id="dialog-title" className="text-lg font-semibold text-slate-900">{title}</h2>
+          <h2 id={titleId} className="text-lg font-semibold text-slate-900">{title}</h2>
           <button type="button" onClick={onClose} aria-label="Đóng hộp thoại" className="flex h-10 w-10 items-center justify-center rounded-md text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-800">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
           </button>
@@ -198,7 +223,7 @@ export function SearchBox({ value, onChange, placeholder = "Tìm kiếm..." }: {
 }) {
   return (
     <div className="relative w-full sm:w-auto">
-      <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
       <input
@@ -220,22 +245,22 @@ export function Pagination({ page, total, perPage, onChange }: {
   const pages = Math.ceil(total / perPage);
   if (pages <= 1) return null;
   return (
-    <div className="flex items-center gap-1">
-      <button onClick={() => onChange(page - 1)} disabled={page === 1}
-        className="w-8 h-8 flex items-center justify-center rounded-md border border-[#dde3ec] text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-sm">
+    <nav className="flex items-center gap-1" aria-label="Phân trang">
+      <button aria-label="Trang trước" onClick={() => onChange(page - 1)} disabled={page === 1}
+        className="flex h-10 w-10 items-center justify-center rounded-md border border-border text-sm text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">
         ‹
       </button>
       {Array.from({ length: pages }, (_, i) => i + 1).map(p => (
-        <button key={p} onClick={() => onChange(p)}
-          className={`w-8 h-8 flex items-center justify-center rounded-md text-sm transition-all ${p === page ? "bg-[#1e3a6e] text-white" : "border border-[#dde3ec] text-slate-600 hover:bg-slate-50"}`}>
+        <button key={p} onClick={() => onChange(p)} aria-label={`Trang ${p}`} aria-current={p === page ? "page" : undefined}
+          className={`flex h-10 w-10 items-center justify-center rounded-md text-sm transition-all ${p === page ? "bg-primary text-white" : "border border-border text-slate-600 hover:bg-slate-50"}`}>
           {p}
         </button>
       ))}
-      <button onClick={() => onChange(page + 1)} disabled={page === pages}
-        className="w-8 h-8 flex items-center justify-center rounded-md border border-[#dde3ec] text-slate-500 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-sm">
+      <button aria-label="Trang sau" onClick={() => onChange(page + 1)} disabled={page === pages}
+        className="flex h-10 w-10 items-center justify-center rounded-md border border-border text-sm text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">
         ›
       </button>
-    </div>
+    </nav>
   );
 }
 
@@ -274,7 +299,7 @@ export function StatCard({ label, value, icon, trend, trendUp, color = "blue" }:
 // ─── Empty State ─────────────────────────────────────────────────────────────
 export function EmptyState({ message = "Không có dữ liệu" }: { message?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+    <div className="flex flex-col items-center justify-center py-16 text-slate-500">
       <svg className="w-12 h-12 mb-3 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
       </svg>

@@ -219,6 +219,9 @@ export default function App() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#f0f4f8]">
+      <a href="#main-content" className="fixed left-3 top-3 z-[60] -translate-y-20 rounded-md bg-white px-4 py-2 text-sm font-semibold text-primary shadow-lg transition-transform focus:translate-y-0">
+        Bỏ qua đến nội dung chính
+      </a>
       <Sidebar
         active={page}
         onNavigate={(key) => navigate(key as Page)}

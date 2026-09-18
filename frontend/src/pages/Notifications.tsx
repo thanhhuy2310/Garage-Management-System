@@ -31,7 +31,7 @@ export default function Notifications() {
 
   return (
     <div className="p-6 space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Tabs
           tabs={[
             { key: "all", label: "Tất cả", count: notifications.length },
@@ -44,16 +44,16 @@ export default function Notifications() {
         <Button variant="ghost" size="sm" onClick={markAllRead}>Đánh dấu tất cả đã đọc</Button>
       </div>
 
-      <div className="space-y-2 max-w-2xl">
+      <div className="max-w-3xl space-y-2">
         {filtered.length === 0 && (
           <Card className="py-16 flex items-center justify-center text-slate-400">
             <p className="text-sm">Không có thông báo nào</p>
           </Card>
         )}
         {filtered.map(n => (
-          <div key={n.id}
-            className={`bg-white rounded-xl border p-4 flex items-start gap-4 cursor-pointer hover:border-slate-300 transition-all ${!n.read ? "border-blue-200 bg-blue-50/50" : "border-[#dde3ec]"}`}
-            onClick={() => markRead(n.id)}>
+          <button key={n.id} type="button"
+            className={`flex w-full items-start gap-4 rounded-lg border bg-white p-4 text-left transition-all hover:border-slate-300 ${!n.read ? "border-blue-200 bg-blue-50/50" : "border-border"}`}
+            onClick={() => markRead(n.id)} aria-label={`${n.read ? "Thông báo đã đọc" : "Đánh dấu đã đọc"}: ${n.title}`}>
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${TYPE_COLOR[n.type]}`}>
               {TYPE_ICON[n.type]}
             </div>
@@ -69,7 +69,7 @@ export default function Notifications() {
                 {n.repairId ? ` · Phiếu SC: ${n.repairId}` : ""}
               </p>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>

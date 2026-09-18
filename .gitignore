@@ -12,3 +12,6 @@ backend/target/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local Codex skills
+.agents/
