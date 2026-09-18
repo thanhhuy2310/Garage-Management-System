@@ -1,5 +1,5 @@
-﻿import React, { useState } from "react";
-import { Card, Badge, Button, SearchBox, Tabs, Modal, Input, Select, Textarea, Icons } from "../components/ui";
+﻿import { useState } from "react";
+import { Card, Badge, Button, SearchBox, Tabs, Modal, Input, Select, Textarea, Icons, TableContainer } from "../components/ui";
 import { dichVu, khachHang, mockAppointments, xe } from "../mock/data";
 
 const STATUS_TABS = [
@@ -18,7 +18,7 @@ const VIEW_TABS = [
 
 const CALENDAR_DAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
-// Simple calendar grid for week 16-22 Sep 2024
+// Simple calendar grid for week 16-22 Sep 2026
 const WEEK_DATES = [
   { d: 16, date: "2026-09-16" },
   { d: 17, date: "2026-09-17" },
@@ -77,6 +77,7 @@ export default function Appointments() {
 
       {view === "list" ? (
         <Card>
+          <TableContainer>
           <table className="w-full data-table">
             <thead>
               <tr>
@@ -105,7 +106,7 @@ export default function Appointments() {
                       <button aria-label={`Xem lịch hẹn ${a.id}`} className="flex h-9 w-9 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"><span>{Icons.eye}</span></button>
                       <button aria-label={`Sửa lịch hẹn ${a.id}`} className="flex h-9 w-9 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"><span>{Icons.edit}</span></button>
                       {a.status === "pending" && (
-                        <button className="px-2 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-medium hover:bg-emerald-100 transition-all">Xác nhận</button>
+                        <button className="rounded bg-success-soft px-2 py-1 text-xs font-medium text-success transition-all hover:bg-success-soft hover:brightness-95">Xác nhận</button>
                       )}
                     </div>
                   </td>
@@ -113,15 +114,16 @@ export default function Appointments() {
               ))}
             </tbody>
           </table>
+          </TableContainer>
         </Card>
       ) : (
         /* Calendar View */
         <Card className="overflow-x-auto p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <button aria-label="Tuần trước" className="flex h-9 w-9 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">‹</button>
+              <button aria-label="Tuần trước" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-slate-500 hover:bg-slate-50">‹</button>
               <h3 className="font-semibold text-slate-800">Tuần 16 – 22 tháng 9, 2026</h3>
-              <button aria-label="Tuần sau" className="flex h-9 w-9 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">›</button>
+              <button aria-label="Tuần sau" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-slate-500 hover:bg-slate-50">›</button>
             </div>
             <button className="rounded-md bg-primary-soft px-3 py-1.5 text-xs font-medium text-primary hover:bg-secondary">Hôm nay</button>
           </div>
@@ -136,7 +138,7 @@ export default function Appointments() {
                 <div className="space-y-1 min-h-[120px]">
                   {mockAppointments.filter(a => a.date === WEEK_DATES[i].date).map(a => (
                     <div key={a.id}
-                      className={`cursor-pointer rounded-md px-2 py-1.5 text-xs transition-all hover:opacity-90 ${a.status === "confirmed" ? "bg-info-soft text-info" : a.status === "arrived" ? "bg-indigo-100 text-indigo-800" : a.status === "pending" ? "bg-warning-soft text-warning" : a.status === "cancelled" ? "bg-danger-soft text-danger line-through" : "bg-success-soft text-success"}`}>
+                      className={`cursor-pointer rounded-md px-2 py-1.5 text-xs transition-all hover:opacity-90 ${a.status === "confirmed" ? "bg-info-soft text-info" : a.status === "arrived" ? "bg-info-soft text-info" : a.status === "pending" ? "bg-warning-soft text-warning" : a.status === "cancelled" ? "bg-danger-soft text-danger line-through" : "bg-success-soft text-success"}`}>
                       <p className="font-semibold">{a.time}</p>
                       <p className="truncate">{a.customer}</p>
                     </div>
@@ -182,11 +184,11 @@ export default function Appointments() {
       {/* Time Conflict Modal */}
       <Modal open={showConflictModal} onClose={() => setShowConflictModal(false)} title="Thời gian không phù hợp">
         <div className="space-y-4">
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
-            <span className="text-amber-500 mt-0.5">{Icons.alertTriangle}</span>
+          <div className="rounded-lg border border-warning/30 bg-warning-soft p-4 flex items-start gap-3">
+            <span className="mt-0.5 text-warning">{Icons.alertTriangle}</span>
             <div>
-              <p className="font-semibold text-amber-800 text-sm">Khung giờ đã chọn không còn trống</p>
-              <p className="mt-1 text-xs text-amber-700">Thứ Ba 17/09/2026 lúc 08:00 đã được đặt bởi khách hàng khác.</p>
+              <p className="text-sm font-semibold text-warning">Khung giờ đã chọn không còn trống</p>
+              <p className="mt-1 text-xs text-warning">Thứ Ba 17/09/2026 lúc 08:00 đã được đặt bởi khách hàng khác.</p>
             </div>
           </div>
           <div>
