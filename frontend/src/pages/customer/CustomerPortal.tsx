@@ -4,6 +4,7 @@ import { GARAGE_NAME } from "../../data";
 import { khachHang } from "../../mock/data";
 import CustomerAppointments from "./CustomerAppointments";
 import CustomerHistory from "./CustomerHistory";
+import CustomerNotifications from "./CustomerNotifications";
 import CustomerQuotations from "./CustomerQuotations";
 import CustomerTracking from "./CustomerTracking";
 
@@ -119,7 +120,7 @@ export default function CustomerPortal({ onLogout }: CustomerPortalProps) {
         {tab === "quotations" && <CustomerQuotations />}
         {tab === "tracking" && <CustomerTracking />}
         {tab === "history" && <CustomerHistory />}
-        {tab === "notifications" && <TabPlaceholder title="Thông báo" note="Nhắc bảo dưỡng, trạng thái lịch hẹn, báo giá mới — hoàn thiện ở phần Notifications." />}
+        {tab === "notifications" && <CustomerNotifications />}
         {tab === "profile" && <ProfileTab />}
       </main>
     </div>
