@@ -57,7 +57,7 @@ export default function Sidebar({
     <aside className={`fixed left-0 top-0 z-30 flex h-dvh w-60 flex-shrink-0 flex-col bg-primary text-white transition-transform duration-200 xl:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
       <div className="flex min-h-16 items-center border-b border-white/10 px-4">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-amber-600 shadow-sm">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-accent shadow-sm">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
               <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2" />
               <circle cx="7.5" cy="17.5" r="2.5" /><circle cx="17.5" cy="17.5" r="2.5" />
@@ -84,7 +84,7 @@ export default function Sidebar({
             >
               <span className={`flex-shrink-0 ${isActive ? "text-amber-400" : "text-white/60 group-hover:text-white/80"}`}>{item.icon}</span>
               <span className={`truncate text-sm font-medium ${isActive ? "font-semibold text-white" : ""}`}>{item.label}</span>
-              {item.badge && <span className="ml-auto flex min-h-5 min-w-5 flex-shrink-0 items-center justify-center rounded-full bg-amber-500 px-1.5 text-xs font-bold text-white" aria-label={`${item.badge} thông báo chưa đọc`}>{item.badge}</span>}
+              {item.badge && <span className="ml-auto flex min-h-5 min-w-5 flex-shrink-0 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-bold text-white" aria-label={`${item.badge} thông báo chưa đọc`}>{item.badge}</span>}
             </button>
           );
         })}
