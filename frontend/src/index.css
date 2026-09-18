@@ -168,6 +168,31 @@ button, [role='button'], a, input, select, textarea {
   box-shadow: var(--shadow-md);
 }
 
+/* shared page layout */
+.page-shell {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+  padding: 20px 16px 24px;
+}
+
+.app-content {
+  margin-left: 0;
+}
+
+@media (min-width: 768px) {
+  .page-shell { padding-inline: 20px; }
+}
+
+@media (min-width: 1280px) {
+  .app-content { margin-left: 240px; }
+  .page-shell { padding-inline: 24px; }
+}
+
+@media (min-width: 1536px) {
+  .page-shell { padding-inline: 32px; }
+}
+
 /* timeline */
 .timeline-line {
   position: absolute;
@@ -223,12 +248,10 @@ input[readonly] {
 }
 
 @media (max-width: 1279px) {
-  main > [class*='p-6'] { padding: 1.25rem; }
   .data-table th, .data-table td { padding-left: 12px; padding-right: 12px; }
 }
 
 @media (max-width: 767px) {
-  main > [class*='p-6'] { padding: 1rem; }
   .data-table { min-width: 680px; }
 }
 

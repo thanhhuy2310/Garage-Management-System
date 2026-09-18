@@ -14,7 +14,7 @@ export default function History() {
   const completedAt = (repairId: string) => phieuSuaChua.find((item) => item.MaPhieuSuaChua === repairId)?.NgayHoanThanh;
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <SearchBox value={search} onChange={setSearch} placeholder="Biển số, khách hàng..." />
         <input type="date" aria-label="Từ ngày" className="h-10 rounded-md border border-border bg-white px-3 text-sm shadow-sm" />

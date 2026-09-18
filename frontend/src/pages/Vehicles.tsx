@@ -21,7 +21,7 @@ export default function Vehicles() {
   const detail = xe.find((vehicle) => vehicle.MaXe === selected);
 
   return (
-    <div className="space-y-5 p-4 sm:p-6">
+    <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <SearchBox value={search} onChange={setSearch} placeholder="Biển số, chủ xe, hãng xe..." />
         <Button icon={Icons.plus} onClick={() => setShowAdd(true)}>Thêm xe</Button>

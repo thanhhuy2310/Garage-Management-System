@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import Header from "./components/Header";
+import PageShell from "./components/PageShell";
 import Sidebar from "./components/Sidebar";
 import Login from "./pages/Login";
 
@@ -235,10 +236,10 @@ export default function App() {
         <button
           aria-label="Đóng thanh điều hướng"
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-20 bg-slate-950/40 lg:hidden"
+          className="fixed inset-0 z-20 bg-slate-950/40 xl:hidden"
         />
       )}
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden lg:ml-[240px]">
+      <div className="app-content flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
           page={page}
           role={role}
@@ -246,7 +247,9 @@ export default function App() {
           onMobileToggle={() => setShowMobile(true)}
         />
         <main id="main-content" className="flex-1 overflow-y-auto" tabIndex={-1}>
-          <Suspense fallback={<PageLoading />}><PageContent page={page} /></Suspense>
+          <PageShell>
+            <Suspense fallback={<PageLoading />}><PageContent page={page} /></Suspense>
+          </PageShell>
         </main>
       </div>
     </div>

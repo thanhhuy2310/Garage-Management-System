@@ -54,7 +54,7 @@ export default function Sidebar({
     : ALL_NAV_ITEMS;
 
   return (
-    <aside className={`fixed left-0 top-0 z-30 flex h-dvh w-[240px] flex-shrink-0 flex-col bg-primary text-white transition-transform duration-200 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+    <aside className={`fixed left-0 top-0 z-30 flex h-dvh w-60 flex-shrink-0 flex-col bg-primary text-white transition-transform duration-200 xl:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
       <div className="flex min-h-16 items-center border-b border-white/10 px-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-amber-600 shadow-sm">
@@ -68,7 +68,7 @@ export default function Sidebar({
             <p className="mt-0.5 text-xs leading-tight text-white/65">Hệ thống quản lý</p>
           </div>
         </div>
-        <button type="button" onClick={onClose} aria-label="Đóng thanh điều hướng" className="ml-auto flex h-10 w-10 items-center justify-center rounded-md text-xl text-white/70 hover:bg-white/10 hover:text-white lg:hidden">×</button>
+        <button type="button" onClick={onClose} aria-label="Đóng thanh điều hướng" className="ml-auto flex h-10 w-10 items-center justify-center rounded-md text-xl text-white/70 hover:bg-white/10 hover:text-white xl:hidden">×</button>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-3" aria-label="Điều hướng chính">

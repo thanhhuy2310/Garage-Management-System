@@ -24,7 +24,7 @@ export default function Reports() {
   const [period, setPeriod] = useState("month");
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Toolbar */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

@@ -17,7 +17,7 @@ export default function Customers() {
   const detailVehicles = xe.filter(vehicle => vehicle.MaKhachHang === detail?.MaKhachHang);
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="space-y-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <SearchBox value={search} onChange={setSearch} placeholder="Tên, số điện thoại..." />

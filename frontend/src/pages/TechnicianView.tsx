@@ -33,7 +33,7 @@ export default function TechnicianView() {
   const doneCount = items.filter((_, i) => itemsDone[`${selected}-${i}`] ?? false).length;
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold">K</div>

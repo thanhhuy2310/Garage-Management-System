@@ -17,7 +17,7 @@ export default function Staff() {
   const detail = mockStaff.find(s => s.id === selected);
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="font-semibold text-slate-700">Danh sách nhân viên ({mockStaff.length})</h2>
         <Button icon={Icons.plus} onClick={() => setShowAdd(true)}>Thêm nhân viên</Button>

@@ -44,7 +44,7 @@ export default function Dashboard() {
   const xKey = chartPeriod === "week" ? "date" : "month";
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Stat cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7">
         <StatCard label="Tiếp nhận hôm nay" value="4" icon={Icons.truck} color="navy" trend="+1 so với hôm qua" trendUp />

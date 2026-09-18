@@ -8,7 +8,7 @@ export default function DesignSystem() {
   const [search, setSearch] = useState("");
 
   return (
-    <div className="p-6 space-y-8 max-w-5xl">
+    <div className="max-w-5xl space-y-8">
       <div>
         <h2 className="text-2xl font-black text-slate-800 mb-1">Design System</h2>
         <p className="text-slate-500 text-sm">Thư viện component dùng chung cho hệ thống Gara Ô Tô Thành Công</p>

@@ -57,7 +57,7 @@ export default function RepairOrders() {
   );
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <SearchBox value={search} onChange={setSearch} placeholder="Tìm mã phiếu, biển số, khách hàng..." />
         <Button icon={Icons.plus} onClick={() => setShowCreate(true)}>Tạo phiếu mới</Button>

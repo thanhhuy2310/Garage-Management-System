@@ -24,7 +24,7 @@ export default function Inventory() {
   const lowStock = phuTung.filter((item) => getInventoryStatus(item) !== "ok");
   const auditItems = phuTung.map((item, index) => ({ ...item, actual: index === 2 ? item.SoLuongTon - 1 : item.SoLuongTon }));
 
-  return <div className="p-6 space-y-5">
+  return <div className="space-y-5">
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <Tabs tabs={TABS} active={tab} onChange={setTab} />
       <p className="text-xs text-slate-500">{kho[0].TenKho} · {kho[0].DiaChi}</p>

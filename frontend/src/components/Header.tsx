@@ -66,7 +66,7 @@ export default function Header({
           type="button"
           onClick={onMenuToggle}
           aria-label="Mở thanh điều hướng"
-          className="mr-1 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 lg:hidden"
+          className="mr-1 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 xl:hidden"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="3" y1="6" x2="21" y2="6" />
@@ -74,10 +74,10 @@ export default function Header({
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        {BREADCRUMBS[page] && <span className="hidden text-xs text-slate-500 sm:inline">{BREADCRUMBS[page]} /</span>}
+        {BREADCRUMBS[page] && <span className="hidden text-xs text-slate-500 2xl:inline">{BREADCRUMBS[page]} /</span>}
         <h1 className="truncate text-lg font-semibold text-slate-900 sm:text-xl">{PAGE_TITLES[page] ?? page}</h1>
         {page === "dashboard" && (
-          <span className="hidden rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-600 xl:inline">18/09/2026</span>
+          <span className="hidden rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-600 2xl:inline">18/09/2026</span>
         )}
         {page === "technician" && (
           <span className="hidden rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700 sm:inline">Ca sáng 07:00–12:00</span>
@@ -85,7 +85,7 @@ export default function Header({
       </div>
 
       <div className="ml-3 flex flex-shrink-0 items-center gap-2">
-        <div className="relative hidden md:block">
+        <div className="relative hidden xl:block">
           <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">{Icons.search}</span>
           <input
             type="search"
@@ -99,7 +99,7 @@ export default function Header({
           <button
             type="button"
             onClick={onMobileToggle}
-            className="hidden h-10 items-center gap-2 rounded-md border border-border bg-secondary px-3 text-[13px] font-semibold text-primary transition-all hover:bg-slate-200 lg:flex"
+            className="hidden h-10 items-center gap-2 rounded-md border border-border bg-secondary px-3 text-[13px] font-semibold text-primary transition-all hover:bg-slate-200 2xl:flex"
             title="Xem ứng dụng khách hàng"
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -142,7 +142,7 @@ export default function Header({
 
         <div className="ml-1 flex items-center gap-2 border-l border-[#dde3ec] pl-2">
           <div className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${user.avatar} text-xs font-bold text-white`}>{user.initial}</div>
-          <div className="hidden md:block">
+          <div className="hidden 2xl:block">
             <p className="text-sm font-semibold leading-tight text-slate-800">{user.name}</p>
             <p className="mt-0.5 text-xs leading-tight text-slate-500">{user.label}</p>
           </div>

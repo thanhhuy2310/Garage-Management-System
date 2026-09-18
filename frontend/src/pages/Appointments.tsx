@@ -44,7 +44,7 @@ export default function Appointments() {
   });
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="space-y-5">
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:w-auto">

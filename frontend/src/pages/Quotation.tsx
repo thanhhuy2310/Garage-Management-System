@@ -11,7 +11,7 @@ export default function Quotation() {
   const total = q ? calcTotal(q.services, q.parts) : 0;
 
   return (
-    <div className="p-6">
+    <div>
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {/* List */}
         <div className="space-y-3">

@@ -29,7 +29,7 @@ export default function Invoice() {
     setShowPay(false);
   };
 
-  return <div className="grid grid-cols-1 gap-4 p-6 xl:grid-cols-3">
+  return <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
     <div className="space-y-3">
       <div className="flex justify-between items-center"><h2 className="font-semibold">Hóa đơn</h2><Button size="sm" icon={Icons.plus}>Lập hóa đơn</Button></div>
       {hoaDon.map((item) => {
