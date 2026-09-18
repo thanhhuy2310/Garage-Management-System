@@ -1,0 +1,209 @@
+import React, { useState } from "react";
+import { Card, Badge, Button, SearchBox, Modal, Icons, TimelineItem } from "../components/ui";
+import { mockRepairOrders, formatCurrency } from "../data";
+
+const STATUS_MAP: Record<string, string> = {
+  pending: "Chờ xử lý",
+  in_progress: "Đang sửa chữa",
+  waiting_parts: "Chờ phụ tùng",
+  inspecting: "Đang kiểm tra",
+  completed: "Hoàn tất",
+};
+
+function RepairTimeline({ status }: { status: string }) {
+  const steps = [
+    { key: "received", label: "Tiếp nhận", time: "15/09 08:00" },
+    { key: "quoted", label: "Báo giá", time: "15/09 10:30" },
+    { key: "in_progress", label: "Đang sửa", time: "15/09 14:00" },
+    { key: "completed", label: "Hoàn tất", time: null },
+    { key: "payment", label: "Thanh toán", time: null },
+    { key: "delivered", label: "Bàn giao", time: null },
+  ];
+  const doneIdx = status === "in_progress" ? 2 : status === "waiting_parts" ? 2 : status === "completed" ? 3 : 0;
+
+  return (
+    <div className="flex items-center gap-0 w-full">
+      {steps.map((s, i) => (
+        <React.Fragment key={s.key}>
+          <div className="flex flex-col items-center gap-1 flex-shrink-0">
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 text-xs font-bold ${
+              i < doneIdx ? "bg-emerald-500 border-emerald-500 text-white" :
+              i === doneIdx ? "bg-[#1e3a6e] border-[#1e3a6e] text-white" :
+              "bg-white border-slate-300 text-slate-400"
+            }`}>
+              {i < doneIdx ? "✓" : i + 1}
+            </div>
+            <p className={`text-[10px] font-medium text-center leading-tight ${i <= doneIdx ? "text-slate-700" : "text-slate-400"}`}>{s.label}</p>
+            {s.time && i < doneIdx + 1 && <p className="text-[9px] text-slate-400 font-mono">{s.time}</p>}
+          </div>
+          {i < steps.length - 1 && (
+            <div className={`flex-1 h-0.5 mx-1 mb-5 ${i < doneIdx ? "bg-emerald-400" : "bg-slate-200"}`} />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+export default function RepairOrders() {
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const selectedOrder = mockRepairOrders.find(r => r.id === selected);
+
+  const filtered = mockRepairOrders.filter(r =>
+    !search || r.vehicle.includes(search) || r.customer.toLowerCase().includes(search.toLowerCase()) || r.id.includes(search)
+  );
+
+  return (
+    <div className="p-6 space-y-5">
+      <div className="flex items-center justify-between">
+        <SearchBox value={search} onChange={setSearch} placeholder="Tìm mã phiếu, biển số, khách hàng..." />
+        <Button icon={Icons.plus}>Tạo phiếu mới</Button>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        {/* List */}
+        <div className="col-span-1 space-y-3">
+          {filtered.map(r => {
+            const total = r.items.reduce((sum, i) => sum + i.qty * i.price, 0);
+            const isActive = selected === r.id;
+            return (
+              <div key={r.id} onClick={() => setSelected(r.id)}
+                className={`bg-white rounded-xl border p-4 cursor-pointer transition-all hover:border-[#1e3a6e] ${isActive ? "border-[#1e3a6e] ring-1 ring-[#1e3a6e]" : "border-[#dde3ec]"}`}>
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <span className="mono text-xs text-slate-400">{r.id}</span>
+                    <p className="font-semibold text-slate-800 text-sm mt-0.5">{r.vehicle}</p>
+                    <p className="text-xs text-slate-500">{r.customer}</p>
+                  </div>
+                  <Badge variant={r.status as any} />
+                </div>
+                <div className="flex items-center justify-between mt-3">
+                  <span className="text-xs text-slate-500">{r.technician}</span>
+                  <span className="text-sm font-bold text-[#1e3a6e]">{formatCurrency(total)}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Detail */}
+        <div className="col-span-2">
+          {selectedOrder ? (
+            <Card className="p-6">
+              {/* Header */}
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <div className="flex items-center gap-3 mb-1">
+                    <span className="mono text-sm text-slate-400">{selectedOrder.id}</span>
+                    <Badge variant={selectedOrder.status as any} />
+                  </div>
+                  <h2 className="text-xl font-bold text-slate-800">{selectedOrder.vehicle}</h2>
+                  <p className="text-slate-500">{selectedOrder.customer} · KM hiện tại: {selectedOrder.km.toLocaleString("vi-VN")} km</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" icon={Icons.printer}>In phiếu</Button>
+                  <Button size="sm" icon={Icons.edit}>Chỉnh sửa</Button>
+                </div>
+              </div>
+
+              {/* Timeline */}
+              <div className="mb-6 p-4 bg-slate-50 rounded-xl">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Tiến độ xử lý</p>
+                <RepairTimeline status={selectedOrder.status} />
+              </div>
+
+              {/* Info */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500 mb-1">Ngày lập</p>
+                  <p className="font-semibold text-sm">{selectedOrder.created.split("-").reverse().join("/")}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500 mb-1">Kỹ thuật viên</p>
+                  <p className="font-semibold text-sm">{selectedOrder.technician}</p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500 mb-1">Ngày bắt đầu</p>
+                  <p className="font-semibold text-sm">{selectedOrder.started.split("-").reverse().join("/")}</p>
+                </div>
+              </div>
+
+              {/* Items */}
+              <div className="mb-4">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Hạng mục sửa chữa</p>
+                <table className="w-full data-table">
+                  <thead>
+                    <tr>
+                      <th>Loại</th>
+                      <th>Nội dung</th>
+                      <th className="text-right">SL</th>
+                      <th className="text-right">Đơn giá</th>
+                      <th className="text-right">Thành tiền</th>
+                      <th>Trạng thái</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedOrder.items.map((item, i) => (
+                      <tr key={i}>
+                        <td>
+                          <span className={`text-xs px-2 py-0.5 rounded font-medium ${item.type === "service" ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"}`}>
+                            {item.type === "service" ? "Dịch vụ" : "Phụ tùng"}
+                          </span>
+                        </td>
+                        <td className="font-medium text-slate-700">{item.name}</td>
+                        <td className="text-right">{item.qty}</td>
+                        <td className="text-right text-slate-600">{formatCurrency(item.price)}</td>
+                        <td className="text-right font-semibold">{formatCurrency(item.qty * item.price)}</td>
+                        <td>
+                          {item.done
+                            ? <span className="text-emerald-600 text-xs flex items-center gap-1">{Icons.checkCircle} Xong</span>
+                            : <span className="text-amber-600 text-xs flex items-center gap-1">{Icons.info} Chờ</span>
+                          }
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Total */}
+              <div className="flex justify-end">
+                <div className="bg-[#1e3a6e] text-white px-6 py-3 rounded-xl">
+                  <span className="text-sm opacity-80">Tổng cộng</span>
+                  <p className="text-xl font-bold">
+                    {formatCurrency(selectedOrder.items.reduce((s, i) => s + i.qty * i.price, 0))}
+                  </p>
+                </div>
+              </div>
+
+              {/* Notes */}
+              {selectedOrder.notes && (
+                <div className="mt-4 p-3 bg-amber-50 border border-amber-100 rounded-lg">
+                  <p className="text-xs font-medium text-amber-800">{Icons.info} Ghi chú: {selectedOrder.notes}</p>
+                </div>
+              )}
+
+              {/* Actions */}
+              {selectedOrder.status === "in_progress" && (
+                <div className="mt-4 flex gap-3">
+                  <Button variant="accent" icon={Icons.package}>Yêu cầu phụ tùng</Button>
+                  <Button variant="secondary">Cập nhật tiến độ</Button>
+                  <Button variant="primary" icon={Icons.checkCircle}>Hoàn tất sửa chữa</Button>
+                </div>
+              )}
+            </Card>
+          ) : (
+            <Card className="flex items-center justify-center h-64">
+              <div className="text-center text-slate-400">
+                <span className="block text-4xl mb-2">📋</span>
+                <p className="text-sm">Chọn một phiếu sửa chữa để xem chi tiết</p>
+              </div>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

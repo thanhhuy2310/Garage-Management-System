@@ -1,0 +1,107 @@
+import React, { useState } from "react";
+import { Card, Button, SearchBox, Icons } from "../components/ui";
+import { formatCurrency } from "../data";
+import { mockRepairOrders } from "../data";
+
+export default function History() {
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const completed = mockRepairOrders.filter(r => r.status === "completed");
+  const filtered = completed.filter(r =>
+    !search || r.vehicle.includes(search) || r.customer.toLowerCase().includes(search.toLowerCase())
+  );
+  const detail = filtered.find(r => r.id === selected);
+
+  return (
+    <div className="p-6 space-y-5">
+      <div className="flex items-center gap-3">
+        <SearchBox value={search} onChange={setSearch} placeholder="Biển số, khách hàng..." />
+        <input type="date" className="h-9 border border-[#dde3ec] rounded-lg px-3 text-sm" placeholder="Từ ngày" />
+        <input type="date" className="h-9 border border-[#dde3ec] rounded-lg px-3 text-sm" placeholder="Đến ngày" />
+        <Button variant="outline" size="sm" icon={Icons.download}>Xuất</Button>
+      </div>
+
+      <div className={`grid gap-4 ${selected ? "grid-cols-2" : "grid-cols-1"}`}>
+        <Card>
+          <table className="w-full data-table">
+            <thead>
+              <tr>
+                <th>Mã phiếu</th>
+                <th>Ngày hoàn tất</th>
+                <th>Xe</th>
+                <th>Khách hàng</th>
+                <th className="text-right">Số km</th>
+                <th>Kỹ thuật viên</th>
+                <th className="text-right">Tổng chi phí</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(r => {
+                const total = r.items.reduce((s, i) => s + i.qty * i.price, 0);
+                return (
+                  <tr key={r.id} className={`cursor-pointer ${selected === r.id ? "bg-blue-50" : ""}`}
+                    onClick={() => setSelected(r.id === selected ? null : r.id)}>
+                    <td><span className="mono text-xs text-slate-400">{r.id}</span></td>
+                    <td className="text-slate-600">{r.created.split("-").reverse().join("/")}</td>
+                    <td><span className="mono font-bold text-[#1e3a6e]">{r.vehicle}</span></td>
+                    <td className="font-medium text-slate-800">{r.customer}</td>
+                    <td className="text-right mono text-sm">{r.km.toLocaleString("vi-VN")}</td>
+                    <td className="text-slate-600">{r.technician}</td>
+                    <td className="text-right font-bold">{formatCurrency(total)}</td>
+                    <td><button className="p-1.5 hover:bg-slate-100 rounded text-slate-500">{Icons.chevronRight}</button></td>
+                  </tr>
+                );
+              })}
+              {filtered.length === 0 && (
+                <tr><td colSpan={8} className="text-center py-12 text-slate-400 text-sm">Không có kết quả</td></tr>
+              )}
+            </tbody>
+          </table>
+        </Card>
+
+        {detail && (
+          <Card className="p-6 h-fit">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="mono text-xs text-slate-400">{detail.id}</span>
+                </div>
+                <p className="font-bold text-xl text-[#1e3a6e] mono">{detail.vehicle}</p>
+                <p className="text-slate-500 text-sm">{detail.customer}</p>
+              </div>
+              <button onClick={() => setSelected(null)} className="p-1 hover:bg-slate-100 rounded text-slate-400">✕</button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Ngày sửa</p><p className="font-semibold">{detail.created.split("-").reverse().join("/")}</p></div>
+              <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Số km</p><p className="font-semibold mono">{detail.km.toLocaleString("vi-VN")}</p></div>
+              <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Kỹ thuật viên</p><p className="font-semibold">{detail.technician}</p></div>
+              <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Tổng chi phí</p><p className="font-bold text-[#1e3a6e]">{formatCurrency(detail.items.reduce((s, i) => s + i.qty * i.price, 0))}</p></div>
+            </div>
+
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Hạng mục đã làm</p>
+            <div className="space-y-2">
+              {detail.items.map((item, i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${item.type === "service" ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"}`}>
+                      {item.type === "service" ? "DV" : "PT"}
+                    </span>
+                    <span className="text-sm font-medium text-slate-700">{item.name}</span>
+                  </div>
+                  <span className="text-sm font-semibold text-slate-800">{formatCurrency(item.qty * item.price)}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-2 mt-5">
+              <Button variant="outline" size="sm" icon={Icons.printer} className="flex-1">In hóa đơn</Button>
+            </div>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
