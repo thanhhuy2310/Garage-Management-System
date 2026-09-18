@@ -23,6 +23,7 @@ const TechnicianView = lazy(() => import("./pages/TechnicianView"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 const MobileApp = lazy(() => import("./pages/MobileApp"));
 const PublicHome = lazy(() => import("./pages/PublicHome"));
+const CustomerPortal = lazy(() => import("./pages/customer/CustomerPortal"));
 import type { PublicPageKey } from "./components/PublicHeader";
 
 export type Page =
@@ -214,16 +215,9 @@ export default function App() {
 
   if (role === "customer") {
     return (
-      <div className="relative min-h-screen bg-[#f0f4f8]">
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="fixed right-4 top-4 z-50 rounded-lg bg-[#1e3a6e] px-3 py-2 text-xs font-semibold text-white shadow-lg hover:bg-[#162d56]"
-        >
-          Đăng xuất
-        </button>
-        <Suspense fallback={<PageLoading />}><MobileApp /></Suspense>
-      </div>
+      <Suspense fallback={<PageLoading />}>
+        <CustomerPortal onLogout={handleLogout} />
+      </Suspense>
     );
   }
 
