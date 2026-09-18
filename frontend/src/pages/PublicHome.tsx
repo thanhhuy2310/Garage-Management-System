@@ -1,5 +1,6 @@
 import PublicHeader, { type PublicPageKey } from "../components/PublicHeader";
 import PublicHero from "../components/PublicHero";
+import PublicProcess from "../components/PublicProcess";
 import PublicServices from "../components/PublicServices";
 
 const PAGE_NOTES: Record<PublicPageKey, { title: string; note: string }> = {
@@ -26,6 +27,7 @@ export default function PublicHome({ page, onNavigate, onLogin, onBook }: Public
         <main>
           <PublicHero onBook={onBook} onViewServices={() => onNavigate("services")} />
           <PublicServices onBook={onBook} onViewAll={() => onNavigate("services")} />
+          <PublicProcess onBook={onBook} />
         </main>
       ) : (
         <main className="mx-auto w-full max-w-6xl px-4 py-16 text-center">
