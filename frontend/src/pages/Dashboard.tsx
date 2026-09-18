@@ -46,7 +46,7 @@ export default function Dashboard() {
   return (
     <div className="p-6 space-y-6">
       {/* Stat cards */}
-      <div className="grid grid-cols-4 gap-4 xl:grid-cols-7">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-7">
         <StatCard label="Tiếp nhận hôm nay" value="4" icon={Icons.truck} color="navy" trend="+1 so với hôm qua" trendUp />
         <StatCard label="Đang sửa chữa" value={repairStatusCount.in_progress + repairStatusCount.waiting_parts} icon={Icons.wrench} color="blue" />
         <StatCard label="Đã hoàn tất" value={repairStatusCount.completed} icon={Icons.checkCircle} color="green" />
@@ -57,30 +57,31 @@ export default function Dashboard() {
       </div>
 
       {/* Charts row */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {/* Revenue chart */}
-        <Card className="col-span-2 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-800 text-sm">Doanh thu & Lượt sửa chữa</h3>
+        <Card className="p-5 xl:col-span-2">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="text-base font-semibold text-slate-900">Doanh thu & Lượt sửa chữa</h3>
             <div className="flex gap-1 bg-slate-100 p-0.5 rounded-lg">
               {(["week", "month"] as ChartPeriod[]).map(p => (
-                <button key={p} onClick={() => setChartPeriod(p)}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${chartPeriod === p ? "bg-white shadow-sm text-[#1e3a6e]" : "text-slate-500 hover:text-slate-700"}`}>
+                <button key={p} onClick={() => setChartPeriod(p)} aria-pressed={chartPeriod === p}
+                  className={`min-h-9 rounded-md px-3 py-1 text-sm font-medium transition-all ${chartPeriod === p ? "bg-white shadow-sm text-primary" : "text-slate-600 hover:text-slate-900"}`}>
                   {p === "week" ? "7 ngày" : "7 tháng"}
                 </button>
               ))}
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+          <div role="img" aria-label={`Biểu đồ doanh thu trong ${chartPeriod === "week" ? "7 ngày" : "7 tháng"} gần nhất`}>
+            <ResponsiveContainer width="100%" height={220}>
+              <AreaChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#1e3a6e" stopOpacity={0.15} />
                   <stop offset="95%" stopColor="#1e3a6e" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false}
+              <XAxis dataKey={xKey} tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false}
                 tickFormatter={(v) => v >= 1000000 ? `${(v / 1000000).toFixed(0)}M` : `${(v / 1000).toFixed(0)}k`} />
               <Tooltip
                 formatter={(v: any, name: any) => [
@@ -90,24 +91,27 @@ export default function Dashboard() {
                 contentStyle={{ borderRadius: 8, border: "1px solid #dde3ec", fontSize: 12 }}
               />
               <Area type="monotone" dataKey="revenue" stroke="#1e3a6e" strokeWidth={2} fill="url(#revenueGrad)" />
-            </AreaChart>
-          </ResponsiveContainer>
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </Card>
 
         {/* Pie chart */}
         <Card className="p-5">
-          <h3 className="font-semibold text-slate-800 text-sm mb-4">Tình trạng sửa chữa</h3>
-          <ResponsiveContainer width="100%" height={160}>
-            <PieChart>
+          <h3 className="mb-4 text-base font-semibold text-slate-900">Tình trạng sửa chữa</h3>
+          <div role="img" aria-label="Biểu đồ tỷ lệ trạng thái sửa chữa">
+            <ResponsiveContainer width="100%" height={160}>
+              <PieChart>
               <Pie data={pieData} dataKey="value" cx="50%" cy="50%" outerRadius={65} innerRadius={38} paddingAngle={3}>
                 {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
               </Pie>
               <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #dde3ec", fontSize: 12 }} />
-            </PieChart>
-          </ResponsiveContainer>
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
           <div className="space-y-1.5 mt-2">
             {pieData.map(d => (
-              <div key={d.name} className="flex items-center justify-between text-xs">
+              <div key={d.name} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ background: d.color }} />
                   <span className="text-slate-600">{d.name}</span>
@@ -120,16 +124,16 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom row */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {/* Today's appointments */}
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-800 text-sm">Lịch hẹn hôm nay</h3>
+            <h3 className="text-base font-semibold text-slate-900">Lịch hẹn hôm nay</h3>
             <span className="text-xs text-slate-400">{todayAppointments.length} lịch hẹn</span>
           </div>
           <div className="space-y-3">
             {todayAppointments.map(a => (
-              <div key={a.id} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-all cursor-pointer">
+              <div key={a.id} className="flex items-start gap-3 rounded-lg bg-slate-50 p-3 transition-colors hover:bg-slate-100">
                 <div className="w-10 text-center">
                   <span className="text-xs font-mono font-semibold text-[#1e3a6e] bg-[#e8eef7] px-1.5 py-1 rounded block">{a.time}</span>
                 </div>
@@ -146,11 +150,11 @@ export default function Dashboard() {
         {/* Active repairs */}
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-800 text-sm">Xe đang sửa chữa</h3>
+            <h3 className="text-base font-semibold text-slate-900">Xe đang sửa chữa</h3>
           </div>
           <div className="space-y-3">
             {mockRepairOrders.filter(r => r.status !== "completed").map(r => (
-              <div key={r.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-all cursor-pointer">
+              <div key={r.id} className="flex items-center gap-3 rounded-lg bg-slate-50 p-3 transition-colors hover:bg-slate-100">
                 <div className="w-8 h-8 bg-[#e8eef7] rounded-lg flex items-center justify-center flex-shrink-0">
                   <span className="text-[#1e3a6e]">{Icons.car}</span>
                 </div>
@@ -167,7 +171,7 @@ export default function Dashboard() {
         {/* Low stock */}
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-800 text-sm">Phụ tùng sắp hết / hết hàng</h3>
+            <h3 className="text-base font-semibold text-slate-900">Phụ tùng sắp hết / hết hàng</h3>
             <span className="text-xs text-amber-600 font-medium">{lowStock.length} mặt hàng</span>
           </div>
           <div className="space-y-2">
@@ -194,33 +198,37 @@ export default function Dashboard() {
       </div>
 
       {/* Services chart */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card className="p-5">
-          <h3 className="font-semibold text-slate-800 text-sm mb-4">Dịch vụ sử dụng nhiều nhất</h3>
+          <h3 className="mb-4 text-base font-semibold text-slate-900">Dịch vụ sử dụng nhiều nhất</h3>
+          <div role="img" aria-label="Biểu đồ các dịch vụ được sử dụng nhiều nhất">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartServices} layout="vertical" margin={{ left: 0, right: 30 }}>
-              <XAxis type="number" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} width={110} />
+              <XAxis type="number" tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: "#475569" }} axisLine={false} tickLine={false} width={120} />
               <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #dde3ec", fontSize: 12 }} formatter={(v) => [`${v} lượt`, "Số lần"]} />
               <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                 {chartServices.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+          </div>
         </Card>
 
         <Card className="p-5">
-          <h3 className="font-semibold text-slate-800 text-sm mb-4">Doanh thu theo tháng</h3>
+          <h3 className="mb-4 text-base font-semibold text-slate-900">Doanh thu theo tháng</h3>
+          <div role="img" aria-label="Biểu đồ doanh thu theo tháng">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartMonthly} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false}
+              <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false}
                 tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
               <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #dde3ec", fontSize: 12 }}
                 formatter={(v: any) => [formatCurrency(Number(v)), "Doanh thu"]} />
               <Bar dataKey="revenue" fill="#1e3a6e" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+          </div>
         </Card>
       </div>
     </div>
