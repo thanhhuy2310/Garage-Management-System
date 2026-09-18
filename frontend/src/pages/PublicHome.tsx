@@ -5,6 +5,7 @@ import PublicHero from "../components/PublicHero";
 import PublicParts from "../components/PublicParts";
 import PublicProcess from "../components/PublicProcess";
 import PublicServices from "../components/PublicServices";
+import PublicPartsPage from "./PublicPartsPage";
 import PublicServicesPage from "./PublicServicesPage";
 
 const PAGE_NOTES: Record<PublicPageKey, { title: string; note: string }> = {
@@ -25,6 +26,9 @@ interface PublicHomeProps {
 export default function PublicHome({ page, onNavigate, onLogin, onBook }: PublicHomeProps) {
   if (page === "services") {
     return <PublicServicesPage onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} />;
+  }
+  if (page === "parts") {
+    return <PublicPartsPage onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} />;
   }
   const meta = PAGE_NOTES[page];
   return (
