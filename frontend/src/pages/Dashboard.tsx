@@ -80,7 +80,7 @@ export default function Dashboard() {
         {/* Revenue chart */}
         <Card className="p-5 xl:col-span-2">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="text-base font-semibold text-slate-900">Doanh thu & Lượt sửa chữa</h3>
+            <h3 className="text-base font-semibold text-foreground">Doanh thu & Lượt sửa chữa</h3>
             <div className="flex gap-1 bg-slate-100 p-0.5 rounded-lg">
               {(["week", "month"] as ChartPeriod[]).map(p => (
                 <button key={p} onClick={() => setChartPeriod(p)} aria-pressed={chartPeriod === p}
@@ -117,7 +117,7 @@ export default function Dashboard() {
 
         {/* Pie chart */}
         <Card className="p-5">
-          <h3 className="mb-4 text-base font-semibold text-slate-900">Tình trạng sửa chữa</h3>
+          <h3 className="mb-4 text-base font-semibold text-foreground">Tình trạng sửa chữa</h3>
           <div role="img" aria-label="Biểu đồ tỷ lệ trạng thái sửa chữa">
             <ResponsiveContainer width="100%" height={190}>
               <PieChart>
@@ -147,7 +147,7 @@ export default function Dashboard() {
         {/* Today's appointments */}
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold text-slate-900">Lịch hẹn hôm nay</h3>
+            <h3 className="text-base font-semibold text-foreground">Lịch hẹn hôm nay</h3>
             <span className="text-xs text-slate-400">{todayAppointments.length} lịch hẹn</span>
           </div>
           <div className="divide-y divide-border">
@@ -169,7 +169,7 @@ export default function Dashboard() {
         {/* Active repairs */}
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold text-slate-900">Xe đang sửa chữa</h3>
+            <h3 className="text-base font-semibold text-foreground">Xe đang sửa chữa</h3>
           </div>
           <div className="divide-y divide-border">
             {mockRepairOrders.filter(r => r.status !== "completed").map(r => (
@@ -190,8 +190,8 @@ export default function Dashboard() {
         {/* Low stock */}
         <Card className="p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold text-slate-900">Phụ tùng sắp hết / hết hàng</h3>
-            <span className="text-xs text-amber-600 font-medium">{lowStock.length} mặt hàng</span>
+            <h3 className="text-base font-semibold text-foreground">Phụ tùng sắp hết / hết hàng</h3>
+            <span className="text-xs text-warning font-medium">{lowStock.length} mặt hàng</span>
           </div>
           <div className="divide-y divide-border">
             {lowStock.map(item => (
@@ -219,7 +219,7 @@ export default function Dashboard() {
       {/* Services chart */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card className="p-5">
-          <h3 className="mb-4 text-base font-semibold text-slate-900">Dịch vụ sử dụng nhiều nhất</h3>
+          <h3 className="mb-4 text-base font-semibold text-foreground">Dịch vụ sử dụng nhiều nhất</h3>
           <div role="img" aria-label="Biểu đồ các dịch vụ được sử dụng nhiều nhất">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartServices} layout="vertical" margin={{ left: 0, right: 30 }}>
@@ -235,7 +235,7 @@ export default function Dashboard() {
         </Card>
 
         <Card className="p-5">
-          <h3 className="mb-4 text-base font-semibold text-slate-900">Doanh thu theo tháng</h3>
+          <h3 className="mb-4 text-base font-semibold text-foreground">Doanh thu theo tháng</h3>
           <div role="img" aria-label="Biểu đồ doanh thu theo tháng">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartMonthly} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
