@@ -55,7 +55,7 @@ export default function Login({ onLogin, account }: LoginProps) {
         </div>
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-600">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
               <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2" />
               <circle cx="7.5" cy="17.5" r="2.5" /><circle cx="17.5" cy="17.5" r="2.5" />
@@ -138,12 +138,21 @@ export default function Login({ onLogin, account }: LoginProps) {
 
             {error && <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">{error}</p>}
 
-            <button type="submit" disabled={loading} className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-semibold text-primary-foreground transition-all hover:bg-primary-hover disabled:opacity-70">
+            <button type="submit" disabled={loading} className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-semibold text-primary-foreground transition-all hover:bg-primary-hover disabled:cursor-wait disabled:opacity-70">
+              {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true" />}
               {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
           </form>
 
-          <div className="mt-7 rounded-lg border border-border bg-surface-subtle p-4">
+          <button
+            type="button"
+            onClick={() => { window.location.hash = "/"; }}
+            className="mt-4 inline-flex min-h-10 items-center gap-1 text-sm font-medium text-muted-foreground transition-all hover:text-primary"
+          >
+            <span aria-hidden="true">←</span> Về trang chủ website
+          </button>
+
+          <div className="mt-7 rounded-lg border border-info/20 bg-info-soft p-4">
             <p className="mb-2 text-[13px] font-semibold uppercase tracking-wide text-muted-foreground">Tài khoản demo</p>
             <p className="text-[13px] text-slate-700"><strong>{account.label}:</strong> <span className="mono">{account.username}</span> / <span className="mono">demo123</span></p>
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">Dùng nút chọn vai trò ở góc dưới để đổi actor trước khi đăng nhập.</p>
