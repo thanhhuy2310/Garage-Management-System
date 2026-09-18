@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Badge, Button, SearchBox, Modal, Icons, Select } from "../components/ui";
+import { Card, Badge, Button, SearchBox, Modal, Icons, Select, TableContainer } from "../components/ui";
 import { mockRepairOrders, formatCurrency, phieuTiepNhan, xe } from "../mock/data";
 
 const STATUS_MAP: Record<string, string> = {
@@ -138,6 +138,7 @@ export default function RepairOrders() {
               {/* Items */}
               <div className="mb-4">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Hạng mục sửa chữa</p>
+                <TableContainer>
                 <table className="w-full data-table">
                   <thead>
                     <tr>
@@ -171,6 +172,7 @@ export default function RepairOrders() {
                     ))}
                   </tbody>
                 </table>
+                </TableContainer>
               </div>
 
               {/* Total */}

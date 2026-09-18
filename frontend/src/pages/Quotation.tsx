@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Badge, Button, Modal, Icons } from "../components/ui";
+import { Card, Badge, Button, Modal, Icons, TableContainer } from "../components/ui";
 import { baoGia, mockQuotations, calcTotal, formatCurrency } from "../mock/data";
 
 export default function Quotation() {
@@ -95,6 +95,7 @@ export default function Quotation() {
               {/* Services */}
               <div className="mb-4">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Dịch vụ</p>
+                <TableContainer>
                 <table className="w-full data-table">
                   <thead>
                     <tr>
@@ -115,11 +116,13 @@ export default function Quotation() {
                     ))}
                   </tbody>
                 </table>
+                </TableContainer>
               </div>
 
               {/* Parts */}
               <div className="mb-6">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Phụ tùng</p>
+                <TableContainer>
                 <table className="w-full data-table">
                   <thead>
                     <tr>
@@ -140,6 +143,7 @@ export default function Quotation() {
                     ))}
                   </tbody>
                 </table>
+                </TableContainer>
               </div>
 
               {/* Total */}

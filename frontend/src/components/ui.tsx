@@ -8,15 +8,15 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: React.ReactNode;
 }
 export function Button({ variant = "primary", size = "md", icon, children, className = "", ...rest }: ButtonProps) {
-  const base = "inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold rounded-md transition-all cursor-pointer select-none border active:translate-y-px disabled:active:translate-y-0";
+  const base = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border font-semibold transition-all cursor-pointer select-none active:translate-y-px disabled:active:translate-y-0";
   const sizes = { sm: "min-h-9 px-3 text-[13px]", md: "min-h-10 px-4 text-sm", lg: "min-h-11 px-5 text-[15px]" };
   const variants: Record<BtnVariant, string> = {
-    primary: "bg-primary text-primary-foreground border-primary hover:bg-[#102a4c] active:bg-slate-950",
-    secondary: "bg-secondary text-secondary-foreground border-border hover:bg-slate-200",
-    danger: "bg-red-600 text-white border-red-600 hover:bg-red-700",
-    ghost: "bg-transparent text-slate-600 border-transparent hover:bg-slate-100",
-    outline: "bg-white text-slate-700 border-slate-300 hover:bg-slate-50",
-    accent: "bg-amber-700 text-white border-amber-700 hover:bg-amber-800",
+    primary: "border-primary bg-primary text-primary-foreground hover:border-primary-hover hover:bg-primary-hover",
+    secondary: "border-border bg-secondary text-secondary-foreground hover:bg-muted",
+    danger: "border-danger bg-danger text-white hover:brightness-90",
+    ghost: "border-transparent bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
+    outline: "border-border bg-surface text-foreground hover:bg-surface-subtle",
+    accent: "border-accent bg-accent text-accent-foreground hover:brightness-90",
   };
   return (
     <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...rest}>
@@ -32,22 +32,22 @@ type BadgeVariant = "pending" | "confirmed" | "arrived" | "cancelled" | "complet
   | "ok" | "low" | "out" | "blue" | "gray";
 
 const BADGE_STYLES: Record<BadgeVariant, string> = {
-  pending: "bg-amber-50 text-amber-700 border border-amber-200",
-  confirmed: "bg-blue-50 text-blue-700 border border-blue-200",
-  arrived: "bg-indigo-50 text-indigo-700 border border-indigo-200",
-  cancelled: "bg-red-50 text-red-600 border border-red-200",
-  completed: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-  in_progress: "bg-blue-50 text-blue-700 border border-blue-200",
-  waiting_parts: "bg-orange-50 text-orange-700 border border-orange-200",
-  draft: "bg-slate-100 text-slate-600 border border-slate-200",
-  rejected: "bg-red-50 text-red-600 border border-red-200",
-  paid: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-  unpaid: "bg-amber-50 text-amber-700 border border-amber-200",
-  ok: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-  low: "bg-amber-50 text-amber-700 border border-amber-200",
-  out: "bg-red-50 text-red-600 border border-red-200",
-  blue: "bg-blue-50 text-blue-700 border border-blue-200",
-  gray: "bg-slate-100 text-slate-600 border border-slate-200",
+  pending: "border-warning/20 bg-warning-soft text-warning",
+  confirmed: "border-info/20 bg-info-soft text-info",
+  arrived: "border-info/20 bg-info-soft text-info",
+  cancelled: "border-danger/20 bg-danger-soft text-danger",
+  completed: "border-success/20 bg-success-soft text-success",
+  in_progress: "border-info/20 bg-info-soft text-info",
+  waiting_parts: "border-warning/20 bg-warning-soft text-warning",
+  draft: "border-border bg-muted text-muted-foreground",
+  rejected: "border-danger/20 bg-danger-soft text-danger",
+  paid: "border-success/20 bg-success-soft text-success",
+  unpaid: "border-warning/20 bg-warning-soft text-warning",
+  ok: "border-success/20 bg-success-soft text-success",
+  low: "border-warning/20 bg-warning-soft text-warning",
+  out: "border-danger/20 bg-danger-soft text-danger",
+  blue: "border-info/20 bg-info-soft text-info",
+  gray: "border-border bg-muted text-muted-foreground",
 };
 
 const BADGE_LABELS: Partial<Record<BadgeVariant, string>> = {
@@ -69,7 +69,7 @@ const BADGE_LABELS: Partial<Record<BadgeVariant, string>> = {
 
 export function Badge({ variant, label, className = "" }: { variant: BadgeVariant; label?: string; className?: string }) {
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${BADGE_STYLES[variant]} ${className}`}>
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${BADGE_STYLES[variant]} ${className}`}>
       {label ?? BADGE_LABELS[variant] ?? variant}
     </span>
   );
@@ -95,11 +95,11 @@ export function Input({ label, icon, error, helperText, className = "", id, ...r
           id={inputId}
           aria-invalid={Boolean(error)}
           aria-describedby={descriptionId}
-          className={`h-10 w-full rounded-md border border-border bg-white px-3 text-sm text-slate-800 shadow-sm ${icon ? "pl-9" : ""} placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition-all ${error ? "border-red-500 focus:border-red-600 focus:ring-red-600/15" : ""} ${className}`}
+          className={`h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-foreground shadow-sm ${icon ? "pl-9" : ""} placeholder:text-muted-foreground hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 transition-all ${error ? "border-danger focus:border-danger focus:ring-danger/15" : ""} ${className}`}
           {...rest}
         />
       </div>
-      {(error || helperText) && <p id={descriptionId} className={`text-xs leading-relaxed ${error ? "text-red-700" : "text-slate-500"}`} role={error ? "alert" : undefined}>{error ?? helperText}</p>}
+      {(error || helperText) && <p id={descriptionId} className={`text-xs leading-relaxed ${error ? "text-danger" : "text-muted-foreground"}`} role={error ? "alert" : undefined}>{error ?? helperText}</p>}
     </div>
   );
 }
@@ -119,7 +119,7 @@ export function Select({ label, options, helperText, className = "", id, ...rest
       <select
         id={selectId}
         aria-describedby={helperText ? `${selectId}-description` : undefined}
-        className={`h-10 rounded-md border border-border bg-white px-3 text-sm text-slate-800 shadow-sm hover:border-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition-all ${className}`}
+        className={`h-10 rounded-md border border-border bg-surface px-3 text-sm text-foreground shadow-sm hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 transition-all ${className}`}
         {...rest}
       >
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -130,10 +130,63 @@ export function Select({ label, options, helperText, className = "", id, ...rest
 }
 
 // ─── Card ───────────────────────────────────────────────────────────────────
+interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label?: string;
+  error?: string;
+  helperText?: string;
+}
+export function Textarea({ label, error, helperText, className = "", id, ...rest }: TextareaProps) {
+  const generatedId = React.useId();
+  const textareaId = id ?? generatedId;
+  const descriptionId = error || helperText ? `${textareaId}-description` : undefined;
+  return (
+    <div className="flex flex-col gap-1.5">
+      {label && <label htmlFor={textareaId} className="text-[13px] font-medium text-slate-700">{label}</label>}
+      <textarea
+        id={textareaId}
+        aria-invalid={Boolean(error)}
+        aria-describedby={descriptionId}
+        className={`min-h-24 w-full resize-y rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm placeholder:text-muted-foreground hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 transition-all ${error ? "border-danger focus:border-danger focus:ring-danger/15" : ""} ${className}`}
+        {...rest}
+      />
+      {(error || helperText) && <p id={descriptionId} className={`text-xs leading-relaxed ${error ? "text-danger" : "text-muted-foreground"}`} role={error ? "alert" : undefined}>{error ?? helperText}</p>}
+    </div>
+  );
+}
+
+interface ChoiceProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
+  label: string;
+  description?: string;
+}
+function Choice({ type, label, description, className = "", id, ...rest }: ChoiceProps & { type: "checkbox" | "radio" }) {
+  const generatedId = React.useId();
+  const choiceId = id ?? generatedId;
+  return (
+    <label htmlFor={choiceId} className="flex min-h-10 cursor-pointer items-start gap-2.5 py-2 text-sm text-foreground">
+      <input id={choiceId} type={type} className={`mt-0.5 h-4 w-4 border-border text-primary accent-primary focus:ring-ring ${className}`} {...rest} />
+      <span>
+        <span className="block font-medium">{label}</span>
+        {description && <span className="mt-0.5 block text-xs text-muted-foreground">{description}</span>}
+      </span>
+    </label>
+  );
+}
+export function Checkbox(props: ChoiceProps) { return <Choice type="checkbox" {...props} />; }
+export function Radio(props: ChoiceProps) { return <Choice type="radio" {...props} />; }
+
+export function TableContainer({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`table-container ${className}`}>{children}</div>;
+}
+
 export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const content = React.Children.map(children, child => (
+    React.isValidElement(child) && child.type === "table"
+      ? <TableContainer>{child}</TableContainer>
+      : child
+  ));
   return (
     <div className={`rounded-lg border border-border bg-card text-card-foreground card-shadow ${className}`}>
-      {children}
+      {content}
     </div>
   );
 }
@@ -209,7 +262,7 @@ export function Tabs({ tabs, active, onChange }: {
         >
           {t.label}
           {t.count !== undefined && (
-            <span className={`text-xs px-1.5 py-0.5 rounded-full ${active === t.key ? "bg-[#1e3a6e] text-white" : "bg-slate-200 text-slate-600"}`}>{t.count}</span>
+            <span className={`rounded-full px-1.5 py-0.5 text-xs ${active === t.key ? "bg-primary text-primary-foreground" : "bg-slate-200 text-slate-600"}`}>{t.count}</span>
           )}
         </button>
       ))}
@@ -232,7 +285,7 @@ export function SearchBox({ value, onChange, placeholder = "Tìm kiếm..." }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-10 w-full rounded-md border border-border bg-white pl-9 pr-3 text-sm shadow-sm placeholder:text-slate-400 hover:border-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/15 transition-all sm:w-72"
+        className="h-10 w-full rounded-md border border-border bg-surface pl-9 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted-foreground hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 transition-all sm:w-72"
       />
     </div>
   );
