@@ -1,5 +1,5 @@
 ﻿import React, { useState } from "react";
-import { Card, Badge, Button, SearchBox, Tabs, Modal, Input, Select, Icons } from "../components/ui";
+import { Card, Badge, Button, SearchBox, Tabs, Modal, Input, Select, Textarea, Icons } from "../components/ui";
 import { dichVu, khachHang, mockAppointments, xe } from "../mock/data";
 
 const STATUS_TABS = [
@@ -46,7 +46,7 @@ export default function Appointments() {
   return (
     <div className="space-y-5">
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="page-toolbar">
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:w-auto">
           <Tabs tabs={VIEW_TABS} active={view} onChange={setView} />
           <SearchBox value={search} onChange={setSearch} placeholder="Tìm khách, biển số..." />
@@ -66,9 +66,9 @@ export default function Appointments() {
       <div className="flex gap-2 flex-wrap">
         {STATUS_TABS.map(tab => (
           <button key={tab.key} onClick={() => setStatusFilter(tab.key)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${statusFilter === tab.key ? "bg-[#1e3a6e] text-white border-[#1e3a6e]" : "bg-white text-slate-600 border-[#dde3ec] hover:border-[#1e3a6e] hover:text-[#1e3a6e]"}`}>
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${statusFilter === tab.key ? "border-primary bg-primary text-primary-foreground" : "border-border bg-surface text-muted-foreground hover:border-primary hover:text-primary"}`}>
             {tab.label}
-            <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${statusFilter === tab.key ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>
+            <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-xs font-bold ${statusFilter === tab.key ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"}`}>
               {tab.key === "all" ? mockAppointments.length : mockAppointments.filter(a => a.status === tab.key).length}
             </span>
           </button>
@@ -95,7 +95,7 @@ export default function Appointments() {
                 <tr key={a.id} className="cursor-pointer">
                   <td><span className="mono text-xs text-slate-500">{a.id}</span></td>
                   <td><span className="font-medium text-slate-800">{a.customer}</span></td>
-                  <td><span className="mono text-sm font-semibold text-[#1e3a6e]">{a.vehicle}</span></td>
+                  <td><span className="mono text-sm font-semibold text-primary">{a.vehicle}</span></td>
                   <td><span className="text-slate-600">{a.service}</span></td>
                   <td><span className="text-slate-600">{a.date.split("-").reverse().join("/")}</span></td>
                   <td><span className="mono text-sm font-semibold">{a.time}</span></td>
@@ -120,23 +120,23 @@ export default function Appointments() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <button aria-label="Tuần trước" className="flex h-9 w-9 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">‹</button>
-              <h3 className="font-semibold text-slate-800">Tuần 16 – 22 tháng 9, 2024</h3>
+              <h3 className="font-semibold text-slate-800">Tuần 16 – 22 tháng 9, 2026</h3>
               <button aria-label="Tuần sau" className="flex h-9 w-9 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">›</button>
             </div>
-            <button className="px-3 py-1.5 text-xs bg-[#e8eef7] text-[#1e3a6e] font-medium rounded-lg hover:bg-[#dce6f5]">Hôm nay</button>
+            <button className="rounded-md bg-primary-soft px-3 py-1.5 text-xs font-medium text-primary hover:bg-secondary">Hôm nay</button>
           </div>
 
           <div className="grid min-w-[720px] grid-cols-7 gap-2">
             {CALENDAR_DAYS.map((d, i) => (
               <div key={d}>
-                <div className={`text-center py-2 mb-2 rounded-lg ${i === 1 ? "bg-[#1e3a6e]" : ""}`}>
+                <div className={`mb-2 rounded-lg py-2 text-center ${i === 1 ? "bg-primary" : ""}`}>
                   <p className={`text-xs ${i === 1 ? "text-white/70" : "text-slate-400"}`}>{d}</p>
                   <p className={`font-bold text-sm ${i === 1 ? "text-white" : "text-slate-700"}`}>{WEEK_DATES[i].d}</p>
                 </div>
                 <div className="space-y-1 min-h-[120px]">
                   {mockAppointments.filter(a => a.date === WEEK_DATES[i].date).map(a => (
                     <div key={a.id}
-                      className={`text-[11px] px-2 py-1.5 rounded-md cursor-pointer hover:opacity-90 transition-all ${a.status === "confirmed" ? "bg-blue-100 text-blue-800" : a.status === "arrived" ? "bg-indigo-100 text-indigo-800" : a.status === "pending" ? "bg-amber-100 text-amber-800" : a.status === "cancelled" ? "bg-red-100 text-red-700 line-through" : "bg-emerald-100 text-emerald-800"}`}>
+                      className={`cursor-pointer rounded-md px-2 py-1.5 text-xs transition-all hover:opacity-90 ${a.status === "confirmed" ? "bg-info-soft text-info" : a.status === "arrived" ? "bg-indigo-100 text-indigo-800" : a.status === "pending" ? "bg-warning-soft text-warning" : a.status === "cancelled" ? "bg-danger-soft text-danger line-through" : "bg-success-soft text-success"}`}>
                       <p className="font-semibold">{a.time}</p>
                       <p className="truncate">{a.customer}</p>
                     </div>
@@ -171,10 +171,7 @@ export default function Appointments() {
             <Input label="Ngày hẹn" type="date" />
             <Input label="Giờ hẹn" type="time" />
           </div>
-          <div>
-            <label className="text-xs font-medium text-slate-600 block mb-1">Ghi chú</label>
-            <textarea className="w-full border border-[#dde3ec] rounded-md text-sm px-3 py-2 h-20 resize-none focus:border-[#3b6fd4] focus:ring-1 focus:ring-[#3b6fd4] focus:outline-none" placeholder="Ghi chú thêm..." />
-          </div>
+          <Textarea label="Ghi chú" placeholder="Ghi chú thêm..." />
           <div className="flex items-center justify-end gap-3 pt-2">
             <Button variant="outline" onClick={() => setShowAddModal(false)}>Hủy</Button>
             <Button onClick={() => { setShowAddModal(false); setShowConflictModal(true); }}>Lưu lịch hẹn</Button>
@@ -189,7 +186,7 @@ export default function Appointments() {
             <span className="text-amber-500 mt-0.5">{Icons.alertTriangle}</span>
             <div>
               <p className="font-semibold text-amber-800 text-sm">Khung giờ đã chọn không còn trống</p>
-              <p className="text-xs text-amber-700 mt-1">Thứ Ba 17/09/2024 lúc 08:00 đã được đặt bởi khách hàng khác.</p>
+              <p className="mt-1 text-xs text-amber-700">Thứ Ba 17/09/2026 lúc 08:00 đã được đặt bởi khách hàng khác.</p>
             </div>
           </div>
           <div>
@@ -197,12 +194,12 @@ export default function Appointments() {
             <div className="space-y-2">
               {["10:30", "13:00", "15:30"].map(time => (
                 <button key={time}
-                  className="w-full flex items-center justify-between p-3 bg-slate-50 border border-[#dde3ec] rounded-lg hover:bg-[#e8eef7] hover:border-[#1e3a6e] transition-all text-left">
+                  className="flex w-full items-center justify-between rounded-lg border border-border bg-surface-subtle p-3 text-left transition-all hover:border-primary hover:bg-primary-soft">
                   <div>
-                    <p className="font-semibold text-slate-800 text-sm">Thứ Ba 17/09/2024 lúc {time}</p>
+                    <p className="text-sm font-semibold text-slate-800">Thứ Ba 17/09/2026 lúc {time}</p>
                     <p className="text-xs text-slate-500">Còn trống</p>
                   </div>
-                  <span className="text-[#1e3a6e] text-xs font-medium">{Icons.chevronRight}</span>
+                  <span className="text-xs font-medium text-primary">{Icons.chevronRight}</span>
                 </button>
               ))}
             </div>

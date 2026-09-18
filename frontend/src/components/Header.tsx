@@ -80,7 +80,7 @@ export default function Header({
           <span className="hidden rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-600 2xl:inline">18/09/2026</span>
         )}
         {page === "technician" && (
-          <span className="hidden rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700 sm:inline">Ca sáng 07:00–12:00</span>
+          <span className="hidden rounded-full bg-warning-soft px-2 py-0.5 text-xs font-medium text-warning sm:inline">Ca sáng 07:00–12:00</span>
         )}
       </div>
 
@@ -91,7 +91,7 @@ export default function Header({
             type="search"
             aria-label="Tìm kiếm toàn bộ"
             placeholder="Tìm kiếm toàn bộ..."
-            className="h-10 w-52 rounded-md border border-border bg-slate-50 pl-9 pr-3 text-sm transition-all placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-600/15"
+            className="h-10 w-52 rounded-md border border-border bg-slate-50 pl-9 pr-3 text-sm transition-all placeholder:text-slate-400 focus:border-ring focus:bg-white focus:ring-2 focus:ring-ring/15"
           />
         </div>
 
@@ -118,7 +118,7 @@ export default function Header({
             className="relative flex h-10 w-10 items-center justify-center rounded-md text-slate-600 transition-all hover:bg-slate-100"
           >
             {Icons.bell}
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full border border-white bg-red-500" />
+            <span className="absolute right-1 top-1 h-2 w-2 rounded-full border border-white bg-danger" />
           </button>
           {showNotifications && (
             <div className="absolute right-0 top-12 z-50 w-[min(22rem,calc(100vw-1.5rem))] rounded-lg border border-border bg-white shadow-xl">
@@ -127,20 +127,20 @@ export default function Header({
                 <button type="button" onClick={() => setShowNotifications(false)} aria-label="Đóng thông báo" className="flex h-9 w-9 items-center justify-center rounded-md text-lg leading-none text-slate-500 hover:bg-slate-100 hover:text-slate-800">×</button>
               </div>
               {QUICK_NOTIFICATIONS.map((notification, index) => (
-                <div key={index} className={`flex items-start gap-3 border-b border-slate-100 p-3 last:border-0 ${notification.unread ? "bg-blue-50/50" : ""}`}>
+                <div key={index} className={`flex items-start gap-3 border-b border-slate-100 p-3 last:border-0 ${notification.unread ? "bg-info-soft/50" : ""}`}>
                   <span className="mt-0.5 text-primary" aria-hidden="true">{notification.icon}</span>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs leading-relaxed text-slate-700">{notification.text}</p>
                     <p className="mt-1 text-xs text-slate-500">{notification.time}</p>
                   </div>
-                  {notification.unread && <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-blue-500" />}
+                  {notification.unread && <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-info" />}
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        <div className="ml-1 flex items-center gap-2 border-l border-[#dde3ec] pl-2">
+        <div className="ml-1 flex items-center gap-2 border-l border-border pl-2">
           <div className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${user.avatar} text-xs font-bold text-white`}>{user.initial}</div>
           <div className="hidden 2xl:block">
             <p className="text-sm font-semibold leading-tight text-slate-800">{user.name}</p>

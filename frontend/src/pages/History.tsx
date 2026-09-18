@@ -15,7 +15,7 @@ export default function History() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <div className="page-toolbar sm:justify-start">
         <SearchBox value={search} onChange={setSearch} placeholder="Biển số, khách hàng..." />
         <input type="date" aria-label="Từ ngày" className="h-10 rounded-md border border-border bg-white px-3 text-sm shadow-sm" />
         <input type="date" aria-label="Đến ngày" className="h-10 rounded-md border border-border bg-white px-3 text-sm shadow-sm" />
@@ -41,11 +41,11 @@ export default function History() {
               {filtered.map(r => {
                 const total = r.items.reduce((s, i) => s + i.qty * i.price, 0);
                 return (
-                  <tr key={r.id} className={`cursor-pointer ${selected === r.id ? "bg-blue-50" : ""}`}
+                  <tr key={r.id} className={`cursor-pointer ${selected === r.id ? "bg-info-soft" : ""}`}
                     onClick={() => setSelected(r.id === selected ? null : r.id)}>
                     <td><span className="mono text-xs text-slate-400">{r.id}</span></td>
                     <td className="text-slate-600">{completedAt(r.id) ? new Date(completedAt(r.id)!).toLocaleString("vi-VN") : "—"}</td>
-                    <td><span className="mono font-bold text-[#1e3a6e]">{r.vehicle}</span></td>
+                    <td><span className="mono font-bold text-primary">{r.vehicle}</span></td>
                     <td className="font-medium text-slate-800">{r.customer}</td>
                     <td className="text-right mono text-sm">{r.km.toLocaleString("vi-VN")}</td>
                     <td className="text-slate-600">{r.technician}</td>
@@ -62,13 +62,13 @@ export default function History() {
         </Card>
 
         {detail && (
-          <Card className="p-6 h-fit">
+          <Card className="detail-panel h-fit p-5">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="mono text-xs text-slate-400">{detail.id}</span>
                 </div>
-                <p className="font-bold text-xl text-[#1e3a6e] mono">{detail.vehicle}</p>
+                <p className="mono text-xl font-bold text-primary">{detail.vehicle}</p>
                 <p className="text-slate-500 text-sm">{detail.customer}</p>
               </div>
               <button aria-label="Đóng chi tiết lịch sử" onClick={() => setSelected(null)} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
@@ -78,7 +78,7 @@ export default function History() {
               <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Ngày hoàn thành</p><p className="font-semibold">{completedAt(detail.id) ? new Date(completedAt(detail.id)!).toLocaleString("vi-VN") : "—"}</p></div>
               <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Số km</p><p className="font-semibold mono">{detail.km.toLocaleString("vi-VN")}</p></div>
               <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Kỹ thuật viên</p><p className="font-semibold">{detail.technician}</p></div>
-              <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Tổng chi phí</p><p className="font-bold text-[#1e3a6e]">{formatCurrency(detail.items.reduce((s, i) => s + i.qty * i.price, 0))}</p></div>
+              <div className="rounded-lg bg-surface-subtle p-3 text-sm"><p className="text-xs text-slate-400">Tổng chi phí</p><p className="font-bold text-primary">{formatCurrency(detail.items.reduce((s, i) => s + i.qty * i.price, 0))}</p></div>
             </div>
 
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Hạng mục đã làm</p>

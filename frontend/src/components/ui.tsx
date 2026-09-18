@@ -323,11 +323,11 @@ export function StatCard({ label, value, icon, trend, trendUp, color = "blue" }:
   trend?: string; trendUp?: boolean; color?: "blue" | "amber" | "green" | "red" | "navy";
 }) {
   const iconBg: Record<string, string> = {
-    blue: "bg-blue-50 text-blue-600",
-    amber: "bg-amber-50 text-amber-600",
-    green: "bg-emerald-50 text-emerald-600",
-    red: "bg-red-50 text-red-600",
-    navy: "bg-[#e8eef7] text-[#1e3a6e]",
+    blue: "bg-info-soft text-info",
+    amber: "bg-warning-soft text-warning",
+    green: "bg-success-soft text-success",
+    red: "bg-danger-soft text-danger",
+    navy: "bg-primary-soft text-primary",
   };
   return (
     <Card className="h-full min-h-32 p-5">
@@ -368,7 +368,7 @@ export function TimelineItem({ label, time, note, done, active }: {
   return (
     <div className="flex gap-4 relative">
       <div className="flex flex-col items-center">
-        <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border-2 z-10 ${done ? "bg-emerald-500 border-emerald-500" : active ? "bg-[#1e3a6e] border-[#1e3a6e]" : "bg-white border-slate-300"}`}>
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border-2 z-10 ${done ? "bg-success border-success" : active ? "bg-primary border-primary" : "bg-white border-slate-300"}`}>
           {done ? (
             <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m20 6-11 11-5-5"/></svg>
           ) : active ? (
@@ -379,7 +379,7 @@ export function TimelineItem({ label, time, note, done, active }: {
         </div>
       </div>
       <div className="pb-6">
-        <p className={`font-medium text-sm ${done ? "text-slate-600" : active ? "text-[#1e3a6e]" : "text-slate-400"}`}>{label}</p>
+        <p className={`font-medium text-sm ${done ? "text-slate-600" : active ? "text-primary" : "text-slate-400"}`}>{label}</p>
         {time && <p className="text-xs text-slate-400 mt-0.5">{time}</p>}
         {note && <p className="text-xs text-slate-500 mt-1 bg-slate-50 rounded px-2 py-1">{note}</p>}
       </div>

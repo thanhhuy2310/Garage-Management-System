@@ -28,13 +28,13 @@ function RepairTimeline({ status }: { status: string }) {
           <div className="flex flex-col items-center gap-1 flex-shrink-0">
             <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 text-xs font-bold ${
               i < doneIdx ? "bg-emerald-500 border-emerald-500 text-white" :
-              i === doneIdx ? "bg-[#1e3a6e] border-[#1e3a6e] text-white" :
+              i === doneIdx ? "bg-primary border-primary text-primary-foreground" :
               "bg-white border-slate-300 text-slate-400"
             }`}>
               {i < doneIdx ? "✓" : i + 1}
             </div>
-            <p className={`text-[10px] font-medium text-center leading-tight ${i <= doneIdx ? "text-slate-700" : "text-slate-400"}`}>{s.label}</p>
-            {s.time && i < doneIdx + 1 && <p className="text-[9px] text-slate-400 font-mono">{s.time}</p>}
+            <p className={`text-center text-xs font-medium leading-tight ${i <= doneIdx ? "text-slate-700" : "text-slate-400"}`}>{s.label}</p>
+            {s.time && i < doneIdx + 1 && <p className="mono text-xs text-slate-400">{s.time}</p>}
           </div>
           {i < steps.length - 1 && (
             <div className={`flex-1 h-0.5 mx-1 mb-5 ${i < doneIdx ? "bg-emerald-400" : "bg-slate-200"}`} />
@@ -58,7 +58,7 @@ export default function RepairOrders() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="page-toolbar">
         <SearchBox value={search} onChange={setSearch} placeholder="Tìm mã phiếu, biển số, khách hàng..." />
         <Button icon={Icons.plus} onClick={() => setShowCreate(true)}>Tạo phiếu mới</Button>
       </div>
@@ -82,7 +82,7 @@ export default function RepairOrders() {
                 </div>
                 <div className="flex items-center justify-between mt-3">
                   <span className="text-xs text-slate-500">{r.technician}</span>
-                  <span className="text-sm font-bold text-[#1e3a6e]">{formatCurrency(total)}</span>
+                  <span className="text-sm font-bold text-primary">{formatCurrency(total)}</span>
                 </div>
               </button>
             );
@@ -92,7 +92,7 @@ export default function RepairOrders() {
         {/* Detail */}
         <div className="xl:col-span-2">
           {selectedOrder ? (
-            <Card className="p-6">
+            <Card className="p-5">
               {/* Header */}
               <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
@@ -177,7 +177,7 @@ export default function RepairOrders() {
 
               {/* Total */}
               <div className="flex justify-end">
-                <div className="bg-[#1e3a6e] text-white px-6 py-3 rounded-xl">
+                <div className="rounded-lg bg-primary px-6 py-3 text-primary-foreground">
                   <span className="text-sm opacity-80">Tổng cộng</span>
                   <p className="text-xl font-bold">
                     {formatCurrency(selectedOrder.items.reduce((s, i) => s + i.qty * i.price, 0))}

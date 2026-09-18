@@ -22,6 +22,9 @@ const Settings = lazy(() => import("./pages/Settings"));
 const TechnicianView = lazy(() => import("./pages/TechnicianView"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 const MobileApp = lazy(() => import("./pages/MobileApp"));
+const PublicHome = lazy(() => import("./pages/PublicHome"));
+const CustomerPortal = lazy(() => import("./pages/customer/CustomerPortal"));
+import type { PublicPageKey } from "./components/PublicHeader";
 
 export type Page =
   | "dashboard" | "appointments" | "reception" | "repair" | "quotation"
@@ -70,6 +73,14 @@ function getPageFromHash(): Page | null {
   return PAGE_KEYS.has(key) ? key : null;
 }
 
+const PUBLIC_KEYS = new Set<PublicPageKey>(["home", "about", "services", "parts", "contact"]);
+
+function getPublicPageFromHash(): PublicPageKey | null {
+  const key = window.location.hash.replace(/^#\/?/, "");
+  if (key === "") return "home";
+  return PUBLIC_KEYS.has(key as PublicPageKey) ? (key as PublicPageKey) : null;
+}
+
 function PageContent({ page }: { page: Page }) {
   switch (page) {
     case "dashboard": return <Dashboard />;
@@ -109,6 +120,7 @@ export default function App() {
   const [showMobile, setShowMobile] = useState(false);
   const [showRolePicker, setShowRolePicker] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [publicPage, setPublicPage] = useState<PublicPageKey | null>(() => getPublicPageFromHash());
 
   const allowedPages = ROLE_NAV[role];
 
@@ -122,6 +134,12 @@ export default function App() {
     window.addEventListener("hashchange", syncRoute);
     return () => window.removeEventListener("hashchange", syncRoute);
   }, [allowedPages]);
+
+  useEffect(() => {
+    const syncPublicRoute = () => setPublicPage(getPublicPageFromHash());
+    window.addEventListener("hashchange", syncPublicRoute);
+    return () => window.removeEventListener("hashchange", syncPublicRoute);
+  }, []);
 
   const navigate = (nextPage: Page) => {
     if (!allowedPages.includes(nextPage) && nextPage !== "mobile") return;
@@ -137,6 +155,23 @@ export default function App() {
   };
 
   if (!loggedIn) {
+    if (publicPage) {
+      const goPublic = (next: PublicPageKey) => {
+        setPublicPage(next);
+        window.location.hash = next === "home" ? "/" : `/${next}`;
+      };
+      const goLogin = () => {
+        setPublicPage(null);
+        window.location.hash = "/login";
+      };
+      // Nút "Đặt lịch" hiện dẫn về đăng nhập khách hàng;
+      // workflow đặt lịch Customer Web đầy đủ nối ở phần Customer Web.
+      return (
+        <Suspense fallback={<PageLoading />}>
+          <PublicHome page={publicPage} onNavigate={goPublic} onLogin={goLogin} onBook={goLogin} />
+        </Suspense>
+      );
+    }
     return (
       <div className="relative">
         <Login
@@ -180,16 +215,9 @@ export default function App() {
 
   if (role === "customer") {
     return (
-      <div className="relative min-h-screen bg-[#f0f4f8]">
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="fixed right-4 top-4 z-50 rounded-lg bg-[#1e3a6e] px-3 py-2 text-xs font-semibold text-white shadow-lg hover:bg-[#162d56]"
-        >
-          Đăng xuất
-        </button>
-        <Suspense fallback={<PageLoading />}><MobileApp /></Suspense>
-      </div>
+      <Suspense fallback={<PageLoading />}>
+        <CustomerPortal onLogout={handleLogout} />
+      </Suspense>
     );
   }
 

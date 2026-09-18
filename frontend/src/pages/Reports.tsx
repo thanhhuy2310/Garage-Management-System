@@ -3,7 +3,7 @@ import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
-import { Card, StatCard, Button, Tabs, Icons } from "../components/ui";
+import { Card, StatCard, Button, Tabs, Icons, TableContainer } from "../components/ui";
 import { chartMonthly, chartServices, formatCurrency } from "../data";
 
 const PIE_COLORS = ["#1e3a6e", "#3b82f6", "#f59e0b", "#10b981", "#f97316", "#8b5cf6"];
@@ -26,7 +26,7 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       {/* Toolbar */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="page-toolbar">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <Tabs tabs={[{ key: "week", label: "Tuần" }, { key: "month", label: "Tháng" }, { key: "quarter", label: "Quý" }, { key: "year", label: "Năm" }]}
             active={period} onChange={setPeriod} />
@@ -113,7 +113,7 @@ export default function Reports() {
 
         <Card className="p-5">
           <h3 className="mb-4 text-base font-semibold text-slate-900">Hiệu suất kỹ thuật viên</h3>
-          <div className="overflow-x-auto">
+          <TableContainer>
             <table className="w-full data-table">
             <thead>
               <tr>
@@ -129,7 +129,7 @@ export default function Reports() {
                 <tr key={i}>
                   <td>
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-[#e8eef7] flex items-center justify-center text-[#1e3a6e] text-xs font-bold">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-soft text-xs font-bold text-primary">
                         {t.name.charAt(0)}
                       </div>
                       <span className="font-medium text-slate-700 text-sm">{t.name}</span>
@@ -145,7 +145,7 @@ export default function Reports() {
               ))}
             </tbody>
             </table>
-          </div>
+          </TableContainer>
         </Card>
       </div>
     </div>

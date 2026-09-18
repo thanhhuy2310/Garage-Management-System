@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge, Button, Card, Icons, Input, Modal, SearchBox, Select } from "../components/ui";
+import { Badge, Button, Card, Icons, Input, Modal, SearchBox, Select, TableContainer } from "../components/ui";
 import { khachHang, mockRepairOrders, xe } from "../mock/data";
 
 const customerName = (customerId: string) =>
@@ -22,14 +22,15 @@ export default function Vehicles() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="page-toolbar">
         <SearchBox value={search} onChange={setSearch} placeholder="Biển số, chủ xe, hãng xe..." />
         <Button icon={Icons.plus} onClick={() => setShowAdd(true)}>Thêm xe</Button>
       </div>
 
       <div className={`grid gap-4 ${selected ? "xl:grid-cols-3" : "grid-cols-1"}`}>
         <div className={selected ? "xl:col-span-2" : ""}>
-          <Card className="overflow-x-auto">
+          <Card>
+            <TableContainer>
             <table className="data-table w-full min-w-[760px]">
               <thead>
                 <tr>
@@ -48,10 +49,10 @@ export default function Vehicles() {
                   <tr
                     key={vehicle.MaXe}
                     onClick={() => setSelected(vehicle.MaXe === selected ? null : vehicle.MaXe)}
-                    className={`cursor-pointer ${selected === vehicle.MaXe ? "bg-blue-50" : ""}`}
+                    className={`cursor-pointer ${selected === vehicle.MaXe ? "bg-info-soft" : ""}`}
                   >
                     <td><span className="mono text-xs text-slate-400">{vehicle.MaXe}</span></td>
-                    <td><span className="mono font-bold text-[#1e3a6e]">{vehicle.BienSo}</span></td>
+                    <td><span className="mono font-bold text-primary">{vehicle.BienSo}</span></td>
                     <td className="font-medium text-slate-800">{customerName(vehicle.MaKhachHang)}</td>
                     <td className="text-slate-600">{vehicle.HangXe || "—"}</td>
                     <td className="text-slate-600">{vehicle.DongXe || "—"}</td>
@@ -67,16 +68,17 @@ export default function Vehicles() {
                 ))}
               </tbody>
             </table>
+            </TableContainer>
             {filtered.length === 0 && <p className="py-10 text-center text-sm text-slate-400">Không tìm thấy xe phù hợp.</p>}
           </Card>
         </div>
 
         {detail && (
-          <div className="space-y-4">
+          <div className="detail-panel space-y-4">
             <Card className="p-5">
               <div className="mb-4 flex items-start justify-between">
                 <div>
-                  <p className="mono text-2xl font-black text-[#1e3a6e]">{detail.BienSo}</p>
+                  <p className="mono text-2xl font-bold text-primary">{detail.BienSo}</p>
                   <p className="font-medium text-slate-600">{detail.HangXe} {detail.DongXe} {detail.NamSanXuat}</p>
                   <p className="mono mt-1 text-xs text-slate-400">{detail.MaXe}</p>
                 </div>
