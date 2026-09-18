@@ -61,15 +61,79 @@ export const mockVehicles = xe.map((vehicle) => ({
   km: vehicle.SoKm ?? 0,
 }));
 
-export const mockAppointments = [
-  { id: "LH001", customer: "Nguyễn Văn An", customerId: "KH001", vehicle: "51G-123.45", service: "Bảo dưỡng định kỳ 45.000 km", date: "2024-09-17", time: "08:00", status: "confirmed", note: "Thay dầu, lọc dầu, kiểm tra tổng quát" },
-  { id: "LH002", customer: "Trần Thị Bình", customerId: "KH002", vehicle: "51B-789.01", service: "Sửa chữa phanh", date: "2024-09-17", time: "09:30", status: "arrived", note: "Tiếng kêu lạ khi đạp phanh" },
-  { id: "LH003", customer: "Lê Minh Cường", customerId: "KH003", vehicle: "51C-234.56", service: "Điều hòa không mát", date: "2024-09-17", time: "14:00", status: "pending", note: "" },
-  { id: "LH004", customer: "Phạm Thị Dung", customerId: "KH004", vehicle: "51D-567.89", service: "Kiểm tra động cơ", date: "2024-09-18", time: "08:30", status: "confirmed", note: "Xe bị rung khi tăng tốc" },
-  { id: "LH005", customer: "Hoàng Văn Em", customerId: "KH005", vehicle: "51E-890.12", service: "Bảo dưỡng định kỳ", date: "2024-09-18", time: "10:00", status: "pending", note: "" },
-  { id: "LH006", customer: "Vũ Thị Phương", customerId: "KH006", vehicle: "51F-345.67", service: "Thay lốp xe", date: "2024-09-19", time: "08:00", status: "pending", note: "Lốp mòn, cần thay 2 lốp trước" },
-  { id: "LH007", customer: "Đặng Văn Giang", customerId: "KH007", vehicle: "51G-456.78", service: "Sơn xe, chỉnh form", date: "2024-09-20", time: "08:00", status: "cancelled", note: "Khách hủy do bận công việc" },
+export interface DichVu {
+  MaDichVu: string;
+  TenDichVu: string;
+  LoaiDichVu: string | null;
+  DonGia: number;
+  MoTa: string | null;
+}
+
+export interface LichHen {
+  MaLichHen: string;
+  MaKhachHang: string;
+  MaXe: string;
+  MaDichVu: string | null;
+  NgayHen: string;
+  GioHen: string;
+  NoiDung: string | null;
+  TrangThai: AppointmentStatus;
+}
+
+export interface PhieuTiepNhan {
+  MaTiepNhan: string;
+  MaXe: string;
+  NgayTiepNhan: string;
+  TinhTrangBanDau: string | null;
+  YeuCauKhachHang: string | null;
+  GhiChu: string | null;
+}
+
+export const dichVu: DichVu[] = [
+  { MaDichVu: "DV001", TenDichVu: "Bảo dưỡng định kỳ 45.000 km", LoaiDichVu: "Bảo dưỡng", DonGia: 350000, MoTa: "Kiểm tra và bảo dưỡng định kỳ" },
+  { MaDichVu: "DV002", TenDichVu: "Sửa chữa phanh", LoaiDichVu: "Sửa chữa", DonGia: 200000, MoTa: "Kiểm tra hệ thống phanh" },
+  { MaDichVu: "DV003", TenDichVu: "Điều hòa không mát", LoaiDichVu: "Điện - điều hòa", DonGia: 250000, MoTa: "Kiểm tra hệ thống điều hòa" },
+  { MaDichVu: "DV004", TenDichVu: "Kiểm tra động cơ", LoaiDichVu: "Động cơ", DonGia: 180000, MoTa: "Chẩn đoán động cơ" },
+  { MaDichVu: "DV005", TenDichVu: "Bảo dưỡng định kỳ", LoaiDichVu: "Bảo dưỡng", DonGia: 250000, MoTa: "Bảo dưỡng tổng quát" },
+  { MaDichVu: "DV006", TenDichVu: "Thay lốp xe", LoaiDichVu: "Lốp", DonGia: 120000, MoTa: "Tháo lắp và cân bằng lốp" },
+  { MaDichVu: "DV007", TenDichVu: "Sơn xe, chỉnh form", LoaiDichVu: "Đồng sơn", DonGia: 1500000, MoTa: "Sơn và chỉnh form thân vỏ" },
 ];
+
+export const lichHen: LichHen[] = [
+  { MaLichHen: "LH001", MaKhachHang: "KH001", MaXe: "XE001", MaDichVu: "DV001", NgayHen: "2024-09-17", GioHen: "08:00", TrangThai: "confirmed", NoiDung: "Thay dầu, lọc dầu, kiểm tra tổng quát" },
+  { MaLichHen: "LH002", MaKhachHang: "KH002", MaXe: "XE003", MaDichVu: "DV002", NgayHen: "2024-09-17", GioHen: "09:30", TrangThai: "arrived", NoiDung: "Tiếng kêu lạ khi đạp phanh" },
+  { MaLichHen: "LH003", MaKhachHang: "KH003", MaXe: "XE004", MaDichVu: "DV003", NgayHen: "2024-09-17", GioHen: "14:00", TrangThai: "pending", NoiDung: null },
+  { MaLichHen: "LH004", MaKhachHang: "KH004", MaXe: "XE005", MaDichVu: "DV004", NgayHen: "2024-09-18", GioHen: "08:30", TrangThai: "confirmed", NoiDung: "Xe bị rung khi tăng tốc" },
+  { MaLichHen: "LH005", MaKhachHang: "KH005", MaXe: "XE006", MaDichVu: "DV005", NgayHen: "2024-09-18", GioHen: "10:00", TrangThai: "pending", NoiDung: null },
+  { MaLichHen: "LH006", MaKhachHang: "KH006", MaXe: "XE007", MaDichVu: "DV006", NgayHen: "2024-09-19", GioHen: "08:00", TrangThai: "pending", NoiDung: "Lốp mòn, cần thay 2 lốp trước" },
+  { MaLichHen: "LH007", MaKhachHang: "KH007", MaXe: "XE008", MaDichVu: "DV007", NgayHen: "2024-09-20", GioHen: "08:00", TrangThai: "cancelled", NoiDung: "Khách hủy do bận công việc" },
+];
+
+export const phieuTiepNhan: PhieuTiepNhan[] = [
+  { MaTiepNhan: "TN001", MaXe: "XE001", NgayTiepNhan: "2024-09-17T08:05:00", TinhTrangBanDau: "Ngoại thất xước nhẹ; các hệ thống chính hoạt động bình thường", YeuCauKhachHang: "Bảo dưỡng định kỳ, thay dầu, kiểm tra tổng quát", GhiChu: null },
+  { MaTiepNhan: "TN002", MaXe: "XE003", NgayTiepNhan: "2024-09-17T09:35:00", TinhTrangBanDau: "Có tiếng kêu khi đạp phanh", YeuCauKhachHang: "Kiểm tra và sửa chữa hệ thống phanh", GhiChu: null },
+  { MaTiepNhan: "TN003", MaXe: "XE005", NgayTiepNhan: "2024-09-14T08:15:00", TinhTrangBanDau: "Xe rung khi tăng tốc", YeuCauKhachHang: "Kiểm tra động cơ", GhiChu: null },
+  { MaTiepNhan: "TN004", MaXe: "XE006", NgayTiepNhan: "2024-09-17T10:05:00", TinhTrangBanDau: "Chưa phát hiện bất thường ngoại thất", YeuCauKhachHang: "Bảo dưỡng định kỳ", GhiChu: "Mới tiếp nhận" },
+];
+
+export const mockAppointments = lichHen.map((appointment) => {
+  const customer = khachHang.find((item) => item.MaKhachHang === appointment.MaKhachHang);
+  const vehicle = xe.find((item) => item.MaXe === appointment.MaXe);
+  const service = dichVu.find((item) => item.MaDichVu === appointment.MaDichVu);
+  return {
+    id: appointment.MaLichHen,
+    customer: customer?.HoTen ?? "Không xác định",
+    customerId: appointment.MaKhachHang,
+    vehicle: vehicle?.BienSo ?? "Không xác định",
+    vehicleId: appointment.MaXe,
+    service: service?.TenDichVu ?? "Chưa chọn dịch vụ",
+    serviceId: appointment.MaDichVu,
+    date: appointment.NgayHen,
+    time: appointment.GioHen,
+    status: appointment.TrangThai,
+    note: appointment.NoiDung ?? "",
+  };
+});
 
 export const mockRepairOrders = [
   {

@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { Card, Button, Input, Select, Badge, Icons, TimelineItem } from "../components/ui";
-import { mockCustomers, mockVehicles, mockAppointments } from "../data";
+import { dichVu, khachHang, lichHen, phieuTiepNhan, xe } from "../mock/data";
 
 const STEPS = ["Thông tin khách", "Thông tin xe", "Lịch hẹn", "Tình trạng xe", "Phiếu tiếp nhận"];
+const receptionRecord = phieuTiepNhan[0];
+const selectedVehicle = xe.find((vehicle) => vehicle.MaXe === receptionRecord.MaXe)!;
+const selectedCustomer = khachHang.find((customer) => customer.MaKhachHang === selectedVehicle.MaKhachHang)!;
+const selectedAppointment = lichHen.find((appointment) => appointment.MaXe === selectedVehicle.MaXe)!;
+const selectedService = dichVu.find((service) => service.MaDichVu === selectedAppointment.MaDichVu)!;
 
 export default function Reception() {
   const [step, setStep] = useState(0);
@@ -18,8 +23,8 @@ export default function Reception() {
             </svg>
           </div>
           <h2 className="text-xl font-bold text-slate-800 mb-2">Tiếp nhận xe thành công!</h2>
-          <p className="text-slate-500 mb-1">Phiếu tiếp nhận: <strong className="text-[#1e3a6e] mono">PTN-2024-0017</strong></p>
-          <p className="text-slate-500 mb-6">Xe <strong>51G-123.45</strong> của khách hàng <strong>Nguyễn Văn An</strong> đã được tiếp nhận.</p>
+          <p className="text-slate-500 mb-1">Phiếu tiếp nhận: <strong className="text-[#1e3a6e] mono">{receptionRecord.MaTiepNhan}</strong></p>
+          <p className="text-slate-500 mb-6">Xe <strong>{selectedVehicle.BienSo}</strong> của khách hàng <strong>{selectedCustomer.HoTen}</strong> đã được tiếp nhận.</p>
           <div className="flex gap-3 justify-center">
             <Button variant="outline" icon={Icons.printer}>In phiếu tiếp nhận</Button>
             <Button onClick={() => setSubmitted(false)}>Tiếp nhận xe khác</Button>
@@ -58,18 +63,17 @@ export default function Reception() {
               <div className="space-y-4">
                 <Select label="Khách hàng *" options={[
                   { value: "", label: "-- Tìm hoặc chọn khách hàng --" },
-                  ...mockCustomers.map(c => ({ value: c.id, label: `${c.name} – ${c.phone}` })),
+                  ...khachHang.map(customer => ({ value: customer.MaKhachHang, label: `${customer.HoTen} – ${customer.SoDienThoai}` })),
                 ]} />
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white font-bold">N</div>
                     <div>
-                      <p className="font-semibold text-slate-800">Nguyễn Văn An</p>
-                      <p className="text-xs text-slate-500 mono">KH001 · 0901234567</p>
+                      <p className="font-semibold text-slate-800">{selectedCustomer.HoTen}</p>
+                      <p className="text-xs text-slate-500 mono">{selectedCustomer.MaKhachHang} · {selectedCustomer.SoDienThoai}</p>
                     </div>
-                    <span className="ml-auto text-xs text-blue-700 bg-blue-100 px-2 py-1 rounded-full font-medium">Khách quen</span>
                   </div>
-                  <p className="text-xs text-slate-500">123 Lê Lợi, Q.1, TP.HCM · 2 xe đăng ký · Lần cuối: 15/08/2024</p>
+                  <p className="text-xs text-slate-500">{selectedCustomer.DiaChi} · {xe.filter(vehicle => vehicle.MaKhachHang === selectedCustomer.MaKhachHang).length} xe đăng ký</p>
                 </div>
                 <p className="text-xs text-slate-400">Chưa tìm thấy? <button className="text-blue-600 underline">Thêm khách hàng mới</button></p>
               </div>
@@ -82,17 +86,19 @@ export default function Reception() {
               <div className="space-y-4">
                 <Select label="Chọn xe *" options={[
                   { value: "", label: "-- Chọn xe --" },
-                  { value: "XE001", label: "51G-123.45 – Toyota Camry 2020" },
-                  { value: "XE002", label: "51A-456.78 – Honda CR-V 2019" },
+                  ...xe.filter(vehicle => vehicle.MaKhachHang === selectedCustomer.MaKhachHang).map(vehicle => ({
+                    value: vehicle.MaXe,
+                    label: `${vehicle.BienSo} – ${vehicle.HangXe} ${vehicle.DongXe} ${vehicle.NamSanXuat}`,
+                  })),
                 ]} />
                 <div className="p-4 bg-slate-50 rounded-xl border border-[#dde3ec]">
                   <div className="grid grid-cols-3 gap-3 text-sm">
-                    <div><p className="text-xs text-slate-400 mb-1">Biển số</p><p className="font-mono font-bold text-[#1e3a6e]">51G-123.45</p></div>
-                    <div><p className="text-xs text-slate-400 mb-1">Hãng xe</p><p className="font-medium">Toyota Camry</p></div>
-                    <div><p className="text-xs text-slate-400 mb-1">Năm sản xuất</p><p className="font-medium">2020</p></div>
-                    <div><p className="text-xs text-slate-400 mb-1">Màu sắc</p><p className="font-medium">Đen</p></div>
-                    <div><p className="text-xs text-slate-400 mb-1">Bảo dưỡng cuối</p><p className="font-medium">15/08/2024</p></div>
-                    <div><p className="text-xs text-slate-400 mb-1">Bảo dưỡng tiếp</p><p className="font-medium text-amber-600">15/11/2024</p></div>
+                    <div><p className="text-xs text-slate-400 mb-1">Biển số</p><p className="font-mono font-bold text-[#1e3a6e]">{selectedVehicle.BienSo}</p></div>
+                    <div><p className="text-xs text-slate-400 mb-1">Hãng / dòng xe</p><p className="font-medium">{selectedVehicle.HangXe} {selectedVehicle.DongXe}</p></div>
+                    <div><p className="text-xs text-slate-400 mb-1">Năm sản xuất</p><p className="font-medium">{selectedVehicle.NamSanXuat}</p></div>
+                    <div><p className="text-xs text-slate-400 mb-1">Số km đã lưu</p><p className="font-medium">{selectedVehicle.SoKm?.toLocaleString("vi-VN")} km</p></div>
+                    <div><p className="text-xs text-slate-400 mb-1">Mã xe</p><p className="font-medium mono">{selectedVehicle.MaXe}</p></div>
+                    <div><p className="text-xs text-slate-400 mb-1">Mã khách hàng</p><p className="font-medium mono">{selectedVehicle.MaKhachHang}</p></div>
                   </div>
                 </div>
                 <Input label="Số km hiện tại *" placeholder="45200" type="number" />
@@ -106,15 +112,15 @@ export default function Reception() {
               <div className="space-y-3">
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-slate-800">LH001 – Bảo dưỡng định kỳ 45.000 km</p>
-                    <p className="text-xs text-slate-500 mt-1">17/09/2024 lúc 08:00 · Trạng thái: Đã xác nhận</p>
+                    <p className="font-semibold text-slate-800">{selectedAppointment.MaLichHen} – {selectedService.TenDichVu}</p>
+                    <p className="text-xs text-slate-500 mt-1">{selectedAppointment.NgayHen.split("-").reverse().join("/")} lúc {selectedAppointment.GioHen} · Trạng thái: Đã xác nhận</p>
                   </div>
                   <Badge variant="confirmed" />
                 </div>
                 <p className="text-xs text-slate-400">Không có lịch hẹn? <button className="text-blue-600 underline">Nhập yêu cầu trực tiếp</button></p>
                 <div>
                   <label className="text-xs font-medium text-slate-600 block mb-1">Yêu cầu của khách hàng</label>
-                  <textarea className="w-full border border-[#dde3ec] rounded-lg text-sm px-3 py-2 h-20 resize-none focus:border-[#3b6fd4] focus:outline-none" defaultValue="Bảo dưỡng định kỳ, thay dầu, kiểm tra tổng quát" />
+                  <textarea className="w-full border border-[#dde3ec] rounded-lg text-sm px-3 py-2 h-20 resize-none focus:border-[#3b6fd4] focus:outline-none" defaultValue={receptionRecord.YeuCauKhachHang ?? ""} />
                 </div>
               </div>
             </Card>
@@ -149,19 +155,15 @@ export default function Reception() {
             <Card className="p-6">
               <h3 className="font-semibold text-slate-800 mb-4">Xác nhận phiếu tiếp nhận</h3>
               <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Khách hàng</p><p className="font-semibold">Nguyễn Văn An</p></div>
-                <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Biển số xe</p><p className="font-mono font-bold text-[#1e3a6e]">51G-123.45</p></div>
-                <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Số km</p><p className="font-semibold">45,200 km</p></div>
-                <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Thời gian tiếp nhận</p><p className="font-semibold">08:05 – 17/09/2024</p></div>
+                <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Khách hàng</p><p className="font-semibold">{selectedCustomer.HoTen}</p></div>
+                <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Biển số xe</p><p className="font-mono font-bold text-[#1e3a6e]">{selectedVehicle.BienSo}</p></div>
+                <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Số km</p><p className="font-semibold">{selectedVehicle.SoKm?.toLocaleString("vi-VN")} km</p></div>
+                <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Thời gian tiếp nhận</p><p className="font-semibold">{new Date(receptionRecord.NgayTiepNhan).toLocaleString("vi-VN")}</p></div>
               </div>
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg mb-4">
-                <p className="text-xs font-medium text-amber-800">Yêu cầu khách: Bảo dưỡng định kỳ, thay dầu, kiểm tra tổng quát</p>
+                <p className="text-xs font-medium text-amber-800">Yêu cầu khách: {receptionRecord.YeuCauKhachHang}</p>
               </div>
-              <Select label="Phân công kỹ thuật viên kiểm tra" options={[
-                { value: "NV002", label: "Trần Văn Khoa" },
-                { value: "NV003", label: "Nguyễn Thành Long" },
-                { value: "NV004", label: "Lê Quang Hưng" },
-              ]} />
+              <Input label="Ghi chú" defaultValue={receptionRecord.GhiChu ?? ""} placeholder="Ghi chú cho phiếu tiếp nhận" />
             </Card>
           )}
 
@@ -181,24 +183,24 @@ export default function Reception() {
           <div className="space-y-3 text-sm">
             <div>
               <p className="text-xs text-slate-400">Khách hàng</p>
-              <p className="font-semibold text-slate-800">{step >= 0 ? "Nguyễn Văn An" : "—"}</p>
+              <p className="font-semibold text-slate-800">{step >= 0 ? selectedCustomer.HoTen : "—"}</p>
             </div>
             <div>
               <p className="text-xs text-slate-400">Xe</p>
-              <p className="font-mono font-bold text-[#1e3a6e]">{step >= 1 ? "51G-123.45" : "—"}</p>
-              <p className="text-xs text-slate-500">{step >= 1 ? "Toyota Camry 2020" : ""}</p>
+              <p className="font-mono font-bold text-[#1e3a6e]">{step >= 1 ? selectedVehicle.BienSo : "—"}</p>
+              <p className="text-xs text-slate-500">{step >= 1 ? `${selectedVehicle.HangXe} ${selectedVehicle.DongXe} ${selectedVehicle.NamSanXuat}` : ""}</p>
             </div>
             <div>
               <p className="text-xs text-slate-400">Lịch hẹn</p>
-              <p className="font-semibold">{step >= 2 ? "LH001" : "—"}</p>
+              <p className="font-semibold">{step >= 2 ? selectedAppointment.MaLichHen : "—"}</p>
             </div>
             <div>
               <p className="text-xs text-slate-400">Yêu cầu</p>
-              <p className="text-slate-700 text-xs leading-relaxed">{step >= 2 ? "Bảo dưỡng định kỳ, thay dầu" : "—"}</p>
+              <p className="text-slate-700 text-xs leading-relaxed">{step >= 2 ? receptionRecord.YeuCauKhachHang : "—"}</p>
             </div>
             <div>
               <p className="text-xs text-slate-400">Số km</p>
-              <p className="font-semibold">{step >= 1 ? "45,200 km" : "—"}</p>
+              <p className="font-semibold">{step >= 1 ? `${selectedVehicle.SoKm?.toLocaleString("vi-VN")} km` : "—"}</p>
             </div>
           </div>
         </Card>

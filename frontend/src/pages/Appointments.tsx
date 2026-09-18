@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, Badge, Button, SearchBox, Tabs, Modal, Input, Select, Icons } from "../components/ui";
-import { mockAppointments } from "../data";
+import { dichVu, khachHang, mockAppointments, xe } from "../mock/data";
 
 const STATUS_TABS = [
   { key: "all", label: "Tất cả" },
@@ -35,6 +35,7 @@ export default function Appointments() {
   const [search, setSearch] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showConflictModal, setShowConflictModal] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
 
   const filtered = mockAppointments.filter(a => {
     const matchStatus = statusFilter === "all" || a.status === statusFilter;
@@ -151,17 +152,21 @@ export default function Appointments() {
       <Modal open={showAddModal} onClose={() => setShowAddModal(false)} title="Thêm lịch hẹn mới" width="max-w-2xl">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Select label="Khách hàng" options={[
+            <Select label="Khách hàng" value={selectedCustomerId} onChange={(event) => setSelectedCustomerId(event.target.value)} options={[
               { value: "", label: "-- Chọn khách hàng --" },
-              { value: "KH001", label: "Nguyễn Văn An" },
-              { value: "KH002", label: "Trần Thị Bình" },
+              ...khachHang.map((customer) => ({ value: customer.MaKhachHang, label: customer.HoTen })),
             ]} />
             <Select label="Xe" options={[
               { value: "", label: "-- Chọn xe --" },
-              { value: "XE001", label: "51G-123.45 (Toyota Camry)" },
+              ...xe
+                .filter((vehicle) => !selectedCustomerId || vehicle.MaKhachHang === selectedCustomerId)
+                .map((vehicle) => ({ value: vehicle.MaXe, label: `${vehicle.BienSo} (${vehicle.HangXe} ${vehicle.DongXe})` })),
             ]} />
           </div>
-          <Input label="Dịch vụ yêu cầu" placeholder="Ví dụ: Bảo dưỡng định kỳ 45.000 km" />
+          <Select label="Dịch vụ" options={[
+            { value: "", label: "-- Chọn dịch vụ --" },
+            ...dichVu.map((service) => ({ value: service.MaDichVu, label: service.TenDichVu })),
+          ]} />
           <div className="grid grid-cols-2 gap-4">
             <Input label="Ngày hẹn" type="date" />
             <Input label="Giờ hẹn" type="time" />
