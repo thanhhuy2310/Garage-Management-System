@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, Badge, Button, SearchBox, Pagination, Icons, Modal, Input } from "../components/ui";
-import { mockCustomers, mockVehicles, mockRepairOrders } from "../data";
+import { khachHang, xe, mockRepairOrders } from "../mock/data";
 
 export default function Customers() {
   const [search, setSearch] = useState("");
@@ -9,11 +9,12 @@ export default function Customers() {
   const [showAdd, setShowAdd] = useState(false);
   const PER = 8;
 
-  const filtered = mockCustomers.filter(c =>
-    !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.phone.includes(search)
+  const filtered = khachHang.filter(customer =>
+    !search || customer.HoTen.toLowerCase().includes(search.toLowerCase()) || customer.SoDienThoai.includes(search)
   );
   const paged = filtered.slice((page - 1) * PER, page * PER);
-  const detail = mockCustomers.find(c => c.id === selected);
+  const detail = khachHang.find(customer => customer.MaKhachHang === selected);
+  const detailVehicles = xe.filter(vehicle => vehicle.MaKhachHang === detail?.MaKhachHang);
 
   return (
     <div className="p-6 space-y-5">
@@ -42,23 +43,25 @@ export default function Customers() {
                 </tr>
               </thead>
               <tbody>
-                {paged.map(c => (
-                  <tr key={c.id} className={`cursor-pointer ${selected === c.id ? "bg-blue-50" : ""}`}
-                    onClick={() => setSelected(c.id === selected ? null : c.id)}>
-                    <td><span className="mono text-xs text-slate-400">{c.id}</span></td>
+                {paged.map(customer => {
+                  const vehicleCount = xe.filter(vehicle => vehicle.MaKhachHang === customer.MaKhachHang).length;
+                  return (
+                  <tr key={customer.MaKhachHang} className={`cursor-pointer ${selected === customer.MaKhachHang ? "bg-blue-50" : ""}`}
+                    onClick={() => setSelected(customer.MaKhachHang === selected ? null : customer.MaKhachHang)}>
+                    <td><span className="mono text-xs text-slate-400">{customer.MaKhachHang}</span></td>
                     <td>
                       <div className="flex items-center gap-2">
                         <div className="w-7 h-7 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                          {c.name.charAt(0)}
+                          {customer.HoTen.charAt(0)}
                         </div>
-                        <span className="font-medium text-slate-800">{c.name}</span>
+                        <span className="font-medium text-slate-800">{customer.HoTen}</span>
                       </div>
                     </td>
-                    <td><span className="mono text-sm">{c.phone}</span></td>
-                    <td className="text-slate-500">{c.email}</td>
-                    <td className="text-slate-500 max-w-[160px] truncate">{c.address}</td>
+                    <td><span className="mono text-sm">{customer.SoDienThoai}</span></td>
+                    <td className="text-slate-500">{customer.Email || "—"}</td>
+                    <td className="text-slate-500 max-w-[160px] truncate">{customer.DiaChi || "—"}</td>
                     <td className="text-center">
-                      <span className="inline-flex items-center justify-center w-6 h-6 bg-[#e8eef7] text-[#1e3a6e] text-xs font-bold rounded-full">{c.vehicles}</span>
+                      <span className="inline-flex items-center justify-center w-6 h-6 bg-[#e8eef7] text-[#1e3a6e] text-xs font-bold rounded-full">{vehicleCount}</span>
                     </td>
                     <td>
                       <div className="flex gap-1">
@@ -67,7 +70,7 @@ export default function Customers() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
             <div className="flex items-center justify-between px-4 py-3 border-t border-[#dde3ec]">
@@ -84,11 +87,11 @@ export default function Customers() {
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-                    {detail.name.charAt(0)}
+                    {detail.HoTen.charAt(0)}
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-800">{detail.name}</h3>
-                    <p className="text-xs text-slate-500 mono">{detail.id}</p>
+                    <h3 className="font-bold text-slate-800">{detail.HoTen}</h3>
+                    <p className="text-xs text-slate-500 mono">{detail.MaKhachHang}</p>
                   </div>
                 </div>
                 <button onClick={() => setSelected(null)} className="p-1 hover:bg-slate-100 rounded text-slate-400">✕</button>
@@ -96,33 +99,29 @@ export default function Customers() {
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-2 text-slate-600">
                   <span className="text-slate-400">{Icons.users}</span>
-                  <span className="mono">{detail.phone}</span>
+                  <span className="mono">{detail.SoDienThoai}</span>
                 </div>
                 <div className="flex items-center gap-2 text-slate-600">
                   <span className="text-slate-400">{Icons.send}</span>
-                  <span>{detail.email}</span>
+                  <span>{detail.Email || "Chưa cập nhật"}</span>
                 </div>
                 <div className="flex items-start gap-2 text-slate-600">
                   <span className="text-slate-400 mt-0.5">{Icons.info}</span>
-                  <span>{detail.address}</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-500">
-                  <span className="text-slate-400">{Icons.calendar}</span>
-                  <span>Khách từ {detail.joined.split("-").reverse().join("/")}</span>
+                  <span>{detail.DiaChi || "Chưa cập nhật"}</span>
                 </div>
               </div>
             </Card>
 
             {/* Vehicles */}
             <Card className="p-5">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Xe ({detail.vehicles})</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Xe ({detailVehicles.length})</p>
               <div className="space-y-2">
-                {mockVehicles.filter(v => v.ownerId === detail.id).map(v => (
-                  <div key={v.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                {detailVehicles.map(vehicle => (
+                  <div key={vehicle.MaXe} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
                     <span className="text-[#1e3a6e]">{Icons.car}</span>
                     <div>
-                      <p className="font-mono font-semibold text-sm text-[#1e3a6e]">{v.plate}</p>
-                      <p className="text-xs text-slate-500">{v.brand} {v.model} {v.year}</p>
+                      <p className="font-mono font-semibold text-sm text-[#1e3a6e]">{vehicle.BienSo}</p>
+                      <p className="text-xs text-slate-500">{vehicle.HangXe} {vehicle.DongXe} {vehicle.NamSanXuat}</p>
                     </div>
                   </div>
                 ))}
@@ -133,7 +132,7 @@ export default function Customers() {
             <Card className="p-5">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Lịch sử gần đây</p>
               <div className="space-y-2">
-                {mockRepairOrders.filter(r => r.customerId === detail.id).map(r => (
+                {mockRepairOrders.filter(r => r.customerId === detail.MaKhachHang).map(r => (
                   <div key={r.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                     <div>
                       <p className="mono text-xs text-slate-500">{r.id}</p>

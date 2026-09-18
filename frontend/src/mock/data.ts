@@ -3,25 +3,63 @@
 export const GARAGE_NAME = "Gara Ô Tô Thành Công";
 export const DEMO_TODAY = "2024-09-17";
 
-export const mockCustomers = [
-  { id: "KH001", name: "Nguyễn Văn An", phone: "0901234567", email: "nguyenvanan@gmail.com", address: "123 Lê Lợi, Q.1, TP.HCM", vehicles: 2, joined: "2022-03-15" },
-  { id: "KH002", name: "Trần Thị Bình", phone: "0912345678", email: "tranthib@gmail.com", address: "45 Nguyễn Huệ, Q.1, TP.HCM", vehicles: 1, joined: "2021-07-20" },
-  { id: "KH003", name: "Lê Minh Cường", phone: "0923456789", email: "leminhc@yahoo.com", address: "78 Điện Biên Phủ, Bình Thạnh", vehicles: 3, joined: "2020-11-05" },
-  { id: "KH004", name: "Phạm Thị Dung", phone: "0934567890", email: "phamthid@gmail.com", address: "12 Cách Mạng Tháng 8, Q.3", vehicles: 1, joined: "2023-01-10" },
-  { id: "KH005", name: "Hoàng Văn Em", phone: "0945678901", email: "hoangvane@gmail.com", address: "56 Hai Bà Trưng, Q.3", vehicles: 2, joined: "2022-08-22" },
-  { id: "KH006", name: "Vũ Thị Phương", phone: "0956789012", email: "vuthip@gmail.com", address: "34 Võ Văn Tần, Q.3", vehicles: 1, joined: "2021-04-14" },
-  { id: "KH007", name: "Đặng Văn Giang", phone: "0967890123", email: "dangvang@gmail.com", address: "90 Lý Thường Kiệt, Q.10", vehicles: 2, joined: "2023-05-30" },
+export interface KhachHang {
+  MaKhachHang: string;
+  HoTen: string;
+  SoDienThoai: string;
+  Email: string | null;
+  DiaChi: string | null;
+}
+
+export interface Xe {
+  MaXe: string;
+  MaKhachHang: string;
+  BienSo: string;
+  HangXe: string | null;
+  DongXe: string | null;
+  NamSanXuat: number | null;
+  SoKm: number | null;
+}
+
+export const khachHang: KhachHang[] = [
+  { MaKhachHang: "KH001", HoTen: "Nguyễn Văn An", SoDienThoai: "0901234567", Email: "nguyenvanan@gmail.com", DiaChi: "123 Lê Lợi, Q.1, TP.HCM" },
+  { MaKhachHang: "KH002", HoTen: "Trần Thị Bình", SoDienThoai: "0912345678", Email: "tranthib@gmail.com", DiaChi: "45 Nguyễn Huệ, Q.1, TP.HCM" },
+  { MaKhachHang: "KH003", HoTen: "Lê Minh Cường", SoDienThoai: "0923456789", Email: "leminhc@yahoo.com", DiaChi: "78 Điện Biên Phủ, Bình Thạnh" },
+  { MaKhachHang: "KH004", HoTen: "Phạm Thị Dung", SoDienThoai: "0934567890", Email: "phamthid@gmail.com", DiaChi: "12 Cách Mạng Tháng 8, Q.3" },
+  { MaKhachHang: "KH005", HoTen: "Hoàng Văn Em", SoDienThoai: "0945678901", Email: "hoangvane@gmail.com", DiaChi: "56 Hai Bà Trưng, Q.3" },
+  { MaKhachHang: "KH006", HoTen: "Vũ Thị Phương", SoDienThoai: "0956789012", Email: "vuthip@gmail.com", DiaChi: "34 Võ Văn Tần, Q.3" },
+  { MaKhachHang: "KH007", HoTen: "Đặng Văn Giang", SoDienThoai: "0967890123", Email: "dangvang@gmail.com", DiaChi: "90 Lý Thường Kiệt, Q.10" },
 ];
 
-export const mockVehicles = [
-  { id: "XE001", plate: "51G-123.45", owner: "Nguyễn Văn An", ownerId: "KH001", brand: "Toyota", model: "Camry", year: 2020, color: "Đen", vin: "JT2BF22K1W0098765", km: 45200, lastService: "2024-08-15", nextService: "2024-11-15" },
-  { id: "XE002", plate: "51A-456.78", owner: "Nguyễn Văn An", ownerId: "KH001", brand: "Honda", model: "CR-V", year: 2019, color: "Trắng", vin: "JHMCR21W1XC005432", km: 62100, lastService: "2024-07-20", nextService: "2024-10-20" },
-  { id: "XE003", plate: "51B-789.01", owner: "Trần Thị Bình", ownerId: "KH002", brand: "Kia", model: "Sorento", year: 2021, color: "Xám", vin: "KNDJN2A29B7654321", km: 38500, lastService: "2024-09-01", nextService: "2024-12-01" },
-  { id: "XE004", plate: "51C-234.56", owner: "Lê Minh Cường", ownerId: "KH003", brand: "Mazda", model: "CX-5", year: 2022, color: "Đỏ", vin: "JM3KFBDM0N0123456", km: 21800, lastService: "2024-09-10", nextService: "2025-03-10" },
-  { id: "XE005", plate: "51D-567.89", owner: "Phạm Thị Dung", ownerId: "KH004", brand: "Ford", model: "EcoSport", year: 2018, color: "Bạc", vin: "MAJ6P1CL2JC987654", km: 89700, lastService: "2024-06-15", nextService: "2024-09-15" },
-  { id: "XE006", plate: "51E-890.12", owner: "Hoàng Văn Em", ownerId: "KH005", brand: "Hyundai", model: "Tucson", year: 2021, color: "Xanh", vin: "KM8J3CA46MU456789", km: 33400, lastService: "2024-08-28", nextService: "2024-11-28" },
-  { id: "XE007", plate: "51F-345.67", owner: "Vũ Thị Phương", ownerId: "KH006", brand: "VinFast", model: "VF8", year: 2023, color: "Trắng", vin: "VS4XHVB1XP1234567", km: 12500, lastService: "2024-09-05", nextService: "2025-03-05" },
+export const xe: Xe[] = [
+  { MaXe: "XE001", MaKhachHang: "KH001", BienSo: "51G-123.45", HangXe: "Toyota", DongXe: "Camry", NamSanXuat: 2020, SoKm: 45200 },
+  { MaXe: "XE002", MaKhachHang: "KH001", BienSo: "51A-456.78", HangXe: "Honda", DongXe: "CR-V", NamSanXuat: 2019, SoKm: 62100 },
+  { MaXe: "XE003", MaKhachHang: "KH002", BienSo: "51B-789.01", HangXe: "Kia", DongXe: "Sorento", NamSanXuat: 2021, SoKm: 38500 },
+  { MaXe: "XE004", MaKhachHang: "KH003", BienSo: "51C-234.56", HangXe: "Mazda", DongXe: "CX-5", NamSanXuat: 2022, SoKm: 21800 },
+  { MaXe: "XE005", MaKhachHang: "KH004", BienSo: "51D-567.89", HangXe: "Ford", DongXe: "EcoSport", NamSanXuat: 2018, SoKm: 89700 },
+  { MaXe: "XE006", MaKhachHang: "KH005", BienSo: "51E-890.12", HangXe: "Hyundai", DongXe: "Tucson", NamSanXuat: 2021, SoKm: 33400 },
+  { MaXe: "XE007", MaKhachHang: "KH006", BienSo: "51F-345.67", HangXe: "VinFast", DongXe: "VF8", NamSanXuat: 2023, SoKm: 12500 },
+  { MaXe: "XE008", MaKhachHang: "KH007", BienSo: "51G-456.78", HangXe: "Mitsubishi", DongXe: "Xpander", NamSanXuat: 2020, SoKm: 48600 },
 ];
+
+// Compatibility views for screens that have not yet migrated to SQL field names.
+export const mockCustomers = khachHang.map((customer) => ({
+  id: customer.MaKhachHang,
+  name: customer.HoTen,
+  phone: customer.SoDienThoai,
+  email: customer.Email ?? "",
+  address: customer.DiaChi ?? "",
+}));
+
+export const mockVehicles = xe.map((vehicle) => ({
+  id: vehicle.MaXe,
+  ownerId: vehicle.MaKhachHang,
+  plate: vehicle.BienSo,
+  brand: vehicle.HangXe ?? "",
+  model: vehicle.DongXe ?? "",
+  year: vehicle.NamSanXuat,
+  km: vehicle.SoKm ?? 0,
+}));
 
 export const mockAppointments = [
   { id: "LH001", customer: "Nguyễn Văn An", customerId: "KH001", vehicle: "51G-123.45", service: "Bảo dưỡng định kỳ 45.000 km", date: "2024-09-17", time: "08:00", status: "confirmed", note: "Thay dầu, lọc dầu, kiểm tra tổng quát" },
