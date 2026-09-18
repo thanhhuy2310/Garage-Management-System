@@ -85,10 +85,10 @@ export default function Vehicles() {
                 <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết xe" className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="rounded-lg bg-slate-50 p-3"><p className="text-xs text-slate-400">Chủ xe</p><p className="font-semibold">{customerName(detail.MaKhachHang)}</p></div>
-                <div className="rounded-lg bg-slate-50 p-3"><p className="text-xs text-slate-400">Mã khách hàng</p><p className="mono font-semibold">{detail.MaKhachHang}</p></div>
-                <div className="rounded-lg bg-slate-50 p-3"><p className="text-xs text-slate-400">Số km</p><p className="mono font-semibold">{detail.SoKm?.toLocaleString("vi-VN") ?? "—"} km</p></div>
-                <div className="rounded-lg bg-slate-50 p-3"><p className="text-xs text-slate-400">Năm sản xuất</p><p className="font-semibold">{detail.NamSanXuat ?? "—"}</p></div>
+                <div className="rounded-lg bg-surface-subtle p-3"><p className="text-xs text-slate-400">Chủ xe</p><p className="font-semibold">{customerName(detail.MaKhachHang)}</p></div>
+                <div className="rounded-lg bg-surface-subtle p-3"><p className="text-xs text-slate-400">Mã khách hàng</p><p className="mono font-semibold">{detail.MaKhachHang}</p></div>
+                <div className="rounded-lg bg-surface-subtle p-3"><p className="text-xs text-slate-400">Số km</p><p className="mono font-semibold">{detail.SoKm?.toLocaleString("vi-VN") ?? "—"} km</p></div>
+                <div className="rounded-lg bg-surface-subtle p-3"><p className="text-xs text-slate-400">Năm sản xuất</p><p className="font-semibold">{detail.NamSanXuat ?? "—"}</p></div>
               </div>
             </Card>
 
@@ -96,7 +96,7 @@ export default function Vehicles() {
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Lịch sử sửa chữa</p>
               <div className="space-y-2">
                 {mockRepairOrders.filter((repair) => repair.vehicle === detail.BienSo).map((repair) => (
-                  <div key={repair.id} className="flex items-center justify-between rounded-lg bg-slate-50 p-3">
+                    <div key={repair.id} className="flex items-center justify-between rounded-lg bg-surface-subtle p-3">
                     <div><p className="mono text-xs text-slate-500">{repair.id}</p><p className="text-xs font-medium text-slate-700">{repair.created.split("-").reverse().join("/")}</p></div>
                     <Badge variant={repair.status as any} />
                   </div>
