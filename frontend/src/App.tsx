@@ -1,57 +1,41 @@
-import React, { useState } from "react";
-import Sidebar from "./components/Sidebar";
+import { lazy, Suspense, useEffect, useState } from "react";
 import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Appointments from "./pages/Appointments";
-import Reception from "./pages/Reception";
-import RepairOrders from "./pages/RepairOrders";
-import Quotation from "./pages/Quotation";
-import Customers from "./pages/Customers";
-import Vehicles from "./pages/Vehicles";
-import Services from "./pages/Services";
-import Inventory from "./pages/Inventory";
-import Invoice from "./pages/Invoice";
-import History from "./pages/History";
-import Notifications from "./pages/Notifications";
-import Reports from "./pages/Reports";
-import Staff from "./pages/Staff";
-import Settings from "./pages/Settings";
-import TechnicianView from "./pages/TechnicianView";
-import DesignSystem from "./pages/DesignSystem";
-import MobileApp from "./pages/MobileApp";
 
-type Page =
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Appointments = lazy(() => import("./pages/Appointments"));
+const Reception = lazy(() => import("./pages/Reception"));
+const RepairOrders = lazy(() => import("./pages/RepairOrders"));
+const Quotation = lazy(() => import("./pages/Quotation"));
+const Customers = lazy(() => import("./pages/Customers"));
+const Vehicles = lazy(() => import("./pages/Vehicles"));
+const Services = lazy(() => import("./pages/Services"));
+const Inventory = lazy(() => import("./pages/Inventory"));
+const Invoice = lazy(() => import("./pages/Invoice"));
+const History = lazy(() => import("./pages/History"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const Reports = lazy(() => import("./pages/Reports"));
+const Staff = lazy(() => import("./pages/Staff"));
+const Settings = lazy(() => import("./pages/Settings"));
+const TechnicianView = lazy(() => import("./pages/TechnicianView"));
+const DesignSystem = lazy(() => import("./pages/DesignSystem"));
+const MobileApp = lazy(() => import("./pages/MobileApp"));
+
+export type Page =
   | "dashboard" | "appointments" | "reception" | "repair" | "quotation"
   | "customers" | "vehicles" | "services" | "inventory" | "invoice"
   | "history" | "notifications" | "reports" | "staff" | "settings"
   | "technician" | "design-system" | "mobile";
 
-function PageContent({ page }: { page: Page }) {
-  switch (page) {
-    case "dashboard":    return <Dashboard />;
-    case "appointments": return <Appointments />;
-    case "reception":    return <Reception />;
-    case "repair":       return <RepairOrders />;
-    case "quotation":    return <Quotation />;
-    case "customers":    return <Customers />;
-    case "vehicles":     return <Vehicles />;
-    case "services":     return <Services />;
-    case "inventory":    return <Inventory />;
-    case "invoice":      return <Invoice />;
-    case "history":      return <History />;
-    case "notifications":return <Notifications />;
-    case "reports":      return <Reports />;
-    case "staff":        return <Staff />;
-    case "settings":     return <Settings />;
-    case "technician":   return <TechnicianView />;
-    case "design-system": return <DesignSystem />;
-    case "mobile":       return <MobileApp />;
-    default:             return <Dashboard />;
-  }
-}
-
 type Role = "manager" | "technician" | "receptionist" | "cashier" | "warehouse" | "admin";
+
+const PAGE_KEYS = new Set<Page>([
+  "dashboard", "appointments", "reception", "repair", "quotation",
+  "customers", "vehicles", "services", "inventory", "invoice",
+  "history", "notifications", "reports", "staff", "settings",
+  "technician", "design-system", "mobile",
+]);
 
 const ROLE_LABELS: Record<Role, string> = {
   admin: "Quản trị viên",
@@ -62,48 +46,110 @@ const ROLE_LABELS: Record<Role, string> = {
   cashier: "Thu ngân",
 };
 
-// Sidebar items each role can see
-const ROLE_NAV: Record<Role, string[]> = {
-  admin: ["dashboard","appointments","reception","repair","quotation","customers","vehicles","services","inventory","invoice","history","notifications","reports","staff","settings","design-system"],
-  manager: ["dashboard","appointments","reception","repair","quotation","customers","vehicles","services","inventory","invoice","history","notifications","reports","staff"],
-  receptionist: ["appointments","reception","repair","quotation","customers","vehicles","invoice","notifications"],
-  technician: ["technician","inventory","notifications"],
-  warehouse: ["inventory","notifications"],
-  cashier: ["invoice","history","notifications"],
+const ROLE_NAV: Record<Role, Page[]> = {
+  admin: ["dashboard", "appointments", "reception", "repair", "quotation", "customers", "vehicles", "services", "inventory", "invoice", "history", "notifications", "reports", "staff", "settings", "design-system"],
+  manager: ["dashboard", "appointments", "reception", "repair", "quotation", "customers", "vehicles", "services", "inventory", "invoice", "history", "notifications", "reports", "staff"],
+  receptionist: ["appointments", "reception", "repair", "quotation", "customers", "vehicles", "invoice", "notifications"],
+  technician: ["technician", "inventory", "notifications"],
+  warehouse: ["inventory", "notifications"],
+  cashier: ["invoice", "history", "notifications"],
 };
+
+function getPageFromHash(): Page | null {
+  const key = window.location.hash.replace(/^#\/?/, "") as Page;
+  return PAGE_KEYS.has(key) ? key : null;
+}
+
+function PageContent({ page }: { page: Page }) {
+  switch (page) {
+    case "dashboard": return <Dashboard />;
+    case "appointments": return <Appointments />;
+    case "reception": return <Reception />;
+    case "repair": return <RepairOrders />;
+    case "quotation": return <Quotation />;
+    case "customers": return <Customers />;
+    case "vehicles": return <Vehicles />;
+    case "services": return <Services />;
+    case "inventory": return <Inventory />;
+    case "invoice": return <Invoice />;
+    case "history": return <History />;
+    case "notifications": return <Notifications />;
+    case "reports": return <Reports />;
+    case "staff": return <Staff />;
+    case "settings": return <Settings />;
+    case "technician": return <TechnicianView />;
+    case "design-system": return <DesignSystem />;
+    case "mobile": return <MobileApp />;
+  }
+}
+
+function PageLoading() {
+  return (
+    <div className="flex min-h-[240px] items-center justify-center text-sm text-slate-500" role="status">
+      <span className="mr-3 h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-[#1e3a6e]" />
+      Đang tải nội dung...
+    </div>
+  );
+}
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [role, setRole] = useState<Role>("manager");
-  const [page, setPage] = useState<Page>("dashboard");
+  const [page, setPage] = useState<Page>(() => getPageFromHash() ?? "dashboard");
   const [showMobile, setShowMobile] = useState(false);
   const [showRolePicker, setShowRolePicker] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const allowedPages = ROLE_NAV[role];
+
+  useEffect(() => {
+    const syncRoute = () => {
+      const nextPage = getPageFromHash();
+      if (nextPage && (allowedPages.includes(nextPage) || nextPage === "mobile")) {
+        setPage(nextPage);
+      }
+    };
+    window.addEventListener("hashchange", syncRoute);
+    return () => window.removeEventListener("hashchange", syncRoute);
+  }, [allowedPages]);
+
+  const navigate = (nextPage: Page) => {
+    if (!allowedPages.includes(nextPage) && nextPage !== "mobile") return;
+    setPage(nextPage);
+    setSidebarOpen(false);
+    window.location.hash = `/${nextPage}`;
+  };
 
   const handleLogin = () => {
+    const landingPage = role === "technician" ? "technician" : allowedPages[0];
     setLoggedIn(true);
-    setPage(role === "technician" ? "technician" : "dashboard");
+    navigate(landingPage);
   };
 
   if (!loggedIn) {
     return (
       <div className="relative">
         <Login onLogin={handleLogin} />
-        {/* Demo role selector */}
         <div className="fixed bottom-6 right-6 z-50">
           {showRolePicker && (
-            <div className="mb-2 bg-white rounded-xl border border-[#dde3ec] shadow-xl p-3 min-w-[200px]">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 px-1">Đăng nhập với vai trò</p>
+            <div className="mb-2 min-w-[200px] rounded-xl border border-[#dde3ec] bg-white p-3 shadow-xl">
+              <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Đăng nhập với vai trò</p>
               {(Object.entries(ROLE_LABELS) as [Role, string][]).map(([key, label]) => (
-                <button key={key} onClick={() => { setRole(key); setShowRolePicker(false); }}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm hover:bg-slate-50 transition-all ${role === key ? "text-[#1e3a6e] font-semibold" : "text-slate-700"}`}>
+                <button
+                  key={key}
+                  onClick={() => { setRole(key); setShowRolePicker(false); }}
+                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-all hover:bg-slate-50 ${role === key ? "font-semibold text-[#1e3a6e]" : "text-slate-700"}`}
+                >
                   {label}
                   {role === key && <span className="text-[#1e3a6e]">✓</span>}
                 </button>
               ))}
             </div>
           )}
-          <button onClick={() => setShowRolePicker(p => !p)}
-            className="w-full px-4 py-2 bg-[#1e3a6e] text-white text-sm font-medium rounded-xl shadow-lg hover:bg-[#162d56] transition-all flex items-center gap-2">
+          <button
+            onClick={() => setShowRolePicker((previous) => !previous)}
+            className="flex w-full items-center gap-2 rounded-xl bg-[#1e3a6e] px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-[#162d56]"
+          >
             <span>Vai trò: {ROLE_LABELS[role]}</span>
             <span className="text-white/60">▼</span>
           </button>
@@ -115,48 +161,56 @@ export default function App() {
   if (showMobile) {
     return (
       <div className="min-h-screen bg-[#f0f4f8]">
-        <div className="fixed top-0 left-0 right-0 z-40 bg-[#1e3a6e] text-white flex items-center justify-between px-6 h-12">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 bg-amber-500 rounded-lg flex items-center justify-center">
+        <div className="fixed inset-x-0 top-0 z-40 flex h-12 items-center justify-between bg-[#1e3a6e] px-4 text-white sm:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-amber-500">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2"/>
-                <circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>
+                <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2" />
+                <circle cx="7.5" cy="17.5" r="2.5" /><circle cx="17.5" cy="17.5" r="2.5" />
               </svg>
             </div>
-            <span className="font-bold text-sm">Ứng dụng Khách Hàng – Mobile Preview</span>
-            <span className="text-xs text-white/50 bg-white/10 px-2 py-0.5 rounded-full">390×844</span>
+            <span className="truncate text-sm font-bold">Ứng dụng Khách hàng – Mobile Preview</span>
+            <span className="hidden rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/50 sm:inline">390×844</span>
           </div>
-          <button onClick={() => setShowMobile(false)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-white/15 hover:bg-white/25 rounded-lg text-sm font-medium transition-all">
-            ← Về giao diện quản lý
+          <button onClick={() => setShowMobile(false)} className="ml-3 flex-shrink-0 rounded-lg bg-white/15 px-3 py-1.5 text-sm font-medium transition-all hover:bg-white/25">
+            ← <span className="hidden sm:inline">Về giao diện quản lý</span>
           </button>
         </div>
         <div className="pt-12">
-          <MobileApp />
+          <Suspense fallback={<PageLoading />}><MobileApp /></Suspense>
         </div>
       </div>
     );
   }
 
-  const allowedPages = ROLE_NAV[role] ?? ROLE_NAV.manager;
-
-  const handleNavigate = (key: string) => {
-    if (allowedPages.includes(key) || key === "mobile") {
-      setPage(key as Page);
-    }
-  };
-
   return (
-    <div className="flex h-screen bg-[#f0f4f8] overflow-hidden">
-      <Sidebar active={page} onNavigate={handleNavigate} role={role} allowedPages={allowedPages} />
-
-      <div className="flex-1 flex flex-col overflow-hidden ml-[220px]">
-        <Header page={page} role={role} onMobileToggle={() => setShowMobile(true)} />
+    <div className="flex h-screen overflow-hidden bg-[#f0f4f8]">
+      <Sidebar
+        active={page}
+        onNavigate={(key) => navigate(key as Page)}
+        role={role}
+        allowedPages={allowedPages}
+        mobileOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+      {sidebarOpen && (
+        <button
+          aria-label="Đóng thanh điều hướng"
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-20 bg-slate-950/40 lg:hidden"
+        />
+      )}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden lg:ml-[220px]">
+        <Header
+          page={page}
+          role={role}
+          onMenuToggle={() => setSidebarOpen(true)}
+          onMobileToggle={() => setShowMobile(true)}
+        />
         <main className="flex-1 overflow-y-auto">
-          <PageContent page={page} />
+          <Suspense fallback={<PageLoading />}><PageContent page={page} /></Suspense>
         </main>
       </div>
     </div>
   );
 }
-
