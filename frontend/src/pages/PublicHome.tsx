@@ -1,4 +1,5 @@
 import PublicHeader, { type PublicPageKey } from "../components/PublicHeader";
+import PublicHero from "../components/PublicHero";
 
 const PAGE_NOTES: Record<PublicPageKey, { title: string; note: string }> = {
   home: { title: "Trang chủ", note: "Hero, dịch vụ nổi bật, quy trình và các section khác sẽ được hoàn thiện ở các phần tiếp theo." },
@@ -20,10 +21,16 @@ export default function PublicHome({ page, onNavigate, onLogin, onBook }: Public
   return (
     <div className="min-h-screen bg-background">
       <PublicHeader active={page} onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} />
-      <main className="mx-auto w-full max-w-6xl px-4 py-16 text-center">
-        <p className="ui-section-title">{meta.title}</p>
-        <p className="ui-secondary-text mx-auto mt-2 max-w-xl text-sm">{meta.note}</p>
-      </main>
+      {page === "home" ? (
+        <main>
+          <PublicHero onBook={onBook} onViewServices={() => onNavigate("services")} />
+        </main>
+      ) : (
+        <main className="mx-auto w-full max-w-6xl px-4 py-16 text-center">
+          <p className="ui-section-title">{meta.title}</p>
+          <p className="ui-secondary-text mx-auto mt-2 max-w-xl text-sm">{meta.note}</p>
+        </main>
+      )}
     </div>
   );
 }
