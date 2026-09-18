@@ -1,7 +1,13 @@
-// Mock data for Gara Ô Tô Thành Công
+﻿// Mock data for Gara Ô Tô Thành Công
+export * from "./schemaData";
+export {
+  mockInventory,
+  mockStaff,
+  mockNotifications,
+} from "./schemaData";
 
 export const GARAGE_NAME = "Gara Ô Tô Thành Công";
-export const DEMO_TODAY = "2024-09-17";
+export const DEMO_TODAY = "2026-09-17";
 
 export interface KhachHang {
   MaKhachHang: string;
@@ -104,20 +110,20 @@ export const dichVu: DichVu[] = [
 ];
 
 export const lichHen: LichHen[] = [
-  { MaLichHen: "LH001", MaKhachHang: "KH001", MaXe: "XE001", MaDichVu: "DV001", NgayHen: "2024-09-17", GioHen: "08:00", TrangThai: "confirmed", NoiDung: "Thay dầu, lọc dầu, kiểm tra tổng quát" },
-  { MaLichHen: "LH002", MaKhachHang: "KH002", MaXe: "XE003", MaDichVu: "DV002", NgayHen: "2024-09-17", GioHen: "09:30", TrangThai: "arrived", NoiDung: "Tiếng kêu lạ khi đạp phanh" },
-  { MaLichHen: "LH003", MaKhachHang: "KH003", MaXe: "XE004", MaDichVu: "DV003", NgayHen: "2024-09-17", GioHen: "14:00", TrangThai: "pending", NoiDung: null },
-  { MaLichHen: "LH004", MaKhachHang: "KH004", MaXe: "XE005", MaDichVu: "DV004", NgayHen: "2024-09-18", GioHen: "08:30", TrangThai: "confirmed", NoiDung: "Xe bị rung khi tăng tốc" },
-  { MaLichHen: "LH005", MaKhachHang: "KH005", MaXe: "XE006", MaDichVu: "DV005", NgayHen: "2024-09-18", GioHen: "10:00", TrangThai: "pending", NoiDung: null },
-  { MaLichHen: "LH006", MaKhachHang: "KH006", MaXe: "XE007", MaDichVu: "DV006", NgayHen: "2024-09-19", GioHen: "08:00", TrangThai: "pending", NoiDung: "Lốp mòn, cần thay 2 lốp trước" },
-  { MaLichHen: "LH007", MaKhachHang: "KH007", MaXe: "XE008", MaDichVu: "DV007", NgayHen: "2024-09-20", GioHen: "08:00", TrangThai: "cancelled", NoiDung: "Khách hủy do bận công việc" },
+  { MaLichHen: "LH001", MaKhachHang: "KH001", MaXe: "XE001", MaDichVu: "DV001", NgayHen: "2026-09-17", GioHen: "08:00", TrangThai: "confirmed", NoiDung: "Thay dầu, lọc dầu, kiểm tra tổng quát" },
+  { MaLichHen: "LH002", MaKhachHang: "KH002", MaXe: "XE003", MaDichVu: "DV002", NgayHen: "2026-09-17", GioHen: "09:30", TrangThai: "arrived", NoiDung: "Tiếng kêu lạ khi đạp phanh" },
+  { MaLichHen: "LH003", MaKhachHang: "KH003", MaXe: "XE004", MaDichVu: "DV003", NgayHen: "2026-09-17", GioHen: "14:00", TrangThai: "pending", NoiDung: null },
+  { MaLichHen: "LH004", MaKhachHang: "KH004", MaXe: "XE005", MaDichVu: "DV004", NgayHen: "2026-09-18", GioHen: "08:30", TrangThai: "confirmed", NoiDung: "Xe bị rung khi tăng tốc" },
+  { MaLichHen: "LH005", MaKhachHang: "KH005", MaXe: "XE006", MaDichVu: "DV005", NgayHen: "2026-09-18", GioHen: "10:00", TrangThai: "pending", NoiDung: null },
+  { MaLichHen: "LH006", MaKhachHang: "KH006", MaXe: "XE007", MaDichVu: "DV006", NgayHen: "2026-09-19", GioHen: "08:00", TrangThai: "pending", NoiDung: "Lốp mòn, cần thay 2 lốp trước" },
+  { MaLichHen: "LH007", MaKhachHang: "KH007", MaXe: "XE008", MaDichVu: "DV007", NgayHen: "2026-09-20", GioHen: "08:00", TrangThai: "cancelled", NoiDung: "Khách hủy do bận công việc" },
 ];
 
 export const phieuTiepNhan: PhieuTiepNhan[] = [
-  { MaTiepNhan: "TN001", MaXe: "XE001", NgayTiepNhan: "2024-09-17T08:05:00", TinhTrangBanDau: "Ngoại thất xước nhẹ; các hệ thống chính hoạt động bình thường", YeuCauKhachHang: "Bảo dưỡng định kỳ, thay dầu, kiểm tra tổng quát", GhiChu: null },
-  { MaTiepNhan: "TN002", MaXe: "XE003", NgayTiepNhan: "2024-09-17T09:35:00", TinhTrangBanDau: "Có tiếng kêu khi đạp phanh", YeuCauKhachHang: "Kiểm tra và sửa chữa hệ thống phanh", GhiChu: null },
-  { MaTiepNhan: "TN003", MaXe: "XE005", NgayTiepNhan: "2024-09-14T08:15:00", TinhTrangBanDau: "Xe rung khi tăng tốc", YeuCauKhachHang: "Kiểm tra động cơ", GhiChu: null },
-  { MaTiepNhan: "TN004", MaXe: "XE006", NgayTiepNhan: "2024-09-17T10:05:00", TinhTrangBanDau: "Chưa phát hiện bất thường ngoại thất", YeuCauKhachHang: "Bảo dưỡng định kỳ", GhiChu: "Mới tiếp nhận" },
+  { MaTiepNhan: "TN001", MaXe: "XE001", NgayTiepNhan: "2026-09-17T08:05:00", TinhTrangBanDau: "Ngoại thất xước nhẹ; các hệ thống chính hoạt động bình thường", YeuCauKhachHang: "Bảo dưỡng định kỳ, thay dầu, kiểm tra tổng quát", GhiChu: null },
+  { MaTiepNhan: "TN002", MaXe: "XE003", NgayTiepNhan: "2026-09-17T09:35:00", TinhTrangBanDau: "Có tiếng kêu khi đạp phanh", YeuCauKhachHang: "Kiểm tra và sửa chữa hệ thống phanh", GhiChu: null },
+  { MaTiepNhan: "TN003", MaXe: "XE005", NgayTiepNhan: "2026-09-14T08:15:00", TinhTrangBanDau: "Xe rung khi tăng tốc", YeuCauKhachHang: "Kiểm tra động cơ", GhiChu: null },
+  { MaTiepNhan: "TN004", MaXe: "XE006", NgayTiepNhan: "2026-09-17T10:05:00", TinhTrangBanDau: "Chưa phát hiện bất thường ngoại thất", YeuCauKhachHang: "Bảo dưỡng định kỳ", GhiChu: "Mới tiếp nhận" },
 ];
 
 export const mockAppointments = lichHen.map((appointment) => {
@@ -157,23 +163,23 @@ export interface PhanCongKyThuatVien {
 }
 
 export const phieuSuaChua: PhieuSuaChua[] = [
-  { MaPhieuSuaChua: "PSC001", MaTiepNhan: "TN001", NgayLap: "2024-09-15T08:30:00", NgayBatDau: "2024-09-15T14:00:00", NgayHoanThanh: null, TrangThai: "in_progress", KetQua: null },
-  { MaPhieuSuaChua: "PSC002", MaTiepNhan: "TN002", NgayLap: "2024-09-16T10:00:00", NgayBatDau: "2024-09-16T13:30:00", NgayHoanThanh: null, TrangThai: "waiting_parts", KetQua: null },
-  { MaPhieuSuaChua: "PSC003", MaTiepNhan: "TN003", NgayLap: "2024-09-14T08:45:00", NgayBatDau: "2024-09-14T09:30:00", NgayHoanThanh: "2024-09-16T15:30:00", TrangThai: "completed", KetQua: "Đã vệ sinh bugi và điều chỉnh bướm ga" },
-  { MaPhieuSuaChua: "PSC004", MaTiepNhan: "TN004", NgayLap: "2024-09-17T10:30:00", NgayBatDau: null, NgayHoanThanh: null, TrangThai: "pending", KetQua: null },
+  { MaPhieuSuaChua: "PSC001", MaTiepNhan: "TN001", NgayLap: "2026-09-15T08:30:00", NgayBatDau: "2026-09-15T14:00:00", NgayHoanThanh: null, TrangThai: "in_progress", KetQua: null },
+  { MaPhieuSuaChua: "PSC002", MaTiepNhan: "TN002", NgayLap: "2026-09-16T10:00:00", NgayBatDau: "2026-09-16T13:30:00", NgayHoanThanh: null, TrangThai: "waiting_parts", KetQua: null },
+  { MaPhieuSuaChua: "PSC003", MaTiepNhan: "TN003", NgayLap: "2026-09-14T08:45:00", NgayBatDau: "2026-09-14T09:30:00", NgayHoanThanh: "2026-09-16T15:30:00", TrangThai: "completed", KetQua: "Đã vệ sinh bugi và điều chỉnh bướm ga" },
+  { MaPhieuSuaChua: "PSC004", MaTiepNhan: "TN004", NgayLap: "2026-09-17T10:30:00", NgayBatDau: null, NgayHoanThanh: null, TrangThai: "pending", KetQua: null },
 ];
 
 export const phanCongKyThuatVien: PhanCongKyThuatVien[] = [
-  { MaPhieuSuaChua: "PSC001", MaKyThuatVien: "NV002", NgayPhanCong: "2024-09-15T09:00:00", GhiChu: null },
-  { MaPhieuSuaChua: "PSC002", MaKyThuatVien: "NV003", NgayPhanCong: "2024-09-16T10:15:00", GhiChu: null },
-  { MaPhieuSuaChua: "PSC003", MaKyThuatVien: "NV004", NgayPhanCong: "2024-09-14T09:00:00", GhiChu: null },
-  { MaPhieuSuaChua: "PSC004", MaKyThuatVien: "NV002", NgayPhanCong: "2024-09-17T10:45:00", GhiChu: "Chờ kỹ thuật viên kiểm tra xe" },
+  { MaPhieuSuaChua: "PSC001", MaKyThuatVien: "NV002", NgayPhanCong: "2026-09-15T09:00:00", GhiChu: null },
+  { MaPhieuSuaChua: "PSC002", MaKyThuatVien: "NV003", NgayPhanCong: "2026-09-16T10:15:00", GhiChu: null },
+  { MaPhieuSuaChua: "PSC003", MaKyThuatVien: "NV004", NgayPhanCong: "2026-09-14T09:00:00", GhiChu: null },
+  { MaPhieuSuaChua: "PSC004", MaKyThuatVien: "NV002", NgayPhanCong: "2026-09-17T10:45:00", GhiChu: "Chờ kỹ thuật viên kiểm tra xe" },
 ];
 
 export const mockRepairOrders = [
   {
     id: "PSC001", receptionId: "TN001", vehicle: "51G-123.45", customer: "Nguyễn Văn An", customerId: "KH001", technicianId: "NV002",
-    created: "2024-09-15", started: "2024-09-15", technician: "Trần Văn Khoa",
+    created: "2026-09-15", started: "2026-09-15", technician: "Trần Văn Khoa",
     status: "in_progress", km: 45200,
     items: [
       { type: "service", name: "Thay dầu động cơ", qty: 1, price: 150000, done: true },
@@ -185,7 +191,7 @@ export const mockRepairOrders = [
   },
   {
     id: "PSC002", receptionId: "TN002", vehicle: "51B-789.01", customer: "Trần Thị Bình", customerId: "KH002", technicianId: "NV003",
-    created: "2024-09-16", started: "2024-09-16", technician: "Nguyễn Thành Long",
+    created: "2026-09-16", started: "2026-09-16", technician: "Nguyễn Thành Long",
     status: "waiting_parts", km: 38500,
     items: [
       { type: "service", name: "Kiểm tra và sửa phanh trước", qty: 1, price: 200000, done: false },
@@ -195,7 +201,7 @@ export const mockRepairOrders = [
   },
   {
     id: "PSC003", receptionId: "TN003", vehicle: "51D-567.89", customer: "Phạm Thị Dung", customerId: "KH004", technicianId: "NV004",
-    created: "2024-09-14", started: "2024-09-14", technician: "Lê Quang Hưng",
+    created: "2026-09-14", started: "2026-09-14", technician: "Lê Quang Hưng",
     status: "completed", km: 89700,
     items: [
       { type: "service", name: "Kiểm tra và vệ sinh bugi", qty: 1, price: 120000, done: true },
@@ -206,7 +212,7 @@ export const mockRepairOrders = [
   },
   {
     id: "PSC004", receptionId: "TN004", vehicle: "51E-890.12", customer: "Hoàng Văn Em", customerId: "KH005", technicianId: "NV002",
-    created: "2024-09-17", started: "2024-09-17", technician: "Trần Văn Khoa",
+    created: "2026-09-17", started: "2026-09-17", technician: "Trần Văn Khoa",
     status: "pending", km: 33400,
     items: [
       { type: "service", name: "Bảo dưỡng định kỳ 30.000 km", qty: 1, price: 250000, done: false },
@@ -235,9 +241,9 @@ export interface ChiTietBaoGia {
 }
 
 export const baoGia: BaoGia[] = [
-  { MaBaoGia: "BG001", MaPhieuSuaChua: "PSC001", NgayLap: "2024-09-15T10:30:00", TongTien: 645000, TrangThai: "confirmed", NgayXacNhan: "2024-09-15T11:00:00" },
-  { MaBaoGia: "BG002", MaPhieuSuaChua: "PSC002", NgayLap: "2024-09-16T11:00:00", TongTien: 1100000, TrangThai: "pending", NgayXacNhan: null },
-  { MaBaoGia: "BG003", MaPhieuSuaChua: "PSC003", NgayLap: "2024-09-14T10:00:00", TongTien: 550000, TrangThai: "confirmed", NgayXacNhan: "2024-09-14T10:20:00" },
+  { MaBaoGia: "BG001", MaPhieuSuaChua: "PSC001", NgayLap: "2026-09-15T10:30:00", TongTien: 645000, TrangThai: "confirmed", NgayXacNhan: "2026-09-15T11:00:00" },
+  { MaBaoGia: "BG002", MaPhieuSuaChua: "PSC002", NgayLap: "2026-09-16T11:00:00", TongTien: 1100000, TrangThai: "pending", NgayXacNhan: null },
+  { MaBaoGia: "BG003", MaPhieuSuaChua: "PSC003", NgayLap: "2026-09-14T10:00:00", TongTien: 550000, TrangThai: "confirmed", NgayXacNhan: "2026-09-14T10:20:00" },
 ];
 
 export const chiTietBaoGia: ChiTietBaoGia[] = [
@@ -255,7 +261,7 @@ export const chiTietBaoGia: ChiTietBaoGia[] = [
 export const mockQuotations = [
   {
     id: "BG001", repairId: "PSC001", customer: "Nguyễn Văn An", vehicle: "51G-123.45",
-    created: "2024-09-15", status: "confirmed",
+    created: "2026-09-15", status: "confirmed",
     services: [
       { name: "Thay dầu động cơ", qty: 1, price: 150000 },
       { name: "Kiểm tra phanh", qty: 1, price: 80000 },
@@ -267,7 +273,7 @@ export const mockQuotations = [
   },
   {
     id: "BG002", repairId: "PSC002", customer: "Trần Thị Bình", vehicle: "51B-789.01",
-    created: "2024-09-16", status: "pending",
+    created: "2026-09-16", status: "pending",
     services: [
       { name: "Kiểm tra và sửa phanh trước", qty: 1, price: 200000 },
     ],
@@ -277,7 +283,7 @@ export const mockQuotations = [
   },
   {
     id: "BG003", repairId: "PSC003", customer: "Phạm Thị Dung", vehicle: "51D-567.89",
-    created: "2024-09-14", status: "confirmed",
+    created: "2026-09-14", status: "confirmed",
     services: [
       { name: "Kiểm tra và vệ sinh bugi", qty: 1, price: 120000 },
       { name: "Điều chỉnh bướm ga", qty: 1, price: 150000 },
@@ -286,67 +292,6 @@ export const mockQuotations = [
       { name: "Bugi NGK (bộ 4)", qty: 1, price: 280000 },
     ],
   },
-];
-
-export const mockInventory = [
-  { id: "PT001", name: "Dầu nhớt Castrol 5W-30 (1L)", brand: "Castrol", unit: "chai", price: 85000, stock: 48, minStock: 20, status: "ok" },
-  { id: "PT002", name: "Lọc dầu Toyota", brand: "Toyota", unit: "cái", price: 95000, stock: 12, minStock: 15, status: "low" },
-  { id: "PT003", name: "Lọc gió động cơ", brand: "Bosch", unit: "cái", price: 120000, stock: 8, minStock: 10, status: "low" },
-  { id: "PT004", name: "Má phanh trước (bộ)", brand: "Brembo", unit: "bộ", price: 450000, stock: 6, minStock: 5, status: "ok" },
-  { id: "PT005", name: "Bugi NGK Platinum", brand: "NGK", unit: "cái", price: 75000, stock: 32, minStock: 20, status: "ok" },
-  { id: "PT006", name: "Bơm nước (Toyota)", brand: "Toyota", unit: "cái", price: 850000, stock: 2, minStock: 3, status: "low" },
-  { id: "PT007", name: "Dây curoa phân phối", brand: "Gates", unit: "bộ", price: 320000, stock: 5, minStock: 5, status: "ok" },
-  { id: "PT008", name: "Ắc quy 75Ah", brand: "GS", unit: "cái", price: 1450000, stock: 0, minStock: 2, status: "out" },
-  { id: "PT009", name: "Lọc nhiên liệu", brand: "Bosch", unit: "cái", price: 145000, stock: 15, minStock: 10, status: "ok" },
-  { id: "PT010", name: "Dầu hộp số tự động (1L)", brand: "Shell", unit: "chai", price: 180000, stock: 24, minStock: 15, status: "ok" },
-];
-
-export const mockInvoices = [
-  {
-    id: "HD001", repairId: "PSC003", customer: "Phạm Thị Dung", customerId: "KH004",
-    vehicle: "51D-567.89", created: "2024-09-16",
-    services: [
-      { name: "Kiểm tra và vệ sinh bugi", qty: 1, price: 120000 },
-      { name: "Điều chỉnh bướm ga", qty: 1, price: 150000 },
-    ],
-    parts: [
-      { name: "Bugi NGK (bộ 4)", qty: 1, price: 280000 },
-    ],
-    status: "paid", paymentMethod: "transfer", paidAt: "2024-09-16",
-  },
-  {
-    id: "HD002", repairId: "PSC001", customer: "Nguyễn Văn An", customerId: "KH001",
-    vehicle: "51G-123.45", created: "2024-09-17",
-    services: [
-      { name: "Thay dầu động cơ", qty: 1, price: 150000 },
-      { name: "Kiểm tra phanh", qty: 1, price: 80000 },
-    ],
-    parts: [
-      { name: "Dầu nhớt Castrol 5W-30 (4L)", qty: 1, price: 320000 },
-      { name: "Lọc dầu", qty: 1, price: 95000 },
-    ],
-    status: "unpaid", paymentMethod: null, paidAt: null,
-  },
-];
-
-export const mockStaff = [
-  { id: "NV001", name: "Nguyễn Hữu Bảo", role: "manager", phone: "0901111111", email: "baonguyen@garage.vn", joined: "2019-03-01", status: "active" },
-  { id: "NV002", name: "Trần Văn Khoa", role: "technician", phone: "0902222222", email: "khoatran@garage.vn", joined: "2020-06-15", status: "active" },
-  { id: "NV003", name: "Nguyễn Thành Long", role: "technician", phone: "0903333333", email: "longnguyen@garage.vn", joined: "2021-01-10", status: "active" },
-  { id: "NV004", name: "Lê Quang Hưng", role: "technician", phone: "0904444444", email: "hungle@garage.vn", joined: "2021-08-20", status: "active" },
-  { id: "NV005", name: "Phạm Minh Tuấn", role: "receptionist", phone: "0905555555", email: "tuanpham@garage.vn", joined: "2022-02-01", status: "active" },
-  { id: "NV006", name: "Vũ Thị Ngọc", role: "receptionist", phone: "0906666666", email: "ngocvu@garage.vn", joined: "2022-09-05", status: "active" },
-  { id: "NV007", name: "Đỗ Văn Nam", role: "warehouse", phone: "0907777777", email: "namdo@garage.vn", joined: "2020-11-15", status: "active" },
-  { id: "NV008", name: "Lê Thị Hoa", role: "cashier", phone: "0908888888", email: "hoale@garage.vn", joined: "2023-03-01", status: "active" },
-];
-
-export const mockNotifications = [
-  { id: 1, type: "appointment", title: "Lịch hẹn mới", body: "Nguyễn Văn An đặt lịch bảo dưỡng lúc 08:00 ngày 17/09", time: "08:30 17/09", read: false },
-  { id: 2, type: "repair", title: "Sửa chữa hoàn tất", body: "Phiếu PSC003 xe 51D-567.89 đã hoàn tất sửa chữa", time: "15:45 16/09", read: false },
-  { id: 3, type: "parts", title: "Phụ tùng sắp hết", body: "Lọc dầu Toyota còn 12 cái (mức tối thiểu: 15)", time: "09:00 16/09", read: true },
-  { id: 4, type: "payment", title: "Thanh toán thành công", body: "Hóa đơn HD001 đã được thanh toán 550.000 VNĐ", time: "16:20 16/09", read: true },
-  { id: 5, type: "appointment", title: "Khách đến gara", body: "Trần Thị Bình đã đến với lịch hẹn LH002", time: "09:35 17/09", read: false },
-  { id: 6, type: "parts", title: "Ắc quy hết hàng", body: "Ắc quy 75Ah đã hết hàng, cần đặt thêm", time: "08:00 17/09", read: false },
 ];
 
 export const chartRevenue = [

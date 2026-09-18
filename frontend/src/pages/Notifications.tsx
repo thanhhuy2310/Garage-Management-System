@@ -27,7 +27,7 @@ export default function Notifications() {
   });
 
   const markAllRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  const markRead = (id: number) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  const markRead = (id: string) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
 
   return (
     <div className="p-6 space-y-5">
@@ -63,7 +63,11 @@ export default function Notifications() {
                 {!n.read && <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1.5" />}
               </div>
               <p className="text-sm text-slate-600 mt-0.5">{n.body}</p>
-              <p className="text-xs text-slate-400 mt-1">{n.time}</p>
+              <p className="text-xs text-slate-400 mt-1">
+                {new Date(n.time).toLocaleString("vi-VN")} · KH: {n.customerId}
+                {n.appointmentId ? ` · Lịch: ${n.appointmentId}` : ""}
+                {n.repairId ? ` · Phiếu SC: ${n.repairId}` : ""}
+              </p>
             </div>
           </div>
         ))}

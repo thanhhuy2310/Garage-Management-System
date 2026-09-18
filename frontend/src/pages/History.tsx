@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Card, Button, SearchBox, Icons } from "../components/ui";
-import { formatCurrency } from "../data";
-import { mockRepairOrders } from "../data";
+import { formatCurrency, mockRepairOrders, phieuSuaChua } from "../data";
 
 export default function History() {
   const [search, setSearch] = useState("");
@@ -12,6 +11,7 @@ export default function History() {
     !search || r.vehicle.includes(search) || r.customer.toLowerCase().includes(search.toLowerCase())
   );
   const detail = filtered.find(r => r.id === selected);
+  const completedAt = (repairId: string) => phieuSuaChua.find((item) => item.MaPhieuSuaChua === repairId)?.NgayHoanThanh;
 
   return (
     <div className="p-6 space-y-5">
@@ -44,7 +44,7 @@ export default function History() {
                   <tr key={r.id} className={`cursor-pointer ${selected === r.id ? "bg-blue-50" : ""}`}
                     onClick={() => setSelected(r.id === selected ? null : r.id)}>
                     <td><span className="mono text-xs text-slate-400">{r.id}</span></td>
-                    <td className="text-slate-600">{r.created.split("-").reverse().join("/")}</td>
+                    <td className="text-slate-600">{completedAt(r.id) ? new Date(completedAt(r.id)!).toLocaleString("vi-VN") : "—"}</td>
                     <td><span className="mono font-bold text-[#1e3a6e]">{r.vehicle}</span></td>
                     <td className="font-medium text-slate-800">{r.customer}</td>
                     <td className="text-right mono text-sm">{r.km.toLocaleString("vi-VN")}</td>
@@ -75,7 +75,7 @@ export default function History() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Ngày sửa</p><p className="font-semibold">{detail.created.split("-").reverse().join("/")}</p></div>
+              <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Ngày hoàn thành</p><p className="font-semibold">{completedAt(detail.id) ? new Date(completedAt(detail.id)!).toLocaleString("vi-VN") : "—"}</p></div>
               <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Số km</p><p className="font-semibold mono">{detail.km.toLocaleString("vi-VN")}</p></div>
               <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Kỹ thuật viên</p><p className="font-semibold">{detail.technician}</p></div>
               <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Tổng chi phí</p><p className="font-bold text-[#1e3a6e]">{formatCurrency(detail.items.reduce((s, i) => s + i.qty * i.price, 0))}</p></div>

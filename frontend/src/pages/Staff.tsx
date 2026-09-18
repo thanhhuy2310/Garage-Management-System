@@ -8,7 +8,6 @@ const PERMISSIONS: Record<string, string[]> = {
   technician: ["Xem công việc", "Cập nhật tiến độ", "Yêu cầu phụ tùng", "Ghi kết quả kiểm tra"],
   receptionist: ["Tiếp nhận xe", "Lập phiếu tiếp nhận", "Quản lý lịch hẹn", "Quản lý khách hàng", "Lập hóa đơn"],
   warehouse: ["Nhập kho", "Xuất kho", "Kiểm kê", "Xem tồn kho"],
-  cashier: ["Xem hóa đơn", "Thanh toán", "In hóa đơn"],
 };
 
 export default function Staff() {
@@ -76,7 +75,7 @@ export default function Staff() {
               </div>
               <div className="flex items-center gap-2 text-slate-600">
                 <span className="text-slate-400 w-4">{Icons.calendar}</span>
-                <span>Từ {detail.joined.split("-").reverse().join("/")}</span>
+                <span>{detail.title}</span>
               </div>
             </div>
 
@@ -107,6 +106,7 @@ export default function Staff() {
             <Input label="Số điện thoại *" placeholder="0901234567" />
           </div>
           <Input label="Email" placeholder="email@garage.vn" type="email" />
+          <Input label="Chức vụ *" placeholder="Ví dụ: Nhân viên kho" />
           <Select label="Vai trò *" options={Object.entries(ROLES).map(([k, v]) => ({ value: k, label: v }))} />
           <div className="grid grid-cols-2 gap-4">
             <Input label="Tên đăng nhập *" placeholder="username" />

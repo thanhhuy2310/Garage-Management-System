@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Badge, TimelineItem } from "../components/ui";
 import { formatCurrency } from "../data";
 import { mockQuotations, calcTotal } from "../data";
@@ -231,7 +231,7 @@ function MobileBook({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
             <h2 className="font-bold text-slate-800 mb-4">Chọn ngày</h2>
             <div className="grid grid-cols-3 gap-2">
               {Array.from({ length: 14 }, (_, i) => {
-                const d = new Date("2024-09-18");
+                const d = new Date("2026-09-18");
                 d.setDate(d.getDate() + i);
                 const label = d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
                 const weekday = d.toLocaleDateString("vi-VN", { weekday: "short" });

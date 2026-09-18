@@ -1,315 +1,60 @@
-import React, { useState } from "react";
-import { Card, Badge, Button, SearchBox, Tabs, Modal, Input, Select, Icons } from "../components/ui";
-import { mockInventory, formatCurrency } from "../data";
+import React, { useMemo, useState } from "react";
+import { Badge, Button, Card, Input, SearchBox, Select, Tabs, Icons } from "../components/ui";
+import { formatCurrency } from "../data";
+import { bienDongKho, chiTietPhieuNhap, chiTietPhieuXuat, getInventoryStatus, kho, nhanVien, phieuNhapKho, phieuXuatKho, phuTung } from "../mock/schemaData";
 
 const TABS = [
-  { key: "stock", label: "Tồn kho" },
-  { key: "import", label: "Nhập kho" },
-  { key: "export", label: "Xuất kho" },
-  { key: "audit", label: "Kiểm kê" },
+  { key: "stock", label: "Tồn kho" }, { key: "import", label: "Nhập kho" },
+  { key: "export", label: "Xuất kho" }, { key: "audit", label: "Kiểm kê" },
+  { key: "history", label: "Biến động kho" },
 ];
-
-const HISTORY = [
-  { date: "17/09 09:30", part: "Lọc dầu Toyota", type: "Xuất", before: 15, change: -3, after: 12, staff: "Trần Văn Khoa", ref: "PSC002" },
-  { date: "16/09 14:00", part: "Dầu nhớt Castrol 5W-30", type: "Xuất", before: 52, change: -4, after: 48, staff: "Trần Văn Khoa", ref: "PSC001" },
-  { date: "15/09 08:00", part: "Dầu nhớt Castrol 5W-30", type: "Nhập", before: 32, change: 20, after: 52, staff: "Đỗ Văn Nam", ref: "PNK005" },
-  { date: "14/09 10:30", part: "Bugi NGK Platinum", type: "Xuất", before: 36, change: -4, after: 32, staff: "Lê Quang Hưng", ref: "PSC003" },
-  { date: "12/09 09:00", part: "Lọc gió động cơ", type: "Nhập", before: 3, change: 5, after: 8, staff: "Đỗ Văn Nam", ref: "PNK004" },
-];
-
-// Mock import form items
-const importItems = [
-  { id: "PT001", name: "Dầu nhớt Castrol 5W-30 (1L)", qty: 20, price: 85000 },
-  { id: "PT002", name: "Lọc dầu Toyota", qty: 10, price: 95000 },
-];
-
-// Mock export items
-const exportItems = mockInventory.slice(0, 4);
-
-// Mock audit data
-const auditItems = mockInventory.map(i => ({
-  ...i,
-  actual: i.status === "ok" ? i.stock : i.status === "low" ? i.stock - 2 : 0,
-  diff: i.status === "ok" ? 0 : i.status === "low" ? -2 : 0,
-}));
+const dateTime = (value: string | null) => value ? new Date(value).toLocaleString("vi-VN") : "—";
+const employeeName = (id: string | null) => nhanVien.find((x) => x.MaNhanVien === id)?.HoTen ?? "—";
+const partName = (id: string) => phuTung.find((x) => x.MaPhuTung === id)?.TenPhuTung ?? id;
 
 export default function Inventory() {
   const [tab, setTab] = useState("stock");
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [confirmed, setConfirmed] = useState<string[]>([]);
+  const filtered = useMemo(() => phuTung.filter((item) => {
+    const matches = !search || `${item.MaPhuTung} ${item.TenPhuTung}`.toLowerCase().includes(search.toLowerCase());
+    return matches && (statusFilter === "all" || getInventoryStatus(item) === statusFilter);
+  }), [search, statusFilter]);
+  const lowStock = phuTung.filter((item) => getInventoryStatus(item) !== "ok");
+  const auditItems = phuTung.map((item, index) => ({ ...item, actual: index === 2 ? item.SoLuongTon - 1 : item.SoLuongTon }));
 
-  const filtered = mockInventory.filter(i =>
-    !search || i.name.toLowerCase().includes(search.toLowerCase()) || i.id.includes(search)
-  );
-
-  return (
-    <div className="p-6 space-y-5">
-      <div className="flex items-center justify-between">
-        <Tabs tabs={TABS} active={tab} onChange={setTab} />
-        <div className="flex gap-2">
-          {tab === "import" && <Button icon={Icons.plus}>Tạo phiếu nhập kho</Button>}
-          {tab === "export" && <Button icon={Icons.plus}>Tạo phiếu xuất kho</Button>}
-          {tab === "audit" && <Button variant="accent">Bắt đầu kiểm kê</Button>}
-        </div>
-      </div>
-
-      {tab === "stock" && (
-        <>
-          <div className="flex items-center gap-3">
-            <SearchBox value={search} onChange={setSearch} placeholder="Mã, tên phụ tùng..." />
-            <Select options={[{ value: "all", label: "Tất cả trạng thái" }, { value: "ok", label: "Còn hàng" }, { value: "low", label: "Sắp hết" }, { value: "out", label: "Hết hàng" }]} className="w-40" />
-          </div>
-
-          {/* Alert */}
-          {mockInventory.filter(i => i.status !== "ok").length > 0 && (
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3">
-              <span className="text-amber-500">{Icons.alertTriangle}</span>
-              <p className="text-sm text-amber-800">
-                <strong>{mockInventory.filter(i => i.status !== "ok").length} mặt hàng</strong> sắp hết hoặc hết hàng cần đặt thêm.
-              </p>
-              <Button variant="accent" size="sm" className="ml-auto">Tạo yêu cầu nhập</Button>
-            </div>
-          )}
-
-          <Card>
-            <table className="w-full data-table">
-              <thead>
-                <tr>
-                  <th>Mã PT</th>
-                  <th>Tên phụ tùng</th>
-                  <th>Hãng</th>
-                  <th>ĐVT</th>
-                  <th className="text-right">Đơn giá</th>
-                  <th className="text-right">Tồn hiện tại</th>
-                  <th className="text-right">Tồn tối thiểu</th>
-                  <th>Trạng thái</th>
-                  <th>Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map(item => (
-                  <tr key={item.id}>
-                    <td><span className="mono text-xs text-slate-400">{item.id}</span></td>
-                    <td><span className="font-medium text-slate-800">{item.name}</span></td>
-                    <td className="text-slate-600">{item.brand}</td>
-                    <td className="text-slate-600">{item.unit}</td>
-                    <td className="text-right font-mono text-sm">{formatCurrency(item.price)}</td>
-                    <td className="text-right">
-                      <span className={`font-bold text-sm ${item.status === "ok" ? "text-slate-800" : item.status === "low" ? "text-amber-600" : "text-red-600"}`}>
-                        {item.stock}
-                      </span>
-                    </td>
-                    <td className="text-right text-slate-500 text-sm">{item.minStock}</td>
-                    <td><Badge variant={item.status as any} /></td>
-                    <td>
-                      <div className="flex gap-1">
-                        <button className="p-1.5 hover:bg-slate-100 rounded text-slate-500">{Icons.eye}</button>
-                        <button className="p-1.5 hover:bg-slate-100 rounded text-slate-500">{Icons.edit}</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
-
-          {/* History */}
-          <Card className="p-5">
-            <h3 className="font-semibold text-slate-800 text-sm mb-4">Lịch sử biến động kho (gần nhất)</h3>
-            <table className="w-full data-table">
-              <thead>
-                <tr>
-                  <th>Ngày giờ</th>
-                  <th>Phụ tùng</th>
-                  <th>Loại</th>
-                  <th className="text-right">Trước</th>
-                  <th className="text-right">Thay đổi</th>
-                  <th className="text-right">Sau</th>
-                  <th>Người thực hiện</th>
-                  <th>Phiếu</th>
-                </tr>
-              </thead>
-              <tbody>
-                {HISTORY.map((h, i) => (
-                  <tr key={i}>
-                    <td className="mono text-xs text-slate-500">{h.date}</td>
-                    <td className="font-medium text-slate-700">{h.part}</td>
-                    <td>
-                      <span className={`text-xs px-2 py-0.5 rounded font-medium ${h.type === "Nhập" ? "bg-emerald-50 text-emerald-700" : "bg-blue-50 text-blue-700"}`}>
-                        {h.type}
-                      </span>
-                    </td>
-                    <td className="text-right text-slate-600">{h.before}</td>
-                    <td className="text-right">
-                      <span className={`font-bold ${h.change > 0 ? "text-emerald-600" : "text-red-500"}`}>
-                        {h.change > 0 ? "+" : ""}{h.change}
-                      </span>
-                    </td>
-                    <td className="text-right font-semibold text-slate-800">{h.after}</td>
-                    <td className="text-slate-600 text-sm">{h.staff}</td>
-                    <td><span className="mono text-xs text-blue-600 hover:underline cursor-pointer">{h.ref}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Card>
-        </>
-      )}
-
-      {tab === "import" && (
-        <Card className="p-6">
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <Input label="Mã phiếu" defaultValue="PNK006" />
-            <Input label="Ngày nhập" type="date" defaultValue="2024-09-17" />
-            <Select label="Nhà cung cấp" options={[
-              { value: "ncc1", label: "Công ty PT Minh Phúc" },
-              { value: "ncc2", label: "Đại lý Toyota chính hãng" },
-              { value: "ncc3", label: "Kho phụ tùng Thành Đô" },
-            ]} />
-          </div>
-
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Chi tiết phiếu nhập</p>
-          <table className="w-full data-table mb-4">
-            <thead>
-              <tr>
-                <th>Mã PT</th>
-                <th>Tên phụ tùng</th>
-                <th className="text-right">Số lượng</th>
-                <th className="text-right">Đơn giá</th>
-                <th className="text-right">Thành tiền</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {importItems.map((item, i) => (
-                <tr key={i}>
-                  <td className="mono text-xs text-slate-400">{item.id}</td>
-                  <td className="font-medium">{item.name}</td>
-                  <td className="text-right"><input type="number" defaultValue={item.qty} className="w-20 border border-[#dde3ec] rounded px-2 py-1 text-sm text-right" /></td>
-                  <td className="text-right">{formatCurrency(item.price)}</td>
-                  <td className="text-right font-semibold">{formatCurrency(item.qty * item.price)}</td>
-                  <td><button className="p-1 text-red-400 hover:text-red-600">{Icons.xCircle}</button></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <Button variant="secondary" size="sm" icon={Icons.plus}>Thêm dòng</Button>
-
-          <div className="flex justify-between items-center mt-4 pt-4 border-t border-[#dde3ec]">
-            <span className="font-bold text-slate-700">Tổng cộng: <span className="text-[#1e3a6e]">{formatCurrency(importItems.reduce((s, i) => s + i.qty * i.price, 0))}</span></span>
-            <div className="flex gap-2">
-              <Button variant="outline" icon={Icons.printer}>In phiếu</Button>
-              <Button variant="secondary">Lưu phiếu</Button>
-              <Button icon={Icons.checkCircle}>Xác nhận nhập kho</Button>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {tab === "export" && (
-        <Card className="p-6">
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <Input label="Mã phiếu" defaultValue="PXK008" />
-            <Select label="Phiếu sửa chữa" options={[
-              { value: "PSC001", label: "PSC001 – 51G-123.45" },
-              { value: "PSC002", label: "PSC002 – 51B-789.01" },
-            ]} />
-            <Select label="Kỹ thuật viên" options={[
-              { value: "NV002", label: "Trần Văn Khoa" },
-              { value: "NV003", label: "Nguyễn Thành Long" },
-            ]} />
-          </div>
-
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Phụ tùng xuất kho</p>
-          <table className="w-full data-table mb-4">
-            <thead>
-              <tr>
-                <th>Tên phụ tùng</th>
-                <th className="text-right">Tồn kho</th>
-                <th className="text-right">Yêu cầu</th>
-                <th className="text-right">Xuất thực tế</th>
-                <th>Tình trạng</th>
-              </tr>
-            </thead>
-            <tbody>
-              {exportItems.map((item, i) => {
-                const reqQty = i === 0 ? 4 : i === 1 ? 3 : 1;
-                const over = reqQty > item.stock;
-                return (
-                  <tr key={item.id}>
-                    <td className="font-medium">{item.name}</td>
-                    <td className="text-right">{item.stock}</td>
-                    <td className="text-right">{reqQty}</td>
-                    <td className="text-right">
-                      <input type="number" defaultValue={over ? item.stock : reqQty}
-                        className={`w-20 border rounded px-2 py-1 text-sm text-right ${over ? "border-red-400 bg-red-50" : "border-[#dde3ec]"}`} />
-                    </td>
-                    <td>
-                      {over ? (
-                        <span className="text-xs text-red-600 flex items-center gap-1">{Icons.alertTriangle} Không đủ hàng</span>
-                      ) : (
-                        <span className="text-xs text-emerald-600 flex items-center gap-1">{Icons.checkCircle} Đủ hàng</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline">Lưu phiếu</Button>
-            <Button icon={Icons.checkCircle}>Xác nhận xuất kho</Button>
-          </div>
-        </Card>
-      )}
-
-      {tab === "audit" && (
-        <Card>
-          <div className="flex items-center justify-between p-4 border-b border-[#dde3ec]">
-            <p className="text-sm font-semibold text-slate-700">Kiểm kê ngày 17/09/2024</p>
-            <Button size="sm">Lưu kết quả kiểm kê</Button>
-          </div>
-          <table className="w-full data-table">
-            <thead>
-              <tr>
-                <th>Mã PT</th>
-                <th>Tên phụ tùng</th>
-                <th className="text-right">Tồn hệ thống</th>
-                <th className="text-right">Tồn thực tế</th>
-                <th className="text-right">Chênh lệch</th>
-                <th>Kết quả</th>
-                <th>Ghi chú</th>
-              </tr>
-            </thead>
-            <tbody>
-              {auditItems.map(item => (
-                <tr key={item.id}>
-                  <td className="mono text-xs text-slate-400">{item.id}</td>
-                  <td className="font-medium text-slate-700">{item.name}</td>
-                  <td className="text-right">{item.stock}</td>
-                  <td className="text-right">
-                    <input type="number" defaultValue={item.actual} className="w-20 border border-[#dde3ec] rounded px-2 py-1 text-sm text-right" />
-                  </td>
-                  <td className="text-right">
-                    <span className={`font-bold ${item.diff === 0 ? "text-emerald-600" : item.diff > 0 ? "text-orange-600" : "text-red-600"}`}>
-                      {item.diff > 0 ? "+" : ""}{item.diff}
-                    </span>
-                  </td>
-                  <td>
-                    {item.diff === 0
-                      ? <span className="text-xs px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-medium">Khớp</span>
-                      : item.diff > 0
-                        ? <span className="text-xs px-2 py-0.5 rounded bg-orange-50 text-orange-700 font-medium">Thừa</span>
-                        : <span className="text-xs px-2 py-0.5 rounded bg-red-50 text-red-600 font-medium">Thiếu</span>
-                    }
-                  </td>
-                  <td><input className="border border-[#dde3ec] rounded px-2 py-1 text-xs w-24" placeholder="Ghi chú..." /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
-      )}
+  return <div className="p-6 space-y-5">
+    <div className="flex items-center justify-between gap-4">
+      <Tabs tabs={TABS} active={tab} onChange={setTab} />
+      <p className="text-xs text-slate-500">{kho[0].TenKho} · {kho[0].DiaChi}</p>
     </div>
-  );
+
+    {tab === "stock" && <>
+      <div className="flex items-end gap-3">
+        <SearchBox value={search} onChange={setSearch} placeholder="Mã, tên phụ tùng..." />
+        <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} options={[{ value: "all", label: "Tất cả trạng thái" }, { value: "ok", label: "Còn hàng" }, { value: "low", label: "Sắp hết" }, { value: "out", label: "Hết hàng" }]} />
+      </div>
+      <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3 text-sm text-amber-800"><span>{Icons.alertTriangle}</span><span><strong>{lowStock.length} mặt hàng</strong> đang dưới mức tồn tối thiểu.</span></div>
+      <Card><table className="w-full data-table">
+        <thead><tr><th>Mã phụ tùng</th><th>Tên phụ tùng</th><th>Kho</th><th>Hãng sản xuất</th><th className="text-right">Đơn giá</th><th className="text-right">Số lượng tồn</th><th className="text-right">Mức tối thiểu</th><th>Trạng thái (dẫn xuất)</th></tr></thead>
+        <tbody>{filtered.map((item) => { const status = getInventoryStatus(item); return <tr key={item.MaPhuTung}><td className="mono text-xs">{item.MaPhuTung}</td><td className="font-medium">{item.TenPhuTung}</td><td className="mono text-xs">{item.MaKho}</td><td>{item.HangSanXuat ?? "—"}</td><td className="text-right">{formatCurrency(item.DonGia)}</td><td className="text-right font-bold">{item.SoLuongTon}</td><td className="text-right">{item.MucTonToiThieu}</td><td><Badge variant={status} /></td></tr>; })}</tbody>
+      </table></Card>
+    </>}
+
+    {tab === "import" && <div className="space-y-4">
+      <Card className="p-5"><h3 className="font-semibold mb-4">Lập phiếu nhập kho</h3><div className="grid grid-cols-3 gap-4"><Input label="Ngày nhập *" type="datetime-local" defaultValue="2026-09-18T08:00" /><Input label="Nhà cung cấp *" placeholder="Nhập tên nhà cung cấp" /><Select label="Nhân viên kho *" options={nhanVien.filter((x) => x.ChucVu === "Nhân viên kho").map((x) => ({ value: x.MaNhanVien, label: `${x.MaNhanVien} · ${x.HoTen}` }))} /></div><Input label="Ghi chú" placeholder="Ghi chú phiếu nhập" className="mt-3" /><p className="text-xs text-slate-500 mt-3">Mã phiếu và thành tiền do hệ thống sinh/tính. Thêm chi tiết sẽ tăng tồn qua sp_ThemChiTietPhieuNhap.</p></Card>
+      {phieuNhapKho.map((receipt) => { const details = chiTietPhieuNhap.filter((x) => x.MaPhieuNhap === receipt.MaPhieuNhap); return <Card key={receipt.MaPhieuNhap} className="p-5"><div className="flex justify-between mb-4"><div><p className="font-semibold">{receipt.MaPhieuNhap}</p><p className="text-xs text-slate-500">{dateTime(receipt.NgayNhap)} · {receipt.NhaCungCap}</p></div><p className="text-sm">Nhân viên: {employeeName(receipt.MaNhanVienKho)}</p></div><table className="w-full data-table"><thead><tr><th>Mã phụ tùng</th><th>Tên phụ tùng</th><th className="text-right">Số lượng</th><th className="text-right">Đơn giá nhập</th><th className="text-right">Thành tiền (tự tính)</th></tr></thead><tbody>{details.map((d) => <tr key={d.MaPhuTung}><td className="mono text-xs">{d.MaPhuTung}</td><td>{partName(d.MaPhuTung)}</td><td className="text-right">{d.SoLuong}</td><td className="text-right">{formatCurrency(d.DonGiaNhap)}</td><td className="text-right font-semibold">{formatCurrency(d.ThanhTien)}</td></tr>)}</tbody></table>{receipt.GhiChu && <p className="text-xs text-slate-500 mt-3">Ghi chú: {receipt.GhiChu}</p>}</Card>; })}
+    </div>}
+
+    {tab === "export" && <div className="space-y-4">
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-800">Lập phiếu xuất <strong>chưa trừ tồn kho</strong>. Tồn chỉ giảm khi kỹ thuật viên xác nhận đã sử dụng qua sp_XacNhanSuDungPhuTung.</div>
+      <Card className="p-5"><h3 className="font-semibold mb-4">Lập phiếu xuất kho</h3><div className="grid grid-cols-3 gap-4"><Select label="Phiếu sửa chữa" options={[{ value: "PSC001", label: "PSC001" }, { value: "PSC002", label: "PSC002" }]} /><Select label="Nhân viên kho *" options={[{ value: "NV007", label: "NV007 · Đỗ Văn Nam" }]} /><Select label="Kỹ thuật viên yêu cầu" options={[{ value: "NV002", label: "NV002 · Trần Văn Khoa" }, { value: "NV003", label: "NV003 · Nguyễn Thành Long" }]} /></div><Input label="Lý do *" placeholder="Lý do xuất kho" className="mt-3" /></Card>
+      {phieuXuatKho.map((issue) => { const details = chiTietPhieuXuat.filter((x) => x.MaPhieuXuat === issue.MaPhieuXuat); return <Card key={issue.MaPhieuXuat} className="p-5"><div className="flex justify-between mb-3"><div><p className="font-semibold">{issue.MaPhieuXuat} · {issue.MaPhieuSuaChua ?? "Không gắn phiếu sửa chữa"}</p><p className="text-xs text-slate-500">{dateTime(issue.NgayXuat)} · {issue.LyDo}</p></div><p className="text-xs text-slate-500">Kho: {employeeName(issue.MaNhanVienKho)} · Yêu cầu: {employeeName(issue.MaKyThuatVienYeuCau)}</p></div><table className="w-full data-table"><thead><tr><th>Phụ tùng</th><th className="text-right">Số lượng</th><th className="text-right">Đơn giá</th><th>Trạng thái</th><th>Người/ngày xác nhận</th><th></th></tr></thead><tbody>{details.map((d) => { const key = `${d.MaPhieuXuat}-${d.MaPhuTung}`; const done = d.DaXacNhanSuDung || confirmed.includes(key); return <tr key={key}><td>{d.MaPhuTung} · {partName(d.MaPhuTung)}</td><td className="text-right">{d.SoLuong}</td><td className="text-right">{d.DonGia === null ? "—" : formatCurrency(d.DonGia)}</td><td><Badge variant={done ? "completed" : "pending"} label={done ? "Đã xác nhận sử dụng" : "Chờ KTV xác nhận"} /></td><td className="text-xs">{done ? `${employeeName(d.MaKyThuatVienXacNhan ?? issue.MaKyThuatVienYeuCau)} · ${dateTime(d.NgayXacNhan ?? "2026-09-18T09:00:00")}` : "—"}</td><td>{!done && <Button size="sm" variant="secondary" onClick={() => setConfirmed((items) => [...items, key])}>KTV xác nhận sử dụng</Button>}</td></tr>; })}</tbody></table></Card>; })}
+    </div>}
+
+    {tab === "audit" && <Card><div className="p-4 border-b flex justify-between"><div><p className="font-semibold">Kiểm kê tồn kho</p><p className="text-xs text-slate-500">Chênh lệch được ghi nhận bằng biến động KIEM_KE qua sp_KiemKeTonKho.</p></div><Button>Lưu kết quả kiểm kê</Button></div><table className="w-full data-table"><thead><tr><th>Mã phụ tùng</th><th>Tên phụ tùng</th><th className="text-right">Tồn hệ thống</th><th className="text-right">Tồn thực tế</th><th className="text-right">Chênh lệch</th><th>Ghi chú</th></tr></thead><tbody>{auditItems.map((item) => { const diff = item.actual - item.SoLuongTon; return <tr key={item.MaPhuTung}><td className="mono text-xs">{item.MaPhuTung}</td><td>{item.TenPhuTung}</td><td className="text-right">{item.SoLuongTon}</td><td className="text-right"><input type="number" defaultValue={item.actual} min={0} className="w-20 border rounded px-2 py-1 text-right" /></td><td className={`text-right font-bold ${diff ? "text-red-600" : "text-emerald-600"}`}>{diff > 0 ? "+" : ""}{diff}</td><td><input placeholder="Ghi chú kiểm kê" className="border rounded px-2 py-1 text-sm" /></td></tr>; })}</tbody></table></Card>}
+
+    {tab === "history" && <Card><table className="w-full data-table"><thead><tr><th>Mã biến động</th><th>Thời gian</th><th>Phụ tùng</th><th>Loại</th><th className="text-right">Số lượng</th><th className="text-right">Trước</th><th className="text-right">Sau</th><th>Chứng từ</th><th>Ghi chú</th></tr></thead><tbody>{bienDongKho.map((m) => <tr key={m.MaBienDong}><td className="mono text-xs">{m.MaBienDong}</td><td>{dateTime(m.ThoiGian)}</td><td>{m.MaPhuTung} · {partName(m.MaPhuTung)}</td><td><Badge variant={m.LoaiBienDong === "NHAP" ? "completed" : m.LoaiBienDong === "XUAT" ? "blue" : "gray"} label={m.LoaiBienDong} /></td><td className="text-right font-semibold">{m.SoLuong > 0 ? "+" : ""}{m.SoLuong}</td><td className="text-right">{m.SoLuongTruoc ?? "—"}</td><td className="text-right">{m.SoLuongSau ?? "—"}</td><td className="mono text-xs">{m.MaPhieuNhap ?? m.MaPhieuXuat ?? "—"}</td><td className="text-xs">{m.GhiChu ?? "—"}</td></tr>)}</tbody></table></Card>}
+  </div>;
 }

@@ -194,12 +194,12 @@ export default function TechnicianView() {
               <div key={item.id} className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-slate-800">{item.name}</p>
-                  <p className="text-xs text-slate-400">Tồn kho: {item.stock} {item.unit}</p>
+                  <p className="text-xs text-slate-400">Tồn kho: {item.stock}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <input type="number" min={0} max={item.stock} defaultValue={0}
                     className="w-16 h-8 border border-[#dde3ec] rounded-lg px-2 text-sm text-center" />
-                  <span className="text-xs text-slate-400">{item.unit}</span>
+                  <span className="text-xs text-slate-400">SL</span>
                 </div>
                 <Badge variant={item.status as any} />
               </div>

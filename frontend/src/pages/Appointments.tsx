@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Card, Badge, Button, SearchBox, Tabs, Modal, Input, Select, Icons } from "../components/ui";
 import { dichVu, khachHang, mockAppointments, xe } from "../mock/data";
 
@@ -20,13 +20,13 @@ const CALENDAR_DAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
 // Simple calendar grid for week 16-22 Sep 2024
 const WEEK_DATES = [
-  { d: 16, date: "2024-09-16" },
-  { d: 17, date: "2024-09-17" },
-  { d: 18, date: "2024-09-18" },
-  { d: 19, date: "2024-09-19" },
-  { d: 20, date: "2024-09-20" },
-  { d: 21, date: "2024-09-21" },
-  { d: 22, date: "2024-09-22" },
+  { d: 16, date: "2026-09-16" },
+  { d: 17, date: "2026-09-17" },
+  { d: 18, date: "2026-09-18" },
+  { d: 19, date: "2026-09-19" },
+  { d: 20, date: "2026-09-20" },
+  { d: 21, date: "2026-09-21" },
+  { d: 22, date: "2026-09-22" },
 ];
 
 export default function Appointments() {

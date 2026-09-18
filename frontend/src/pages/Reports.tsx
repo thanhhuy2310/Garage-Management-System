@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer, Legend
@@ -30,7 +30,7 @@ export default function Reports() {
         <div className="flex items-center gap-3">
           <Tabs tabs={[{ key: "week", label: "Tuần" }, { key: "month", label: "Tháng" }, { key: "quarter", label: "Quý" }, { key: "year", label: "Năm" }]}
             active={period} onChange={setPeriod} />
-          <input type="month" defaultValue="2024-09" className="h-9 border border-[#dde3ec] rounded-lg px-3 text-sm" />
+          <input type="month" defaultValue="2026-09" className="h-9 border border-[#dde3ec] rounded-lg px-3 text-sm" />
         </div>
         <Button variant="outline" icon={Icons.download}>Xuất báo cáo</Button>
       </div>

@@ -1,206 +1,54 @@
-import React, { useState } from "react";
-import { Card, Badge, Button, Modal, Icons } from "../components/ui";
-import { mockInvoices, calcTotal, formatCurrency } from "../data";
+import React, { useMemo, useState } from "react";
+import { Badge, Button, Card, Input, Modal, Icons } from "../components/ui";
+import { baoGia, chiTietBaoGia, formatCurrency, khachHang, phieuSuaChua, phieuTiepNhan, xe } from "../data";
+import { hoaDon, thanhToan } from "../mock/schemaData";
+
+const toDate = (value: string) => new Date(value).toLocaleString("vi-VN");
 
 export default function Invoice() {
-  const [selected, setSelected] = useState(mockInvoices[1].id);
-  const [showPayModal, setShowPayModal] = useState(false);
-  const [payMethod, setPayMethod] = useState<"cash" | "transfer">("transfer");
-  const [paid, setPaid] = useState(false);
+  const [selectedId, setSelectedId] = useState(hoaDon[1]?.MaHoaDon ?? hoaDon[0].MaHoaDon);
+  const [showPay, setShowPay] = useState(false);
+  const [method, setMethod] = useState<"cash" | "transfer">("transfer");
+  const [localPayments, setLocalPayments] = useState(thanhToan);
+  const invoice = hoaDon.find((item) => item.MaHoaDon === selectedId)!;
+  const repair = phieuSuaChua.find((item) => item.MaPhieuSuaChua === invoice.MaPhieuSuaChua);
+  const reception = phieuTiepNhan.find((item) => item.MaTiepNhan === repair?.MaTiepNhan);
+  const vehicle = xe.find((item) => item.MaXe === reception?.MaXe);
+  const customer = khachHang.find((item) => item.MaKhachHang === vehicle?.MaKhachHang);
+  const quote = baoGia.find((item) => item.MaPhieuSuaChua === invoice.MaPhieuSuaChua);
+  const lines = chiTietBaoGia.filter((item) => item.MaBaoGia === quote?.MaBaoGia);
+  const payments = localPayments.filter((item) => item.MaHoaDon === invoice.MaHoaDon);
+  const paidAmount = payments.reduce((sum, item) => sum + item.SoTien, 0);
+  const remaining = Math.max(invoice.TongTien - paidAmount, 0);
+  const status = remaining === 0 ? "paid" : "unpaid";
+  const nextPaymentId = useMemo(() => `TT${String(localPayments.length + 1).padStart(3, "0")}`, [localPayments.length]);
 
-  const inv = mockInvoices.find(i => i.id === selected);
-  const total = inv ? calcTotal(inv.services, inv.parts) : 0;
-  const isUnpaid = inv?.status === "unpaid" && !paid;
+  const confirmPayment = () => {
+    if (remaining <= 0) return;
+    setLocalPayments((items) => [...items, { MaThanhToan: nextPaymentId, MaHoaDon: invoice.MaHoaDon, NgayThanhToan: "2026-09-18T09:00:00", SoTien: remaining, PhuongThuc: method }]);
+    setShowPay(false);
+  };
 
-  return (
-    <div className="p-6">
-      <div className="grid grid-cols-3 gap-4">
-        {/* List */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="font-semibold text-slate-700">Hóa đơn</h2>
-            <Button size="sm" icon={Icons.plus}>Lập hóa đơn</Button>
-          </div>
-          {mockInvoices.map(i => {
-            const t = calcTotal(i.services, i.parts);
-            return (
-              <div key={i.id} onClick={() => { setSelected(i.id); setPaid(false); }}
-                className={`bg-white rounded-xl border p-4 cursor-pointer transition-all hover:border-[#1e3a6e] ${selected === i.id ? "border-[#1e3a6e] ring-1 ring-[#1e3a6e]" : "border-[#dde3ec]"}`}>
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <span className="mono text-xs text-slate-400">{i.id}</span>
-                    <p className="font-semibold text-slate-800 text-sm">{i.customer}</p>
-                    <p className="text-xs text-slate-500">{i.vehicle}</p>
-                  </div>
-                  <Badge variant={(i.status === "paid" || (selected === i.id && paid)) ? "paid" : "unpaid"} />
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs text-slate-500">{i.created.split("-").reverse().join("/")}</span>
-                  <span className="font-bold text-[#1e3a6e] text-sm">{formatCurrency(t)}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Detail */}
-        <div className="col-span-2">
-          {inv && (
-            <Card className="p-6">
-              {/* Invoice header */}
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    <h2 className="text-2xl font-bold text-slate-800">HÓA ĐƠN {inv.id}</h2>
-                    <Badge variant={(inv.status === "paid" || paid) ? "paid" : "unpaid"} />
-                  </div>
-                  <p className="text-slate-500 text-sm">Gara Ô Tô Thành Công · 123 Lê Văn Sỹ, Q.3, TP.HCM</p>
-                </div>
-                <Button variant="outline" size="sm" icon={Icons.printer}>In hóa đơn</Button>
-              </div>
-
-              {/* Customer & vehicle info */}
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="p-4 bg-slate-50 rounded-xl">
-                  <p className="text-xs text-slate-500 mb-1">Khách hàng</p>
-                  <p className="font-semibold text-slate-800">{inv.customer}</p>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-xl">
-                  <p className="text-xs text-slate-500 mb-1">Biển số xe</p>
-                  <p className="font-mono font-bold text-[#1e3a6e]">{inv.vehicle}</p>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-xl">
-                  <p className="text-xs text-slate-500 mb-1">Phiếu sửa chữa</p>
-                  <p className="font-mono text-sm text-blue-600">{inv.repairId}</p>
-                </div>
-              </div>
-
-              {/* Services */}
-              {inv.services.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Dịch vụ</p>
-                  <table className="w-full data-table">
-                    <thead>
-                      <tr><th>Tên dịch vụ</th><th className="text-right">SL</th><th className="text-right">Đơn giá</th><th className="text-right">Thành tiền</th></tr>
-                    </thead>
-                    <tbody>
-                      {inv.services.map((s, i) => (
-                        <tr key={i}>
-                          <td className="font-medium">{s.name}</td>
-                          <td className="text-right">{s.qty}</td>
-                          <td className="text-right text-slate-600">{formatCurrency(s.price)}</td>
-                          <td className="text-right font-semibold">{formatCurrency(s.qty * s.price)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* Parts */}
-              {inv.parts.length > 0 && (
-                <div className="mb-6">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Phụ tùng</p>
-                  <table className="w-full data-table">
-                    <thead>
-                      <tr><th>Tên phụ tùng</th><th className="text-right">SL</th><th className="text-right">Đơn giá</th><th className="text-right">Thành tiền</th></tr>
-                    </thead>
-                    <tbody>
-                      {inv.parts.map((p, i) => (
-                        <tr key={i}>
-                          <td className="font-medium">{p.name}</td>
-                          <td className="text-right">{p.qty}</td>
-                          <td className="text-right text-slate-600">{formatCurrency(p.price)}</td>
-                          <td className="text-right font-semibold">{formatCurrency(p.qty * p.price)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* Total */}
-              <div className="border-t border-[#dde3ec] pt-4 flex justify-end">
-                <div className="w-72 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Tổng dịch vụ:</span>
-                    <span>{formatCurrency(inv.services.reduce((s, x) => s + x.qty * x.price, 0))}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Tổng phụ tùng:</span>
-                    <span>{formatCurrency(inv.parts.reduce((s, x) => s + x.qty * x.price, 0))}</span>
-                  </div>
-                  <div className="flex justify-between pt-2 border-t border-[#dde3ec]">
-                    <span className="font-bold text-slate-800 text-base">Tổng cộng:</span>
-                    <span className="text-2xl font-bold text-[#1e3a6e]">{formatCurrency(total)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment status */}
-              {(inv.status === "paid" || paid) ? (
-                <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3">
-                  <span className="text-emerald-600 text-xl">{Icons.checkCircle}</span>
-                  <div>
-                    <p className="font-semibold text-emerald-800">Đã thanh toán</p>
-                    <p className="text-xs text-emerald-700">
-                      {inv.paidAt ? `Ngày ${inv.paidAt.split("-").reverse().join("/")} · ` : ""}
-                      {inv.paymentMethod === "transfer" ? "Chuyển khoản" : "Tiền mặt"}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-6 flex gap-3">
-                  <Button className="flex-1" variant="primary" onClick={() => setShowPayModal(true)}>
-                    Thanh toán
-                  </Button>
-                  <Button variant="outline" icon={Icons.printer}>In hóa đơn</Button>
-                </div>
-              )}
-            </Card>
-          )}
-        </div>
-      </div>
-
-      {/* Payment modal */}
-      <Modal open={showPayModal} onClose={() => setShowPayModal(false)} title="Thanh toán hóa đơn">
-        <div className="space-y-5">
-          <div className="p-4 bg-[#e8eef7] rounded-xl flex items-center justify-between">
-            <span className="text-slate-600 font-medium">Tổng thanh toán</span>
-            <span className="text-2xl font-bold text-[#1e3a6e]">{formatCurrency(total)}</span>
-          </div>
-
-          <div>
-            <p className="text-xs font-medium text-slate-600 mb-2">Phương thức thanh toán</p>
-            <div className="grid grid-cols-2 gap-3">
-              {(["cash", "transfer"] as const).map(m => (
-                <button key={m} onClick={() => setPayMethod(m)}
-                  className={`p-4 rounded-xl border-2 text-left transition-all ${payMethod === m ? "border-[#1e3a6e] bg-[#e8eef7]" : "border-[#dde3ec] hover:border-slate-300"}`}>
-                  <div className="text-2xl mb-1">{m === "cash" ? "💵" : "🏦"}</div>
-                  <p className="font-semibold text-slate-700 text-sm">{m === "cash" ? "Tiền mặt" : "Chuyển khoản"}</p>
-                  {m === "transfer" && <p className="text-xs text-slate-400 mt-0.5">ACB · 1234567890</p>}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {payMethod === "transfer" && (
-            <div className="p-4 bg-slate-50 rounded-xl text-center border border-dashed border-slate-300">
-              <p className="text-xs text-slate-500 mb-1">Mã QR chuyển khoản</p>
-              <div className="w-32 h-32 bg-slate-200 rounded-lg mx-auto flex items-center justify-center text-slate-400 text-xs">QR Code</div>
-              <p className="text-xs text-slate-500 mt-1">ACB · Gara Ô Tô Thành Công · 1234567890</p>
-            </div>
-          )}
-
-          <div className="flex gap-3">
-            <button onClick={() => setShowPayModal(false)} className="flex-1 h-10 rounded-lg border border-[#dde3ec] text-slate-600 text-sm font-medium hover:bg-slate-50">Hủy</button>
-            <button onClick={() => { setShowPayModal(false); setPaid(true); }}
-              className="flex-1 h-10 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-all">
-              Xác nhận thanh toán
-            </button>
-          </div>
-        </div>
-      </Modal>
+  return <div className="p-6 grid grid-cols-3 gap-4">
+    <div className="space-y-3">
+      <div className="flex justify-between items-center"><h2 className="font-semibold">Hóa đơn</h2><Button size="sm" icon={Icons.plus}>Lập hóa đơn</Button></div>
+      {hoaDon.map((item) => {
+        const paid = localPayments.filter((p) => p.MaHoaDon === item.MaHoaDon).reduce((sum, p) => sum + p.SoTien, 0);
+        return <button key={item.MaHoaDon} onClick={() => setSelectedId(item.MaHoaDon)} className={`w-full text-left bg-white rounded-xl border p-4 ${selectedId === item.MaHoaDon ? "border-[#1e3a6e] ring-1 ring-[#1e3a6e]" : "border-[#dde3ec]"}`}><div className="flex justify-between"><span className="mono text-xs">{item.MaHoaDon}</span><Badge variant={paid >= item.TongTien ? "paid" : "unpaid"} /></div><p className="font-semibold mt-2">{item.MaPhieuSuaChua}</p><p className="text-xs text-slate-500">{toDate(item.NgayLap)}</p><p className="font-bold text-[#1e3a6e] mt-2">{formatCurrency(item.TongTien)}</p></button>;
+      })}
     </div>
-  );
+
+    <Card className="col-span-2 p-6">
+      <div className="flex justify-between mb-5"><div><div className="flex gap-3 items-center"><h2 className="text-2xl font-bold">HÓA ĐƠN {invoice.MaHoaDon}</h2><Badge variant={status} /></div><p className="text-sm text-slate-500">Ngày lập: {toDate(invoice.NgayLap)}</p></div><Button variant="outline" icon={Icons.printer}>In hóa đơn</Button></div>
+      <div className="grid grid-cols-3 gap-3 mb-5"><div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-500">Khách hàng</p><p className="font-semibold">{customer?.HoTen ?? "—"}</p></div><div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-500">Biển số</p><p className="font-semibold">{vehicle?.BienSo ?? "—"}</p></div><div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-500">Phiếu sửa chữa</p><p className="font-semibold mono">{invoice.MaPhieuSuaChua}</p></div></div>
+      <table className="w-full data-table"><thead><tr><th>Nội dung</th><th>Loại</th><th className="text-right">Số lượng</th><th className="text-right">Đơn giá</th><th className="text-right">Thành tiền</th></tr></thead><tbody>{lines.map((line) => <tr key={line.MaChiTietBaoGia}><td>{line.NoiDung}</td><td>{line.MaDichVu ? "Dịch vụ" : "Phụ tùng"}</td><td className="text-right">{line.SoLuong}</td><td className="text-right">{formatCurrency(line.DonGia)}</td><td className="text-right font-semibold">{formatCurrency(line.SoLuong * line.DonGia)}</td></tr>)}</tbody></table>
+      <div className="flex justify-end mt-4"><div className="w-80 space-y-2 text-sm"><div className="flex justify-between"><span>Tổng tiền hóa đơn</span><strong>{formatCurrency(invoice.TongTien)}</strong></div><div className="flex justify-between"><span>Đã thanh toán</span><span>{formatCurrency(paidAmount)}</span></div><div className="flex justify-between border-t pt-2 text-lg"><strong>Còn lại</strong><strong className="text-[#1e3a6e]">{formatCurrency(remaining)}</strong></div></div></div>
+      {payments.length > 0 && <div className="mt-5"><p className="text-xs uppercase font-semibold text-slate-500 mb-2">Các lần thanh toán</p>{payments.map((payment) => <div key={payment.MaThanhToan} className="flex justify-between p-3 bg-emerald-50 rounded-lg text-sm"><span>{payment.MaThanhToan} · {toDate(payment.NgayThanhToan)} · {payment.PhuongThuc === "transfer" ? "Chuyển khoản" : "Tiền mặt"}</span><strong>{formatCurrency(payment.SoTien)}</strong></div>)}</div>}
+      {remaining > 0 && <Button className="w-full mt-5 justify-center" onClick={() => setShowPay(true)}>Ghi nhận thanh toán</Button>}
+    </Card>
+
+    <Modal open={showPay} onClose={() => setShowPay(false)} title="Ghi nhận thanh toán">
+      <div className="space-y-4"><Input label="Mã hóa đơn" value={invoice.MaHoaDon} readOnly /><Input label="Ngày thanh toán" type="datetime-local" defaultValue="2026-09-18T09:00" /><Input label="Số tiền" type="number" value={remaining} readOnly /><div><p className="text-xs font-medium text-slate-600 mb-2">Phương thức</p><div className="grid grid-cols-2 gap-2">{(["cash", "transfer"] as const).map((value) => <button key={value} onClick={() => setMethod(value)} className={`p-3 border rounded-lg ${method === value ? "border-[#1e3a6e] bg-[#e8eef7]" : "border-[#dde3ec]"}`}>{value === "cash" ? "Tiền mặt" : "Chuyển khoản"}</button>)}</div></div><p className="text-xs text-slate-500">sp_GhiNhanThanhToan cho phép nhiều lần thanh toán và cập nhật trạng thái hóa đơn theo tổng đã trả.</p><div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowPay(false)}>Hủy</Button><Button onClick={confirmPayment}>Xác nhận</Button></div></div>
+    </Modal>
+  </div>;
 }
