@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Card, Badge, Button, Modal, Icons } from "../components/ui";
-import { mockQuotations, calcTotal, formatCurrency } from "../data";
+import { baoGia, mockQuotations, calcTotal, formatCurrency } from "../mock/data";
 
 export default function Quotation() {
   const [selected, setSelected] = useState<string | null>(mockQuotations[1].id);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const q = mockQuotations.find(x => x.id === selected);
+  const quotationRecord = baoGia.find((record) => record.MaBaoGia === selected);
   const total = q ? calcTotal(q.services, q.parts) : 0;
 
   return (
@@ -51,7 +52,11 @@ export default function Quotation() {
                     <h2 className="text-xl font-bold text-slate-800">Báo giá {q.id}</h2>
                     <Badge variant={q.status as any} />
                   </div>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <span className="text-slate-500 text-xs">Phiếu sửa chữa</span>
+                      <p className="font-medium mono">{q.repairId}</p>
+                    </div>
                     <div>
                       <span className="text-slate-500 text-xs">Khách hàng</span>
                       <p className="font-medium">{q.customer}</p>
@@ -77,6 +82,7 @@ export default function Quotation() {
                 <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-2">
                   <span className="text-emerald-600">{Icons.checkCircle}</span>
                   <p className="text-sm font-medium text-emerald-800">Đã xác nhận – Có thể tiến hành sửa chữa</p>
+                  {quotationRecord?.NgayXacNhan && <span className="ml-auto text-xs text-emerald-700">{new Date(quotationRecord.NgayXacNhan).toLocaleString("vi-VN")}</span>}
                 </div>
               )}
               {q.status === "pending" && (

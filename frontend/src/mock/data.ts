@@ -97,6 +97,10 @@ export const dichVu: DichVu[] = [
   { MaDichVu: "DV005", TenDichVu: "Bảo dưỡng định kỳ", LoaiDichVu: "Bảo dưỡng", DonGia: 250000, MoTa: "Bảo dưỡng tổng quát" },
   { MaDichVu: "DV006", TenDichVu: "Thay lốp xe", LoaiDichVu: "Lốp", DonGia: 120000, MoTa: "Tháo lắp và cân bằng lốp" },
   { MaDichVu: "DV007", TenDichVu: "Sơn xe, chỉnh form", LoaiDichVu: "Đồng sơn", DonGia: 1500000, MoTa: "Sơn và chỉnh form thân vỏ" },
+  { MaDichVu: "DV008", TenDichVu: "Thay dầu động cơ", LoaiDichVu: "Bảo dưỡng", DonGia: 150000, MoTa: "Thay dầu động cơ theo tiêu chuẩn" },
+  { MaDichVu: "DV009", TenDichVu: "Kiểm tra phanh", LoaiDichVu: "Sửa chữa", DonGia: 80000, MoTa: "Kiểm tra hệ thống phanh" },
+  { MaDichVu: "DV010", TenDichVu: "Kiểm tra và vệ sinh bugi", LoaiDichVu: "Động cơ", DonGia: 120000, MoTa: "Kiểm tra, vệ sinh bugi" },
+  { MaDichVu: "DV011", TenDichVu: "Điều chỉnh bướm ga", LoaiDichVu: "Động cơ", DonGia: 150000, MoTa: "Vệ sinh và điều chỉnh bướm ga" },
 ];
 
 export const lichHen: LichHen[] = [
@@ -209,6 +213,43 @@ export const mockRepairOrders = [
     ],
     notes: "Mới tiếp nhận"
   },
+];
+
+export interface BaoGia {
+  MaBaoGia: string;
+  MaPhieuSuaChua: string;
+  NgayLap: string;
+  TongTien: number;
+  TrangThai: QuotationStatus;
+  NgayXacNhan: string | null;
+}
+
+export interface ChiTietBaoGia {
+  MaChiTietBaoGia: string;
+  MaBaoGia: string;
+  MaDichVu: string | null;
+  MaPhuTung: string | null;
+  NoiDung: string;
+  SoLuong: number;
+  DonGia: number;
+}
+
+export const baoGia: BaoGia[] = [
+  { MaBaoGia: "BG001", MaPhieuSuaChua: "PSC001", NgayLap: "2024-09-15T10:30:00", TongTien: 645000, TrangThai: "confirmed", NgayXacNhan: "2024-09-15T11:00:00" },
+  { MaBaoGia: "BG002", MaPhieuSuaChua: "PSC002", NgayLap: "2024-09-16T11:00:00", TongTien: 1100000, TrangThai: "pending", NgayXacNhan: null },
+  { MaBaoGia: "BG003", MaPhieuSuaChua: "PSC003", NgayLap: "2024-09-14T10:00:00", TongTien: 550000, TrangThai: "confirmed", NgayXacNhan: "2024-09-14T10:20:00" },
+];
+
+export const chiTietBaoGia: ChiTietBaoGia[] = [
+  { MaChiTietBaoGia: "CTBG001", MaBaoGia: "BG001", MaDichVu: "DV008", MaPhuTung: null, NoiDung: "Thay dầu động cơ", SoLuong: 1, DonGia: 150000 },
+  { MaChiTietBaoGia: "CTBG002", MaBaoGia: "BG001", MaDichVu: "DV009", MaPhuTung: null, NoiDung: "Kiểm tra phanh", SoLuong: 1, DonGia: 80000 },
+  { MaChiTietBaoGia: "CTBG003", MaBaoGia: "BG001", MaDichVu: null, MaPhuTung: "PT011", NoiDung: "Dầu nhớt Castrol 5W-30 (4L)", SoLuong: 1, DonGia: 320000 },
+  { MaChiTietBaoGia: "CTBG004", MaBaoGia: "BG001", MaDichVu: null, MaPhuTung: "PT002", NoiDung: "Lọc dầu", SoLuong: 1, DonGia: 95000 },
+  { MaChiTietBaoGia: "CTBG005", MaBaoGia: "BG002", MaDichVu: "DV002", MaPhuTung: null, NoiDung: "Kiểm tra và sửa phanh trước", SoLuong: 1, DonGia: 200000 },
+  { MaChiTietBaoGia: "CTBG006", MaBaoGia: "BG002", MaDichVu: null, MaPhuTung: "PT004", NoiDung: "Má phanh trước Kia Sorento", SoLuong: 2, DonGia: 450000 },
+  { MaChiTietBaoGia: "CTBG007", MaBaoGia: "BG003", MaDichVu: "DV010", MaPhuTung: null, NoiDung: "Kiểm tra và vệ sinh bugi", SoLuong: 1, DonGia: 120000 },
+  { MaChiTietBaoGia: "CTBG008", MaBaoGia: "BG003", MaDichVu: "DV011", MaPhuTung: null, NoiDung: "Điều chỉnh bướm ga", SoLuong: 1, DonGia: 150000 },
+  { MaChiTietBaoGia: "CTBG009", MaBaoGia: "BG003", MaDichVu: null, MaPhuTung: "PT005", NoiDung: "Bugi NGK (bộ 4)", SoLuong: 1, DonGia: 280000 },
 ];
 
 export const mockQuotations = [
