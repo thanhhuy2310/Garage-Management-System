@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Card, Badge, Button, SearchBox, Pagination, Icons, Modal, Input } from "../components/ui";
+import { useState } from "react";
+import { Card, Badge, Button, SearchBox, Pagination, Icons, Modal, Input, TableContainer } from "../components/ui";
 import { khachHang, xe, mockRepairOrders } from "../mock/data";
 
 export default function Customers() {
@@ -30,6 +30,7 @@ export default function Customers() {
         {/* Table */}
         <div className={selected ? "xl:col-span-2" : ""}>
           <Card>
+            <TableContainer>
             <table className="w-full data-table">
               <thead>
                 <tr>
@@ -51,7 +52,7 @@ export default function Customers() {
                     <td><span className="mono text-xs text-slate-400">{customer.MaKhachHang}</span></td>
                     <td>
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-bold text-primary">
                           {customer.HoTen.charAt(0)}
                         </div>
                         <span className="font-medium text-slate-800">{customer.HoTen}</span>
@@ -73,6 +74,7 @@ export default function Customers() {
                 )})}
               </tbody>
             </table>
+            </TableContainer>
             <div className="flex items-center justify-between border-t border-border px-4 py-3">
               <p className="text-xs text-slate-500">{filtered.length} khách hàng</p>
               <Pagination page={page} total={filtered.length} perPage={PER} onChange={setPage} />
@@ -117,7 +119,7 @@ export default function Customers() {
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Xe ({detailVehicles.length})</p>
               <div className="space-y-2">
                 {detailVehicles.map(vehicle => (
-                  <div key={vehicle.MaXe} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                  <div key={vehicle.MaXe} className="flex items-center gap-3 rounded-lg bg-surface-subtle p-3">
                     <span className="text-primary">{Icons.car}</span>
                     <div>
                       <p className="mono text-sm font-semibold text-primary">{vehicle.BienSo}</p>
@@ -133,7 +135,7 @@ export default function Customers() {
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Lịch sử gần đây</p>
               <div className="space-y-2">
                 {mockRepairOrders.filter(r => r.customerId === detail.MaKhachHang).map(r => (
-                  <div key={r.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                    <div key={r.id} className="flex items-center justify-between rounded-lg bg-surface-subtle p-3">
                     <div>
                       <p className="mono text-xs text-slate-500">{r.id}</p>
                       <p className="text-xs font-medium">{r.created.split("-").reverse().join("/")}</p>
