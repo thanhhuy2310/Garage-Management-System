@@ -171,7 +171,16 @@ export default function App() {
   }
 
   if (role === "customer") {
-    return <Suspense fallback={<PageLoading />}><CustomerPortal onLogout={handleLogout} /></Suspense>;
+    const customerPage = route.area === "customer" ? route.page : "overview";
+    return (
+      <Suspense fallback={<PageLoading />}>
+        <CustomerPortal
+          page={customerPage}
+          onNavigate={(next) => navigateTo(ROUTE_PATHS.customer(next))}
+          onLogout={handleLogout}
+        />
+      </Suspense>
+    );
   }
 
   const page = route.area === "admin" && allowedPages.includes(route.page) ? route.page : landingPage;

@@ -2,15 +2,18 @@ import { useState } from "react";
 import { Button, Card, Icons, Input } from "../../components/ui";
 import CustomerLayout from "../../layouts/CustomerLayout";
 import { khachHang } from "../../mock/data";
+import type { CustomerPage } from "../../router";
 import CustomerAppointments from "./CustomerAppointments";
 import CustomerHistory from "./CustomerHistory";
 import CustomerNotifications from "./CustomerNotifications";
+import CustomerOverview from "./CustomerOverview";
 import CustomerQuotations from "./CustomerQuotations";
 import CustomerTracking from "./CustomerTracking";
 
-export type CustomerTab = "appointments" | "quotations" | "tracking" | "history" | "notifications" | "profile";
+export type CustomerTab = CustomerPage;
 
 const TABS: { key: CustomerTab; label: string; icon: React.ReactNode }[] = [
+  { key: "overview", label: "Tổng quan", icon: Icons.home },
   { key: "appointments", label: "Lịch hẹn", icon: Icons.calendar },
   { key: "quotations", label: "Báo giá", icon: Icons.fileText },
   { key: "tracking", label: "Tiến độ sửa chữa", icon: Icons.wrench },
@@ -24,15 +27,8 @@ const CURRENT_CUSTOMER_ID = "KH001";
 
 interface CustomerPortalProps {
   onLogout: () => void;
-}
-
-function TabPlaceholder({ title, note }: { title: string; note: string }) {
-  return (
-    <Card className="p-10 text-center">
-      <p className="ui-card-title">{title}</p>
-      <p className="ui-secondary-text mx-auto mt-1 max-w-md text-sm">{note}</p>
-    </Card>
-  );
+  page: CustomerPage;
+  onNavigate: (page: CustomerPage) => void;
 }
 
 function ProfileTab() {
@@ -73,8 +69,7 @@ function ProfileTab() {
   );
 }
 
-export default function CustomerPortal({ onLogout }: CustomerPortalProps) {
-  const [tab, setTab] = useState<CustomerTab>("appointments");
+export default function CustomerPortal({ onLogout, page, onNavigate }: CustomerPortalProps) {
   const customer = khachHang.find((c) => c.MaKhachHang === CURRENT_CUSTOMER_ID);
 
   return (
@@ -89,10 +84,10 @@ export default function CustomerPortal({ onLogout }: CustomerPortalProps) {
                 key={item.key}
                 type="button"
                 role="tab"
-                aria-selected={tab === item.key}
-                onClick={() => setTab(item.key)}
+                aria-selected={page === item.key}
+                onClick={() => onNavigate(item.key)}
                 className={`flex min-h-10 flex-shrink-0 items-center gap-1.5 rounded-md px-3 text-[13px] font-medium transition-all ${
-                  tab === item.key ? "bg-primary text-primary-foreground" : "text-slate-600 hover:bg-surface-subtle"
+                  page === item.key ? "bg-primary text-primary-foreground" : "text-slate-600 hover:bg-surface-subtle"
                 }`}
               >
                 <span aria-hidden="true">{item.icon}</span>
@@ -104,12 +99,13 @@ export default function CustomerPortal({ onLogout }: CustomerPortalProps) {
       }
     >
       <div className="space-y-4">
-        {tab === "appointments" && <CustomerAppointments />}
-        {tab === "quotations" && <CustomerQuotations />}
-        {tab === "tracking" && <CustomerTracking />}
-        {tab === "history" && <CustomerHistory />}
-        {tab === "notifications" && <CustomerNotifications />}
-        {tab === "profile" && <ProfileTab />}
+        {page === "overview" && <CustomerOverview onNavigate={onNavigate} />}
+        {page === "appointments" && <CustomerAppointments />}
+        {page === "quotations" && <CustomerQuotations />}
+        {page === "tracking" && <CustomerTracking />}
+        {page === "history" && <CustomerHistory />}
+        {page === "notifications" && <CustomerNotifications />}
+        {page === "profile" && <ProfileTab />}
       </div>
     </CustomerLayout>
   );
