@@ -150,17 +150,21 @@ export default function App() {
       const publicPage = route.page as PublicPageKey;
       const goPublic = (page: PublicPageKey) => navigateTo(ROUTE_PATHS.public(page));
       const goLogin = () => navigateTo("/login");
+      const goBooking = () => {
+        setRole("customer");
+        navigateTo("/login");
+      };
       return (
         <PublicLayout>
           <Suspense fallback={<PageLoading />}>
-            <PublicHome page={publicPage} onNavigate={goPublic} onLogin={goLogin} onBook={goLogin} />
+            <PublicHome page={publicPage} onNavigate={goPublic} onLogin={goLogin} onBook={goBooking} />
           </Suspense>
         </PublicLayout>
       );
     }
     return (
       <div className="relative">
-        <Login onLogin={handleLogin} account={{ label: ROLE_LABELS[role], username: ROLE_USERNAMES[role] }} />
+        <Login onLogin={handleLogin} onBack={() => navigateTo("/")} account={{ label: ROLE_LABELS[role], username: ROLE_USERNAMES[role] }} />
         <RolePicker role={role} onChange={setRole} />
       </div>
     );

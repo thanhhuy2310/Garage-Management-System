@@ -34,7 +34,7 @@ export default function PublicHeader({ active, onNavigate, onLogin, onBook }: Pu
   return (
     <>
       {/* Utility top bar */}
-      <div className="hidden bg-primary text-xs text-white/80 md:block">
+      <div className="hidden bg-brand-dark text-xs text-white/80 md:block">
         <div className="mx-auto flex h-9 w-full max-w-6xl items-center justify-between px-4">
           <div className="flex items-center gap-4">
             <a href={`tel:${HOTLINE.replace(/\s/g, "")}`} className="flex items-center gap-1.5 font-semibold text-white transition-all hover:text-white">
@@ -63,7 +63,7 @@ export default function PublicHeader({ active, onNavigate, onLogin, onBook }: Pu
             aria-label={`${GARAGE_NAME} – Trang chủ`}
             className="flex min-w-0 items-center gap-2.5 text-left"
           >
-            <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-white" aria-hidden="true">
+            <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-brand-dark text-white" aria-hidden="true">
               {Icons.wrench}
             </span>
             <span className="min-w-0">

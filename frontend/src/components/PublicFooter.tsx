@@ -66,7 +66,7 @@ export default function PublicFooter({ onNavigate, onBook }: PublicFooterProps) 
       </section>
 
       {/* Footer */}
-      <footer className="bg-primary text-sm text-white/70">
+      <footer className="bg-brand-dark text-sm text-white/70">
         <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <p className="text-[15px] font-bold text-white">{GARAGE_NAME}</p>

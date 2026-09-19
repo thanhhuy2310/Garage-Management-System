@@ -4,6 +4,7 @@ import { Icons } from "../components/ui";
 
 interface LoginProps {
   onLogin: () => void;
+  onBack: () => void;
   account: {
     label: string;
     username: string;
@@ -17,7 +18,7 @@ const FEATURES = [
   { icon: Icons.barChart, text: "Báo cáo thống kê" },
 ];
 
-export default function Login({ onLogin, account }: LoginProps) {
+export default function Login({ onLogin, onBack, account }: LoginProps) {
   const [username, setUsername] = useState(account.username);
   const [password, setPassword] = useState("demo123");
   const [remember, setRemember] = useState(false);
@@ -47,7 +48,7 @@ export default function Login({ onLogin, account }: LoginProps) {
 
   return (
     <div className="flex min-h-dvh bg-background">
-      <section className="relative hidden w-[46%] flex-col justify-between overflow-hidden bg-primary p-10 2xl:p-12 xl:flex">
+      <section className="relative hidden w-[46%] flex-col justify-between overflow-hidden bg-brand-dark p-10 2xl:p-12 xl:flex">
         <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
           <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-white/5" />
           <div className="absolute -bottom-20 -left-20 h-96 w-96 rounded-full bg-white/5" />
@@ -146,7 +147,7 @@ export default function Login({ onLogin, account }: LoginProps) {
 
           <button
             type="button"
-            onClick={() => { window.location.hash = "/"; }}
+            onClick={onBack}
             className="mt-4 inline-flex min-h-10 items-center gap-1 text-sm font-medium text-muted-foreground transition-all hover:text-primary"
           >
             <span aria-hidden="true">←</span> Về trang chủ website
