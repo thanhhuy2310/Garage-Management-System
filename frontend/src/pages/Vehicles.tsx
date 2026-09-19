@@ -48,7 +48,14 @@ export default function Vehicles() {
                 {filtered.map((vehicle) => (
                   <tr
                     key={vehicle.MaXe}
+                    tabIndex={0}
+                    aria-selected={selected === vehicle.MaXe}
                     onClick={() => setSelected(vehicle.MaXe === selected ? null : vehicle.MaXe)}
+                    onKeyDown={(event) => {
+                      if (event.currentTarget !== event.target || (event.key !== "Enter" && event.key !== " ")) return;
+                      event.preventDefault();
+                      setSelected(vehicle.MaXe === selected ? null : vehicle.MaXe);
+                    }}
                     className={`cursor-pointer ${selected === vehicle.MaXe ? "bg-info-soft" : ""}`}
                   >
                     <td><span className="mono text-xs text-slate-400">{vehicle.MaXe}</span></td>

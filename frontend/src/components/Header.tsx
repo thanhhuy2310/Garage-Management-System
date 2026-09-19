@@ -75,7 +75,7 @@ export default function Header({
         {BREADCRUMBS[page] && <span className="hidden text-xs text-slate-500 2xl:inline">{BREADCRUMBS[page]} /</span>}
         <h1 className="truncate text-lg font-semibold text-slate-900 sm:text-xl">{PAGE_TITLES[page] ?? page}</h1>
         {page === "dashboard" && (
-          <span className="hidden rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-600 2xl:inline">18/09/2026</span>
+          <span className="hidden rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-600 2xl:inline">17/09/2026</span>
         )}
         {page === "technician" && (
           <span className="hidden rounded-full bg-warning-soft px-2 py-0.5 text-xs font-medium text-warning sm:inline">Ca sáng 07:00–12:00</span>

@@ -320,6 +320,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
   outline-offset: 2px;
 }
 
+.data-table tr[tabindex]:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ring) 45%, transparent);
+  outline-offset: -3px;
+}
+
 button:disabled, input:disabled, select:disabled, textarea:disabled {
   cursor: not-allowed;
   opacity: 0.48;

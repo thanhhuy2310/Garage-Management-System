@@ -46,8 +46,18 @@ export default function Customers() {
                 {paged.map(customer => {
                   const vehicleCount = xe.filter(vehicle => vehicle.MaKhachHang === customer.MaKhachHang).length;
                   return (
-                  <tr key={customer.MaKhachHang} className={`cursor-pointer ${selected === customer.MaKhachHang ? "bg-info-soft" : ""}`}
-                    onClick={() => setSelected(customer.MaKhachHang === selected ? null : customer.MaKhachHang)}>
+                  <tr
+                    key={customer.MaKhachHang}
+                    tabIndex={0}
+                    aria-selected={selected === customer.MaKhachHang}
+                    className={`cursor-pointer ${selected === customer.MaKhachHang ? "bg-info-soft" : ""}`}
+                    onClick={() => setSelected(customer.MaKhachHang === selected ? null : customer.MaKhachHang)}
+                    onKeyDown={(event) => {
+                      if (event.currentTarget !== event.target || (event.key !== "Enter" && event.key !== " ")) return;
+                      event.preventDefault();
+                      setSelected(customer.MaKhachHang === selected ? null : customer.MaKhachHang);
+                    }}
+                  >
                     <td><span className="mono text-xs text-slate-400">{customer.MaKhachHang}</span></td>
                     <td>
                       <div className="flex items-center gap-2">

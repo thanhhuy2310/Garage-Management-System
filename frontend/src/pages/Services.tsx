@@ -57,7 +57,18 @@ export default function Services() {
               <thead><tr><th>Mã DV</th><th>Tên dịch vụ</th><th>Loại dịch vụ</th><th className="text-right">Đơn giá</th><th>Mô tả</th><th>Thao tác</th></tr></thead>
               <tbody>
                 {filtered.map((service) => (
-                  <tr key={service.MaDichVu} onClick={() => setSelected(service.MaDichVu === selected ? null : service.MaDichVu)} className={`cursor-pointer ${selected === service.MaDichVu ? "bg-primary-soft" : ""}`}>
+                  <tr
+                    key={service.MaDichVu}
+                    tabIndex={0}
+                    aria-selected={selected === service.MaDichVu}
+                    onClick={() => setSelected(service.MaDichVu === selected ? null : service.MaDichVu)}
+                    onKeyDown={(event) => {
+                      if (event.currentTarget !== event.target || (event.key !== "Enter" && event.key !== " ")) return;
+                      event.preventDefault();
+                      setSelected(service.MaDichVu === selected ? null : service.MaDichVu);
+                    }}
+                    className={`cursor-pointer ${selected === service.MaDichVu ? "bg-primary-soft" : ""}`}
+                  >
                     <td><span className="mono text-xs text-slate-400">{service.MaDichVu}</span></td>
                     <td className="font-medium text-slate-800">{service.TenDichVu}</td>
                     <td><span className="rounded-full bg-primary-soft px-2 py-1 text-xs font-medium text-primary">{service.LoaiDichVu || "—"}</span></td>

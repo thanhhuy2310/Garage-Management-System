@@ -41,8 +41,18 @@ export default function History() {
               {filtered.map(r => {
                 const total = r.items.reduce((s, i) => s + i.qty * i.price, 0);
                 return (
-                  <tr key={r.id} className={`cursor-pointer ${selected === r.id ? "bg-info-soft" : ""}`}
-                    onClick={() => setSelected(r.id === selected ? null : r.id)}>
+                  <tr
+                    key={r.id}
+                    tabIndex={0}
+                    aria-selected={selected === r.id}
+                    className={`cursor-pointer ${selected === r.id ? "bg-info-soft" : ""}`}
+                    onClick={() => setSelected(r.id === selected ? null : r.id)}
+                    onKeyDown={(event) => {
+                      if (event.currentTarget !== event.target || (event.key !== "Enter" && event.key !== " ")) return;
+                      event.preventDefault();
+                      setSelected(r.id === selected ? null : r.id);
+                    }}
+                  >
                     <td><span className="mono text-xs text-slate-400">{r.id}</span></td>
                     <td className="text-slate-600">{completedAt(r.id) ? new Date(completedAt(r.id)!).toLocaleString("vi-VN") : "—"}</td>
                     <td><span className="mono font-bold text-primary">{r.vehicle}</span></td>
