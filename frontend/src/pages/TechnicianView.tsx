@@ -15,7 +15,7 @@ function ProgressBar({ done, total }: { done: number; total: number }) {
         <span>{done}/{total} hạng mục</span>
         <span className="font-semibold text-slate-700">{pct}%</span>
       </div>
-      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+      <div className="h-2 overflow-hidden rounded-full bg-border">
         <div className={`h-full rounded-full transition-all ${pct === 100 ? "bg-success" : "bg-primary"}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
@@ -42,7 +42,7 @@ export default function TechnicianView() {
           <p className="text-xs text-slate-500">Kỹ thuật viên · Gara Ô Tô Thành Công</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-          <div className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs font-medium text-emerald-700">
+          <div className="rounded-lg border border-success/25 bg-success-soft px-3 py-1.5 text-xs font-medium text-success">
             ● Ca sáng: 07:00 – 12:00
           </div>
           <div className="rounded-lg bg-primary-soft px-3 py-1.5 text-xs font-medium text-primary">
@@ -124,10 +124,10 @@ export default function TechnicianView() {
                         </button>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <span className={`text-xs px-2 py-0.5 rounded font-medium ${item.type === "service" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}>
+                            <span className={`rounded px-2 py-0.5 text-xs font-medium ${item.type === "service" ? "bg-info-soft text-info" : "bg-primary-soft text-primary"}`}>
                               {item.type === "service" ? "Dịch vụ" : "Phụ tùng"}
                             </span>
-                            <span className={`text-sm font-medium ${done ? "text-emerald-700 line-through" : "text-slate-800"}`}>{item.name}</span>
+                            <span className={`text-sm font-medium ${done ? "text-success line-through" : "text-slate-800"}`}>{item.name}</span>
                           </div>
                           {item.type === "parts" && (
                             <p className="text-xs text-slate-400 mt-0.5">
@@ -135,7 +135,7 @@ export default function TechnicianView() {
                             </p>
                           )}
                         </div>
-                        {done && <span className="text-xs text-emerald-600 font-medium">✓ Đã hoàn tất</span>}
+                        {done && <span className="text-xs font-medium text-success">✓ Đã hoàn tất</span>}
                       </div>
                     );
                   })}
@@ -144,8 +144,8 @@ export default function TechnicianView() {
 
               {/* Notes */}
               {job.notes && (
-                <div className="mb-5 p-3 bg-amber-50 border border-amber-100 rounded-lg">
-                  <p className="text-xs font-medium text-amber-800">📌 Ghi chú: {job.notes}</p>
+                <div className="mb-5 rounded-lg border border-warning/25 bg-warning-soft p-3">
+                  <p className="text-xs font-medium text-warning">Ghi chú: {job.notes}</p>
                 </div>
               )}
 
@@ -185,7 +185,7 @@ export default function TechnicianView() {
           <p className="text-xs text-slate-500">Chỉ gửi yêu cầu khi công việc thực sự cần phụ tùng; phiếu sửa chữa không bắt buộc phải có phiếu xuất kho.</p>
           <div className="space-y-3">
             {mockInventory.slice(0, 5).map((item) => (
-              <div key={item.id} className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg">
+              <div key={item.id} className="flex items-center gap-4 rounded-lg bg-surface-subtle p-3">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-slate-800">{item.name}</p>
                   <p className="text-xs text-slate-400">Tồn kho: {item.stock}</p>
@@ -210,8 +210,8 @@ export default function TechnicianView() {
       <Modal open={showCompleteModal} onClose={() => setShowCompleteModal(false)} title="Xác nhận hoàn tất sửa chữa">
         <div className="space-y-4">
           <div className="rounded-lg border border-success/20 bg-success-soft p-4">
-            <p className="font-semibold text-emerald-800">Tất cả hạng mục đã hoàn thành!</p>
-            <p className="text-xs text-emerald-700 mt-1">Xe {job?.vehicle} sẽ được chuyển sang trạng thái "Hoàn tất sửa chữa".</p>
+            <p className="font-semibold text-success">Tất cả hạng mục đã hoàn thành!</p>
+            <p className="mt-1 text-xs text-success">Xe {job?.vehicle} sẽ được chuyển sang trạng thái "Hoàn tất sửa chữa".</p>
           </div>
           <Textarea label="Ghi chú bàn giao" defaultValue="Đã hoàn tất tất cả hạng mục. Xe trong tình trạng tốt, sẵn sàng bàn giao." />
           <div className="flex gap-3 justify-end">

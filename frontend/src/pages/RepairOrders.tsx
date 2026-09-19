@@ -27,7 +27,7 @@ function RepairTimeline({ status }: { status: string }) {
         <React.Fragment key={s.key}>
           <div className="flex flex-col items-center gap-1 flex-shrink-0">
             <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 text-xs font-bold ${
-              i < doneIdx ? "bg-emerald-500 border-emerald-500 text-white" :
+              i < doneIdx ? "border-success bg-success text-white" :
               i === doneIdx ? "bg-primary border-primary text-primary-foreground" :
               "bg-white border-slate-300 text-slate-400"
             }`}>
@@ -37,7 +37,7 @@ function RepairTimeline({ status }: { status: string }) {
             {s.time && i < doneIdx + 1 && <p className="mono text-xs text-slate-400">{s.time}</p>}
           </div>
           {i < steps.length - 1 && (
-            <div className={`flex-1 h-0.5 mx-1 mb-5 ${i < doneIdx ? "bg-emerald-400" : "bg-slate-200"}`} />
+            <div className={`mx-1 mb-5 h-0.5 flex-1 ${i < doneIdx ? "bg-success" : "bg-border"}`} />
           )}
         </React.Fragment>
       ))}
@@ -47,7 +47,7 @@ function RepairTimeline({ status }: { status: string }) {
 
 export default function RepairOrders() {
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(mockRepairOrders[0]?.id ?? null);
   const [showCreate, setShowCreate] = useState(false);
 
   const selectedOrder = mockRepairOrders.find(r => r.id === selected);
@@ -110,26 +110,26 @@ export default function RepairOrders() {
               </div>
 
               {/* Timeline */}
-              <div className="mb-6 overflow-x-auto rounded-lg bg-slate-50 p-4">
+              <div className="mb-6 overflow-x-auto rounded-lg bg-surface-subtle p-4">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Tiến độ xử lý</p>
                 <RepairTimeline status={selectedOrder.status} />
               </div>
 
               {/* Info */}
               <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="p-3 bg-slate-50 rounded-lg">
+                <div className="rounded-lg bg-surface-subtle p-3">
                   <p className="text-xs text-slate-500 mb-1">Phiếu tiếp nhận</p>
                   <p className="font-semibold text-sm mono">{selectedOrder.receptionId}</p>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
+                <div className="rounded-lg bg-surface-subtle p-3">
                   <p className="text-xs text-slate-500 mb-1">Ngày lập</p>
                   <p className="font-semibold text-sm">{selectedOrder.created.split("-").reverse().join("/")}</p>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
+                <div className="rounded-lg bg-surface-subtle p-3">
                   <p className="text-xs text-slate-500 mb-1">Kỹ thuật viên</p>
                   <p className="font-semibold text-sm">{selectedOrder.technician}</p>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-lg">
+                <div className="rounded-lg bg-surface-subtle p-3">
                   <p className="text-xs text-slate-500 mb-1">Ngày bắt đầu</p>
                   <p className="font-semibold text-sm">{selectedOrder.started.split("-").reverse().join("/")}</p>
                 </div>
@@ -154,7 +154,7 @@ export default function RepairOrders() {
                     {selectedOrder.items.map((item, i) => (
                       <tr key={i}>
                         <td>
-                          <span className={`text-xs px-2 py-0.5 rounded font-medium ${item.type === "service" ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"}`}>
+                          <span className={`rounded px-2 py-0.5 text-xs font-medium ${item.type === "service" ? "bg-info-soft text-info" : "bg-primary-soft text-primary"}`}>
                             {item.type === "service" ? "Dịch vụ" : "Phụ tùng"}
                           </span>
                         </td>
@@ -164,8 +164,8 @@ export default function RepairOrders() {
                         <td className="text-right font-semibold">{formatCurrency(item.qty * item.price)}</td>
                         <td>
                           {item.done
-                            ? <span className="text-emerald-600 text-xs flex items-center gap-1">{Icons.checkCircle} Xong</span>
-                            : <span className="text-amber-600 text-xs flex items-center gap-1">{Icons.info} Chờ</span>
+                            ? <span className="flex items-center gap-1 text-xs text-success">{Icons.checkCircle} Xong</span>
+                            : <span className="flex items-center gap-1 text-xs text-warning">{Icons.info} Chờ</span>
                           }
                         </td>
                       </tr>
@@ -187,8 +187,8 @@ export default function RepairOrders() {
 
               {/* Notes */}
               {selectedOrder.notes && (
-                <div className="mt-4 p-3 bg-amber-50 border border-amber-100 rounded-lg">
-                  <p className="text-xs font-medium text-amber-800">{Icons.info} Ghi chú: {selectedOrder.notes}</p>
+                <div className="mt-4 rounded-lg border border-warning/25 bg-warning-soft p-3">
+                  <p className="text-xs font-medium text-warning">{Icons.info} Ghi chú: {selectedOrder.notes}</p>
                 </div>
               )}
 
@@ -214,7 +214,7 @@ export default function RepairOrders() {
 
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Lập phiếu sửa chữa">
         <div className="space-y-4">
-          <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800">
+          <div className="rounded-lg border border-info/25 bg-info-soft p-3 text-xs text-info">
             Kiểm tra xe là bước bắt buộc trước khi lập phiếu sửa chữa.
           </div>
           <Select label="Phiếu tiếp nhận *" options={[

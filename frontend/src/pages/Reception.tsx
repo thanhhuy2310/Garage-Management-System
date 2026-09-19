@@ -17,8 +17,8 @@ export default function Reception() {
     return (
       <div className="mx-auto max-w-2xl">
         <Card className="p-8 text-center">
-          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success-soft">
+            <svg className="h-8 w-8 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="m20 6-11 11-5-5"/>
             </svg>
           </div>
@@ -42,7 +42,7 @@ export default function Reception() {
           <React.Fragment key={s}>
             <button onClick={() => setStep(i)} className="flex flex-shrink-0 items-center gap-2">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
-                i < step ? "bg-emerald-500 border-emerald-500 text-white" :
+                i < step ? "border-success bg-success text-white" :
                 i === step ? "bg-primary border-primary text-primary-foreground" :
                 "bg-white border-slate-300 text-slate-400"
               }`}>
@@ -50,7 +50,7 @@ export default function Reception() {
               </div>
               <span className={`text-sm font-medium hidden sm:block ${i <= step ? "text-slate-800" : "text-slate-400"}`}>{s}</span>
             </button>
-            {i < STEPS.length - 1 && <div className={`flex-1 h-0.5 ${i < step ? "bg-emerald-400" : "bg-slate-200"}`} />}
+            {i < STEPS.length - 1 && <div className={`h-0.5 flex-1 ${i < step ? "bg-success" : "bg-border"}`} />}
           </React.Fragment>
         ))}
       </div>
@@ -75,7 +75,7 @@ export default function Reception() {
                   </div>
                   <p className="text-xs text-slate-500">{selectedCustomer.DiaChi} · {xe.filter(vehicle => vehicle.MaKhachHang === selectedCustomer.MaKhachHang).length} xe đăng ký</p>
                 </div>
-                <p className="text-xs text-slate-400">Chưa tìm thấy? <button className="text-blue-600 underline">Thêm khách hàng mới</button></p>
+                <p className="text-xs text-muted-foreground">Chưa tìm thấy? <button type="button" className="font-medium text-primary underline">Thêm khách hàng mới</button></p>
               </div>
             </Card>
           )}
@@ -117,7 +117,7 @@ export default function Reception() {
                   </div>
                   <Badge variant="confirmed" />
                 </div>
-                <p className="text-xs text-slate-400">Không có lịch hẹn? <button className="text-blue-600 underline">Nhập yêu cầu trực tiếp</button></p>
+                <p className="text-xs text-muted-foreground">Không có lịch hẹn? <button type="button" className="font-medium text-primary underline">Nhập yêu cầu trực tiếp</button></p>
                 <Textarea label="Yêu cầu của khách hàng" defaultValue={receptionRecord.YeuCauKhachHang ?? ""} />
               </div>
             </Card>
@@ -128,7 +128,7 @@ export default function Reception() {
               <h3 className="font-semibold text-slate-800 mb-4">Tình trạng xe ban đầu</h3>
               <div className="space-y-3">
                 {["Ngoại thất xe", "Nội thất xe", "Lốp xe", "Đèn xe", "Hệ thống điện", "Hệ thống phanh"].map(item => (
-                  <div key={item} className="flex flex-col gap-3 rounded-lg bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div key={item} className="flex flex-col gap-3 rounded-lg bg-surface-subtle p-3 sm:flex-row sm:items-center sm:justify-between">
                     <span className="text-sm font-medium text-slate-700">{item}</span>
                     <div className="flex gap-2">
                       {["Tốt", "Bình thường", "Cần chú ý"].map(opt => (
@@ -149,13 +149,13 @@ export default function Reception() {
             <Card className="p-5">
               <h3 className="font-semibold text-slate-800 mb-4">Xác nhận phiếu tiếp nhận</h3>
               <div className="mb-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-                <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Khách hàng</p><p className="font-semibold">{selectedCustomer.HoTen}</p></div>
+                <div className="rounded-lg bg-surface-subtle p-3"><p className="mb-1 text-xs text-muted-foreground">Khách hàng</p><p className="font-semibold">{selectedCustomer.HoTen}</p></div>
                 <div className="rounded-lg bg-surface-subtle p-3"><p className="mb-1 text-xs text-slate-400">Biển số xe</p><p className="mono font-bold text-primary">{selectedVehicle.BienSo}</p></div>
-                <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Số km</p><p className="font-semibold">{selectedVehicle.SoKm?.toLocaleString("vi-VN")} km</p></div>
-                <div className="p-3 bg-slate-50 rounded-lg"><p className="text-xs text-slate-400 mb-1">Thời gian tiếp nhận</p><p className="font-semibold">{new Date(receptionRecord.NgayTiepNhan).toLocaleString("vi-VN")}</p></div>
+                <div className="rounded-lg bg-surface-subtle p-3"><p className="mb-1 text-xs text-muted-foreground">Số km</p><p className="font-semibold">{selectedVehicle.SoKm?.toLocaleString("vi-VN")} km</p></div>
+                <div className="rounded-lg bg-surface-subtle p-3"><p className="mb-1 text-xs text-muted-foreground">Thời gian tiếp nhận</p><p className="font-semibold">{new Date(receptionRecord.NgayTiepNhan).toLocaleString("vi-VN")}</p></div>
               </div>
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg mb-4">
-                <p className="text-xs font-medium text-amber-800">Yêu cầu khách: {receptionRecord.YeuCauKhachHang}</p>
+              <div className="mb-4 rounded-lg border border-warning/25 bg-warning-soft p-3">
+                <p className="text-xs font-medium text-warning">Yêu cầu khách: {receptionRecord.YeuCauKhachHang}</p>
               </div>
               <Input label="Ghi chú" defaultValue={receptionRecord.GhiChu ?? ""} placeholder="Ghi chú cho phiếu tiếp nhận" />
             </Card>

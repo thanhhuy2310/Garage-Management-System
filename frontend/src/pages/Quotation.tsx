@@ -79,16 +79,16 @@ export default function Quotation() {
 
               {/* Status notice */}
               {q.status === "confirmed" && (
-                <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-2">
-                  <span className="text-emerald-600">{Icons.checkCircle}</span>
-                  <p className="text-sm font-medium text-emerald-800">Đã xác nhận – Có thể tiến hành sửa chữa</p>
-                  {quotationRecord?.NgayXacNhan && <span className="ml-auto text-xs text-emerald-700">{new Date(quotationRecord.NgayXacNhan).toLocaleString("vi-VN")}</span>}
+                <div className="mb-4 flex items-center gap-2 rounded-lg border border-success/25 bg-success-soft p-3">
+                  <span className="text-success">{Icons.checkCircle}</span>
+                  <p className="text-sm font-medium text-success">Đã xác nhận – Có thể tiến hành sửa chữa</p>
+                  {quotationRecord?.NgayXacNhan && <span className="ml-auto text-xs text-success">{new Date(quotationRecord.NgayXacNhan).toLocaleString("vi-VN")}</span>}
                 </div>
               )}
               {q.status === "pending" && (
-                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2">
-                  <span className="text-amber-600">{Icons.info}</span>
-                  <p className="text-sm font-medium text-amber-800">Đang chờ khách hàng xác nhận...</p>
+                <div className="mb-4 flex items-center gap-2 rounded-lg border border-warning/25 bg-warning-soft p-3">
+                  <span className="text-warning">{Icons.info}</span>
+                  <p className="text-sm font-medium text-warning">Đang chờ khách hàng xác nhận...</p>
                 </div>
               )}
 
@@ -185,9 +185,9 @@ export default function Quotation() {
       {/* Confirm modal */}
       <Modal open={showConfirmModal} onClose={() => setShowConfirmModal(false)} title="Xác nhận báo giá">
         <div className="space-y-4">
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="font-semibold text-blue-800 text-sm">Xác nhận tiến hành sửa chữa?</p>
-            <p className="text-xs text-blue-700 mt-1">Sau khi xác nhận, kỹ thuật viên sẽ bắt đầu thực hiện các hạng mục trong báo giá.</p>
+          <div className="rounded-lg border border-info/25 bg-info-soft p-4">
+            <p className="text-sm font-semibold text-info">Xác nhận tiến hành sửa chữa?</p>
+            <p className="mt-1 text-xs text-info">Sau khi xác nhận, kỹ thuật viên sẽ bắt đầu thực hiện các hạng mục trong báo giá.</p>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-slate-600">Khách hàng:</span>
