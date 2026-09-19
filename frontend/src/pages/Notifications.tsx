@@ -10,10 +10,10 @@ const TYPE_ICON: Record<string, React.ReactNode> = {
 };
 
 const TYPE_COLOR: Record<string, string> = {
-  appointment: "bg-blue-100 text-blue-600",
-  repair: "bg-emerald-100 text-emerald-600",
-  parts: "bg-amber-100 text-amber-600",
-  payment: "bg-purple-100 text-purple-600",
+  appointment: "bg-info-soft text-info",
+  repair: "bg-success-soft text-success",
+  parts: "bg-warning-soft text-warning",
+  payment: "bg-primary-soft text-primary",
 };
 
 export default function Notifications() {
@@ -52,7 +52,7 @@ export default function Notifications() {
         )}
         {filtered.map(n => (
           <button key={n.id} type="button"
-            className={`flex w-full items-start gap-4 rounded-lg border bg-white p-4 text-left transition-all hover:border-slate-300 ${!n.read ? "border-blue-200 bg-blue-50/50" : "border-border"}`}
+            className={`flex w-full items-start gap-4 rounded-lg border bg-surface p-4 text-left transition-all hover:border-primary/50 ${!n.read ? "border-info/30 bg-info-soft/50" : "border-border"}`}
             onClick={() => markRead(n.id)} aria-label={`${n.read ? "Thông báo đã đọc" : "Đánh dấu đã đọc"}: ${n.title}`}>
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${TYPE_COLOR[n.type]}`}>
               {TYPE_ICON[n.type]}
@@ -60,7 +60,7 @@ export default function Notifications() {
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
                 <p className={`font-semibold text-sm ${!n.read ? "text-slate-900" : "text-slate-700"}`}>{n.title}</p>
-                {!n.read && <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1.5" />}
+                {!n.read && <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-info" aria-label="Chưa đọc" />}
               </div>
               <p className="text-sm text-slate-600 mt-0.5">{n.body}</p>
               <p className="text-xs text-slate-400 mt-1">

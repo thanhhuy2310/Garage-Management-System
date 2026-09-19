@@ -12,7 +12,7 @@ const PERMISSIONS: Record<string, string[]> = {
 
 export default function Staff() {
   const [showAdd, setShowAdd] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(mockStaff[0]?.id ?? null);
 
   const detail = mockStaff.find(s => s.id === selected);
 
@@ -39,7 +39,7 @@ export default function Staff() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs bg-[#e8eef7] text-[#1e3a6e] px-2 py-1 rounded-full font-medium">{ROLES[s.role]}</span>
+                  <span className="rounded-full bg-primary-soft px-2 py-1 text-xs font-medium text-primary">{ROLES[s.role]}</span>
                   <Badge variant={s.status === "active" ? "completed" : "cancelled"} label={s.status === "active" ? "Đang làm" : "Nghỉ việc"} />
                 </div>
                 <div className="mt-3 text-xs text-slate-500 mono">{s.phone}</div>
@@ -84,7 +84,7 @@ export default function Staff() {
               <div className="space-y-2">
                 {(PERMISSIONS[detail.role] || []).map(p => (
                   <div key={p} className="flex items-center gap-2 text-sm">
-                    <span className="text-emerald-500">{Icons.checkCircle}</span>
+                    <span className="text-success">{Icons.checkCircle}</span>
                     <span className="text-slate-700">{p}</span>
                   </div>
                 ))}

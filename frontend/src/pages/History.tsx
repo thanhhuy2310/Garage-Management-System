@@ -4,7 +4,7 @@ import { formatCurrency, mockRepairOrders, phieuSuaChua } from "../data";
 
 export default function History() {
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(mockRepairOrders.find((repair) => repair.status === "completed")?.id ?? null);
 
   const completed = mockRepairOrders.filter(r => r.status === "completed");
   const filtered = completed.filter(r =>
@@ -75,18 +75,18 @@ export default function History() {
             </div>
 
             <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Ngày hoàn thành</p><p className="font-semibold">{completedAt(detail.id) ? new Date(completedAt(detail.id)!).toLocaleString("vi-VN") : "—"}</p></div>
-              <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Số km</p><p className="font-semibold mono">{detail.km.toLocaleString("vi-VN")}</p></div>
-              <div className="p-3 bg-slate-50 rounded-lg text-sm"><p className="text-xs text-slate-400">Kỹ thuật viên</p><p className="font-semibold">{detail.technician}</p></div>
+              <div className="rounded-lg bg-surface-subtle p-3 text-sm"><p className="text-xs text-muted-foreground">Ngày hoàn thành</p><p className="font-semibold">{completedAt(detail.id) ? new Date(completedAt(detail.id)!).toLocaleString("vi-VN") : "—"}</p></div>
+              <div className="rounded-lg bg-surface-subtle p-3 text-sm"><p className="text-xs text-muted-foreground">Số km</p><p className="mono font-semibold">{detail.km.toLocaleString("vi-VN")}</p></div>
+              <div className="rounded-lg bg-surface-subtle p-3 text-sm"><p className="text-xs text-muted-foreground">Kỹ thuật viên</p><p className="font-semibold">{detail.technician}</p></div>
               <div className="rounded-lg bg-surface-subtle p-3 text-sm"><p className="text-xs text-slate-400">Tổng chi phí</p><p className="font-bold text-primary">{formatCurrency(detail.items.reduce((s, i) => s + i.qty * i.price, 0))}</p></div>
             </div>
 
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Hạng mục đã làm</p>
             <div className="space-y-2">
               {detail.items.map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div key={i} className="flex items-center justify-between rounded-lg bg-surface-subtle p-3">
                   <div className="flex items-center gap-2">
-                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${item.type === "service" ? "bg-blue-50 text-blue-700" : "bg-purple-50 text-purple-700"}`}>
+                    <span className={`rounded px-2 py-0.5 text-xs font-medium ${item.type === "service" ? "bg-info-soft text-info" : "bg-primary-soft text-primary"}`}>
                       {item.type === "service" ? "DV" : "PT"}
                     </span>
                     <span className="text-sm font-medium text-slate-700">{item.name}</span>

@@ -6,7 +6,7 @@ import {
 import { Card, StatCard, Button, Tabs, Icons, TableContainer } from "../components/ui";
 import { chartMonthly, chartServices, formatCurrency } from "../data";
 
-const PIE_COLORS = ["#1e3a6e", "#3b82f6", "#f59e0b", "#10b981", "#f97316", "#8b5cf6"];
+const PIE_COLORS = ["#153A5B", "#1B4D7A", "#E67817", "#047857", "#B45309", "#687585"];
 
 const techStats = [
   { name: "Trần Văn Khoa", completed: 42, hours: 168, revenue: 28500000, rating: 4.8 },
@@ -52,8 +52,8 @@ export default function Reports() {
               <AreaChart data={chartMonthly} margin={{ left: -20 }}>
               <defs>
                 <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#1e3a6e" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#1e3a6e" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#1B4D7A" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#1B4D7A" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
@@ -61,7 +61,7 @@ export default function Reports() {
                 tickFormatter={v => `${(v / 1000000).toFixed(0)}M`} />
               <Tooltip formatter={(v: any) => [formatCurrency(Number(v)), "Doanh thu"]}
                 contentStyle={{ borderRadius: 8, border: "1px solid #dde3ec", fontSize: 12 }} />
-              <Area type="monotone" dataKey="revenue" stroke="#1e3a6e" strokeWidth={2.5} fill="url(#grad1)" />
+              <Area type="monotone" dataKey="revenue" stroke="#1B4D7A" strokeWidth={2.5} fill="url(#grad1)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -104,8 +104,8 @@ export default function Reports() {
               <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #dde3ec", fontSize: 12 }} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Bar dataKey="nhap" name="Nhập" fill="#10b981" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="xuat" name="Xuất" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="nhap" name="Nhập" fill="#047857" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="xuat" name="Xuất" fill="#E67817" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

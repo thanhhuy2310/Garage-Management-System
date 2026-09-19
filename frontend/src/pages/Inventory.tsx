@@ -26,8 +26,19 @@ export default function Inventory() {
 
   return <div className="space-y-5">
     <div className="page-toolbar">
-      <Tabs tabs={TABS} active={tab} onChange={setTab} />
-      <p className="text-xs text-slate-500">{kho[0].TenKho} · {kho[0].DiaChi}</p>
+      <Tabs
+        tabs={TABS.map((item) => ({
+          ...item,
+          count: item.key === "stock" ? phuTung.length
+            : item.key === "import" ? phieuNhapKho.length
+            : item.key === "export" ? phieuXuatKho.length
+            : item.key === "history" ? bienDongKho.length
+            : undefined,
+        }))}
+        active={tab}
+        onChange={setTab}
+      />
+      <p className="text-xs text-muted-foreground">{kho[0].TenKho} · {kho[0].DiaChi}</p>
     </div>
 
     {tab === "stock" && <>
