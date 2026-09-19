@@ -138,7 +138,7 @@ function MobileBook({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-slate-500">Xe:</span><span className="font-semibold">51G-123.45</span></div>
             <div className="flex justify-between"><span className="text-slate-500">Dịch vụ:</span><span className="font-semibold">Bảo dưỡng định kỳ</span></div>
-            <div className="flex justify-between"><span className="text-slate-500">Ngày:</span><span className="font-semibold">18/09/2024</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">Ngày:</span><span className="font-semibold">18/09/2026</span></div>
             <div className="flex justify-between"><span className="text-slate-500">Giờ:</span><span className="font-bold text-[#1e3a6e]">10:30</span></div>
           </div>
         </div>
@@ -158,7 +158,7 @@ function MobileBook({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
             <span className="text-amber-500">⚠️</span>
             <p className="font-semibold text-amber-800 text-sm">Giờ đã chọn không còn trống</p>
           </div>
-          <p className="text-xs text-amber-700">18/09/2024 lúc 08:00 đã được đặt. Gara đề xuất các giờ khác:</p>
+          <p className="text-xs text-amber-700">18/09/2026 lúc 08:00 đã được đặt. Gara đề xuất các giờ khác:</p>
         </div>
         <p className="font-semibold text-slate-800 mb-3 text-sm">Chọn thời gian thay thế:</p>
         <div className="space-y-3 flex-1">
@@ -168,7 +168,7 @@ function MobileBook({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-[#e8eef7] rounded-xl flex items-center justify-center font-mono font-bold text-[#1e3a6e] text-sm">{t}</div>
                 <div className="text-left">
-                  <p className="font-semibold text-slate-800 text-sm">18/09/2024 lúc {t}</p>
+                  <p className="font-semibold text-slate-800 text-sm">18/09/2026 lúc {t}</p>
                   <p className="text-xs text-emerald-600">Còn trống</p>
                 </div>
               </div>
@@ -272,7 +272,7 @@ function MobileBook({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
               <div className="p-4 space-y-3 text-sm">
                 <div className="flex justify-between"><span className="text-slate-500">Xe:</span><span className="font-mono font-bold text-[#1e3a6e]">51G-123.45</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">Dịch vụ:</span><span className="font-semibold">{selectedService || "Bảo dưỡng định kỳ"}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Ngày:</span><span className="font-semibold">{selectedDate || "18/09/2024"}</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Ngày:</span><span className="font-semibold">{selectedDate || "18/09/2026"}</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">Giờ:</span><span className="font-bold text-[#1e3a6e]">{selectedTime || "10:30"}</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">Gara:</span><span className="font-semibold">Gara Ô Tô Thành Công</span></div>
               </div>
@@ -312,7 +312,7 @@ function MobileTrack() {
         </div>
         <div className="space-y-1 text-xs text-slate-500">
           <p>Kỹ thuật viên: <strong>Trần Văn Khoa</strong></p>
-          <p>Bắt đầu: <strong>15/09/2024 lúc 14:00</strong></p>
+          <p>Bắt đầu: <strong>15/09/2026 lúc 14:00</strong></p>
         </div>
       </div>
 
@@ -449,7 +449,7 @@ function MobileHistory() {
               <Badge variant="completed" />
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <div><p className="text-xs text-slate-400">Ngày sửa</p><p className="font-semibold">14/09/2024</p></div>
+              <div><p className="text-xs text-slate-400">Ngày sửa</p><p className="font-semibold">14/09/2026</p></div>
               <div><p className="text-xs text-slate-400">Kỹ thuật viên</p><p className="font-semibold">Lê Quang Hưng</p></div>
             </div>
             <div>
@@ -471,9 +471,9 @@ function MobileHistory() {
         <>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Xe: 51G-123.45 · Toyota Camry</p>
           {[
-            { date: "15/09/2024", service: "Đang sửa chữa", status: "in_progress", cost: 645000 },
-            { date: "15/08/2024", service: "Bảo dưỡng 40.000 km", status: "completed", cost: 420000 },
-            { date: "12/05/2024", service: "Thay lốp xe (2 lốp trước)", status: "completed", cost: 1800000 },
+            { date: "15/09/2026", service: "Đang sửa chữa", status: "in_progress", cost: 645000 },
+            { date: "15/08/2026", service: "Bảo dưỡng 40.000 km", status: "completed", cost: 420000 },
+            { date: "12/05/2026", service: "Thay lốp xe (2 lốp trước)", status: "completed", cost: 1800000 },
           ].map((h, i) => (
             <button key={i} onClick={() => setDetail(true)}
               className="w-full bg-white rounded-2xl border border-[#dde3ec] p-4 text-left hover:border-[#1e3a6e] transition-all">

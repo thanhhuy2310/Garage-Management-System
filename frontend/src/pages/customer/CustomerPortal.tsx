@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Card, Icons, Input } from "../../components/ui";
-import { GARAGE_NAME } from "../../data";
+import CustomerLayout from "../../layouts/CustomerLayout";
 import { khachHang } from "../../mock/data";
 import CustomerAppointments from "./CustomerAppointments";
 import CustomerHistory from "./CustomerHistory";
@@ -78,22 +78,10 @@ export default function CustomerPortal({ onLogout }: CustomerPortalProps) {
   const customer = khachHang.find((c) => c.MaKhachHang === CURRENT_CUSTOMER_ID);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Customer header */}
-      <header className="sticky top-0 z-30 border-b border-border bg-white">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-4">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-white" aria-hidden="true">
-              {Icons.wrench}
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-foreground">{GARAGE_NAME}</p>
-              <p className="truncate text-xs text-muted-foreground">Xin chào, {customer?.HoTen}</p>
-            </div>
-          </div>
-          <Button size="sm" variant="outline" onClick={onLogout}>Đăng xuất</Button>
-        </div>
-        {/* Customer nav */}
+    <CustomerLayout
+      onLogout={onLogout}
+      customerName={customer?.HoTen}
+      navigation={
         <nav aria-label="Khu vực khách hàng" className="mx-auto w-full max-w-6xl px-4">
           <div className="flex gap-1 overflow-x-auto pb-2" role="tablist">
             {TABS.map((item) => (
@@ -113,16 +101,16 @@ export default function CustomerPortal({ onLogout }: CustomerPortalProps) {
             ))}
           </div>
         </nav>
-      </header>
-
-      <main className="mx-auto w-full max-w-6xl space-y-4 px-4 py-6">
+      }
+    >
+      <div className="space-y-4">
         {tab === "appointments" && <CustomerAppointments />}
         {tab === "quotations" && <CustomerQuotations />}
         {tab === "tracking" && <CustomerTracking />}
         {tab === "history" && <CustomerHistory />}
         {tab === "notifications" && <CustomerNotifications />}
         {tab === "profile" && <ProfileTab />}
-      </main>
-    </div>
+      </div>
+    </CustomerLayout>
   );
 }

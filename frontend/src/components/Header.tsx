@@ -47,14 +47,12 @@ interface HeaderProps {
   page: string;
   role?: string;
   onMenuToggle?: () => void;
-  onMobileToggle?: () => void;
 }
 
 export default function Header({
   page,
   role = "manager",
   onMenuToggle,
-  onMobileToggle,
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const user = ROLE_INFO[role] ?? ROLE_INFO.manager;
@@ -94,20 +92,6 @@ export default function Header({
             className="h-10 w-52 rounded-md border border-border bg-slate-50 pl-9 pr-3 text-sm transition-all placeholder:text-slate-400 focus:border-ring focus:bg-white focus:ring-2 focus:ring-ring/15"
           />
         </div>
-
-        {onMobileToggle && (
-          <button
-            type="button"
-            onClick={onMobileToggle}
-            className="hidden h-10 items-center gap-2 rounded-md border border-border bg-secondary px-3 text-[13px] font-semibold text-primary transition-all hover:bg-slate-200 2xl:flex"
-            title="Xem ứng dụng khách hàng"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="5" y="2" width="14" height="20" rx="2" /><line x1="12" y1="18" x2="12.01" y2="18" />
-            </svg>
-            App KH
-          </button>
-        )}
 
         <div className="relative">
           <button

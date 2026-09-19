@@ -18,7 +18,7 @@ const VIEW_TABS = [
 
 const CALENDAR_DAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
-// Simple calendar grid for week 16-22 Sep 2024
+// Simple calendar grid for week 16-22 Sep 2026
 const WEEK_DATES = [
   { d: 16, date: "2026-09-16" },
   { d: 17, date: "2026-09-17" },

@@ -54,7 +54,7 @@ export default function Sidebar({
     : ALL_NAV_ITEMS;
 
   return (
-    <aside className={`fixed left-0 top-0 z-30 flex h-dvh w-60 flex-shrink-0 flex-col bg-primary text-white transition-transform duration-200 xl:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+    <aside className={`fixed left-0 top-0 z-30 flex h-dvh w-60 flex-shrink-0 flex-col bg-brand-dark text-white transition-transform duration-200 xl:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
       <div className="flex min-h-16 items-center border-b border-white/10 px-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-accent shadow-sm">

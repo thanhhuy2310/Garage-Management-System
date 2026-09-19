@@ -9,6 +9,8 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
   --color-primary-soft: var(--primary-soft);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-blue: var(--brand-blue);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -59,24 +61,26 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #f5f7f9;
+  --foreground: #12202f;
   --card: #ffffff;
-  --card-foreground: #0f172a;
-  --primary: #17365f;
+  --card-foreground: #12202f;
+  --brand-dark: #0b1f33;
+  --brand-blue: #1b4d7a;
+  --primary: #153a5b;
   --primary-foreground: #ffffff;
-  --primary-hover: #102a4c;
-  --primary-soft: #eaf0f7;
-  --secondary: #eaf0f7;
-  --secondary-foreground: #17365f;
-  --muted: #f1f5f9;
-  --muted-foreground: #526176;
-  --accent: #b45309;
+  --primary-hover: #0b1f33;
+  --primary-soft: #e9f0f6;
+  --secondary: #e9f0f6;
+  --secondary-foreground: #153a5b;
+  --muted: #edf1f4;
+  --muted-foreground: #687585;
+  --accent: #e67817;
   --accent-foreground: #ffffff;
   --surface: #ffffff;
-  --surface-subtle: #f8fafc;
-  --border: #dbe3ec;
-  --ring: #2563eb;
+  --surface-subtle: #f5f7f9;
+  --border: #dce3e9;
+  --ring: #1b4d7a;
   --success: #047857;
   --success-soft: #ecfdf5;
   --warning: #b45309;
@@ -89,8 +93,8 @@
   --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
   --shadow-md: 0 10px 28px rgba(15, 23, 42, 0.12);
   --shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.18);
-  --gradient-brand: linear-gradient(135deg, #17365f 0%, #102a4c 100%);
-  --gradient-accent: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+  --gradient-brand: linear-gradient(135deg, #153a5b 0%, #0b1f33 100%);
+  --gradient-accent: linear-gradient(135deg, #e67817 0%, #c75e09 100%);
 
   /* status colors */
   --status-pending: #f59e0b;
@@ -121,6 +125,30 @@ body {
   line-height: var(--line-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.skip-link {
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  z-index: 100;
+  transform: translateY(-160%);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--primary);
+  padding: 8px 14px;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  box-shadow: var(--shadow-md);
+  transition: transform 160ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
 }
 
 code, .mono {
