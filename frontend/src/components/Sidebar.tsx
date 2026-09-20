@@ -54,8 +54,8 @@ export default function Sidebar({
     : ALL_NAV_ITEMS;
 
   return (
-    <aside className={`fixed left-0 top-0 z-30 flex h-dvh w-60 flex-shrink-0 flex-col bg-brand-dark text-white transition-transform duration-200 xl:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
-      <div className="flex min-h-16 items-center border-b border-white/10 px-4">
+    <aside className={`fixed left-0 top-0 z-30 flex h-dvh w-[min(18rem,86vw)] flex-shrink-0 flex-col bg-brand-dark text-white transition-transform duration-200 xl:w-60 xl:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <div className="flex min-h-[4.5rem] items-center border-b border-white/10 px-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-accent shadow-sm">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
@@ -68,7 +68,7 @@ export default function Sidebar({
             <p className="mt-0.5 text-xs leading-tight text-white/65">Hệ thống quản lý</p>
           </div>
         </div>
-        <button type="button" onClick={onClose} aria-label="Đóng thanh điều hướng" className="ml-auto flex h-10 w-10 items-center justify-center rounded-md text-xl text-white/70 hover:bg-white/10 hover:text-white xl:hidden">×</button>
+        <button type="button" onClick={onClose} aria-label="Đóng thanh điều hướng" className="ml-auto flex h-11 w-11 items-center justify-center rounded-md text-xl text-white/70 hover:bg-white/10 hover:text-white xl:hidden">×</button>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-3" aria-label="Điều hướng chính">
@@ -80,7 +80,7 @@ export default function Sidebar({
               type="button"
               onClick={() => { onNavigate(item.key); onClose?.(); }}
               aria-current={isActive ? "page" : undefined}
-              className={`group relative mb-1 flex min-h-11 w-full items-center gap-3 rounded-md border-l-[3px] px-3 text-left transition-all ${isActive ? "border-amber-400 bg-white/12 text-white" : "border-transparent text-white/75 hover:bg-white/8 hover:text-white"}`}
+              className={`group relative mb-1 flex min-h-12 w-full items-center gap-3 rounded-md border-l-[3px] px-3 text-left transition-all ${isActive ? "border-amber-400 bg-white/12 text-white" : "border-transparent text-white/75 hover:bg-white/8 hover:text-white"}`}
             >
               <span className={`flex-shrink-0 ${isActive ? "text-amber-400" : "text-white/60 group-hover:text-white/80"}`}>{item.icon}</span>
               <span className={`truncate text-sm font-medium ${isActive ? "font-semibold text-white" : ""}`}>{item.label}</span>
@@ -97,7 +97,7 @@ export default function Sidebar({
             <p className="truncate text-sm font-semibold text-white">{avatar.name}</p>
             <p className="truncate text-xs text-white/60">{avatar.title}</p>
           </div>
-          <button type="button" onClick={onLogout} className="flex h-10 w-10 items-center justify-center rounded-md text-white/60 hover:bg-white/10 hover:text-white" title="Đăng xuất" aria-label="Đăng xuất">
+          <button type="button" onClick={onLogout} className="flex h-11 w-11 items-center justify-center rounded-md text-white/60 hover:bg-white/10 hover:text-white" title="Đăng xuất" aria-label="Đăng xuất">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
             </svg>

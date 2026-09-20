@@ -9,7 +9,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 export function Button({ variant = "primary", size = "md", icon, children, className = "", ...rest }: ButtonProps) {
   const base = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border font-semibold transition-all cursor-pointer select-none active:translate-y-px disabled:active:translate-y-0";
-  const sizes = { sm: "min-h-9 px-3 text-[13px]", md: "min-h-10 px-4 text-sm", lg: "min-h-11 px-5 text-[15px]" };
+  const sizes = { sm: "min-h-11 px-3 text-sm", md: "min-h-11 px-4 text-sm", lg: "min-h-12 px-5 text-base" };
   const variants: Record<BtnVariant, string> = {
     primary: "border-primary bg-primary text-primary-foreground hover:border-primary-hover hover:bg-primary-hover",
     secondary: "border-border bg-secondary text-secondary-foreground hover:bg-muted",
@@ -88,14 +88,14 @@ export function Input({ label, icon, error, helperText, className = "", id, ...r
   const descriptionId = error || helperText ? `${inputId}-description` : undefined;
   return (
     <div className="flex flex-col gap-1.5">
-      {label && <label htmlFor={inputId} className="text-[13px] font-medium text-slate-700">{label}</label>}
+      {label && <label htmlFor={inputId} className="text-sm font-semibold text-slate-700">{label}</label>}
       <div className="relative">
         {icon && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true">{icon}</span>}
         <input
           id={inputId}
           aria-invalid={Boolean(error)}
           aria-describedby={descriptionId}
-          className={`h-10 w-full rounded-md border border-border bg-surface px-3 text-sm text-foreground shadow-sm ${icon ? "pl-9" : ""} placeholder:text-muted-foreground hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 transition-all ${error ? "border-danger focus:border-danger focus:ring-danger/15" : ""} ${className}`}
+          className={`min-h-11 w-full rounded-md border border-border bg-surface px-3 text-base text-foreground shadow-sm sm:text-sm ${icon ? "pl-9" : ""} placeholder:text-muted-foreground hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 transition-all ${error ? "border-danger focus:border-danger focus:ring-danger/15" : ""} ${className}`}
           {...rest}
         />
       </div>
@@ -115,11 +115,11 @@ export function Select({ label, options, helperText, className = "", id, ...rest
   const selectId = id ?? generatedId;
   return (
     <div className="flex flex-col gap-1.5">
-      {label && <label htmlFor={selectId} className="text-[13px] font-medium text-slate-700">{label}</label>}
+      {label && <label htmlFor={selectId} className="text-sm font-semibold text-slate-700">{label}</label>}
       <select
         id={selectId}
         aria-describedby={helperText ? `${selectId}-description` : undefined}
-        className={`h-10 rounded-md border border-border bg-surface px-3 text-sm text-foreground shadow-sm hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 transition-all ${className}`}
+        className={`min-h-11 rounded-md border border-border bg-surface px-3 text-base text-foreground shadow-sm hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 transition-all sm:text-sm ${className}`}
         {...rest}
       >
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -141,12 +141,12 @@ export function Textarea({ label, error, helperText, className = "", id, ...rest
   const descriptionId = error || helperText ? `${textareaId}-description` : undefined;
   return (
     <div className="flex flex-col gap-1.5">
-      {label && <label htmlFor={textareaId} className="text-[13px] font-medium text-slate-700">{label}</label>}
+      {label && <label htmlFor={textareaId} className="text-sm font-semibold text-slate-700">{label}</label>}
       <textarea
         id={textareaId}
         aria-invalid={Boolean(error)}
         aria-describedby={descriptionId}
-        className={`min-h-24 w-full resize-y rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm placeholder:text-muted-foreground hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 transition-all ${error ? "border-danger focus:border-danger focus:ring-danger/15" : ""} ${className}`}
+        className={`min-h-28 w-full resize-y rounded-md border border-border bg-surface px-3 py-3 text-base text-foreground shadow-sm placeholder:text-muted-foreground hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 transition-all sm:text-sm ${error ? "border-danger focus:border-danger focus:ring-danger/15" : ""} ${className}`}
         {...rest}
       />
       {(error || helperText) && <p id={descriptionId} className={`text-xs leading-relaxed ${error ? "text-danger" : "text-muted-foreground"}`} role={error ? "alert" : undefined}>{error ?? helperText}</p>}
@@ -162,8 +162,8 @@ function Choice({ type, label, description, className = "", id, ...rest }: Choic
   const generatedId = React.useId();
   const choiceId = id ?? generatedId;
   return (
-    <label htmlFor={choiceId} className="flex min-h-10 cursor-pointer items-start gap-2.5 py-2 text-sm text-foreground">
-      <input id={choiceId} type={type} className={`mt-0.5 h-4 w-4 border-border text-primary accent-primary focus:ring-ring ${className}`} {...rest} />
+    <label htmlFor={choiceId} className="flex min-h-11 cursor-pointer items-start gap-3 py-2.5 text-sm text-foreground">
+      <input id={choiceId} type={type} className={`mt-0.5 h-5 w-5 flex-shrink-0 border-border text-primary accent-primary focus:ring-ring ${className}`} {...rest} />
       <span>
         <span className="block font-medium">{label}</span>
         {description && <span className="mt-0.5 block text-xs text-muted-foreground">{description}</span>}
@@ -220,7 +220,7 @@ export function Modal({ open, onClose, title, children, width = "max-w-lg" }: {
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6" onClick={onClose} role="presentation">
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6" onClick={onClose} role="presentation">
       <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]" />
       <div
         ref={dialogRef}
@@ -228,16 +228,16 @@ export function Modal({ open, onClose, title, children, width = "max-w-lg" }: {
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`relative flex max-h-[calc(100dvh-1.5rem)] w-full flex-col overflow-hidden rounded-lg bg-white card-shadow-md sm:max-h-[90vh] ${width}`}
+        className={`relative flex max-h-[calc(100dvh-0.75rem)] w-full flex-col overflow-hidden rounded-t-xl bg-white card-shadow-md sm:max-h-[90vh] sm:rounded-xl ${width}`}
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+        <div className="flex items-center justify-between gap-4 border-b border-border px-4 py-3 sm:px-6 sm:py-4">
           <h2 id={titleId} className="text-lg font-semibold text-slate-900">{title}</h2>
-          <button type="button" onClick={onClose} aria-label="Đóng hộp thoại" className="flex h-10 w-10 items-center justify-center rounded-md text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-800">
+          <button type="button" onClick={onClose} aria-label="Đóng hộp thoại" className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-800">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
           </button>
         </div>
-        <div className="overflow-y-auto p-5">{children}</div>
+        <div className="overflow-y-auto p-4 sm:p-6">{children}</div>
       </div>
     </div>
   );
@@ -258,7 +258,7 @@ export function Tabs({ tabs, active, onChange }: {
           onClick={() => onChange(t.key)}
           role="tab"
           aria-selected={active === t.key}
-          className={`flex min-h-9 flex-shrink-0 items-center gap-1.5 rounded-md px-3 text-[13px] font-medium transition-all ${active === t.key ? "bg-white text-primary shadow-sm" : "text-slate-600 hover:bg-white/60 hover:text-slate-900"}`}
+          className={`flex min-h-11 flex-shrink-0 items-center gap-2 rounded-md px-3.5 text-sm font-semibold transition-all ${active === t.key ? "bg-white text-primary shadow-sm" : "text-slate-600 hover:bg-white/60 hover:text-slate-900"}`}
         >
           {t.label}
           {t.count !== undefined && (
@@ -285,7 +285,7 @@ export function SearchBox({ value, onChange, placeholder = "Tìm kiếm..." }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-10 w-full rounded-md border border-border bg-surface pl-9 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted-foreground hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 transition-all sm:w-72"
+        className="h-11 w-full rounded-md border border-border bg-surface pl-10 pr-3 text-base text-foreground shadow-sm placeholder:text-muted-foreground hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 transition-all sm:w-72 sm:text-sm"
       />
     </div>
   );
@@ -300,17 +300,17 @@ export function Pagination({ page, total, perPage, onChange }: {
   return (
     <nav className="flex items-center gap-1" aria-label="Phân trang">
       <button aria-label="Trang trước" onClick={() => onChange(page - 1)} disabled={page === 1}
-        className="flex h-10 w-10 items-center justify-center rounded-md border border-border text-sm text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">
+        className="flex h-11 w-11 items-center justify-center rounded-md border border-border text-sm text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">
         ‹
       </button>
       {Array.from({ length: pages }, (_, i) => i + 1).map(p => (
         <button key={p} onClick={() => onChange(p)} aria-label={`Trang ${p}`} aria-current={p === page ? "page" : undefined}
-          className={`flex h-10 w-10 items-center justify-center rounded-md text-sm transition-all ${p === page ? "bg-primary text-white" : "border border-border text-slate-600 hover:bg-slate-50"}`}>
+          className={`flex h-11 w-11 items-center justify-center rounded-md text-sm transition-all ${p === page ? "bg-primary text-white" : "border border-border text-slate-600 hover:bg-slate-50"}`}>
           {p}
         </button>
       ))}
       <button aria-label="Trang sau" onClick={() => onChange(page + 1)} disabled={page === pages}
-        className="flex h-10 w-10 items-center justify-center rounded-md border border-border text-sm text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">
+        className="flex h-11 w-11 items-center justify-center rounded-md border border-border text-sm text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">
         ›
       </button>
     </nav>

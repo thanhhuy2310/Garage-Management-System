@@ -40,16 +40,16 @@
   --font-mono: 'DM Mono', 'Fira Code', ui-monospace, monospace;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
-  --text-base: 0.9375rem;
+  --text-base: 1rem;
   --text-lg: 1.125rem;
   --text-xl: 1.25rem;
-  --text-page: 1.5rem;
+  --text-page: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
   --text-stat: 1.875rem;
   --text-display: 2.5rem;
   --text-hero: 3.25rem;
   --tracking-tight: -0.02em;
   --tracking-display: -0.03em;
-  --line-body: 1.55;
+  --line-body: 1.6;
   --line-heading: 1.3;
   --line-display: 1.1;
   --space-1: 0.25rem;
@@ -61,6 +61,12 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
+  --spacing-control-x: var(--space-4);
+  --spacing-card: clamp(1rem, 0.8rem + 0.8vw, 1.5rem);
+  --spacing-page-x: clamp(1rem, 0.55rem + 1.8vw, 2rem);
+  --spacing-page-y: clamp(1.25rem, 0.9rem + 1.4vw, 2rem);
+  --spacing-section: clamp(1.25rem, 1rem + 1vw, 2rem);
+  --control-height: 2.75rem;
   --background: #f5f7f9;
   --foreground: #12202f;
   --card: #ffffff;
@@ -123,6 +129,7 @@ body {
   line-height: var(--line-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-width: 320px;
 }
 
 #root {
@@ -182,7 +189,7 @@ button, [role='button'], a, input, select, textarea {
 /* table */
 .data-table th {
   background: #f8fafc;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -192,9 +199,9 @@ button, [role='button'], a, input, select, textarea {
   white-space: nowrap;
 }
 .data-table td {
-  padding: 13px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid #f1f5f9;
-  font-size: 14px;
+  font-size: 0.875rem;
   vertical-align: middle;
 }
 .data-table tr:last-child td {
@@ -217,9 +224,9 @@ button, [role='button'], a, input, select, textarea {
   overscroll-behavior-inline: contain;
 }
 
-.ui-page-title { font-size: var(--text-page); font-weight: 700; letter-spacing: var(--tracking-tight); }
-.ui-section-title { font-size: var(--text-lg); font-weight: 600; }
-.ui-card-title { font-size: var(--text-base); font-weight: 600; }
+.ui-page-title { font-size: var(--text-page); font-weight: 750; line-height: 1.25; letter-spacing: var(--tracking-tight); }
+.ui-section-title { font-size: clamp(1.125rem, 1.02rem + 0.35vw, 1.25rem); font-weight: 700; }
+.ui-card-title { font-size: 1.0625rem; font-weight: 700; }
 .ui-display { font-size: var(--text-display); font-weight: 800; line-height: var(--line-display); letter-spacing: var(--tracking-display); }
 .ui-hero { font-size: var(--text-hero); font-weight: 800; line-height: var(--line-display); letter-spacing: var(--tracking-display); }
 .ui-secondary-text { color: var(--muted-foreground); }
@@ -353,7 +360,7 @@ button, [role='button'], a, input, select, textarea {
 .page-toolbar {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .detail-panel {
@@ -380,7 +387,7 @@ button, [role='button'], a, input, select, textarea {
   width: 100%;
   max-width: 1600px;
   margin-inline: auto;
-  padding: 20px 16px 24px;
+  padding: var(--spacing-page-y) var(--spacing-page-x) calc(var(--spacing-page-y) + 0.5rem);
 }
 
 .app-content {
@@ -388,19 +395,13 @@ button, [role='button'], a, input, select, textarea {
 }
 
 @media (min-width: 768px) {
-  .page-shell { padding-inline: 20px; }
   .page-toolbar { flex-direction: row; align-items: center; justify-content: space-between; }
   .receipt-header { flex-direction: row; align-items: flex-start; justify-content: space-between; }
 }
 
 @media (min-width: 1280px) {
   .app-content { margin-left: 240px; }
-  .page-shell { padding-inline: 24px; }
   .detail-panel { position: sticky; top: 88px; }
-}
-
-@media (min-width: 1536px) {
-  .page-shell { padding-inline: 32px; }
 }
 
 /* timeline */
@@ -468,6 +469,16 @@ input[readonly] {
 
 @media (max-width: 767px) {
   .data-table { min-width: 680px; }
+  .page-toolbar > button,
+  .page-toolbar > .page-toolbar-primary {
+    width: 100%;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 1rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

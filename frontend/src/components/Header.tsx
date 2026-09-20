@@ -58,13 +58,13 @@ export default function Header({
   const user = ROLE_INFO[role] ?? ROLE_INFO.manager;
 
   return (
-    <header className="sticky top-0 z-20 flex min-h-16 flex-shrink-0 items-center justify-between border-b border-border bg-white px-3 sm:px-5 lg:px-6">
+    <header className="sticky top-0 z-20 flex min-h-[4.5rem] flex-shrink-0 items-center justify-between border-b border-border bg-white px-3 sm:px-5 lg:px-6">
       <div className="flex min-w-0 items-center gap-2">
         <button
           type="button"
           onClick={onMenuToggle}
           aria-label="Mở thanh điều hướng"
-          className="mr-1 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 xl:hidden"
+          className="mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 xl:hidden"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="3" y1="6" x2="21" y2="6" />
@@ -73,7 +73,7 @@ export default function Header({
           </svg>
         </button>
         {BREADCRUMBS[page] && <span className="hidden text-xs text-slate-500 2xl:inline">{BREADCRUMBS[page]} /</span>}
-        <h1 className="truncate text-lg font-semibold text-slate-900 sm:text-xl">{PAGE_TITLES[page] ?? page}</h1>
+        <h1 className="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl">{PAGE_TITLES[page] ?? page}</h1>
         {page === "dashboard" && (
           <span className="hidden rounded-md bg-slate-100 px-2 py-1 font-mono text-xs text-slate-600 2xl:inline">17/09/2026</span>
         )}
@@ -89,7 +89,7 @@ export default function Header({
             type="search"
             aria-label="Tìm kiếm toàn bộ"
             placeholder="Tìm kiếm toàn bộ..."
-            className="h-10 w-52 rounded-md border border-border bg-slate-50 pl-9 pr-3 text-sm transition-all placeholder:text-slate-400 focus:border-ring focus:bg-white focus:ring-2 focus:ring-ring/15"
+            className="h-11 w-56 rounded-md border border-border bg-slate-50 pl-9 pr-3 text-sm transition-all placeholder:text-slate-400 focus:border-ring focus:bg-white focus:ring-2 focus:ring-ring/15"
           />
         </div>
 
@@ -99,7 +99,7 @@ export default function Header({
             onClick={() => setShowNotifications((open) => !open)}
             aria-label="Mở thông báo"
             aria-expanded={showNotifications}
-            className="relative flex h-10 w-10 items-center justify-center rounded-md text-slate-600 transition-all hover:bg-slate-100"
+            className="relative flex h-11 w-11 items-center justify-center rounded-md text-slate-600 transition-all hover:bg-slate-100"
           >
             {Icons.bell}
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full border border-white bg-danger" />
@@ -108,13 +108,13 @@ export default function Header({
             <div className="absolute right-0 top-12 z-50 w-[min(22rem,calc(100vw-1.5rem))] rounded-lg border border-border bg-white shadow-xl">
               <div className="flex items-center justify-between border-b border-border p-4">
                 <p className="text-sm font-semibold text-slate-800">Thông báo</p>
-                <button type="button" onClick={() => setShowNotifications(false)} aria-label="Đóng thông báo" className="flex h-9 w-9 items-center justify-center rounded-md text-lg leading-none text-slate-500 hover:bg-slate-100 hover:text-slate-800">×</button>
+                <button type="button" onClick={() => setShowNotifications(false)} aria-label="Đóng thông báo" className="flex h-11 w-11 items-center justify-center rounded-md text-lg leading-none text-slate-500 hover:bg-slate-100 hover:text-slate-800">×</button>
               </div>
               {QUICK_NOTIFICATIONS.map((notification, index) => (
                 <div key={index} className={`flex items-start gap-3 border-b border-slate-100 p-3 last:border-0 ${notification.unread ? "bg-info-soft/50" : ""}`}>
                   <span className="mt-0.5 text-primary" aria-hidden="true">{notification.icon}</span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs leading-relaxed text-slate-700">{notification.text}</p>
+                    <p className="text-sm leading-relaxed text-slate-700">{notification.text}</p>
                     <p className="mt-1 text-xs text-slate-500">{notification.time}</p>
                   </div>
                   {notification.unread && <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-info" />}
@@ -125,7 +125,7 @@ export default function Header({
         </div>
 
         <div className="ml-1 flex items-center gap-2 border-l border-border pl-2">
-          <div className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${user.avatar} text-xs font-bold text-white`}>{user.initial}</div>
+          <div className={`flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br ${user.avatar} text-sm font-bold text-white`}>{user.initial}</div>
           <div className="hidden 2xl:block">
             <p className="text-sm font-semibold leading-tight text-slate-800">{user.name}</p>
             <p className="mt-0.5 text-xs leading-tight text-slate-500">{user.label}</p>
