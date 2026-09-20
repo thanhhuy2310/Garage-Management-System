@@ -3,6 +3,7 @@ import type { PublicPageKey } from "./components/PublicHeader";
 import AdminLayout from "./layouts/AdminLayout";
 import PublicLayout from "./layouts/PublicLayout";
 import Login from "./pages/Login";
+import { Icons } from "./components/ui";
 import { navigateTo, ROUTE_PATHS, useAppRoute, type AdminPage, type Role } from "./router";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -31,9 +32,9 @@ const ROLE_LABELS: Record<Role, string> = {
   customer: "Khách hàng",
   admin: "Quản trị viên",
   manager: "Quản lý",
-  receptionist: "NV tiếp nhận",
+  receptionist: "Nhân viên tiếp nhận",
   technician: "Kỹ thuật viên",
-  warehouse: "NV kho",
+  warehouse: "Nhân viên kho",
 };
 
 const ROLE_NAV: Record<Role, AdminPage[]> = {
@@ -99,7 +100,7 @@ function RolePicker({ role, onChange }: { role: Role; onChange: (role: Role) => 
               onClick={() => { onChange(key); setOpen(false); }}
               className={`flex min-h-11 w-full items-center justify-between rounded-md px-3 text-sm hover:bg-muted ${role === key ? "font-semibold text-primary" : "text-foreground"}`}
             >
-              {label}{role === key && <span aria-hidden="true">✓</span>}
+              {label}{role === key && <span aria-hidden="true">{Icons.check}</span>}
             </button>
           ))}
         </div>

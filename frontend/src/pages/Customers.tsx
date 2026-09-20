@@ -61,7 +61,7 @@ export default function Customers() {
                     <td><span className="mono text-xs text-slate-400">{customer.MaKhachHang}</span></td>
                     <td>
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        <div className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                           {customer.HoTen.charAt(0)}
                         </div>
                         <span className="font-medium text-slate-800">{customer.HoTen}</span>
@@ -104,7 +104,7 @@ export default function Customers() {
                     <p className="text-xs text-slate-500 mono">{detail.MaKhachHang}</p>
                   </div>
                 </div>
-                <button aria-label="Đóng thông tin khách hàng" onClick={() => setSelected(null)} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
+                <button aria-label="Đóng thông tin khách hàng" onClick={() => setSelected(null)} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.close}</button>
               </div>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-2 text-slate-600">

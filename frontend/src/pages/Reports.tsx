@@ -139,7 +139,7 @@ export default function Reports() {
                   <td className="text-right text-slate-600">{t.hours}h</td>
                   <td className="text-right font-mono text-sm">{(t.revenue / 1000000).toFixed(1)}M</td>
                   <td className="text-center">
-                    <span className="text-amber-500 font-bold text-sm">★ {t.rating}</span>
+                    <span className="flex items-center gap-1 text-sm font-bold text-amber-500"><span aria-hidden="true">{Icons.star}</span>{t.rating}</span>
                   </td>
                 </tr>
               ))}

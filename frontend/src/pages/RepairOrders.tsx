@@ -31,7 +31,7 @@ function RepairTimeline({ status }: { status: string }) {
               i === doneIdx ? "bg-primary border-primary text-primary-foreground" :
               "bg-white border-slate-300 text-slate-400"
             }`}>
-              {i < doneIdx ? "✓" : i + 1}
+              {i < doneIdx ? <span aria-hidden="true">{Icons.check}</span> : i + 1}
             </div>
             <p className={`text-center text-xs font-medium leading-tight ${i <= doneIdx ? "text-slate-700" : "text-slate-400"}`}>{s.label}</p>
             {s.time && i < doneIdx + 1 && <p className="mono text-xs text-slate-400">{s.time}</p>}

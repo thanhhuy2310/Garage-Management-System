@@ -7,8 +7,8 @@ import { phuTung } from "../mock/schemaData";
 
 const VALUES = [
   { title: "Minh bạch", description: "Báo giá chi tiết từng hạng mục, khách duyệt mới làm.", icon: Icons.fileText, tint: "bg-info-soft text-info" },
-  { title: "Kỷ luật quy trình", description: "6 bước chuẩn: đặt lịch tới bàn giao, bước nào cũng ghi nhận.", icon: Icons.clipboard, tint: "bg-success-soft text-success" },
-  { title: "Tôn trọng thời gian", description: "Hẹn giờ chính xác, nhắc bảo dưỡng định kỳ tự động.", icon: Icons.bell, tint: "bg-warning-soft text-warning" },
+  { title: "Theo đúng quy trình", description: "Từ đặt lịch đến bàn giao, mỗi bước đều được ghi nhận.", icon: Icons.clipboard, tint: "bg-success-soft text-success" },
+  { title: "Chủ động thời gian", description: "Khách chọn giờ hẹn và nhận nhắc lịch bảo dưỡng định kỳ.", icon: Icons.bell, tint: "bg-warning-soft text-warning" },
 ];
 
 interface PublicAboutPageProps {
@@ -35,7 +35,7 @@ export default function PublicAboutPage({ onNavigate, onLogin, onBook }: PublicA
 
         <div className="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-12 lg:grid-cols-2">
           <div>
-            <h2 className="ui-section-title text-xl">Quản lý bằng hệ thống, phục vụ bằng cái tâm</h2>
+            <h2 className="ui-section-title text-xl">Theo dõi đầy đủ từ tiếp nhận đến bàn giao</h2>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Mỗi xe vào xưởng đều có hồ sơ đầy đủ: phiếu tiếp nhận ghi tình trạng ban đầu, phiếu sửa chữa
               theo dõi từng hạng mục, báo giá xác nhận trước khi làm và hóa đơn rõ ràng khi bàn giao.
@@ -70,10 +70,10 @@ export default function PublicAboutPage({ onNavigate, onLogin, onBook }: PublicA
         </div>
 
         <div className="mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6">
-          <div className="flex flex-col items-center justify-between gap-4 rounded-2xl px-6 py-8 text-center text-white sm:flex-row sm:text-left" style={{ background: "var(--gradient-brand)" }}>
+          <div className="flex flex-col items-center justify-between gap-4 rounded-xl bg-brand-dark px-6 py-8 text-center text-white sm:flex-row sm:text-left">
             <div>
-              <h2 className="text-xl font-extrabold tracking-tight">Ghé xưởng trải nghiệm thử một lần</h2>
-              <p className="mt-1 text-sm text-white/75">Đặt lịch online — gara xác nhận giờ hẹn trong giờ làm việc.</p>
+              <h2 className="text-xl font-extrabold tracking-tight">Đặt lịch trước khi đến gara</h2>
+              <p className="mt-1 text-sm text-white/75">Chọn ngày giờ phù hợp, gara sẽ xác nhận trong giờ làm việc.</p>
             </div>
             <button
               type="button"

@@ -56,12 +56,7 @@ export default function Login({ onLogin, onBack, account }: LoginProps) {
         </div>
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2" />
-              <circle cx="7.5" cy="17.5" r="2.5" /><circle cx="17.5" cy="17.5" r="2.5" />
-            </svg>
-          </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-white" aria-hidden="true"><span className="scale-125">{Icons.car}</span></div>
           <div>
             <p className="text-lg font-bold leading-tight text-white">{GARAGE_NAME}</p>
             <p className="text-xs text-white/50">Hệ thống quản lý gara</p>
@@ -83,11 +78,9 @@ export default function Login({ onLogin, onBack, account }: LoginProps) {
             </g>
             <line x1="20" y1="162" x2="380" y2="162" stroke="rgba(255,255,255,0.2)" />
           </svg>
-          <h1 className="mb-3 text-[28px] font-semibold leading-tight text-white 2xl:text-3xl">
-            Quản lý gara<br /><span className="text-amber-400">thông minh & hiệu quả</span>
-          </h1>
+          <h1 className="mb-3 text-[28px] font-semibold leading-tight text-white 2xl:text-3xl">Quản lý công việc tại gara</h1>
           <p className="max-w-sm text-sm leading-relaxed text-white/60">
-            Hệ thống quản lý toàn diện dành cho gara ô tô – từ tiếp nhận, sửa chữa đến bàn giao xe.
+            Theo dõi lịch hẹn, tiếp nhận, sửa chữa, kho và hóa đơn trong cùng một hệ thống.
           </p>
         </div>
 
@@ -103,12 +96,7 @@ export default function Login({ onLogin, onBack, account }: LoginProps) {
       <main className="flex flex-1 items-center justify-center bg-surface px-4 py-8 sm:p-8 lg:p-10">
         <div className="w-full max-w-[420px]">
           <div className="mb-8 flex items-center gap-3 xl:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2" />
-                <circle cx="7.5" cy="17.5" r="2.5" /><circle cx="17.5" cy="17.5" r="2.5" />
-              </svg>
-            </div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white" aria-hidden="true">{Icons.car}</div>
             <p className="font-semibold text-primary">{GARAGE_NAME}</p>
           </div>
 
@@ -150,13 +138,13 @@ export default function Login({ onLogin, onBack, account }: LoginProps) {
             onClick={onBack}
             className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-all hover:text-primary"
           >
-            <span aria-hidden="true">←</span> Về trang chủ website
+            <span aria-hidden="true">{Icons.arrowLeft}</span> Về trang chủ
           </button>
 
           <div className="mt-7 rounded-lg border border-info/20 bg-info-soft p-4">
             <p className="mb-2 text-[13px] font-semibold uppercase tracking-wide text-muted-foreground">Tài khoản demo</p>
             <p className="text-[13px] text-slate-700"><strong>{account.label}:</strong> <span className="mono">{account.username}</span> / <span className="mono">demo123</span></p>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">Dùng nút chọn vai trò ở góc dưới để đổi actor trước khi đăng nhập.</p>
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">Dùng nút ở góc dưới để chọn vai trò trước khi đăng nhập.</p>
           </div>
         </div>
       </main>

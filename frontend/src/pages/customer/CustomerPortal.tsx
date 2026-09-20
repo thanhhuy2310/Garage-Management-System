@@ -49,7 +49,7 @@ function ProfileTab() {
         <h3 className="ui-card-title">Đổi mật khẩu</h3>
         {done ? (
           <p className="mt-3 rounded-md bg-success-soft px-3 py-2 text-sm text-success" role="status">
-            Đổi mật khẩu thành công (demo).
+            Mật khẩu đã được cập nhật.
           </p>
         ) : (
           <form

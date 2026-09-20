@@ -30,11 +30,11 @@ const BREADCRUMBS: Record<string, string> = {
 };
 
 const ROLE_INFO: Record<string, { label: string; name: string; initial: string; avatar: string }> = {
-  admin: { label: "Quản trị viên", name: "Admin", initial: "A", avatar: "from-purple-400 to-indigo-600" },
-  manager: { label: "Quản lý", name: "Nguyễn Hữu Bảo", initial: "B", avatar: "from-blue-400 to-blue-600" },
-  receptionist: { label: "NV tiếp nhận", name: "Phạm Minh Tuấn", initial: "T", avatar: "from-emerald-400 to-emerald-600" },
-  technician: { label: "Kỹ thuật viên", name: "Trần Văn Khoa", initial: "K", avatar: "from-orange-400 to-orange-600" },
-  warehouse: { label: "NV kho", name: "Đỗ Văn Nam", initial: "N", avatar: "from-amber-400 to-amber-600" },
+  admin: { label: "Quản trị viên", name: "Admin", initial: "A", avatar: "bg-violet-600" },
+  manager: { label: "Quản lý", name: "Nguyễn Hữu Bảo", initial: "B", avatar: "bg-blue-600" },
+  receptionist: { label: "Nhân viên tiếp nhận", name: "Phạm Minh Tuấn", initial: "T", avatar: "bg-emerald-600" },
+  technician: { label: "Kỹ thuật viên", name: "Trần Văn Khoa", initial: "K", avatar: "bg-orange-600" },
+  warehouse: { label: "Nhân viên kho", name: "Đỗ Văn Nam", initial: "N", avatar: "bg-amber-600" },
 };
 
 const QUICK_NOTIFICATIONS = [
@@ -66,11 +66,7 @@ export default function Header({
           aria-label="Mở thanh điều hướng"
           className="mr-1 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 xl:hidden"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
+          {Icons.menu}
         </button>
         {BREADCRUMBS[page] && <span className="hidden text-xs text-slate-500 2xl:inline">{BREADCRUMBS[page]} /</span>}
         <h1 className="truncate text-lg font-bold tracking-tight text-slate-900 sm:text-xl">{PAGE_TITLES[page] ?? page}</h1>
@@ -108,7 +104,7 @@ export default function Header({
             <div className="absolute right-0 top-12 z-50 w-[min(22rem,calc(100vw-1.5rem))] rounded-lg border border-border bg-white shadow-xl">
               <div className="flex items-center justify-between border-b border-border p-4">
                 <p className="text-sm font-semibold text-slate-800">Thông báo</p>
-                <button type="button" onClick={() => setShowNotifications(false)} aria-label="Đóng thông báo" className="flex h-11 w-11 items-center justify-center rounded-md text-lg leading-none text-slate-500 hover:bg-slate-100 hover:text-slate-800">×</button>
+                <button type="button" onClick={() => setShowNotifications(false)} aria-label="Đóng thông báo" className="flex h-11 w-11 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800">{Icons.close}</button>
               </div>
               {QUICK_NOTIFICATIONS.map((notification, index) => (
                 <div key={index} className={`flex items-start gap-3 border-b border-slate-100 p-3 last:border-0 ${notification.unread ? "bg-info-soft/50" : ""}`}>
@@ -125,7 +121,7 @@ export default function Header({
         </div>
 
         <div className="ml-1 flex items-center gap-2 border-l border-border pl-2">
-          <div className={`flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br ${user.avatar} text-sm font-bold text-white`}>{user.initial}</div>
+          <div className={`flex h-9 w-9 items-center justify-center rounded-full ${user.avatar} text-sm font-bold text-white`}>{user.initial}</div>
           <div className="hidden 2xl:block">
             <p className="text-sm font-semibold leading-tight text-slate-800">{user.name}</p>
             <p className="mt-0.5 text-xs leading-tight text-slate-500">{user.label}</p>

@@ -1,33 +1,28 @@
-const REVIEWS = [
-  { quote: "Báo giá rõ từng hạng mục, tôi xác nhận trên hệ thống rồi gara mới làm. Rất yên tâm.", name: "Nguyễn Văn An", vehicle: "Toyota Vios" },
-  { quote: "Tiến độ được cập nhật liên tục, không cần gọi hỏi nhiều lần mà vẫn biết xe đang ở bước nào.", name: "Trần Thị Bình", vehicle: "Honda City" },
-  { quote: "Nhân viên giải thích dễ hiểu, thời gian bàn giao đúng hẹn và hóa đơn minh bạch.", name: "Lê Minh Cường", vehicle: "Ford Ranger" },
-];
+import { Icons } from "./ui";
 
-function Stars() {
-  return (
-    <span className="flex gap-1 text-accent" aria-label="5 trên 5 sao">
-      {Array.from({ length: 5 }, (_, index) => (
-        <svg key={index} width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 2.7 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3-4.6-4.4 6.3-.9L12 2.7Z" /></svg>
-      ))}
-    </span>
-  );
-}
+const CUSTOMER_INFORMATION = [
+  { title: "Báo giá", description: "Xem từng hạng mục, số lượng phụ tùng và chi phí trước khi xác nhận sửa chữa.", icon: Icons.fileText },
+  { title: "Tiến độ sửa chữa", description: "Theo dõi trạng thái tiếp nhận, kiểm tra, sửa chữa và thời điểm bàn giao xe.", icon: Icons.wrench },
+  { title: "Lịch sử dịch vụ", description: "Tra cứu các lần sửa chữa đã hoàn tất cùng nội dung thực hiện và tổng chi phí.", icon: Icons.history },
+];
 
 export default function PublicTestimonials() {
   return (
-    <section aria-labelledby="homepage-reviews-title" className="bg-surface-subtle">
+    <section aria-labelledby="homepage-customer-info-title" className="bg-surface-subtle">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
-        <div className="text-center"><p className="public-kicker text-accent">Khách hàng nói gì</p><h2 id="homepage-reviews-title" className="public-section-title mt-3 text-foreground">Uy tín được đo bằng trải nghiệm thật.</h2></div>
-        <div className="mt-9 grid grid-cols-1 gap-px overflow-hidden border border-border bg-border md:grid-cols-3">
-          {REVIEWS.map((review) => (
-            <figure key={review.name} className="flex min-h-[250px] flex-col bg-white p-7 sm:p-8">
-              <Stars />
-              <blockquote className="mt-6 text-base font-medium leading-7 text-foreground">“{review.quote}”</blockquote>
-              <figcaption className="mt-auto border-t border-border pt-5"><p className="font-extrabold text-foreground">{review.name}</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">{review.vehicle}</p></figcaption>
-            </figure>
-          ))}
+        <div className="text-center">
+          <p className="public-kicker text-accent">Khu vực khách hàng</p>
+          <h2 id="homepage-customer-info-title" className="public-section-title mt-3 text-foreground">Thông tin cần thiết sau khi gửi xe.</h2>
         </div>
+        <ul className="mt-9 grid grid-cols-1 gap-px overflow-hidden border border-border bg-border md:grid-cols-3">
+          {CUSTOMER_INFORMATION.map((item) => (
+            <li key={item.title} className="flex min-h-[230px] flex-col bg-white p-7 sm:p-8">
+              <span className="grid h-11 w-11 place-items-center border border-border text-primary" aria-hidden="true">{item.icon}</span>
+              <h3 className="mt-6 text-lg font-extrabold text-foreground">{item.title}</h3>
+              <p className="mt-3 text-base leading-7 text-muted-foreground">{item.description}</p>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

@@ -120,7 +120,7 @@ export default function TechnicianView() {
                         <button
                           onClick={() => setItemsDone(prev => ({ ...prev, [key]: !done }))}
                           className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border-2 transition-all ${done ? "border-success bg-success" : "border-slate-300 hover:border-primary"}`}>
-                          {done && <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m20 6-11 11-5-5"/></svg>}
+                          {done && <span className="text-white" aria-hidden="true">{Icons.check}</span>}
                         </button>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
@@ -135,7 +135,7 @@ export default function TechnicianView() {
                             </p>
                           )}
                         </div>
-                        {done && <span className="text-xs font-medium text-success">✓ Đã hoàn tất</span>}
+                        {done && <span className="flex items-center gap-1 text-xs font-medium text-success"><span aria-hidden="true">{Icons.check}</span>Đã hoàn tất</span>}
                       </div>
                     );
                   })}
@@ -210,7 +210,7 @@ export default function TechnicianView() {
       <Modal open={showCompleteModal} onClose={() => setShowCompleteModal(false)} title="Xác nhận hoàn tất sửa chữa">
         <div className="space-y-4">
           <div className="rounded-lg border border-success/20 bg-success-soft p-4">
-            <p className="font-semibold text-success">Tất cả hạng mục đã hoàn thành!</p>
+            <p className="font-semibold text-success">Tất cả hạng mục đã hoàn thành.</p>
             <p className="mt-1 text-xs text-success">Xe {job?.vehicle} sẽ được chuyển sang trạng thái "Hoàn tất sửa chữa".</p>
           </div>
           <Textarea label="Ghi chú bàn giao" defaultValue="Đã hoàn tất tất cả hạng mục. Xe trong tình trạng tốt, sẵn sàng bàn giao." />

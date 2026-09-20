@@ -81,7 +81,7 @@ export default function History() {
                 <p className="mono text-xl font-bold text-primary">{detail.vehicle}</p>
                 <p className="text-slate-500 text-sm">{detail.customer}</p>
               </div>
-              <button aria-label="Đóng chi tiết lịch sử" onClick={() => setSelected(null)} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
+              <button aria-label="Đóng chi tiết lịch sử" onClick={() => setSelected(null)} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.close}</button>
             </div>
 
             <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2">

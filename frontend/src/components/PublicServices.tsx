@@ -39,10 +39,10 @@ export default function PublicServices({ onBook, onViewAll }: PublicServicesProp
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
         <div className="flex flex-col gap-5 border-b border-white/12 pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="public-kicker text-accent">Năng lực xưởng</p>
-            <h2 id="homepage-services-title" className="public-section-title mt-3 max-w-3xl text-white">Mọi vấn đề của xe, đều có giải pháp rõ ràng.</h2>
+            <p className="public-kicker text-accent">Dịch vụ tại gara</p>
+            <h2 id="homepage-services-title" className="public-section-title mt-3 max-w-3xl text-white">Sửa chữa và bảo dưỡng theo từng hạng mục.</h2>
           </div>
-          <button type="button" onClick={onViewAll} className="public-text-link text-white">Xem tất cả dịch vụ <span aria-hidden="true">→</span></button>
+          <button type="button" onClick={onViewAll} className="public-text-link text-white">Xem tất cả dịch vụ <span aria-hidden="true">{Icons.arrowRight}</span></button>
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-px overflow-hidden border border-white/12 bg-white/12 sm:grid-cols-2 lg:grid-cols-3">
@@ -55,7 +55,7 @@ export default function PublicServices({ onBook, onViewAll }: PublicServicesProp
               <div className="mt-auto pt-10">
                 <h3 className="text-xl font-black uppercase tracking-tight text-white">{category}</h3>
                 <p className="mt-2 text-base leading-7 text-white/65">
-                  {info.count > 1 ? `${info.sample} và ${info.count - 1} hạng mục liên quan.` : `${info.sample} · hạng mục chuyên biệt.`}
+                  {info.count > 1 ? `${info.sample} và ${info.count - 1} hạng mục liên quan.` : info.sample}
                 </p>
                 <div className="mt-5 flex items-end justify-between gap-4 border-t border-white/10 pt-4">
                   <p><span className="block text-[10px] font-bold uppercase tracking-wider text-white/35">Chi phí từ</span><span className="mono mt-1 block font-bold text-white">{formatCurrency(info.minPrice)}</span></p>

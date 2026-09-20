@@ -17,9 +17,9 @@ export default function PublicProcess({ onBook }: PublicProcessProps) {
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
         <div className="lg:sticky lg:top-32 lg:self-start">
           <p className="public-kicker text-accent">Quy trình dịch vụ</p>
-          <h2 id="homepage-process-title" className="public-section-title mt-3 text-foreground">6 bước rõ ràng.<br />Không có chi phí bất ngờ.</h2>
-          <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">Mỗi bước đều được lưu trên hệ thống. Khách hàng có thể theo dõi từ lúc đặt lịch đến khi nhận lại xe.</p>
-          <button type="button" onClick={onBook} className="public-primary-button mt-7">Bắt đầu đặt lịch <span aria-hidden="true">→</span></button>
+          <h2 id="homepage-process-title" className="public-section-title mt-3 text-foreground">Từ đặt lịch đến bàn giao xe.</h2>
+          <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">Mỗi bước đều được ghi nhận trên hệ thống để khách hàng biết xe đang được xử lý đến đâu.</p>
+          <button type="button" onClick={onBook} className="public-primary-button mt-7">Đặt lịch sửa chữa <span aria-hidden="true">{Icons.arrowRight}</span></button>
         </div>
 
         <ol className="border-t border-border">

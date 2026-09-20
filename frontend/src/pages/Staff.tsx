@@ -30,7 +30,7 @@ export default function Staff() {
               <button key={s.id} type="button" onClick={() => setSelected(s.id === selected ? null : s.id)} aria-pressed={selected === s.id}
                 className={`w-full rounded-lg border bg-white p-4 text-left transition-all hover:border-primary sm:p-5 ${selected === s.id ? "border-primary ring-1 ring-primary" : "border-border"}`}>
                 <div className="flex items-start gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold flex-shrink-0">
                     {s.name.charAt(0)}
                   </div>
                   <div>
@@ -53,7 +53,7 @@ export default function Staff() {
           <Card className="p-4 sm:p-5">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+                <div className="w-12 h-12 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
                   {detail.name.charAt(0)}
                 </div>
                 <div>
@@ -61,7 +61,7 @@ export default function Staff() {
                   <p className="text-xs text-slate-500">{ROLES[detail.role]}</p>
                 </div>
               </div>
-              <button aria-label="Đóng thông tin nhân viên" onClick={() => setSelected(null)} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
+              <button aria-label="Đóng thông tin nhân viên" onClick={() => setSelected(null)} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.close}</button>
             </div>
 
             <div className="space-y-2 text-sm mb-5">

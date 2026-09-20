@@ -18,11 +18,9 @@ export default function Reception() {
       <div className="mx-auto max-w-2xl">
         <Card className="p-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success-soft">
-            <svg className="h-8 w-8 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="m20 6-11 11-5-5"/>
-            </svg>
+            <span className="scale-150 text-success" aria-hidden="true">{Icons.check}</span>
           </div>
-          <h2 className="text-xl font-bold text-slate-800 mb-2">Tiếp nhận xe thành công!</h2>
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Đã lập phiếu tiếp nhận</h2>
           <p className="mb-1 text-slate-500">Phiếu tiếp nhận: <strong className="mono text-primary">{receptionRecord.MaTiepNhan}</strong></p>
           <p className="text-slate-500 mb-6">Xe <strong>{selectedVehicle.BienSo}</strong> của khách hàng <strong>{selectedCustomer.HoTen}</strong> đã được tiếp nhận.</p>
           <div className="flex gap-3 justify-center">
@@ -46,7 +44,7 @@ export default function Reception() {
                 i === step ? "bg-primary border-primary text-primary-foreground" :
                 "bg-white border-slate-300 text-slate-400"
               }`}>
-                {i < step ? "✓" : i + 1}
+                {i < step ? <span aria-hidden="true">{Icons.check}</span> : i + 1}
               </div>
               <span className={`text-sm font-medium hidden sm:block ${i <= step ? "text-slate-800" : "text-slate-400"}`}>{s}</span>
             </button>
@@ -163,9 +161,9 @@ export default function Reception() {
 
           {/* Navigation */}
           <div className="flex justify-between">
-            <Button variant="outline" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}>← Quay lại</Button>
+            <Button variant="outline" icon={Icons.arrowLeft} onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}>Quay lại</Button>
             {step < STEPS.length - 1
-              ? <Button onClick={() => setStep(step + 1)}>Tiếp theo →</Button>
+              ? <Button icon={Icons.arrowRight} onClick={() => setStep(step + 1)}>Tiếp theo</Button>
               : <Button icon={Icons.checkCircle} onClick={() => setSubmitted(true)}>Lập phiếu tiếp nhận</Button>
             }
           </div>

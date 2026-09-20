@@ -78,7 +78,7 @@ export default function CustomerAppointments({ onBooked }: { onBooked?: () => vo
             <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-success-soft text-success" aria-hidden="true">
               {Icons.checkCircle}
             </span>
-            <p className="ui-card-title mt-3">Đặt lịch thành công!</p>
+            <p className="ui-card-title mt-3">Đã đặt lịch</p>
             <p className="ui-secondary-text mt-1 text-sm">Gara sẽ xác nhận giờ hẹn trong giờ làm việc.</p>
             <div className="mt-4 flex justify-center">
               <Button variant="outline" onClick={() => { setShowBook(false); onBooked?.(); }}>Đóng</Button>

@@ -88,7 +88,7 @@ export default function Services() {
           <Card className="h-fit space-y-4 p-4 sm:p-5">
             <div className="flex items-start justify-between">
               <div><span className="mono text-xs text-slate-400">{detail.MaDichVu}</span><h3 className="mt-1 font-bold leading-tight text-slate-800">{detail.TenDichVu}</h3></div>
-              <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết" className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
+              <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết" className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.close}</button>
             </div>
             <div className="rounded-lg bg-surface-subtle p-3"><p className="text-xs text-muted-foreground">Loại dịch vụ</p><p className="font-semibold">{detail.LoaiDichVu || "Chưa phân loại"}</p></div>
             <div className="rounded-lg bg-surface-subtle p-3"><p className="text-xs text-muted-foreground">Đơn giá</p><p className="font-bold text-primary">{formatCurrency(detail.DonGia)}</p></div>

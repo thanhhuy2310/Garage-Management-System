@@ -12,8 +12,8 @@ export default function PublicParts({ onBook, onViewAll }: PublicPartsProps) {
     <section aria-labelledby="homepage-parts-title" className="bg-surface">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div><p className="public-kicker text-accent">Sẵn trong kho</p><h2 id="homepage-parts-title" className="public-section-title mt-3 text-foreground">Phụ tùng rõ nguồn gốc.<br />Không để xe chờ lâu.</h2></div>
-          <button type="button" onClick={onViewAll} className="public-text-link text-primary">Xem kho phụ tùng <span aria-hidden="true">→</span></button>
+          <div><p className="public-kicker text-accent">Tra cứu phụ tùng</p><h2 id="homepage-parts-title" className="public-section-title mt-3 text-foreground">Phụ tùng đang có trong kho.</h2></div>
+          <button type="button" onClick={onViewAll} className="public-text-link text-primary">Xem kho phụ tùng <span aria-hidden="true">{Icons.arrowRight}</span></button>
         </div>
 
         <div className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

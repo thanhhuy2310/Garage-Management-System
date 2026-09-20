@@ -119,9 +119,9 @@ export default function Appointments() {
         <Card className="overflow-x-auto p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <button aria-label="Tuần trước" className="flex h-11 w-11 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">‹</button>
+              <button aria-label="Tuần trước" className="flex h-11 w-11 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">{Icons.chevronLeft}</button>
               <h3 className="font-semibold text-slate-800">Tuần 16 – 22 tháng 9, 2026</h3>
-              <button aria-label="Tuần sau" className="flex h-11 w-11 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">›</button>
+              <button aria-label="Tuần sau" className="flex h-11 w-11 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">{Icons.chevronRight}</button>
             </div>
             <button className="min-h-11 rounded-md bg-primary-soft px-4 text-sm font-medium text-primary hover:bg-secondary">Hôm nay</button>
           </div>

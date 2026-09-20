@@ -1,5 +1,5 @@
 ﻿import React, { useState } from "react";
-import { Badge, TimelineItem } from "../components/ui";
+import { Badge, Icons, TimelineItem } from "../components/ui";
 import { formatCurrency } from "../data";
 import { mockQuotations, calcTotal } from "../data";
 
@@ -7,11 +7,11 @@ type MobileScreen = "home" | "book" | "track" | "quote" | "history" | "account";
 type BookStep = 0 | 1 | 2 | 3 | 4;
 
 const NAV = [
-  { key: "home", icon: "🏠", label: "Trang chủ" },
-  { key: "book", icon: "📅", label: "Lịch hẹn" },
-  { key: "track", icon: "🔧", label: "Xe của tôi" },
-  { key: "history", icon: "📋", label: "Lịch sử" },
-  { key: "account", icon: "👤", label: "Tài khoản" },
+  { key: "home", icon: Icons.home, label: "Trang chủ" },
+  { key: "book", icon: Icons.calendar, label: "Lịch hẹn" },
+  { key: "track", icon: Icons.wrench, label: "Xe của tôi" },
+  { key: "history", icon: Icons.clipboard, label: "Lịch sử" },
+  { key: "account", icon: Icons.user, label: "Tài khoản" },
 ];
 
 function MobileHome({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
@@ -21,11 +21,11 @@ function MobileHome({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
       <div className="bg-[#1e3a6e] px-4 pt-10 pb-8">
         <div className="flex items-center justify-between mb-1">
           <div>
-            <p className="text-white/70 text-sm">Xin chào 👋</p>
+            <p className="text-white/70 text-sm">Xin chào</p>
             <p className="text-white font-bold text-lg">Nguyễn Văn An</p>
           </div>
           <div className="relative">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white">🔔</div>
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-white" aria-hidden="true">{Icons.bell}</div>
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold">2</span>
           </div>
         </div>
@@ -36,10 +36,10 @@ function MobileHome({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
         <div className="bg-white rounded-2xl p-4 shadow-lg border border-[#dde3ec]">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Xe đang sửa chữa</p>
-            <button onClick={() => onNavigate("track")} className="text-xs text-blue-600 font-medium">Xem chi tiết →</button>
+            <button onClick={() => onNavigate("track")} className="flex items-center gap-1 text-xs font-medium text-blue-600">Xem chi tiết <span aria-hidden="true">{Icons.arrowRight}</span></button>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#e8eef7] rounded-xl flex items-center justify-center text-2xl">🚗</div>
+            <div className="w-12 h-12 bg-[#e8eef7] rounded-xl flex items-center justify-center text-[#1e3a6e]" aria-hidden="true">{Icons.car}</div>
             <div>
               <p className="font-mono font-bold text-[#1e3a6e]">51G-123.45</p>
               <p className="text-xs text-slate-500">Toyota Camry 2020</p>
@@ -52,7 +52,7 @@ function MobileHome({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
               <span className="text-xs text-blue-600 font-semibold">65%</span>
             </div>
             <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-blue-500 to-[#1e3a6e] rounded-full" style={{ width: "65%" }} />
+              <div className="h-full bg-[#1e3a6e] rounded-full" style={{ width: "65%" }} />
             </div>
           </div>
         </div>
@@ -63,14 +63,14 @@ function MobileHome({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
         <div className="grid grid-cols-2 gap-3">
           <button onClick={() => onNavigate("book")}
             className="bg-[#1e3a6e] text-white rounded-2xl p-4 text-left hover:bg-[#162d56] transition-all">
-            <div className="text-2xl mb-2">📅</div>
+            <div className="mb-2" aria-hidden="true">{Icons.calendar}</div>
             <p className="font-semibold text-sm">Đặt lịch hẹn</p>
             <p className="text-white/60 text-xs mt-0.5">Chọn ngày & dịch vụ</p>
           </button>
           <button onClick={() => onNavigate("quote")}
             className="bg-amber-500 text-white rounded-2xl p-4 text-left hover:bg-amber-600 transition-all relative">
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] rounded-full px-1.5 py-0.5 font-bold">1 mới</span>
-            <div className="text-2xl mb-2">💰</div>
+            <div className="mb-2" aria-hidden="true">{Icons.fileText}</div>
             <p className="font-semibold text-sm">Báo giá</p>
             <p className="text-white/80 text-xs mt-0.5">Chờ xác nhận</p>
           </button>
@@ -99,11 +99,11 @@ function MobileHome({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Thông báo gần đây</p>
           <div className="space-y-3">
             {[
-              { icon: "🔧", text: "Xe đang được sửa chữa – Bảo dưỡng động cơ đã hoàn tất", time: "10:30", unread: true },
-              { icon: "💰", text: "Báo giá BG002 đang chờ xác nhận từ bạn", time: "09:15", unread: true },
+              { icon: Icons.wrench, text: "Hạng mục bảo dưỡng động cơ đã hoàn tất", time: "10:30", unread: true },
+              { icon: Icons.fileText, text: "Báo giá BG002 đang chờ bạn xác nhận", time: "09:15", unread: true },
             ].map((n, i) => (
               <div key={i} className={`flex items-start gap-3 p-3 rounded-xl ${n.unread ? "bg-blue-50" : "bg-slate-50"}`}>
-                <span className="text-lg">{n.icon}</span>
+                <span className="text-[#1e3a6e]" aria-hidden="true">{n.icon}</span>
                 <div className="flex-1">
                   <p className="text-xs text-slate-700 leading-relaxed">{n.text}</p>
                   <p className="text-[10px] text-slate-400 mt-1">{n.time}</p>
@@ -131,9 +131,9 @@ function MobileBook({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
   if (confirmed) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center text-4xl mb-4">✅</div>
-        <h2 className="text-xl font-bold text-slate-800 mb-2">Đặt lịch thành công!</h2>
-        <p className="text-slate-500 text-sm mb-6">Lịch hẹn của bạn đã được gara xác nhận.<br />Vui lòng đến đúng giờ.</p>
+        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mb-4" aria-hidden="true"><span className="scale-150">{Icons.checkCircle}</span></div>
+        <h2 className="text-xl font-bold text-slate-800 mb-2">Đã đặt lịch</h2>
+        <p className="text-slate-500 text-sm mb-6">Gara đã nhận lịch hẹn của bạn. Vui lòng đến đúng giờ đã chọn.</p>
         <div className="bg-white rounded-2xl p-4 w-full border border-[#dde3ec] mb-6">
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-slate-500">Xe:</span><span className="font-semibold">51G-123.45</span></div>
@@ -155,7 +155,7 @@ function MobileBook({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
       <div className="flex-1 flex flex-col px-4 pt-6">
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-amber-500">⚠️</span>
+            <span className="text-amber-500" aria-hidden="true">{Icons.alertTriangle}</span>
             <p className="font-semibold text-amber-800 text-sm">Giờ đã chọn không còn trống</p>
           </div>
           <p className="text-xs text-amber-700">18/09/2026 lúc 08:00 đã được đặt. Gara đề xuất các giờ khác:</p>
@@ -172,7 +172,7 @@ function MobileBook({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
                   <p className="text-xs text-emerald-600">Còn trống</p>
                 </div>
               </div>
-              <span className="text-slate-400">›</span>
+              <span className="text-slate-400" aria-hidden="true">{Icons.chevronRight}</span>
             </button>
           ))}
         </div>
@@ -201,12 +201,12 @@ function MobileBook({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
               {[{ id: "XE001", plate: "51G-123.45", name: "Toyota Camry 2020" }, { id: "XE002", plate: "51A-456.78", name: "Honda CR-V 2019" }].map(v => (
                 <button key={v.id} onClick={() => setSelectedVehicle(v.id)}
                   className={`w-full flex items-center gap-3 p-4 rounded-2xl border-2 transition-all ${selectedVehicle === v.id ? "border-[#1e3a6e] bg-[#e8eef7]" : "border-[#dde3ec] bg-white"}`}>
-                  <div className="w-12 h-12 bg-[#e8eef7] rounded-xl flex items-center justify-center text-2xl">🚗</div>
+                  <div className="w-12 h-12 bg-[#e8eef7] rounded-xl flex items-center justify-center text-[#1e3a6e]" aria-hidden="true">{Icons.car}</div>
                   <div className="text-left">
                     <p className="font-mono font-bold text-[#1e3a6e]">{v.plate}</p>
                     <p className="text-xs text-slate-500">{v.name}</p>
                   </div>
-                  {selectedVehicle === v.id && <span className="ml-auto text-[#1e3a6e] text-xl">✓</span>}
+                  {selectedVehicle === v.id && <span className="ml-auto text-[#1e3a6e]" aria-hidden="true">{Icons.check}</span>}
                 </button>
               ))}
             </div>
@@ -220,7 +220,7 @@ function MobileBook({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
                 <button key={s} onClick={() => setSelectedService(s)}
                   className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-sm font-medium ${selectedService === s ? "border-[#1e3a6e] bg-[#e8eef7] text-[#1e3a6e]" : "border-[#dde3ec] bg-white text-slate-700"}`}>
                   {s}
-                  {selectedService === s && <span>✓</span>}
+                  {selectedService === s && <span aria-hidden="true">{Icons.check}</span>}
                 </button>
               ))}
             </div>
@@ -287,11 +287,11 @@ function MobileBook({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) {
 
       {/* Bottom nav */}
       <div className="px-4 pb-4 pt-2 flex gap-3">
-        {step > 0 && <button onClick={() => setStep((step - 1) as BookStep)} className="h-12 flex-1 border border-[#dde3ec] rounded-2xl text-slate-600 font-medium text-sm">← Quay lại</button>}
+        {step > 0 && <button onClick={() => setStep((step - 1) as BookStep)} className="h-12 flex flex-1 items-center justify-center gap-1 border border-[#dde3ec] rounded-2xl text-slate-600 font-medium text-sm"><span aria-hidden="true">{Icons.arrowLeft}</span> Quay lại</button>}
         <button
           onClick={() => step < 4 ? setStep((step + 1) as BookStep) : setConfirmed(true)}
           className="h-12 flex-1 bg-[#1e3a6e] text-white rounded-2xl font-semibold text-sm hover:bg-[#162d56] transition-all">
-          {step < 4 ? "Tiếp theo →" : "Xác nhận đặt lịch ✓"}
+          <span className="flex items-center justify-center gap-1">{step < 4 ? <>Tiếp theo <span aria-hidden="true">{Icons.arrowRight}</span></> : <>Xác nhận đặt lịch <span aria-hidden="true">{Icons.check}</span></>}</span>
         </button>
       </div>
     </div>
@@ -303,7 +303,7 @@ function MobileTrack() {
     <div className="flex-1 overflow-y-auto px-4 pt-4 space-y-4">
       <div className="bg-white rounded-2xl border border-[#dde3ec] p-4">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-12 h-12 bg-[#e8eef7] rounded-xl flex items-center justify-center text-2xl">🚗</div>
+          <div className="w-12 h-12 bg-[#e8eef7] rounded-xl flex items-center justify-center text-[#1e3a6e]" aria-hidden="true">{Icons.car}</div>
           <div>
             <p className="font-mono font-bold text-[#1e3a6e]">51G-123.45</p>
             <p className="text-xs text-slate-500">Toyota Camry 2020</p>
@@ -333,7 +333,7 @@ function MobileTrack() {
       </div>
 
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-        <p className="font-semibold text-amber-800 text-sm mb-1">📞 Cần hỗ trợ?</p>
+        <p className="flex items-center gap-2 font-semibold text-amber-800 text-sm mb-1"><span aria-hidden="true">{Icons.phone}</span>Cần hỗ trợ?</p>
         <p className="text-xs text-amber-700">Liên hệ gara: <strong>028 3456 7890</strong></p>
       </div>
     </div>
@@ -349,8 +349,8 @@ function MobileQuote({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) 
   if (confirmed) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-        <div className="text-5xl mb-4">✅</div>
-        <h2 className="text-xl font-bold text-slate-800 mb-2">Đã xác nhận!</h2>
+        <div className="mb-4 text-emerald-600" aria-hidden="true"><span className="inline-flex scale-150">{Icons.checkCircle}</span></div>
+        <h2 className="text-xl font-bold text-slate-800 mb-2">Đã xác nhận báo giá</h2>
         <p className="text-slate-500 text-sm mb-4">Gara sẽ bắt đầu sửa chữa ngay sau khi nhận được xác nhận của bạn.</p>
         <button onClick={() => { setConfirmed(false); onNavigate("home"); }}
           className="w-full h-12 bg-[#1e3a6e] text-white rounded-2xl font-semibold text-sm">
@@ -427,7 +427,7 @@ function MobileQuote({ onNavigate }: { onNavigate: (s: MobileScreen) => void }) 
             <p className="text-sm text-slate-500 text-center mb-4">Bạn đồng ý với báo giá <strong>{formatCurrency(total)}</strong> và cho phép gara tiến hành sửa chữa?</p>
             <div className="grid grid-cols-2 gap-3">
               <button onClick={() => setShowModal(false)} className="h-12 border border-[#dde3ec] rounded-2xl text-slate-600 font-medium text-sm">Hủy</button>
-              <button onClick={() => { setShowModal(false); setConfirmed(true); }} className="h-12 bg-[#1e3a6e] text-white rounded-2xl font-semibold text-sm">Xác nhận ✓</button>
+              <button onClick={() => { setShowModal(false); setConfirmed(true); }} className="h-12 flex items-center justify-center gap-1 bg-[#1e3a6e] text-white rounded-2xl font-semibold text-sm">Xác nhận <span aria-hidden="true">{Icons.check}</span></button>
             </div>
           </div>
         </div>
@@ -442,7 +442,7 @@ function MobileHistory() {
     <div className="flex-1 overflow-y-auto px-4 pt-4 space-y-3">
       {detail ? (
         <>
-          <button onClick={() => setDetail(false)} className="flex items-center gap-2 text-[#1e3a6e] font-medium text-sm mb-2">← Quay lại</button>
+          <button onClick={() => setDetail(false)} className="flex items-center gap-2 text-[#1e3a6e] font-medium text-sm mb-2"><span aria-hidden="true">{Icons.arrowLeft}</span> Quay lại</button>
           <div className="bg-white rounded-2xl border border-[#dde3ec] p-4 space-y-3">
             <div className="flex justify-between items-start">
               <div><p className="font-mono font-bold text-[#1e3a6e]">51D-567.89</p><p className="text-xs text-slate-500">Ford EcoSport 2018</p></div>
@@ -456,7 +456,7 @@ function MobileHistory() {
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Dịch vụ đã làm</p>
               {["Kiểm tra và vệ sinh bugi", "Điều chỉnh bướm ga"].map(s => (
                 <div key={s} className="flex items-center gap-2 py-2 border-b border-[#dde3ec] last:border-0">
-                  <span className="text-emerald-500 text-xs">✓</span>
+                  <span className="text-emerald-500" aria-hidden="true">{Icons.check}</span>
                   <span className="text-sm text-slate-700">{s}</span>
                 </div>
               ))}
@@ -518,7 +518,7 @@ export default function MobileApp() {
         {/* Page title (except home) */}
         {screen !== "home" && (
           <div className={`flex items-center gap-3 px-4 py-3 ${screen === "book" || screen === "track" || screen === "quote" ? "bg-[#1e3a6e] text-white" : "bg-white border-b border-[#dde3ec]"}`}>
-            <button onClick={() => setScreen("home")} className={`p-1.5 rounded-lg ${screen === "book" || screen === "track" || screen === "quote" ? "text-white/70 hover:text-white hover:bg-white/10" : "text-slate-500 hover:bg-slate-100"}`}>←</button>
+            <button onClick={() => setScreen("home")} aria-label="Về trang chủ" className={`flex h-11 w-11 items-center justify-center rounded-lg ${screen === "book" || screen === "track" || screen === "quote" ? "text-white/70 hover:text-white hover:bg-white/10" : "text-slate-500 hover:bg-slate-100"}`}>{Icons.arrowLeft}</button>
             <h2 className={`font-bold text-sm ${screen === "book" || screen === "track" || screen === "quote" ? "text-white" : "text-slate-800"}`}>{PAGE_TITLE[screen]}</h2>
           </div>
         )}
@@ -532,13 +532,13 @@ export default function MobileApp() {
           {screen === "history" && <MobileHistory />}
           {screen === "account" && (
             <div className="flex-1 overflow-y-auto flex flex-col items-center pt-8 px-4 pb-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-3">A</div>
+              <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-3">A</div>
               <p className="font-bold text-slate-800 text-lg">Nguyễn Văn An</p>
               <p className="text-slate-500 text-sm mono">0901234567</p>
               <div className="w-full mt-6 space-y-2">
                 {["Thông tin cá nhân", "Xe của tôi", "Đổi mật khẩu", "Liên hệ hỗ trợ", "Đăng xuất"].map(item => (
                   <button key={item} className={`w-full flex items-center justify-between p-4 bg-white rounded-2xl border border-[#dde3ec] text-sm font-medium ${item === "Đăng xuất" ? "text-red-500" : "text-slate-700"}`}>
-                    {item} <span>›</span>
+                    {item} <span aria-hidden="true">{Icons.chevronRight}</span>
                   </button>
                 ))}
               </div>
@@ -551,7 +551,7 @@ export default function MobileApp() {
           {NAV.map(n => (
             <button key={n.key} onClick={() => setScreen(n.key as MobileScreen)}
               className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-all ${screen === n.key || (screen === "track" && n.key === "track") || (screen === "quote" && n.key === "home") ? "text-[#1e3a6e]" : "text-slate-400"}`}>
-              <span className="text-lg">{n.icon}</span>
+              <span aria-hidden="true">{n.icon}</span>
               <span className="text-[9px] font-medium">{n.label}</span>
               {n.key === "home" && screen === "home" && <span className="w-1 h-1 bg-[#1e3a6e] rounded-full" />}
             </button>

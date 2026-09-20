@@ -6,7 +6,7 @@ import { GARAGE_NAME } from "../data";
 
 const CONTACT_ROWS = [
   { label: "Địa chỉ", value: "123 Lê Lợi, Q.1, TP.HCM", icon: Icons.car },
-  { label: "Hotline", value: "0901 234 567", href: "tel:0901234567", icon: Icons.bell },
+  { label: "Hotline", value: "0901 234 567", href: "tel:0901234567", icon: Icons.phone },
   { label: "Giờ làm việc", value: "T2 – T7 · 07:30 – 17:30", icon: Icons.calendar },
 ];
 
@@ -26,9 +26,9 @@ export default function PublicContactPage({ onNavigate, onLogin, onBook }: Publi
         <div className="border-b border-border bg-surface-subtle">
           <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
             <p className="text-xs font-bold uppercase tracking-widest text-accent">Liên hệ</p>
-            <h1 className="ui-page-title mt-2 text-3xl sm:text-4xl">Ghé xưởng hoặc nhắn trước</h1>
+            <h1 className="ui-page-title mt-2 text-3xl sm:text-4xl">Liên hệ với gara</h1>
             <p className="ui-secondary-text mt-2 max-w-2xl text-sm">
-              Cần tư vấn bệnh xe, hỏi giá hay đặt lịch? {GARAGE_NAME} phản hồi trong giờ làm việc.
+              Gửi thông tin tình trạng xe, hỏi giá hoặc đặt lịch. {GARAGE_NAME} phản hồi trong giờ làm việc.
             </p>
           </div>
         </div>
@@ -60,7 +60,7 @@ export default function PublicContactPage({ onNavigate, onLogin, onBook }: Publi
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-success-soft text-success" aria-hidden="true">
                   {Icons.checkCircle}
                 </span>
-                <h2 className="ui-card-title mt-4">Đã nhận lời nhắn!</h2>
+                <h2 className="ui-card-title mt-4">Đã nhận lời nhắn</h2>
                 <p className="ui-secondary-text mt-1 max-w-sm text-sm">
                   Gara sẽ liên hệ lại trong giờ làm việc. Trường hợp gấp, gọi hotline 0901 234 567.
                 </p>

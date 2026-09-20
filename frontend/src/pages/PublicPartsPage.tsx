@@ -44,8 +44,8 @@ export default function PublicPartsPage({ onNavigate, onLogin, onBook }: PublicP
             <p className="text-xs font-bold uppercase tracking-widest text-accent">Phụ tùng</p>
             <h1 className="ui-page-title mt-2 text-3xl sm:text-4xl">Kho phụ tùng công khai</h1>
             <p className="ui-secondary-text mt-3 max-w-2xl text-base leading-relaxed">
-              {phuTung.length} mã phụ tùng có nguồn gốc rõ ràng. Tình trạng tồn kho hiển thị thật —
-              mã nào hết hàng, gara báo trước khi nhận xe.
+              Có {phuTung.length} mã phụ tùng trong danh mục. Tình trạng tồn kho được hiển thị theo dữ liệu hiện có
+              để khách kiểm tra trước khi đặt lịch.
             </p>
           </div>
         </div>

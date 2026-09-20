@@ -234,7 +234,7 @@ export function Modal({ open, onClose, title, children, width = "max-w-lg" }: {
         <div className="flex items-center justify-between gap-4 border-b border-border px-4 py-3 sm:px-6 sm:py-4">
           <h2 id={titleId} className="text-lg font-semibold text-slate-900">{title}</h2>
           <button type="button" onClick={onClose} aria-label="Đóng hộp thoại" className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-800">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            {Icons.close}
           </button>
         </div>
         <div className="overflow-y-auto p-4 sm:p-6">{children}</div>
@@ -276,9 +276,7 @@ export function SearchBox({ value, onChange, placeholder = "Tìm kiếm..." }: {
 }) {
   return (
     <div className="relative w-full sm:w-auto">
-      <svg aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-      </svg>
+      <span aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">{Icons.search}</span>
       <input
         type="search"
         aria-label={placeholder}
@@ -301,7 +299,7 @@ export function Pagination({ page, total, perPage, onChange }: {
     <nav className="flex items-center gap-1" aria-label="Phân trang">
       <button aria-label="Trang trước" onClick={() => onChange(page - 1)} disabled={page === 1}
         className="flex h-11 w-11 items-center justify-center rounded-md border border-border text-sm text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">
-        ‹
+        {Icons.chevronLeft}
       </button>
       {Array.from({ length: pages }, (_, i) => i + 1).map(p => (
         <button key={p} onClick={() => onChange(p)} aria-label={`Trang ${p}`} aria-current={p === page ? "page" : undefined}
@@ -311,7 +309,7 @@ export function Pagination({ page, total, perPage, onChange }: {
       ))}
       <button aria-label="Trang sau" onClick={() => onChange(page + 1)} disabled={page === pages}
         className="flex h-11 w-11 items-center justify-center rounded-md border border-border text-sm text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">
-        ›
+        {Icons.chevronRight}
       </button>
     </nav>
   );
@@ -337,7 +335,7 @@ export function StatCard({ label, value, icon, trend, trendUp, color = "blue" }:
           <p className="mt-1 whitespace-nowrap text-[26px] font-bold leading-tight tracking-tight text-foreground">{value}</p>
           {trend && (
             <p className={`mt-1.5 flex items-center gap-1 text-xs font-medium ${trendUp ? "text-success" : "text-danger"}`}>
-              {trendUp ? "↑" : "↓"} {trend}
+              <span aria-hidden="true">{trendUp ? Icons.trendingUp : Icons.trendingDown}</span> {trend}
             </p>
           )}
         </div>
@@ -353,9 +351,7 @@ export function StatCard({ label, value, icon, trend, trendUp, color = "blue" }:
 export function EmptyState({ message = "Không có dữ liệu" }: { message?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-slate-500">
-      <svg className="w-12 h-12 mb-3 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
-      </svg>
+      <span className="mb-3 scale-150 opacity-40" aria-hidden="true">{Icons.inbox}</span>
       <p className="text-sm">{message}</p>
     </div>
   );
@@ -370,7 +366,7 @@ export function TimelineItem({ label, time, note, done, active }: {
       <div className="flex flex-col items-center">
         <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border-2 z-10 ${done ? "bg-success border-success" : active ? "bg-primary border-primary" : "bg-white border-slate-300"}`}>
           {done ? (
-            <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m20 6-11 11-5-5"/></svg>
+            <span className="text-white" aria-hidden="true">{Icons.check}</span>
           ) : active ? (
             <div className="w-3 h-3 rounded-full bg-white" />
           ) : (
@@ -418,4 +414,18 @@ export const Icons = {
   xCircle: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>,
   alertTriangle: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
   info: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
+  menu: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>,
+  close: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>,
+  logOut: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>,
+  arrowLeft: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m12 19-7-7 7-7M19 12H5"/></svg>,
+  arrowRight: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m12 5 7 7-7 7M5 12h14"/></svg>,
+  chevronLeft: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m15 18-6-6 6-6"/></svg>,
+  check: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m20 6-11 11-5-5"/></svg>,
+  trendingUp: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>,
+  trendingDown: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 7 6 6 4-4 8 8"/><path d="M15 17h6v-6"/></svg>,
+  clock: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>,
+  alertCircle: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5M12 16h.01"/></svg>,
+  star: <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5"><path d="m12 2.7 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3-4.6-4.4 6.3-.9L12 2.7Z"/></svg>,
+  user: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>,
+  phone: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.78.62 2.63a2 2 0 0 1-.45 2.11L8 9.73a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.85.29 1.73.5 2.63.62A2 2 0 0 1 22 16.92Z"/></svg>,
 };

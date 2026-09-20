@@ -89,7 +89,7 @@ export default function CustomerQuotations() {
                   <p className="mono text-sm font-bold text-primary">{detail.MaBaoGia}</p>
                   <p className="text-xs text-muted-foreground">Chi tiết hạng mục</p>
                 </div>
-                <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết" className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
+                <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết" className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.close}</button>
               </div>
               <ul className="space-y-2">
                 {detailLines.map((line) => (

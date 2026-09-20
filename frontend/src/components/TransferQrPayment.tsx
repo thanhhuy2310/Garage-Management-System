@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Button } from "./ui";
+import { Button, Icons } from "./ui";
 
 const QR_VALIDITY_SECONDS = 15 * 60;
 
@@ -103,7 +103,7 @@ export default function TransferQrPayment({ amount, amountLabel, invoiceId, onVa
           <p className="mt-1 text-xs leading-5 text-muted-foreground">Mã VietQR đã bao gồm số tiền và nội dung thanh toán của hóa đơn.</p>
         </div>
         <div className={`flex min-h-11 items-center gap-2 rounded-md border px-3 py-2 text-sm font-semibold ${expired ? "border-danger/20 bg-danger-soft text-danger" : nearlyExpired ? "border-warning/20 bg-warning-soft text-warning" : "border-success/20 bg-success-soft text-success"}`}>
-          <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span aria-hidden="true">{Icons.clock}</span>
           <span>{expired ? "Đã hết hạn" : `Còn ${formatCountdown(secondsLeft)}`}</span>
         </div>
       </div>
@@ -120,7 +120,7 @@ export default function TransferQrPayment({ amount, amountLabel, invoiceId, onVa
           />
           {expired && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/90 p-4 text-center">
-              <svg aria-hidden="true" className="text-danger" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5M12 16h.01"/></svg>
+              <span aria-hidden="true" className="scale-125 text-danger">{Icons.alertCircle}</span>
               <div><p className="font-semibold text-foreground">QR đã hết hạn</p><p className="mt-1 text-xs text-muted-foreground">Tạo mã mới để tiếp tục.</p></div>
               <Button type="button" size="sm" className="min-h-11" onClick={renewQr}>Tạo QR mới</Button>
             </div>

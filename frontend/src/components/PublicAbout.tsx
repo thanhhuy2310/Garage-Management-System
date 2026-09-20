@@ -28,8 +28,8 @@ export default function PublicAbout({ onNavigateAbout }: PublicAboutProps) {
         </div>
 
         <div className="bg-white p-7 sm:p-10 lg:p-12">
-          <p className="public-kicker text-accent">Vì sao chọn chúng tôi</p>
-          <h2 id="homepage-about-title" className="public-section-title mt-3 text-foreground">Quản lý bằng hệ thống.<br />Phục vụ bằng trách nhiệm.</h2>
+          <p className="public-kicker text-accent">Cách gara vận hành</p>
+          <h2 id="homepage-about-title" className="public-section-title mt-3 text-foreground">Thông tin rõ ràng ở từng bước.</h2>
           <p className="mt-5 text-base leading-7 text-muted-foreground">Từ lịch hẹn, báo giá, phiếu sửa chữa đến kho và hóa đơn đều liên thông. Thông tin đến tay khách luôn đầy đủ, nhất quán và dễ kiểm tra.</p>
           <ul className="mt-7 divide-y divide-border border-y border-border">
             {STRENGTHS.map((item) => (
@@ -39,7 +39,7 @@ export default function PublicAbout({ onNavigateAbout }: PublicAboutProps) {
               </li>
             ))}
           </ul>
-          <button type="button" onClick={onNavigateAbout} className="public-text-link mt-7 text-primary">Tìm hiểu về gara <span aria-hidden="true">→</span></button>
+          <button type="button" onClick={onNavigateAbout} className="public-text-link mt-7 text-primary">Tìm hiểu về gara <span aria-hidden="true">{Icons.arrowRight}</span></button>
         </div>
       </div>
     </section>

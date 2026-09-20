@@ -89,7 +89,7 @@ export default function Vehicles() {
                   <p className="font-medium text-slate-600">{detail.HangXe} {detail.DongXe} {detail.NamSanXuat}</p>
                   <p className="mono mt-1 text-xs text-slate-400">{detail.MaXe}</p>
                 </div>
-                <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết xe" className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
+                <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết xe" className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.close}</button>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-lg bg-slate-50 p-3"><p className="text-xs text-slate-400">Chủ xe</p><p className="font-semibold">{customerName(detail.MaKhachHang)}</p></div>
