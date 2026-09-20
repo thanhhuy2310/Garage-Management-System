@@ -5,6 +5,7 @@ import PublicHero from "../components/PublicHero";
 import PublicParts from "../components/PublicParts";
 import PublicProcess from "../components/PublicProcess";
 import PublicServices from "../components/PublicServices";
+import PublicTestimonials from "../components/PublicTestimonials";
 import PublicAboutPage from "./PublicAboutPage";
 import PublicContactPage from "./PublicContactPage";
 import PublicPartsPage from "./PublicPartsPage";
@@ -39,6 +40,7 @@ export default function PublicHome({ page, onNavigate, onLogin, onBook }: Public
         <PublicProcess onBook={onBook} />
         <PublicAbout onNavigateAbout={() => onNavigate("about")} />
         <PublicParts onBook={onBook} onViewAll={() => onNavigate("parts")} />
+        <PublicTestimonials />
         <PublicFooter onNavigate={onNavigate} onBook={onBook} />
       </main>
     </div>

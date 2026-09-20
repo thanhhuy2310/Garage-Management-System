@@ -108,8 +108,6 @@
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 html {
@@ -225,6 +223,127 @@ button, [role='button'], a, input, select, textarea {
 .ui-display { font-size: var(--text-display); font-weight: 800; line-height: var(--line-display); letter-spacing: var(--tracking-display); }
 .ui-hero { font-size: var(--text-hero); font-weight: 800; line-height: var(--line-display); letter-spacing: var(--tracking-display); }
 .ui-secondary-text { color: var(--muted-foreground); }
+
+/* SportZone-inspired public homepage: bold editorial hierarchy for automotive content */
+.public-hero {
+  background-image:
+    linear-gradient(90deg, rgba(5, 18, 30, 0.98) 0%, rgba(5, 18, 30, 0.9) 36%, rgba(5, 18, 30, 0.36) 68%, rgba(5, 18, 30, 0.1) 100%),
+    url('/images/garage-hero.png');
+  background-position: center;
+  background-size: cover;
+}
+
+.public-hero-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to right, black, transparent 74%);
+}
+
+.public-kicker {
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.public-display {
+  font-size: clamp(3.1rem, 7.2vw, 6.8rem);
+  font-weight: 900;
+  line-height: 0.96;
+  letter-spacing: -0.055em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.public-section-title {
+  font-size: clamp(2rem, 4.2vw, 3.75rem);
+  font-weight: 900;
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.public-primary-button,
+.public-secondary-button {
+  display: inline-flex;
+  min-height: 3.25rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding-inline: 1.6rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease;
+}
+
+.public-primary-button {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.public-primary-button:hover { filter: brightness(1.08); }
+
+.public-secondary-button {
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.public-secondary-button:hover {
+  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.public-text-link {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.public-text-link span { transition: transform 180ms ease; }
+.public-text-link:hover span { transform: translateX(4px); }
+
+.public-service-card::before {
+  position: absolute;
+  inset: 0;
+  width: 0;
+  background: linear-gradient(135deg, rgba(230, 120, 23, 0.12), transparent 62%);
+  content: '';
+  transition: width 240ms ease;
+}
+
+.public-service-card:hover::before { width: 100%; }
+.public-service-card > * { position: relative; }
+
+.public-footer-title {
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 639px) {
+  .public-hero {
+    background-image:
+      linear-gradient(90deg, rgba(5, 18, 30, 0.98) 0%, rgba(5, 18, 30, 0.9) 62%, rgba(5, 18, 30, 0.65) 100%),
+      url('/images/garage-hero.png');
+    background-position: 58% center;
+  }
+
+  .public-display { font-size: clamp(2.75rem, 14vw, 3.5rem); }
+}
 
 ::selection {
   background: var(--primary-soft);
