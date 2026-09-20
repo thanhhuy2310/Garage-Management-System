@@ -18,7 +18,7 @@ export default function PublicHero({ onBook, onViewServices }: PublicHeroProps) 
           <p className="public-kicker text-accent">Dịch vụ ô tô chuyên nghiệp</p>
           <h1 className="public-display mt-5 max-w-[820px] text-white">
             Chăm xe chuẩn hãng.
-            <span className="mt-1 block text-accent">Vững mọi hành trình.</span>
+            <span className="mt-3 block text-accent sm:mt-4">Vững mọi hành trình.</span>
           </h1>
           <p className="mt-6 max-w-xl text-base leading-7 text-white/75 sm:text-lg">
             Đặt lịch trong một phút, duyệt báo giá trước khi sửa và theo dõi từng bước thực hiện ngay trên hệ thống.
