@@ -39,11 +39,11 @@ export default function PublicHeader({ active, onNavigate, onLogin, onBook }: Pu
 
       <header className="sticky top-0 z-40 border-b border-white/10 bg-brand-dark text-white shadow-lg">
         <div className="mx-auto flex h-[76px] w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-          <button type="button" onClick={() => go("home")} aria-label={`${GARAGE_NAME} – Trang chủ`} className="group flex min-w-0 items-center gap-3 text-left">
-            <span className="grid h-12 w-12 flex-shrink-0 place-items-center bg-accent text-sm font-black tracking-wider text-white transition-all group-hover:bg-white group-hover:text-brand-dark" aria-hidden="true">TC</span>
+          <button type="button" onClick={() => go("home")} aria-label={`${GARAGE_NAME} – Trang chủ`} className="group flex min-w-0 items-center gap-2 text-left sm:gap-3">
+            <span className="grid h-11 w-11 flex-shrink-0 place-items-center bg-accent text-xs font-black tracking-wider text-white transition-all group-hover:bg-white group-hover:text-brand-dark sm:h-12 sm:w-12 sm:text-sm" aria-hidden="true">TC</span>
             <span className="min-w-0">
-              <span className="block truncate text-[15px] font-black uppercase leading-tight tracking-[-0.02em] text-white sm:text-base">Gara Thành Công</span>
-              <span className="mt-1 block truncate text-xs font-bold uppercase tracking-[0.14em] text-white/55">Dịch vụ sửa chữa ô tô</span>
+              <span className="block truncate text-xs font-black uppercase leading-tight tracking-[-0.02em] text-white sm:text-base">Gara Thành Công</span>
+              <span className="mt-1 hidden truncate text-xs font-bold uppercase tracking-[0.14em] text-white/55 sm:block">Dịch vụ sửa chữa ô tô</span>
             </span>
           </button>
 
@@ -61,7 +61,7 @@ export default function PublicHeader({ active, onNavigate, onLogin, onBook }: Pu
               <span><span className="block text-xs font-bold uppercase tracking-[0.14em] text-white/50">Hotline hỗ trợ</span><span className="mt-0.5 block text-sm font-extrabold text-white">{HOTLINE}</span></span>
             </a>
             <button type="button" onClick={onLogin} className="hidden min-h-11 items-center px-3 text-sm font-extrabold uppercase tracking-wider text-white/70 transition-all hover:text-white sm:inline-flex">Đăng nhập</button>
-            <button type="button" onClick={onBook} className="inline-flex min-h-11 items-center bg-accent px-4 text-sm font-extrabold uppercase tracking-wider text-white transition-all hover:brightness-110 sm:px-5">Đặt lịch</button>
+            <button type="button" onClick={onBook} className="inline-flex min-h-11 items-center bg-accent px-3 text-xs font-extrabold uppercase tracking-wider text-white transition-all hover:brightness-110 sm:px-5 sm:text-sm">Đặt lịch</button>
             <button type="button" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? "Đóng menu" : "Mở menu"} aria-expanded={menuOpen} className="flex h-11 w-11 items-center justify-center border border-white/15 text-white transition-all hover:border-white/40 xl:hidden">
               <span aria-hidden="true">{menuOpen ? Icons.close : Icons.menu}</span>
             </button>
