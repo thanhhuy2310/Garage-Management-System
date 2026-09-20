@@ -35,7 +35,7 @@ export default function PublicServices({ onBook, onViewAll }: PublicServicesProp
   }, []);
 
   return (
-    <section aria-labelledby="homepage-services-title" className="bg-brand-dark text-white">
+    <section aria-labelledby="homepage-services-title" className="public-reveal bg-brand-dark text-white">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
         <div className="flex flex-col gap-5 border-b border-white/12 pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div>

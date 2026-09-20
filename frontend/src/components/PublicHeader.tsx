@@ -51,7 +51,7 @@ export default function PublicHeader({ active, onNavigate, onLogin, onBook }: Pu
             {NAV_ITEMS.map((item) => (
               <button key={item.key} type="button" onClick={() => go(item.key)} aria-current={active === item.key ? "page" : undefined} className={`relative flex h-full items-center whitespace-nowrap text-sm font-extrabold uppercase tracking-[0.1em] transition-all ${active === item.key ? "text-white" : "text-white/60 hover:text-white"}`}>
                 {item.label}
-                {active === item.key && <span className="absolute inset-x-0 bottom-0 h-1 bg-accent" aria-hidden="true" />}
+                {active === item.key && <span className="public-nav-indicator absolute inset-x-0 bottom-0 h-1 bg-accent" aria-hidden="true" />}
               </button>
             ))}
           </nav>
@@ -69,7 +69,7 @@ export default function PublicHeader({ active, onNavigate, onLogin, onBook }: Pu
         </div>
 
         {menuOpen && (
-          <nav aria-label="Điều hướng website trên di động" className="border-t border-white/10 bg-brand-dark px-4 py-3 xl:hidden">
+          <nav aria-label="Điều hướng website trên di động" className="mobile-menu-enter border-t border-white/10 bg-brand-dark px-4 py-3 xl:hidden">
             {NAV_ITEMS.map((item) => (
               <button key={item.key} type="button" onClick={() => go(item.key)} aria-current={active === item.key ? "page" : undefined} className={`flex min-h-12 w-full items-center justify-between border-b border-white/10 px-1 text-left text-sm font-extrabold uppercase tracking-[0.1em] ${active === item.key ? "text-accent" : "text-white/70"}`}>
                 {item.label}<span aria-hidden="true">{Icons.arrowRight}</span>

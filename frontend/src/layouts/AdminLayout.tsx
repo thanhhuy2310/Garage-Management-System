@@ -38,13 +38,13 @@ export default function AdminLayout({ children, page, role, allowedPages, onNavi
           type="button"
           aria-label="Đóng thanh điều hướng"
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-20 bg-slate-950/45 xl:hidden"
+          className="sidebar-backdrop-enter fixed inset-0 z-20 bg-slate-950/45 xl:hidden"
         />
       )}
       <div className="app-content flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header page={page} role={role} onMenuToggle={() => setSidebarOpen(true)} />
         <main id="admin-content" className="flex-1 overflow-y-auto" tabIndex={-1}>
-          <PageShell>{children}</PageShell>
+          <PageShell key={page}>{children}</PageShell>
         </main>
       </div>
     </div>

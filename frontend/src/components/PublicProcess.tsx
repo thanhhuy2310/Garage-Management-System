@@ -13,7 +13,7 @@ interface PublicProcessProps { onBook: () => void; }
 
 export default function PublicProcess({ onBook }: PublicProcessProps) {
   return (
-    <section aria-labelledby="homepage-process-title" className="bg-surface">
+    <section aria-labelledby="homepage-process-title" className="public-reveal bg-surface">
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
         <div className="lg:sticky lg:top-32 lg:self-start">
           <p className="public-kicker text-accent">Quy trình dịch vụ</p>

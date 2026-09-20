@@ -12,7 +12,7 @@ interface PublicAboutProps { onNavigateAbout: () => void; }
 
 export default function PublicAbout({ onNavigateAbout }: PublicAboutProps) {
   return (
-    <section aria-labelledby="homepage-about-title" className="border-y border-border bg-surface-subtle">
+    <section aria-labelledby="homepage-about-title" className="public-reveal border-y border-border bg-surface-subtle">
       <div className="mx-auto grid w-full max-w-7xl items-stretch gap-0 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-2">
         <div className="relative overflow-hidden bg-brand-dark p-7 text-white sm:p-10 lg:p-12" aria-hidden="true">
           <div className="public-hero-grid pointer-events-none absolute inset-0 opacity-40" />

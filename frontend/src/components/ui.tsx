@@ -8,7 +8,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon?: React.ReactNode;
 }
 export function Button({ variant = "primary", size = "md", icon, children, className = "", ...rest }: ButtonProps) {
-  const base = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border font-semibold transition-all cursor-pointer select-none active:translate-y-px disabled:active:translate-y-0";
+  const base = "motion-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border font-semibold cursor-pointer select-none disabled:active:translate-y-0";
   const sizes = { sm: "min-h-11 px-3 text-sm", md: "min-h-11 px-4 text-sm", lg: "min-h-12 px-5 text-base" };
   const variants: Record<BtnVariant, string> = {
     primary: "border-primary bg-primary text-primary-foreground hover:border-primary-hover hover:bg-primary-hover",
@@ -221,14 +221,14 @@ export function Modal({ open, onClose, title, children, width = "max-w-lg" }: {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6" onClick={onClose} role="presentation">
-      <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]" />
+      <div className="modal-backdrop-enter absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]" />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className={`relative flex max-h-[calc(100dvh-0.75rem)] w-full flex-col overflow-hidden rounded-t-xl bg-white card-shadow-md sm:max-h-[90vh] sm:rounded-xl ${width}`}
+        className={`modal-panel-enter relative flex max-h-[calc(100dvh-0.75rem)] w-full flex-col overflow-hidden rounded-t-xl bg-white card-shadow-md sm:max-h-[90vh] sm:rounded-xl ${width}`}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between gap-4 border-b border-border px-4 py-3 sm:px-6 sm:py-4">

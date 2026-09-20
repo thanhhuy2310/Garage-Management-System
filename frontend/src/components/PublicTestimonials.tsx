@@ -8,7 +8,7 @@ const CUSTOMER_INFORMATION = [
 
 export default function PublicTestimonials() {
   return (
-    <section aria-labelledby="homepage-customer-info-title" className="bg-surface-subtle">
+    <section aria-labelledby="homepage-customer-info-title" className="public-reveal bg-surface-subtle">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
         <div className="text-center">
           <p className="public-kicker text-accent">Khu vực khách hàng</p>

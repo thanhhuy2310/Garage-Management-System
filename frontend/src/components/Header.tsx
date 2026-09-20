@@ -101,7 +101,7 @@ export default function Header({
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full border border-white bg-danger" />
           </button>
           {showNotifications && (
-            <div className="absolute right-0 top-12 z-50 w-[min(22rem,calc(100vw-1.5rem))] rounded-lg border border-border bg-white shadow-xl">
+            <div className="dropdown-enter absolute right-0 top-12 z-50 w-[min(22rem,calc(100vw-1.5rem))] rounded-lg border border-border bg-white shadow-xl">
               <div className="flex items-center justify-between border-b border-border p-4">
                 <p className="text-sm font-semibold text-slate-800">Thông báo</p>
                 <button type="button" onClick={() => setShowNotifications(false)} aria-label="Đóng thông báo" className="flex h-11 w-11 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800">{Icons.close}</button>

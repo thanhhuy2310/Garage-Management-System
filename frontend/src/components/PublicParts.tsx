@@ -9,7 +9,7 @@ export default function PublicParts({ onBook, onViewAll }: PublicPartsProps) {
   const featured = useMemo(() => phuTung.filter((part) => getInventoryStatus(part) === "ok").slice(0, 4), []);
 
   return (
-    <section aria-labelledby="homepage-parts-title" className="bg-surface">
+    <section aria-labelledby="homepage-parts-title" className="public-reveal bg-surface">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div><p className="public-kicker text-accent">Tra cứu phụ tùng</p><h2 id="homepage-parts-title" className="public-section-title mt-3 text-foreground">Phụ tùng đang có trong kho.</h2></div>
@@ -18,7 +18,7 @@ export default function PublicParts({ onBook, onViewAll }: PublicPartsProps) {
 
         <div className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {featured.map((part, index) => (
-            <article key={part.MaPhuTung} className="group border border-border bg-white transition-all hover:-translate-y-1 hover:border-primary hover:shadow-lg">
+            <article key={part.MaPhuTung} className="interactive-card group border border-border bg-white hover:border-primary hover:shadow-lg">
               <div className="relative grid h-44 place-items-center overflow-hidden bg-brand-dark">
                 <div className="public-hero-grid pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
                 <span className="relative grid h-16 w-16 place-items-center border border-white/15 text-accent transition-transform group-hover:scale-110" aria-hidden="true">{Icons.package}</span>

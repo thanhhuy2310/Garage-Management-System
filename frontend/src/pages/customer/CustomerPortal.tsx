@@ -98,7 +98,7 @@ export default function CustomerPortal({ onLogout, page, onNavigate }: CustomerP
         </nav>
       }
     >
-      <div className="space-y-6">
+      <div key={page} className="customer-page-enter space-y-6">
         {page === "overview" && <CustomerOverview onNavigate={onNavigate} />}
         {page === "appointments" && <CustomerAppointments />}
         {page === "quotations" && <CustomerQuotations />}

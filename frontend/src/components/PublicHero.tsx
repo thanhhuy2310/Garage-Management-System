@@ -15,10 +15,10 @@ const STATS = [
 
 export default function PublicHero({ onBook, onViewServices }: PublicHeroProps) {
   return (
-    <section aria-label="Giới thiệu gara" className="public-hero relative isolate flex min-h-[690px] items-center overflow-hidden text-white lg:min-h-[760px]">
+    <section aria-label="Giới thiệu gara" className="public-hero public-reveal relative isolate flex min-h-[690px] items-center overflow-hidden text-white lg:min-h-[760px]">
       <div className="public-hero-grid pointer-events-none absolute inset-0" aria-hidden="true" />
       <div className="relative mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
-        <div className="max-w-3xl">
+        <div className="public-hero-content max-w-3xl">
           <p className="public-kicker text-accent">Gara Ô Tô Thành Công</p>
           <h1 className="public-display mt-5 max-w-[820px] text-white">
             Bảo dưỡng đúng lịch.
@@ -33,7 +33,7 @@ export default function PublicHero({ onBook, onViewServices }: PublicHeroProps) 
             <button type="button" onClick={onViewServices} className="public-secondary-button">Xem bảng dịch vụ</button>
           </div>
 
-          <dl className="mt-12 grid max-w-2xl grid-cols-3 border-y border-white/15 bg-brand-dark/45 backdrop-blur-sm">
+          <dl className="public-hero-meta mt-12 grid max-w-2xl grid-cols-3 border-y border-white/15 bg-brand-dark/45 backdrop-blur-sm">
             {STATS.map((stat) => (
               <div key={stat.label} className="border-r border-white/15 px-3 py-5 last:border-r-0 sm:px-6">
                 <dt className="mt-1 text-[10px] font-bold uppercase tracking-wider text-white/55 sm:text-xs">{stat.label}</dt>
