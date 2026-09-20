@@ -23,14 +23,14 @@ export default function Services() {
     : 0;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {[
           { label: "Tổng dịch vụ", value: dichVu.length, icon: Icons.wrench },
           { label: "Nhóm dịch vụ", value: categories.length - 1, icon: Icons.clipboard },
           { label: "Đơn giá trung bình", value: formatCurrency(averagePrice), icon: Icons.creditCard },
         ].map((item) => (
-          <Card key={item.label} className="flex items-center gap-3 p-4">
+          <Card key={item.label} className="flex items-center gap-4 p-4 sm:p-5">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-soft text-primary">{item.icon}</div>
             <div><p className="text-xs text-muted-foreground">{item.label}</p><p className="text-xl font-bold text-foreground">{item.value}</p></div>
           </Card>
@@ -42,7 +42,7 @@ export default function Services() {
           <SearchBox value={search} onChange={setSearch} placeholder="Tên dịch vụ..." />
           <div className="flex flex-wrap gap-1.5">
             {categories.map((item) => (
-              <button key={item} type="button" onClick={() => setCategory(item)} aria-pressed={category === item} className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${category === item ? "border-primary bg-primary text-white" : "border-border bg-surface text-muted-foreground hover:border-primary hover:text-primary"}`}>{item}</button>
+              <button key={item} type="button" onClick={() => setCategory(item)} aria-pressed={category === item} className={`min-h-11 rounded-full border px-4 text-sm font-medium transition-all ${category === item ? "border-primary bg-primary text-white" : "border-border bg-surface text-muted-foreground hover:border-primary hover:text-primary"}`}>{item}</button>
             ))}
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function Services() {
                     <td><span className="rounded-full bg-primary-soft px-2 py-1 text-xs font-medium text-primary">{service.LoaiDichVu || "—"}</span></td>
                     <td className="mono text-right font-semibold">{formatCurrency(service.DonGia)}</td>
                     <td className="max-w-[240px] truncate text-slate-500">{service.MoTa || "—"}</td>
-                    <td><button type="button" aria-label={`Sửa ${service.TenDichVu}`} className="rounded p-1.5 text-slate-500 hover:bg-slate-100">{Icons.edit}</button></td>
+                    <td><button type="button" aria-label={`Sửa ${service.TenDichVu}`} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.edit}</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -85,10 +85,10 @@ export default function Services() {
         </div>
 
         {detail && (
-          <Card className="h-fit space-y-4 p-5">
+          <Card className="h-fit space-y-4 p-4 sm:p-5">
             <div className="flex items-start justify-between">
               <div><span className="mono text-xs text-slate-400">{detail.MaDichVu}</span><h3 className="mt-1 font-bold leading-tight text-slate-800">{detail.TenDichVu}</h3></div>
-              <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết" className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
+              <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết" className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
             </div>
             <div className="rounded-lg bg-surface-subtle p-3"><p className="text-xs text-muted-foreground">Loại dịch vụ</p><p className="font-semibold">{detail.LoaiDichVu || "Chưa phân loại"}</p></div>
             <div className="rounded-lg bg-surface-subtle p-3"><p className="text-xs text-muted-foreground">Đơn giá</p><p className="font-bold text-primary">{formatCurrency(detail.DonGia)}</p></div>

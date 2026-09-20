@@ -30,7 +30,7 @@ export default function Reports() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <Tabs tabs={[{ key: "week", label: "Tuần" }, { key: "month", label: "Tháng" }, { key: "quarter", label: "Quý" }, { key: "year", label: "Năm" }]}
             active={period} onChange={setPeriod} />
-          <input type="month" aria-label="Chọn tháng báo cáo" defaultValue="2026-09" className="h-10 rounded-md border border-border bg-white px-3 text-sm shadow-sm" />
+          <input type="month" aria-label="Chọn tháng báo cáo" defaultValue="2026-09" className="min-h-11 rounded-md border border-border bg-white px-3 text-base shadow-sm sm:text-sm" />
         </div>
         <Button variant="outline" icon={Icons.download}>Xuất báo cáo</Button>
       </div>
@@ -45,7 +45,7 @@ export default function Reports() {
 
       {/* Revenue chart */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Card className="p-5 xl:col-span-2">
+        <Card className="p-4 sm:p-5 xl:col-span-2">
           <h3 className="mb-4 text-base font-semibold text-slate-900">Doanh thu theo tháng</h3>
           <div role="img" aria-label="Biểu đồ doanh thu theo tháng">
             <ResponsiveContainer width="100%" height={220}>
@@ -67,7 +67,7 @@ export default function Reports() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
           <h3 className="mb-4 text-base font-semibold text-slate-900">Tỷ lệ dịch vụ</h3>
           <div role="img" aria-label="Biểu đồ tỷ lệ dịch vụ">
             <ResponsiveContainer width="100%" height={180}>
@@ -95,7 +95,7 @@ export default function Reports() {
 
       {/* Inventory & Technicians */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
           <h3 className="mb-4 text-base font-semibold text-slate-900">Nhập / Xuất / Tồn phụ tùng</h3>
           <div role="img" aria-label="Biểu đồ nhập và xuất phụ tùng theo tháng">
             <ResponsiveContainer width="100%" height={200}>
@@ -111,7 +111,7 @@ export default function Reports() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
           <h3 className="mb-4 text-base font-semibold text-slate-900">Hiệu suất kỹ thuật viên</h3>
           <TableContainer>
             <table className="w-full data-table">

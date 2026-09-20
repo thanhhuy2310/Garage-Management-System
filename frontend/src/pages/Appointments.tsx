@@ -44,7 +44,7 @@ export default function Appointments() {
   });
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Toolbar */}
       <div className="page-toolbar">
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:w-auto">
@@ -66,7 +66,7 @@ export default function Appointments() {
       <div className="flex gap-2 flex-wrap">
         {STATUS_TABS.map(tab => (
           <button key={tab.key} onClick={() => setStatusFilter(tab.key)}
-            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${statusFilter === tab.key ? "border-primary bg-primary text-primary-foreground" : "border-border bg-surface text-muted-foreground hover:border-primary hover:text-primary"}`}>
+            className={`min-h-11 rounded-full border px-4 text-sm font-medium transition-all ${statusFilter === tab.key ? "border-primary bg-primary text-primary-foreground" : "border-border bg-surface text-muted-foreground hover:border-primary hover:text-primary"}`}>
             {tab.label}
             <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-xs font-bold ${statusFilter === tab.key ? "bg-white/20 text-white" : "bg-muted text-muted-foreground"}`}>
               {tab.key === "all" ? mockAppointments.length : mockAppointments.filter(a => a.status === tab.key).length}
@@ -102,10 +102,10 @@ export default function Appointments() {
                   <td><Badge variant={a.status as any} /></td>
                   <td>
                     <div className="flex items-center gap-1">
-                      <button aria-label={`Xem lịch hẹn ${a.id}`} className="flex h-9 w-9 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"><span>{Icons.eye}</span></button>
-                      <button aria-label={`Sửa lịch hẹn ${a.id}`} className="flex h-9 w-9 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"><span>{Icons.edit}</span></button>
+                      <button aria-label={`Xem lịch hẹn ${a.id}`} className="flex h-11 w-11 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"><span>{Icons.eye}</span></button>
+                      <button aria-label={`Sửa lịch hẹn ${a.id}`} className="flex h-11 w-11 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"><span>{Icons.edit}</span></button>
                       {a.status === "pending" && (
-                        <button className="px-2 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-medium hover:bg-emerald-100 transition-all">Xác nhận</button>
+                        <button className="min-h-11 rounded bg-emerald-50 px-3 text-sm font-medium text-emerald-700 transition-all hover:bg-emerald-100">Xác nhận</button>
                       )}
                     </div>
                   </td>
@@ -116,14 +116,14 @@ export default function Appointments() {
         </Card>
       ) : (
         /* Calendar View */
-        <Card className="overflow-x-auto p-5">
+        <Card className="overflow-x-auto p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <button aria-label="Tuần trước" className="flex h-9 w-9 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">‹</button>
+              <button aria-label="Tuần trước" className="flex h-11 w-11 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">‹</button>
               <h3 className="font-semibold text-slate-800">Tuần 16 – 22 tháng 9, 2026</h3>
-              <button aria-label="Tuần sau" className="flex h-9 w-9 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">›</button>
+              <button aria-label="Tuần sau" className="flex h-11 w-11 items-center justify-center rounded-lg border text-slate-500 hover:bg-slate-50">›</button>
             </div>
-            <button className="rounded-md bg-primary-soft px-3 py-1.5 text-xs font-medium text-primary hover:bg-secondary">Hôm nay</button>
+            <button className="min-h-11 rounded-md bg-primary-soft px-4 text-sm font-medium text-primary hover:bg-secondary">Hôm nay</button>
           </div>
 
           <div className="grid min-w-[720px] grid-cols-7 gap-2">

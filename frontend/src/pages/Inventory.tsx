@@ -24,7 +24,7 @@ export default function Inventory() {
   const lowStock = phuTung.filter((item) => getInventoryStatus(item) !== "ok");
   const auditItems = phuTung.map((item, index) => ({ ...item, actual: index === 2 ? item.SoLuongTon - 1 : item.SoLuongTon }));
 
-  return <div className="space-y-5">
+  return <div className="space-y-6">
     <div className="page-toolbar">
       <Tabs
         tabs={TABS.map((item) => ({

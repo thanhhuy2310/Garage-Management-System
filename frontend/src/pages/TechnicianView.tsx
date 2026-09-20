@@ -33,7 +33,7 @@ export default function TechnicianView() {
   const doneCount = items.filter((_, i) => itemsDone[`${selected}-${i}`] ?? false).length;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary font-bold text-white">K</div>
@@ -83,7 +83,7 @@ export default function TechnicianView() {
         {/* Job detail */}
         <div className="xl:col-span-2">
           {job ? (
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5 lg:p-6">
               {/* Header */}
               <div className="flex items-start justify-between mb-5">
                 <div>

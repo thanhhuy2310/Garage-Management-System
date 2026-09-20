@@ -78,13 +78,13 @@ export default function Dashboard() {
       {/* Charts row */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {/* Revenue chart */}
-        <Card className="p-5 xl:col-span-2">
+        <Card className="p-4 sm:p-5 xl:col-span-2">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="text-base font-semibold text-foreground">Doanh thu & Lượt sửa chữa</h3>
             <div className="flex gap-1 bg-slate-100 p-0.5 rounded-lg">
               {(["week", "month"] as ChartPeriod[]).map(p => (
                 <button key={p} onClick={() => setChartPeriod(p)} aria-pressed={chartPeriod === p}
-                  className={`min-h-9 rounded-md px-3 py-1 text-sm font-medium transition-all ${chartPeriod === p ? "bg-white shadow-sm text-primary" : "text-slate-600 hover:text-slate-900"}`}>
+                  className={`min-h-11 rounded-md px-4 text-sm font-medium transition-all ${chartPeriod === p ? "bg-white shadow-sm text-primary" : "text-slate-600 hover:text-slate-900"}`}>
                   {p === "week" ? "7 ngày" : "7 tháng"}
                 </button>
               ))}
@@ -116,7 +116,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Pie chart */}
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
           <h3 className="mb-4 text-base font-semibold text-foreground">Tình trạng sửa chữa</h3>
           <div role="img" aria-label="Biểu đồ tỷ lệ trạng thái sửa chữa">
             <ResponsiveContainer width="100%" height={190}>
@@ -145,7 +145,7 @@ export default function Dashboard() {
       {/* Bottom row */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {/* Today's appointments */}
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold text-foreground">Lịch hẹn hôm nay</h3>
             <span className="text-xs text-slate-400">{todayAppointments.length} lịch hẹn</span>
@@ -167,7 +167,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Active repairs */}
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold text-foreground">Xe đang sửa chữa</h3>
           </div>
@@ -188,7 +188,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Low stock */}
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold text-foreground">Phụ tùng sắp hết / hết hàng</h3>
             <span className="text-xs text-warning font-medium">{lowStock.length} mặt hàng</span>
@@ -218,7 +218,7 @@ export default function Dashboard() {
 
       {/* Services chart */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
           <h3 className="mb-4 text-base font-semibold text-foreground">Dịch vụ sử dụng nhiều nhất</h3>
           <div role="img" aria-label="Biểu đồ các dịch vụ được sử dụng nhiều nhất">
           <ResponsiveContainer width="100%" height={200}>
@@ -234,7 +234,7 @@ export default function Dashboard() {
           </div>
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
           <h3 className="mb-4 text-base font-semibold text-foreground">Doanh thu theo tháng</h3>
           <div role="img" aria-label="Biểu đồ doanh thu theo tháng">
           <ResponsiveContainer width="100%" height={200}>

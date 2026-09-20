@@ -57,7 +57,7 @@ export default function RepairOrders() {
   );
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="page-toolbar">
         <SearchBox value={search} onChange={setSearch} placeholder="Tìm mã phiếu, biển số, khách hàng..." />
         <Button icon={Icons.plus} onClick={() => setShowCreate(true)}>Tạo phiếu mới</Button>
@@ -92,7 +92,7 @@ export default function RepairOrders() {
         {/* Detail */}
         <div className="xl:col-span-2">
           {selectedOrder ? (
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5 lg:p-6">
               {/* Header */}
               <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>

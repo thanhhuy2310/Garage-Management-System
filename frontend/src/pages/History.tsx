@@ -14,11 +14,11 @@ export default function History() {
   const completedAt = (repairId: string) => phieuSuaChua.find((item) => item.MaPhieuSuaChua === repairId)?.NgayHoanThanh;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="page-toolbar sm:justify-start">
         <SearchBox value={search} onChange={setSearch} placeholder="Biển số, khách hàng..." />
-        <input type="date" aria-label="Từ ngày" className="h-10 rounded-md border border-border bg-white px-3 text-sm shadow-sm" />
-        <input type="date" aria-label="Đến ngày" className="h-10 rounded-md border border-border bg-white px-3 text-sm shadow-sm" />
+        <input type="date" aria-label="Từ ngày" className="min-h-11 rounded-md border border-border bg-white px-3 text-base shadow-sm sm:text-sm" />
+        <input type="date" aria-label="Đến ngày" className="min-h-11 rounded-md border border-border bg-white px-3 text-base shadow-sm sm:text-sm" />
         <Button variant="outline" size="sm" icon={Icons.download}>Xuất</Button>
       </div>
 
@@ -60,7 +60,7 @@ export default function History() {
                     <td className="text-right mono text-sm">{r.km.toLocaleString("vi-VN")}</td>
                     <td className="text-slate-600">{r.technician}</td>
                     <td className="text-right font-bold">{formatCurrency(total)}</td>
-                    <td><button aria-label={`Xem chi tiết phiếu ${r.id}`} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.chevronRight}</button></td>
+                    <td><button aria-label={`Xem chi tiết phiếu ${r.id}`} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.chevronRight}</button></td>
                   </tr>
                 );
               })}
@@ -72,7 +72,7 @@ export default function History() {
         </Card>
 
         {detail && (
-          <Card className="detail-panel h-fit p-5">
+          <Card className="detail-panel h-fit p-4 sm:p-5">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -81,7 +81,7 @@ export default function History() {
                 <p className="mono text-xl font-bold text-primary">{detail.vehicle}</p>
                 <p className="text-slate-500 text-sm">{detail.customer}</p>
               </div>
-              <button aria-label="Đóng chi tiết lịch sử" onClick={() => setSelected(null)} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
+              <button aria-label="Đóng chi tiết lịch sử" onClick={() => setSelected(null)} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
             </div>
 
             <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2">

@@ -17,7 +17,7 @@ export default function Customers() {
   const detailVehicles = xe.filter(vehicle => vehicle.MaKhachHang === detail?.MaKhachHang);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="page-toolbar">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <SearchBox value={search} onChange={setSearch} placeholder="Tên, số điện thoại..." />
@@ -75,8 +75,8 @@ export default function Customers() {
                     </td>
                     <td>
                       <div className="flex gap-1">
-                        <button aria-label={`Xem khách hàng ${customer.HoTen}`} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.eye}</button>
-                        <button aria-label={`Sửa khách hàng ${customer.HoTen}`} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.edit}</button>
+                        <button aria-label={`Xem khách hàng ${customer.HoTen}`} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.eye}</button>
+                        <button aria-label={`Sửa khách hàng ${customer.HoTen}`} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.edit}</button>
                       </div>
                     </td>
                   </tr>
@@ -93,7 +93,7 @@ export default function Customers() {
         {/* Detail panel */}
         {detail && (
           <div className="detail-panel space-y-4">
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-white">
@@ -104,7 +104,7 @@ export default function Customers() {
                     <p className="text-xs text-slate-500 mono">{detail.MaKhachHang}</p>
                   </div>
                 </div>
-                <button aria-label="Đóng thông tin khách hàng" onClick={() => setSelected(null)} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
+                <button aria-label="Đóng thông tin khách hàng" onClick={() => setSelected(null)} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
               </div>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-2 text-slate-600">
@@ -123,7 +123,7 @@ export default function Customers() {
             </Card>
 
             {/* Vehicles */}
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Xe ({detailVehicles.length})</p>
               <div className="space-y-2">
                 {detailVehicles.map(vehicle => (
@@ -139,7 +139,7 @@ export default function Customers() {
             </Card>
 
             {/* Repair history */}
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Lịch sử gần đây</p>
               <div className="space-y-2">
                 {mockRepairOrders.filter(r => r.customerId === detail.MaKhachHang).map(r => (

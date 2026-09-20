@@ -40,7 +40,7 @@ export default function Reception() {
       <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-2">
         {STEPS.map((s, i) => (
           <React.Fragment key={s}>
-            <button onClick={() => setStep(i)} className="flex flex-shrink-0 items-center gap-2">
+            <button onClick={() => setStep(i)} className="flex min-h-11 flex-shrink-0 items-center gap-2 rounded-md px-1">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
                 i < step ? "border-success bg-success text-white" :
                 i === step ? "bg-primary border-primary text-primary-foreground" :
@@ -55,10 +55,10 @@ export default function Reception() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="space-y-4 xl:col-span-2">
           {step === 0 && (
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5 lg:p-6">
               <h3 className="font-semibold text-slate-800 mb-4">Thông tin khách hàng</h3>
               <div className="space-y-4">
                 <Select label="Khách hàng *" options={[
@@ -81,7 +81,7 @@ export default function Reception() {
           )}
 
           {step === 1 && (
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5 lg:p-6">
               <h3 className="font-semibold text-slate-800 mb-4">Thông tin xe</h3>
               <div className="space-y-4">
                 <Select label="Chọn xe *" options={[
@@ -107,7 +107,7 @@ export default function Reception() {
           )}
 
           {step === 2 && (
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5 lg:p-6">
               <h3 className="font-semibold text-slate-800 mb-4">Lịch hẹn liên quan</h3>
               <div className="space-y-3">
                 <div className="flex flex-col gap-3 rounded-lg border border-info/20 bg-info-soft p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -124,7 +124,7 @@ export default function Reception() {
           )}
 
           {step === 3 && (
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5 lg:p-6">
               <h3 className="font-semibold text-slate-800 mb-4">Tình trạng xe ban đầu</h3>
               <div className="space-y-3">
                 {["Ngoại thất xe", "Nội thất xe", "Lốp xe", "Đèn xe", "Hệ thống điện", "Hệ thống phanh"].map(item => (
@@ -146,7 +146,7 @@ export default function Reception() {
           )}
 
           {step === 4 && (
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5 lg:p-6">
               <h3 className="font-semibold text-slate-800 mb-4">Xác nhận phiếu tiếp nhận</h3>
               <div className="mb-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                 <div className="rounded-lg bg-surface-subtle p-3"><p className="mb-1 text-xs text-muted-foreground">Khách hàng</p><p className="font-semibold">{selectedCustomer.HoTen}</p></div>
@@ -172,7 +172,7 @@ export default function Reception() {
         </div>
 
         {/* Summary panel */}
-        <Card className="detail-panel h-fit p-5">
+        <Card className="detail-panel h-fit p-4 sm:p-5 lg:p-6">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Tóm tắt</p>
           <div className="space-y-3 text-sm">
             <div>

@@ -11,12 +11,12 @@ export default function Quotation() {
   const total = q ? calcTotal(q.services, q.parts) : 0;
 
   return (
-    <div>
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         {/* List */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="font-semibold text-slate-700">Tất cả báo giá</h2>
+          <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="ui-section-title text-slate-700">Tất cả báo giá</h2>
             <Button size="sm" icon={Icons.plus}>Tạo mới</Button>
           </div>
           {mockQuotations.map(quote => {
@@ -44,7 +44,7 @@ export default function Quotation() {
         {/* Detail */}
         <div className="xl:col-span-2">
           {q ? (
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5 lg:p-6">
               {/* Header */}
               <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>

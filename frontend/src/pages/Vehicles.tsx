@@ -21,7 +21,7 @@ export default function Vehicles() {
   const detail = xe.find((vehicle) => vehicle.MaXe === selected);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="page-toolbar">
         <SearchBox value={search} onChange={setSearch} placeholder="Biển số, chủ xe, hãng xe..." />
         <Button icon={Icons.plus} onClick={() => setShowAdd(true)}>Thêm xe</Button>
@@ -67,8 +67,8 @@ export default function Vehicles() {
                     <td className="mono text-right text-sm">{vehicle.SoKm?.toLocaleString("vi-VN") ?? "—"}</td>
                     <td>
                       <div className="flex gap-1">
-                        <button type="button" aria-label={`Xem xe ${vehicle.BienSo}`} className="rounded p-1.5 text-slate-500 hover:bg-slate-100">{Icons.eye}</button>
-                        <button type="button" aria-label={`Sửa xe ${vehicle.BienSo}`} className="rounded p-1.5 text-slate-500 hover:bg-slate-100">{Icons.edit}</button>
+                        <button type="button" aria-label={`Xem xe ${vehicle.BienSo}`} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.eye}</button>
+                        <button type="button" aria-label={`Sửa xe ${vehicle.BienSo}`} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.edit}</button>
                       </div>
                     </td>
                   </tr>
@@ -82,14 +82,14 @@ export default function Vehicles() {
 
         {detail && (
           <div className="detail-panel space-y-4">
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5">
               <div className="mb-4 flex items-start justify-between">
                 <div>
                   <p className="mono text-2xl font-bold text-primary">{detail.BienSo}</p>
                   <p className="font-medium text-slate-600">{detail.HangXe} {detail.DongXe} {detail.NamSanXuat}</p>
                   <p className="mono mt-1 text-xs text-slate-400">{detail.MaXe}</p>
                 </div>
-                <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết xe" className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
+                <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết xe" className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-lg bg-slate-50 p-3"><p className="text-xs text-slate-400">Chủ xe</p><p className="font-semibold">{customerName(detail.MaKhachHang)}</p></div>
@@ -99,7 +99,7 @@ export default function Vehicles() {
               </div>
             </Card>
 
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5">
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Lịch sử sửa chữa</p>
               <div className="space-y-2">
                 {mockRepairOrders.filter((repair) => repair.vehicle === detail.BienSo).map((repair) => (

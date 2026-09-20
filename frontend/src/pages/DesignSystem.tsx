@@ -128,8 +128,8 @@ export default function DesignSystem() {
                   <td><Badge variant={row.status} label={row.status === "completed" ? "Đang làm" : "Hoạt động"} /></td>
                   <td>
                     <div className="flex gap-1">
-                      <button aria-label={`Xem ${row.name}`} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.eye}</button>
-                      <button aria-label={`Sửa ${row.name}`} className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.edit}</button>
+                      <button aria-label={`Xem ${row.name}`} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.eye}</button>
+                      <button aria-label={`Sửa ${row.name}`} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.edit}</button>
                     </div>
                   </td>
                 </tr>
@@ -186,7 +186,7 @@ export default function DesignSystem() {
         <h3 className="font-semibold text-slate-700 mb-4 pb-2 border-b border-[#dde3ec]">Feedback States</h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Card><EmptyState message="Không có dữ liệu để hiển thị" /></Card>
-          <Card className="p-5">
+          <Card className="p-4 sm:p-5">
             <Button onClick={() => setModalOpen(true)}>Mở Modal</Button>
             <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Modal xác nhận">
               <p className="text-sm text-slate-600 mb-4">Đây là modal xác nhận hành động. Bạn có chắc chắn muốn tiếp tục?</p>
