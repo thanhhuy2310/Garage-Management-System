@@ -40,17 +40,17 @@ export default function PublicPartsPage({ onNavigate, onLogin, onBook }: PublicP
       <PublicHeader active="parts" onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} />
       <main>
         <div className="border-b border-border bg-surface-subtle">
-          <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:py-14">
+          <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
             <p className="text-xs font-bold uppercase tracking-widest text-accent">Phụ tùng</p>
             <h1 className="ui-page-title mt-2 text-3xl sm:text-4xl">Kho phụ tùng công khai</h1>
-            <p className="ui-secondary-text mt-2 max-w-2xl text-sm">
+            <p className="ui-secondary-text mt-3 max-w-2xl text-base leading-relaxed">
               {phuTung.length} mã phụ tùng có nguồn gốc rõ ràng. Tình trạng tồn kho hiển thị thật —
               mã nào hết hàng, gara báo trước khi nhận xe.
             </p>
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-6xl px-4 py-10">
+        <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
           <div className="page-toolbar">
             <div className="flex flex-wrap gap-1.5" role="group" aria-label="Lọc theo tình trạng tồn kho">
               {STATUS_FILTERS.map((item) => (
@@ -59,7 +59,7 @@ export default function PublicPartsPage({ onNavigate, onLogin, onBook }: PublicP
                   type="button"
                   onClick={() => setStatus(item.key)}
                   aria-pressed={status === item.key}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                  className={`min-h-11 rounded-full border px-4 text-sm font-medium transition-all ${
                     status === item.key
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-surface text-muted-foreground hover:border-primary hover:text-primary"
@@ -76,7 +76,7 @@ export default function PublicPartsPage({ onNavigate, onLogin, onBook }: PublicP
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Tên, hãng, mã phụ tùng..."
-                className="h-10 w-full rounded-md border border-border bg-surface pl-3 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted-foreground transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 sm:w-64"
+                className="h-11 w-full rounded-md border border-border bg-surface px-3 text-base text-foreground shadow-sm placeholder:text-muted-foreground transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 sm:w-64 sm:text-sm"
               />
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function PublicPartsPage({ onNavigate, onLogin, onBook }: PublicP
                 return (
                   <li
                     key={part.MaPhuTung}
-                    className="card-shadow flex flex-col rounded-lg border border-border bg-card p-5 text-card-foreground"
+                    className="card-shadow flex flex-col rounded-lg border border-border bg-card p-4 text-card-foreground sm:p-5"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary-soft text-primary" aria-hidden="true">
@@ -108,7 +108,7 @@ export default function PublicPartsPage({ onNavigate, onLogin, onBook }: PublicP
                       type="button"
                       onClick={onBook}
                       disabled={partStatus === "out"}
-                      className="mt-4 inline-flex min-h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+                      className="mt-5 inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
                       aria-label={`Đặt lịch thay ${part.TenPhuTung}`}
                     >
                       {partStatus === "out" ? "Hết hàng" : "Đặt lịch thay"}

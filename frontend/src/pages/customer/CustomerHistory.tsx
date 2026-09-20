@@ -18,7 +18,7 @@ export default function CustomerHistory() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
         <h2 className="ui-section-title">Lịch sử sửa chữa / bảo dưỡng</h2>
         <p className="ui-secondary-text text-sm">{completed.length} lần đã hoàn tất</p>
@@ -39,7 +39,7 @@ export default function CustomerHistory() {
             const open = expanded === repair.MaPhieuSuaChua;
             return (
               <li key={repair.MaPhieuSuaChua}>
-                <Card className="p-5">
+                <Card className="p-4 sm:p-5">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="mono text-lg font-bold text-primary">{vehicle?.BienSo}</p>
@@ -58,7 +58,7 @@ export default function CustomerHistory() {
                     type="button"
                     onClick={() => setExpanded(open ? null : repair.MaPhieuSuaChua)}
                     aria-expanded={open}
-                    className="mt-2 min-h-10 text-sm font-medium text-primary hover:underline"
+                    className="mt-2 min-h-11 rounded-md px-1 text-sm font-medium text-primary hover:underline"
                   >
                     {open ? "Thu gọn chi tiết" : "Xem chi tiết hạng mục"}
                   </button>

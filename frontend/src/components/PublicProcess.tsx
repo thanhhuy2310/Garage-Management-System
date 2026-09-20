@@ -18,7 +18,7 @@ export default function PublicProcess({ onBook }: PublicProcessProps) {
         <div className="lg:sticky lg:top-32 lg:self-start">
           <p className="public-kicker text-accent">Quy trình dịch vụ</p>
           <h2 id="homepage-process-title" className="public-section-title mt-3 text-foreground">6 bước rõ ràng.<br />Không có chi phí bất ngờ.</h2>
-          <p className="mt-5 max-w-md text-sm leading-7 text-muted-foreground">Mỗi bước đều được lưu trên hệ thống. Khách hàng có thể theo dõi từ lúc đặt lịch đến khi nhận lại xe.</p>
+          <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">Mỗi bước đều được lưu trên hệ thống. Khách hàng có thể theo dõi từ lúc đặt lịch đến khi nhận lại xe.</p>
           <button type="button" onClick={onBook} className="public-primary-button mt-7">Bắt đầu đặt lịch <span aria-hidden="true">→</span></button>
         </div>
 
@@ -26,7 +26,7 @@ export default function PublicProcess({ onBook }: PublicProcessProps) {
           {STEPS.map((step, index) => (
             <li key={step.title} className="group grid grid-cols-[52px_1fr_auto] items-center gap-4 border-b border-border py-5 sm:grid-cols-[72px_1fr_auto] sm:py-6">
               <span className="mono text-2xl font-black text-border transition-all group-hover:text-accent sm:text-3xl" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-              <div><h3 className="text-base font-extrabold uppercase tracking-tight text-foreground"><span className="sr-only">Bước {index + 1}: </span>{step.title}</h3><p className="mt-1 text-sm text-muted-foreground">{step.description}</p></div>
+              <div><h3 className="text-base font-extrabold uppercase tracking-tight text-foreground"><span className="sr-only">Bước {index + 1}: </span>{step.title}</h3><p className="mt-1 text-base leading-relaxed text-muted-foreground">{step.description}</p></div>
               <span className="grid h-11 w-11 place-items-center border border-border text-primary transition-all group-hover:border-primary group-hover:bg-primary group-hover:text-white" aria-hidden="true">{step.icon}</span>
             </li>
           ))}

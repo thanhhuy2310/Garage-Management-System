@@ -35,8 +35,8 @@ function ProfileTab() {
   const customer = khachHang.find((c) => c.MaKhachHang === CURRENT_CUSTOMER_ID);
   const [done, setDone] = useState(false);
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <Card className="space-y-3 p-5">
+    <div className="grid gap-6 lg:grid-cols-2">
+      <Card className="space-y-4 p-4 sm:p-5">
         <h3 className="ui-card-title">Thông tin cá nhân</h3>
         <div className="rounded-lg bg-surface-subtle p-3 text-sm">
           <p className="font-semibold text-foreground">{customer?.HoTen}</p>
@@ -45,7 +45,7 @@ function ProfileTab() {
         </div>
         <p className="text-xs text-muted-foreground">Muốn cập nhật thông tin, liên hệ lễ tân gara để được hỗ trợ.</p>
       </Card>
-      <Card className="p-5">
+      <Card className="p-4 sm:p-5">
         <h3 className="ui-card-title">Đổi mật khẩu</h3>
         {done ? (
           <p className="mt-3 rounded-md bg-success-soft px-3 py-2 text-sm text-success" role="status">
@@ -78,7 +78,7 @@ export default function CustomerPortal({ onLogout, page, onNavigate }: CustomerP
       customerName={customer?.HoTen}
       navigation={
         <nav aria-label="Khu vực khách hàng" className="mx-auto w-full max-w-6xl px-4">
-          <div className="flex gap-1 overflow-x-auto pb-2" role="tablist">
+          <div className="flex gap-2 overflow-x-auto pb-3" role="tablist">
             {TABS.map((item) => (
               <button
                 key={item.key}
@@ -86,7 +86,7 @@ export default function CustomerPortal({ onLogout, page, onNavigate }: CustomerP
                 role="tab"
                 aria-selected={page === item.key}
                 onClick={() => onNavigate(item.key)}
-                className={`flex min-h-10 flex-shrink-0 items-center gap-1.5 rounded-md px-3 text-[13px] font-medium transition-all ${
+                className={`flex min-h-11 flex-shrink-0 items-center gap-2 rounded-md px-3.5 text-sm font-semibold transition-all ${
                   page === item.key ? "bg-primary text-primary-foreground" : "text-slate-600 hover:bg-surface-subtle"
                 }`}
               >
@@ -98,7 +98,7 @@ export default function CustomerPortal({ onLogout, page, onNavigate }: CustomerP
         </nav>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-6">
         {page === "overview" && <CustomerOverview onNavigate={onNavigate} />}
         {page === "appointments" && <CustomerAppointments />}
         {page === "quotations" && <CustomerQuotations />}

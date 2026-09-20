@@ -97,7 +97,7 @@ function RolePicker({ role, onChange }: { role: Role; onChange: (role: Role) => 
               key={key}
               type="button"
               onClick={() => { onChange(key); setOpen(false); }}
-              className={`flex min-h-10 w-full items-center justify-between rounded-md px-3 text-sm hover:bg-muted ${role === key ? "font-semibold text-primary" : "text-foreground"}`}
+              className={`flex min-h-11 w-full items-center justify-between rounded-md px-3 text-sm hover:bg-muted ${role === key ? "font-semibold text-primary" : "text-foreground"}`}
             >
               {label}{role === key && <span aria-hidden="true">✓</span>}
             </button>

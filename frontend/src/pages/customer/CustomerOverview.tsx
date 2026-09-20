@@ -34,14 +34,14 @@ export default function CustomerOverview({ onNavigate }: CustomerOverviewProps) 
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
         <p className="text-xs font-bold uppercase tracking-widest text-accent">Khu vực khách hàng</p>
         <h1 className="ui-page-title mt-1 text-brand-dark">Tổng quan xe &amp; dịch vụ</h1>
         <p className="ui-secondary-text mt-1 text-sm">Theo dõi lịch hẹn, báo giá và tiến độ sửa chữa trong một nơi.</p>
       </div>
 
-      <section aria-label="Chỉ số tổng quan" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Chỉ số tổng quan" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {summaries.map((item) => (
           <Card key={item.label} className="flex min-h-28 items-center gap-4 p-4">
             <span className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg ${item.tint}`} aria-hidden="true">{item.icon}</span>
@@ -51,7 +51,7 @@ export default function CustomerOverview({ onNavigate }: CustomerOverviewProps) 
       </section>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="ui-card-title">Lịch hẹn gần nhất</h2>
             <Button size="sm" variant="ghost" onClick={() => onNavigate("appointments")}>Xem lịch hẹn</Button>
@@ -67,7 +67,7 @@ export default function CustomerOverview({ onNavigate }: CustomerOverviewProps) 
           ) : <p className="mt-4 text-sm text-muted-foreground">Chưa có lịch hẹn sắp tới.</p>}
         </Card>
 
-        <Card className="p-5">
+        <Card className="p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="ui-card-title">Tiến độ hiện tại</h2>
             <Button size="sm" variant="ghost" onClick={() => onNavigate("tracking")}>Theo dõi chi tiết</Button>
@@ -86,13 +86,13 @@ export default function CustomerOverview({ onNavigate }: CustomerOverviewProps) 
       </div>
 
       {pendingQuotations.length > 0 && (
-        <Card className="flex flex-col gap-4 border-warning/30 bg-warning-soft p-5 sm:flex-row sm:items-center sm:justify-between">
+        <Card className="flex flex-col gap-4 border-warning/30 bg-warning-soft p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div><p className="font-semibold text-foreground">Bạn có {pendingQuotations.length} báo giá đang chờ xác nhận</p><p className="mt-1 text-sm text-muted-foreground">Xem đầy đủ hạng mục và chi phí trước khi gara thực hiện.</p></div>
           <Button onClick={() => onNavigate("quotations")}>Xem báo giá</Button>
         </Card>
       )}
 
-      <section aria-label="Thao tác nhanh" className="flex flex-wrap gap-3">
+      <section aria-label="Thao tác nhanh" className="grid gap-3 sm:flex sm:flex-wrap">
         <Button icon={Icons.plus} onClick={() => onNavigate("appointments")}>Đặt lịch mới</Button>
         <Button variant="outline" icon={Icons.history} onClick={() => onNavigate("history")}>Xem lịch sử</Button>
         <Button variant="outline" icon={Icons.userCheck} onClick={() => onNavigate("profile")}>Hồ sơ cá nhân</Button>

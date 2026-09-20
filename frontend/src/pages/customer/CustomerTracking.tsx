@@ -36,7 +36,7 @@ export default function CustomerTracking() {
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
         <h2 className="ui-section-title">Tiến độ sửa chữa</h2>
         <p className="ui-secondary-text text-sm">{myRepairs.length} xe đang trong xưởng</p>
@@ -64,7 +64,7 @@ export default function CustomerTracking() {
             ];
             return (
               <li key={repair.MaPhieuSuaChua}>
-                <Card className="h-full p-5">
+                <Card className="h-full p-4 sm:p-5">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <p className="mono text-lg font-bold text-primary">{vehicle?.BienSo}</p>

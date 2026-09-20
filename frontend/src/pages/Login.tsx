@@ -100,7 +100,7 @@ export default function Login({ onLogin, onBack, account }: LoginProps) {
         </div>
       </section>
 
-      <main className="flex flex-1 items-center justify-center bg-surface p-5 sm:p-8 lg:p-10">
+      <main className="flex flex-1 items-center justify-center bg-surface px-4 py-8 sm:p-8 lg:p-10">
         <div className="w-full max-w-[420px]">
           <div className="mb-8 flex items-center gap-3 xl:hidden">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
@@ -119,22 +119,22 @@ export default function Login({ onLogin, onBack, account }: LoginProps) {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="username" className="mb-1.5 block text-sm font-medium text-slate-700">Tên đăng nhập</label>
-              <input id="username" value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" className="h-11 w-full rounded-md border border-border bg-surface px-4 text-sm text-foreground shadow-sm transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15" />
+              <input id="username" value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" className="h-11 w-full rounded-md border border-border bg-surface px-4 text-base text-foreground shadow-sm transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 sm:text-sm" />
             </div>
             <div>
               <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-slate-700">Mật khẩu</label>
               <div className="relative">
-                <input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" className="h-11 w-full rounded-md border border-border bg-surface px-4 pr-16 text-sm text-foreground shadow-sm transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15" />
-                <button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-1 top-1/2 min-h-9 -translate-y-1/2 rounded-md px-3 text-xs font-semibold text-primary hover:bg-secondary" aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}>{showPassword ? "Ẩn" : "Hiện"}</button>
+                <input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" className="h-11 w-full rounded-md border border-border bg-surface px-4 pr-20 text-base text-foreground shadow-sm transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 sm:text-sm" />
+                <button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-0 top-1/2 min-h-11 -translate-y-1/2 rounded-md px-3 text-sm font-semibold text-primary hover:bg-secondary" aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}>{showPassword ? "Ẩn" : "Hiện"}</button>
               </div>
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="flex cursor-pointer items-center gap-2">
+              <label className="flex min-h-11 cursor-pointer items-center gap-2">
                 <input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} className="h-4 w-4 cursor-pointer accent-primary" />
                 <span className="text-sm text-slate-600">Ghi nhớ đăng nhập</span>
               </label>
-              <button type="button" className="text-sm font-medium text-primary hover:underline">Quên mật khẩu?</button>
+              <button type="button" className="min-h-11 rounded-md px-1 text-sm font-medium text-primary hover:underline">Quên mật khẩu?</button>
             </div>
 
             {error && <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">{error}</p>}
@@ -148,7 +148,7 @@ export default function Login({ onLogin, onBack, account }: LoginProps) {
           <button
             type="button"
             onClick={onBack}
-            className="mt-4 inline-flex min-h-10 items-center gap-1 text-sm font-medium text-muted-foreground transition-all hover:text-primary"
+            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-all hover:text-primary"
           >
             <span aria-hidden="true">←</span> Về trang chủ website
           </button>

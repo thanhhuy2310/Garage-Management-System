@@ -54,12 +54,12 @@ export default function PublicServices({ onBook, onViewAll }: PublicServicesProp
               </div>
               <div className="mt-auto pt-10">
                 <h3 className="text-xl font-black uppercase tracking-tight text-white">{category}</h3>
-                <p className="mt-2 text-sm leading-6 text-white/55">
+                <p className="mt-2 text-base leading-7 text-white/65">
                   {info.count > 1 ? `${info.sample} và ${info.count - 1} hạng mục liên quan.` : `${info.sample} · hạng mục chuyên biệt.`}
                 </p>
                 <div className="mt-5 flex items-end justify-between gap-4 border-t border-white/10 pt-4">
                   <p><span className="block text-[10px] font-bold uppercase tracking-wider text-white/35">Chi phí từ</span><span className="mono mt-1 block font-bold text-white">{formatCurrency(info.minPrice)}</span></p>
-                  <button type="button" onClick={onBook} aria-label={`Đặt lịch ${category}`} className="min-h-11 border border-white/15 px-4 text-xs font-extrabold uppercase tracking-wider text-white transition-all hover:border-accent hover:bg-accent">Đặt lịch</button>
+                  <button type="button" onClick={onBook} aria-label={`Đặt lịch ${category}`} className="min-h-11 border border-white/15 px-4 text-sm font-extrabold uppercase tracking-wider text-white transition-all hover:border-accent hover:bg-accent">Đặt lịch</button>
                 </div>
               </div>
             </article>

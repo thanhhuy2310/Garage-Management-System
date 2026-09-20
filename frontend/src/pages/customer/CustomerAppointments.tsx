@@ -34,7 +34,7 @@ export default function CustomerAppointments({ onBooked }: { onBooked?: () => vo
   const serviceName = (id: string | null) => dichVu.find((s) => s.MaDichVu === id)?.TenDichVu ?? "Tư vấn chung";
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="page-toolbar">
         <div>
           <h2 className="ui-section-title">Lịch hẹn của tôi</h2>
@@ -52,7 +52,7 @@ export default function CustomerAppointments({ onBooked }: { onBooked?: () => vo
         <ul className="grid gap-4 md:grid-cols-2">
           {myAppointments.map((appointment) => (
             <li key={appointment.MaLichHen}>
-              <Card className="h-full p-5">
+              <Card className="h-full p-4 sm:p-5">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="mono text-lg font-bold text-primary">{vehiclePlate(appointment.MaXe)}</p>
@@ -94,12 +94,12 @@ export default function CustomerAppointments({ onBooked }: { onBooked?: () => vo
               label="Dịch vụ *"
               options={[{ value: "", label: "Tư vấn chung" }, ...dichVu.map((s) => ({ value: s.MaDichVu, label: s.TenDichVu }))]}
             />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Input label="Ngày hẹn *" type="date" required />
               <Input label="Giờ hẹn *" type="time" required />
             </div>
             <Input label="Nội dung / triệu chứng" placeholder="Xe kêu lạ khi đạp phanh..." />
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button type="button" variant="outline" onClick={() => setShowBook(false)}>Hủy</Button>
               <Button type="submit">Xác nhận đặt lịch</Button>
             </div>

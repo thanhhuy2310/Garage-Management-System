@@ -22,7 +22,7 @@ export default function PublicAbout({ onNavigateAbout }: PublicAboutProps) {
             <div className="mt-auto grid grid-cols-2 border border-white/15">
               <div className="border-b border-r border-white/15 p-5"><p className="text-4xl font-black text-accent">{dichVu.length}</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-white/50">Hạng mục dịch vụ</p></div>
               <div className="border-b border-white/15 p-5"><p className="text-4xl font-black text-accent">06</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-white/50">Bước kiểm soát</p></div>
-              <div className="col-span-2 flex items-center gap-3 p-5"><span className="grid h-11 w-11 flex-shrink-0 place-items-center bg-accent text-white">{Icons.bell}</span><p className="text-sm leading-6 text-white/70">Nhắc lịch bảo dưỡng và thông báo tiến độ tự động cho khách hàng.</p></div>
+              <div className="col-span-2 flex items-center gap-4 p-5"><span className="grid h-11 w-11 flex-shrink-0 place-items-center bg-accent text-white">{Icons.bell}</span><p className="text-base leading-7 text-white/75">Nhắc lịch bảo dưỡng và thông báo tiến độ tự động cho khách hàng.</p></div>
             </div>
           </div>
         </div>
@@ -30,12 +30,12 @@ export default function PublicAbout({ onNavigateAbout }: PublicAboutProps) {
         <div className="bg-white p-7 sm:p-10 lg:p-12">
           <p className="public-kicker text-accent">Vì sao chọn chúng tôi</p>
           <h2 id="homepage-about-title" className="public-section-title mt-3 text-foreground">Quản lý bằng hệ thống.<br />Phục vụ bằng trách nhiệm.</h2>
-          <p className="mt-5 text-sm leading-7 text-muted-foreground">Từ lịch hẹn, báo giá, phiếu sửa chữa đến kho và hóa đơn đều liên thông. Thông tin đến tay khách luôn đầy đủ, nhất quán và dễ kiểm tra.</p>
+          <p className="mt-5 text-base leading-7 text-muted-foreground">Từ lịch hẹn, báo giá, phiếu sửa chữa đến kho và hóa đơn đều liên thông. Thông tin đến tay khách luôn đầy đủ, nhất quán và dễ kiểm tra.</p>
           <ul className="mt-7 divide-y divide-border border-y border-border">
             {STRENGTHS.map((item) => (
               <li key={item.title} className="flex gap-4 py-5">
                 <span className="grid h-11 w-11 flex-shrink-0 place-items-center bg-primary-soft text-primary" aria-hidden="true">{item.icon}</span>
-                <div><h3 className="font-extrabold text-foreground">{item.title}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{item.description}</p></div>
+                <div><h3 className="font-extrabold text-foreground">{item.title}</h3><p className="mt-1 text-base leading-7 text-muted-foreground">{item.description}</p></div>
               </li>
             ))}
           </ul>

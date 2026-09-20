@@ -17,7 +17,7 @@ export default function CustomerNotifications() {
   const unreadCount = mine.filter((n) => !n.DaDoc && !readIds.includes(n.MaThongBao)).length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="page-toolbar">
         <div>
           <h2 className="ui-section-title">Thông báo</h2>
@@ -29,7 +29,7 @@ export default function CustomerNotifications() {
           <button
             type="button"
             onClick={() => setReadIds(mine.map((n) => n.MaThongBao))}
-            className="min-h-10 rounded-md border border-border bg-surface px-4 text-sm font-semibold text-primary transition-all hover:bg-surface-subtle"
+            className="min-h-11 rounded-md border border-border bg-surface px-4 text-sm font-semibold text-primary transition-all hover:bg-surface-subtle"
           >
             Đánh dấu đã đọc hết
           </button>
@@ -55,7 +55,7 @@ export default function CustomerNotifications() {
                     unread ? "border-info/30 bg-info-soft/40" : "border-border"
                   }`}
                 >
-                  <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${meta.tint}`} aria-hidden="true">
+                  <span className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg ${meta.tint}`} aria-hidden="true">
                     {meta.icon}
                   </span>
                   <span className="min-w-0 flex-1">
@@ -63,7 +63,7 @@ export default function CustomerNotifications() {
                       <span className="truncate text-sm font-semibold text-foreground">{notice.TieuDe}</span>
                       {unread && <span className="h-2 w-2 flex-shrink-0 rounded-full bg-info" aria-label="Chưa đọc" />}
                     </span>
-                    <span className="mt-0.5 block text-[13px] leading-relaxed text-slate-600">{notice.NoiDung}</span>
+                    <span className="mt-1 block text-sm leading-relaxed text-slate-600">{notice.NoiDung}</span>
                     <span className="mt-1 block text-xs text-slate-400">
                       {meta.label} · {notice.ThoiGian.slice(0, 16).replace("T", " ")}
                     </span>

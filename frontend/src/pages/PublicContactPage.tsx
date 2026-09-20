@@ -24,7 +24,7 @@ export default function PublicContactPage({ onNavigate, onLogin, onBook }: Publi
       <PublicHeader active="contact" onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} />
       <main>
         <div className="border-b border-border bg-surface-subtle">
-          <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:py-14">
+          <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
             <p className="text-xs font-bold uppercase tracking-widest text-accent">Liên hệ</p>
             <h1 className="ui-page-title mt-2 text-3xl sm:text-4xl">Ghé xưởng hoặc nhắn trước</h1>
             <p className="ui-secondary-text mt-2 max-w-2xl text-sm">
@@ -34,7 +34,7 @@ export default function PublicContactPage({ onNavigate, onLogin, onBook }: Publi
         </div>
 
         <div className="mx-auto grid w-full max-w-6xl gap-4 px-4 py-10 lg:grid-cols-2">
-          <Card className="space-y-4 p-5 sm:p-6">
+          <Card className="space-y-5 p-4 sm:p-6">
             <h2 className="ui-card-title">Thông tin liên hệ</h2>
             {CONTACT_ROWS.map((row) => (
               <div key={row.label} className="flex items-center gap-3 rounded-lg bg-surface-subtle p-3">
@@ -54,7 +54,7 @@ export default function PublicContactPage({ onNavigate, onLogin, onBook }: Publi
             <Button onClick={onBook} className="w-full" icon={Icons.calendar}>Đặt lịch sửa chữa</Button>
           </Card>
 
-          <Card className="p-5 sm:p-6">
+          <Card className="p-4 sm:p-6">
             {sent ? (
               <div className="flex h-full min-h-64 flex-col items-center justify-center text-center">
                 <span className="flex h-12 w-12 items-center justify-center rounded-full bg-success-soft text-success" aria-hidden="true">

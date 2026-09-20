@@ -23,7 +23,7 @@ export default function PublicAboutPage({ onNavigate, onLogin, onBook }: PublicA
       <PublicHeader active="about" onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} />
       <main>
         <div className="border-b border-border bg-surface-subtle">
-          <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:py-14">
+          <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
             <p className="text-xs font-bold uppercase tracking-widest text-accent">Giới thiệu</p>
             <h1 className="ui-page-title mt-2 text-3xl sm:text-4xl">Về {GARAGE_NAME}</h1>
             <p className="ui-secondary-text mt-2 max-w-2xl text-sm">
@@ -56,7 +56,7 @@ export default function PublicAboutPage({ onNavigate, onLogin, onBook }: PublicA
           </div>
           <ul className="space-y-4">
             {VALUES.map((item) => (
-              <li key={item.title} className="card-shadow flex gap-3 rounded-lg border border-border bg-card p-5">
+              <li key={item.title} className="card-shadow flex gap-4 rounded-lg border border-border bg-card p-4 sm:p-5">
                 <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${item.tint}`} aria-hidden="true">
                   {item.icon}
                 </span>
@@ -69,7 +69,7 @@ export default function PublicAboutPage({ onNavigate, onLogin, onBook }: PublicA
           </ul>
         </div>
 
-        <div className="mx-auto w-full max-w-6xl px-4 pb-14">
+        <div className="mx-auto w-full max-w-6xl px-4 pb-14 sm:px-6">
           <div className="flex flex-col items-center justify-between gap-4 rounded-2xl px-6 py-8 text-center text-white sm:flex-row sm:text-left" style={{ background: "var(--gradient-brand)" }}>
             <div>
               <h2 className="text-xl font-extrabold tracking-tight">Ghé xưởng trải nghiệm thử một lần</h2>

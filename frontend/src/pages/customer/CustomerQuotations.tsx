@@ -39,7 +39,7 @@ export default function CustomerQuotations() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
         <h2 className="ui-section-title">Báo giá của tôi</h2>
         <p className="ui-secondary-text text-sm">{myQuotations.length} báo giá · xác nhận trước khi gara sửa chữa</p>
@@ -57,7 +57,7 @@ export default function CustomerQuotations() {
               const isConfirmed = quotation.TrangThai === "confirmed" || confirmedIds.includes(quotation.MaBaoGia);
               return (
                 <li key={quotation.MaBaoGia}>
-                  <Card className="h-full p-5">
+                  <Card className="h-full p-4 sm:p-5">
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <p className="mono text-sm font-bold text-primary">{quotation.MaBaoGia}</p>
@@ -68,7 +68,7 @@ export default function CustomerQuotations() {
                       <Badge variant={isConfirmed ? "confirmed" : STATUS_VARIANT[quotation.TrangThai]} label={isConfirmed ? "Đã xác nhận" : STATUS_LABEL[quotation.TrangThai]} />
                     </div>
                     <p className="mono mt-3 text-xl font-bold text-foreground">{formatCurrency(quotation.TongTien)}</p>
-                    <div className="mt-3 flex gap-2">
+                    <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                       <Button size="sm" variant="outline" onClick={() => setSelected(quotation.MaBaoGia)}>Xem chi tiết</Button>
                       {!isConfirmed && (
                         <Button size="sm" onClick={() => setConfirmedIds((ids) => [...ids, quotation.MaBaoGia])}>
@@ -83,13 +83,13 @@ export default function CustomerQuotations() {
           </ul>
 
           {detail && (
-            <Card className="detail-panel h-fit p-5">
+            <Card className="detail-panel h-fit p-4 sm:p-5">
               <div className="mb-3 flex items-start justify-between">
                 <div>
                   <p className="mono text-sm font-bold text-primary">{detail.MaBaoGia}</p>
                   <p className="text-xs text-muted-foreground">Chi tiết hạng mục</p>
                 </div>
-                <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết" className="flex h-9 w-9 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
+                <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết" className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">✕</button>
               </div>
               <ul className="space-y-2">
                 {detailLines.map((line) => (
