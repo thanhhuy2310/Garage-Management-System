@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 
 // ─── Button ────────────────────────────────────────────────────────────────
 type BtnVariant = "primary" | "secondary" | "danger" | "ghost" | "outline" | "accent";
@@ -219,7 +220,7 @@ export function Modal({ open, onClose, title, children, width = "max-w-lg" }: {
   }, [open, onClose]);
 
   if (!open) return null;
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-6" onClick={onClose} role="presentation">
       <div className="modal-backdrop-enter absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]" />
       <div
@@ -239,7 +240,8 @@ export function Modal({ open, onClose, title, children, width = "max-w-lg" }: {
         </div>
         <div className="overflow-y-auto p-4 sm:p-6">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

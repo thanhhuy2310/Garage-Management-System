@@ -410,6 +410,12 @@ button, [role='button'], a, input, select, textarea {
   animation: customer-page-enter 320ms var(--ease-emphasized) both;
 }
 
+.booking-step-enter,
+.booking-month-enter,
+.booking-slots-enter {
+  animation: booking-content-enter var(--motion-normal) var(--ease-emphasized) both;
+}
+
 @keyframes public-hero-content-enter {
   from { opacity: 0; transform: translate3d(-18px, 12px, 0); }
   to { opacity: 1; transform: translate3d(0, 0, 0); }
@@ -422,6 +428,11 @@ button, [role='button'], a, input, select, textarea {
 
 @keyframes customer-page-enter {
   from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes booking-content-enter {
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
