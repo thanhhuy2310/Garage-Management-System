@@ -341,6 +341,16 @@ button, [role='button'], a, input, select, textarea {
 .public-service-card:hover::before { width: 100%; }
 .public-service-card > * { position: relative; }
 
+.public-about-media img {
+  transform: scale(1.01);
+  transition: transform 700ms var(--ease-emphasized), filter 400ms var(--ease-standard);
+}
+
+.public-about-media:hover img {
+  filter: saturate(1.04) contrast(1.02);
+  transform: scale(1.045);
+}
+
 .public-footer-title {
   color: #ffffff;
   font-size: 0.8125rem;
