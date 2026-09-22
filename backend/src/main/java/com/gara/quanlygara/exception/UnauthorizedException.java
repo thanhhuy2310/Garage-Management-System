@@ -1,0 +1,7 @@
+package com.gara.quanlygara.exception;
+
+public class UnauthorizedException extends RuntimeException {
+    public UnauthorizedException(String message) {
+        super(message);
+    }
+}
