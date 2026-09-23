@@ -5,12 +5,14 @@ REST API dùng Java 21, Spring Boot 3.5.6, Maven Wrapper và SQL Server.
 ## Chạy nhanh
 
 1. Chạy `database/QuanLyGaraOTo.sql` trong SQL Server/SSMS.
-2. Khai báo `DB_PASSWORD` và `JWT_SECRET`; các biến tùy chọn nằm trong `.env.example`.
-3. Trong IntelliJ chọn **Garage Backend**, hoặc chạy:
+2. Sao chép `.env.example` thành `.env` và điền thông tin local. File `.env` đã được Git bỏ qua.
+3. Chạy:
 
 ```powershell
-.\mvnw.cmd spring-boot:run
+.\run-dev.ps1
 ```
+
+Script đọc `.env`, đưa các biến vào process và gọi Maven Wrapper. Trong IntelliJ có thể chọn cấu hình local **Garage Backend** rồi nhấn **Run**.
 
 Kiểm tra tại `http://localhost:8080/api/health`.
 

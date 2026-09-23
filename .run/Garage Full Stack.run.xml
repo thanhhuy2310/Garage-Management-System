@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Garage Full Stack" type="CompoundRunConfigurationType">
-    <toRun name="Garage Backend" type="Application" />
+    <toRun name="Garage Backend (Shared)" type="Application" />
     <toRun name="Garage Frontend" type="js.build_tools.npm" />
     <method v="2" />
   </configuration>

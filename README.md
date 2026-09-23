@@ -25,7 +25,7 @@ Mở SQL Server/SSMS và chạy file `backend/database/QuanLyGaraOTo.sql`. Datab
 
 ### 2. Thiết lập biến môi trường backend
 
-Tham khảo `backend/.env.example` và khai báo các biến sau trong hệ điều hành hoặc trong Run Configuration cá nhân của IntelliJ:
+Sao chép `backend/.env.example` thành `backend/.env`, sau đó điền cấu hình SQL Server và JWT local:
 
 ```text
 DB_URL
@@ -36,7 +36,7 @@ JWT_EXPIRATION
 SERVER_PORT
 ```
 
-`DB_PASSWORD` và `JWT_SECRET` là bắt buộc. `JWT_SECRET` cần dài ít nhất 32 ký tự. File `.env` chỉ là cấu hình cục bộ và đã được Git bỏ qua; Spring Boot không tự đọc file này nếu không có công cụ hỗ trợ, vì vậy cách đơn giản nhất trong IntelliJ là mở **Run > Edit Configurations > Garage Backend > Environment variables** và nhập các biến một lần trên máy của bạn.
+`DB_PASSWORD` và `JWT_SECRET` là bắt buộc. `JWT_SECRET` cần dài ít nhất 32 ký tự. File `.env` chỉ là cấu hình cục bộ và đã được Git bỏ qua. Script `backend/run-dev.ps1` sẽ nạp file này vào process trước khi chạy Spring Boot.
 
 ### 3. Chạy backend
 
@@ -49,14 +49,14 @@ Cách 1 — IntelliJ IDEA:
 
 Có thể chạy trực tiếp main class `com.gara.quanlygara.QuanLyGaraApplication` nếu IntelliJ chưa hiển thị cấu hình dùng chung.
 
-Cách 2 — Maven Wrapper trên Windows:
+Cách 2 — PowerShell trên Windows:
 
 ```powershell
 cd backend
-$env:DB_PASSWORD="your_local_password"
-$env:JWT_SECRET="your_local_secret_at_least_32_characters"
-.\mvnw.cmd spring-boot:run
+.\run-dev.ps1
 ```
+
+Nếu Windows chặn script lần đầu, mở PowerShell cho tài khoản hiện tại và chạy `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
 Cách 3 — build JAR:
 

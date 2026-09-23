@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Garage Backend" type="Application" factoryName="Application">
+  <configuration default="false" name="Garage Backend (Shared)" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="com.gara.quanlygara.QuanLyGaraApplication" />
     <module name="garage-management-backend" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/backend" />
