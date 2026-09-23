@@ -37,7 +37,10 @@ export default function Login({ onLogin, onBack }: LoginProps) {
       const response = await authApi.login({ username: username.trim(), password });
       onLogin(response, remember);
     } catch (loginError) {
-      setError(errorMessage(loginError, "Đăng nhập không thành công. Vui lòng thử lại."));
+      setError(errorMessage(
+        loginError,
+        "Chưa kết nối được backend. Hãy đợi Garage Backend khởi động xong rồi thử lại.",
+      ));
     } finally {
       setLoading(false);
     }
