@@ -36,7 +36,7 @@ JWT_EXPIRATION
 SERVER_PORT
 ```
 
-`DB_PASSWORD` và `JWT_SECRET` là bắt buộc. `JWT_SECRET` cần dài ít nhất 32 ký tự. File `.env` chỉ là cấu hình cục bộ và đã được Git bỏ qua. Script `backend/run-dev.ps1` sẽ nạp file này vào process trước khi chạy Spring Boot.
+`DB_PASSWORD` và `JWT_SECRET` là bắt buộc. `JWT_SECRET` cần dài ít nhất 32 ký tự. File `.env` chỉ là cấu hình cục bộ và đã được Git bỏ qua. Backend nạp file này khi chạy trực tiếp từ IntelliJ; script `backend/run-dev.ps1` cũng đưa các biến vào process trước khi chạy Spring Boot.
 
 ### 3. Chạy backend
 

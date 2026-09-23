@@ -12,7 +12,7 @@ REST API dùng Java 21, Spring Boot 3.5.6, Maven Wrapper và SQL Server.
 .\run-dev.ps1
 ```
 
-Script đọc `.env`, đưa các biến vào process và gọi Maven Wrapper. Trong IntelliJ có thể chọn cấu hình local **Garage Backend** rồi nhấn **Run**.
+Script đọc `.env`, đưa các biến vào process và gọi Maven Wrapper. Spring Boot cũng tự import `.env` local, nên trong IntelliJ có thể chọn cấu hình **Garage Backend** hoặc chạy trực tiếp `QuanLyGaraApplication`.
 
 Kiểm tra tại `http://localhost:8080/api/health`.
 
