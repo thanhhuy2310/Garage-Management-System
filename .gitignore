@@ -5,6 +5,13 @@ frontend/dist/
 # Backend
 backend/target/
 
+# Local environment and secrets
+.env
+.env.local
+application-local.properties
+application-local.yml
+application-local.yaml
+
 # IntelliJ
 .idea/
 *.iml

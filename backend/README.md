@@ -1,22 +1,17 @@
-# Backend - Garage Management
+# Backend - Garage Management System
 
-Java Spring Boot REST API cho hệ thống quản lý gara sửa chữa ô tô.
+REST API dùng Java 21, Spring Boot 3.5.6, Maven Wrapper và SQL Server.
 
-## Stack
-- Java 21
-- Spring Boot 3
-- Spring Web
-- Spring Data JPA
-- Bean Validation
-- SQL Server
-- Maven
+## Chạy nhanh
 
-## Chạy backend trong IntelliJ IDEA
-1. Mở thư mục gốc `garage-management-system` bằng IntelliJ IDEA.
-2. IntelliJ sẽ nhận `backend/pom.xml` là Maven project. Nếu chưa nhận, nhấn phải `pom.xml` -> **Add as Maven Project**.
-3. Chọn JDK 21.
-4. Sửa cấu hình SQL Server trong `src/main/resources/application.properties`.
-5. Chạy class `com.gara.quanlygara.QuanLyGaraApplication`.
-6. API test: `http://localhost:8080/api/health`.
+1. Chạy `database/QuanLyGaraOTo.sql` trong SQL Server/SSMS.
+2. Khai báo `DB_PASSWORD` và `JWT_SECRET`; các biến tùy chọn nằm trong `.env.example`.
+3. Trong IntelliJ chọn **Garage Backend**, hoặc chạy:
 
-Script SQL hiện nằm tại `database/QuanLyGaraOTo.sql`.
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+Kiểm tra tại `http://localhost:8080/api/health`.
+
+Hướng dẫn đầy đủ cho backend, frontend và IntelliJ nằm trong `../README.md`.
