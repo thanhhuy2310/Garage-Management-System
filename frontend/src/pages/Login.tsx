@@ -1,14 +1,12 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { GARAGE_NAME } from "../data";
 import { Icons } from "../components/ui";
+import { authApi, type LoginResponse } from "../api/auth";
+import { errorMessage } from "../api/client";
 
 interface LoginProps {
-  onLogin: () => void;
+  onLogin: (response: LoginResponse, remember: boolean) => void;
   onBack: () => void;
-  account: {
-    label: string;
-    username: string;
-  };
 }
 
 const FEATURES = [
@@ -18,32 +16,31 @@ const FEATURES = [
   { icon: Icons.barChart, text: "Báo cáo thống kê" },
 ];
 
-export default function Login({ onLogin, onBack, account }: LoginProps) {
-  const [username, setUsername] = useState(account.username);
-  const [password, setPassword] = useState("demo123");
+export default function Login({ onLogin, onBack }: LoginProps) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    setUsername(account.username);
-    setPassword("demo123");
-    setError("");
-  }, [account.username]);
-
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (username.trim() !== account.username || password !== "demo123") {
-      setError("Tên đăng nhập hoặc mật khẩu demo chưa đúng.");
+    if (!username.trim() || !password) {
+      setError("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.");
       return;
     }
+
     setError("");
     setLoading(true);
-    window.setTimeout(() => {
+    try {
+      const response = await authApi.login({ username: username.trim(), password });
+      onLogin(response, remember);
+    } catch (loginError) {
+      setError(errorMessage(loginError, "Đăng nhập không thành công. Vui lòng thử lại."));
+    } finally {
       setLoading(false);
-      onLogin();
-    }, 350);
+    }
   };
 
   return (
@@ -101,8 +98,7 @@ export default function Login({ onLogin, onBack, account }: LoginProps) {
           </div>
 
           <h2 className="mb-1 text-2xl font-semibold text-foreground">Đăng nhập</h2>
-          <p className="mb-2 text-sm text-muted-foreground">Hệ thống quản lý gara sửa chữa ô tô</p>
-          <p className="mb-7 text-[13px] font-medium text-primary">Vai trò đang chọn: {account.label}</p>
+          <p className="mb-7 text-sm text-muted-foreground">Hệ thống quản lý gara sửa chữa ô tô</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -142,9 +138,9 @@ export default function Login({ onLogin, onBack, account }: LoginProps) {
           </button>
 
           <div className="mt-7 rounded-lg border border-info/20 bg-info-soft p-4">
-            <p className="mb-2 text-[13px] font-semibold uppercase tracking-wide text-muted-foreground">Tài khoản demo</p>
-            <p className="text-[13px] text-slate-700"><strong>{account.label}:</strong> <span className="mono">{account.username}</span> / <span className="mono">demo123</span></p>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">Dùng nút ở góc dưới để chọn vai trò trước khi đăng nhập.</p>
+            <p className="text-[13px] leading-relaxed text-slate-700">
+              Đăng nhập bằng tài khoản trong cơ sở dữ liệu. Quyền truy cập được backend xác định tự động theo vai trò của tài khoản.
+            </p>
           </div>
         </div>
       </main>

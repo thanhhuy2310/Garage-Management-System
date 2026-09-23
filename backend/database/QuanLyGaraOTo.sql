@@ -1093,7 +1093,7 @@ GO
 -- ============================================================
 -- 13. DU LIEU MAU
 -- Du lieu gia lap phuc vu demo giao dien / nghiep vu.
--- MatKhauHash chi la gia tri demo, KHONG dung cho production.
+-- Tai khoan mau dung chung mat khau demo123 (BCrypt), chi phuc vu moi truong demo.
 -- ============================================================
 
 INSERT INTO KhachHang (HoTen, SoDienThoai, Email, DiaChi)
@@ -1120,13 +1120,13 @@ GO
 
 INSERT INTO TaiKhoan (TenDangNhap, MatKhauHash, VaiTro, TrangThai, MaKhachHang, MaNhanVien)
 VALUES
-('khach01',   'DEMO_HASH_123456', N'CUSTOMER',     1, 1, NULL),
-('tiepnhan',  'DEMO_HASH_123456', N'RECEPTIONIST', 1, NULL, 1),
-('ktvbao',    'DEMO_HASH_123456', N'TECHNICIAN',   1, NULL, 2),
-('ktvhung',   'DEMO_HASH_123456', N'TECHNICIAN',   1, NULL, 3),
-('kho',       'DEMO_HASH_123456', N'WAREHOUSE',    1, NULL, 4),
-('manager',   'DEMO_HASH_123456', N'MANAGER',      1, NULL, 5),
-('admin',     'DEMO_HASH_123456', N'ADMIN',        1, NULL, 6);
+('khach01',   '$2a$10$cmQuil5sXrlLUZ540DVtcuEAIKD4PNfBsj9F0Z2iCby2wUQmaWppK', N'CUSTOMER',     1, 1, NULL),
+('tiepnhan',  '$2a$10$cmQuil5sXrlLUZ540DVtcuEAIKD4PNfBsj9F0Z2iCby2wUQmaWppK', N'RECEPTIONIST', 1, NULL, 1),
+('ktvbao',    '$2a$10$cmQuil5sXrlLUZ540DVtcuEAIKD4PNfBsj9F0Z2iCby2wUQmaWppK', N'TECHNICIAN',   1, NULL, 2),
+('ktvhung',   '$2a$10$cmQuil5sXrlLUZ540DVtcuEAIKD4PNfBsj9F0Z2iCby2wUQmaWppK', N'TECHNICIAN',   1, NULL, 3),
+('kho',       '$2a$10$cmQuil5sXrlLUZ540DVtcuEAIKD4PNfBsj9F0Z2iCby2wUQmaWppK', N'WAREHOUSE',    1, NULL, 4),
+('manager',   '$2a$10$cmQuil5sXrlLUZ540DVtcuEAIKD4PNfBsj9F0Z2iCby2wUQmaWppK', N'MANAGER',      1, NULL, 5),
+('admin',     '$2a$10$cmQuil5sXrlLUZ540DVtcuEAIKD4PNfBsj9F0Z2iCby2wUQmaWppK', N'ADMIN',        1, NULL, 6);
 GO
 
 INSERT INTO DichVu (TenDichVu, LoaiDichVu, DonGia, MoTa)

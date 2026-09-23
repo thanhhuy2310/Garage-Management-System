@@ -84,6 +84,10 @@ Sau khi đã cấu hình backend, có thể chọn **Garage Full Stack** để c
 - Backend: http://localhost:8080
 - Health check: http://localhost:8080/api/health
 
+Trong môi trường phát triển, frontend gọi các đường dẫn `/api` và Vite tự chuyển tiếp sang backend ở cổng `8080`. Vì vậy cần chạy cả **Garage Backend** và **Garage Frontend** (hoặc cấu hình **Garage Full Stack**) trước khi đăng nhập.
+
+Các tài khoản mẫu trong script SQL gồm `khach01`, `tiepnhan`, `ktvbao`, `ktvhung`, `kho`, `manager` và `admin`; mật khẩu demo dùng chung là `demo123`. Chỉ sử dụng các tài khoản này cho dữ liệu mẫu local.
+
 Backend hiện chưa tích hợp Swagger/OpenAPI.
 
 ## IntelliJ IDEA khuyến nghị

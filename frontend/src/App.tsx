@@ -3,8 +3,9 @@ import type { PublicPageKey } from "./components/PublicHeader";
 import AdminLayout from "./layouts/AdminLayout";
 import PublicLayout from "./layouts/PublicLayout";
 import Login from "./pages/Login";
-import { Icons } from "./components/ui";
 import { navigateTo, ROUTE_PATHS, useAppRoute, type AdminPage, type Role } from "./router";
+import { authApi, type LoginResponse } from "./api/auth";
+import { clearSession, readSession, saveSession, updateStoredAccount, type StoredSession } from "./api/session";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Appointments = lazy(() => import("./pages/Appointments"));
@@ -28,15 +29,6 @@ const CustomerPortal = lazy(() => import("./pages/customer/CustomerPortal"));
 
 export type Page = AdminPage;
 
-const ROLE_LABELS: Record<Role, string> = {
-  customer: "Khách hàng",
-  admin: "Quản trị viên",
-  manager: "Quản lý",
-  receptionist: "Nhân viên tiếp nhận",
-  technician: "Kỹ thuật viên",
-  warehouse: "Nhân viên kho",
-};
-
 const ROLE_NAV: Record<Role, AdminPage[]> = {
   customer: [],
   receptionist: ["customers", "vehicles", "appointments", "reception", "repair", "quotation", "invoice", "history"],
@@ -46,14 +38,10 @@ const ROLE_NAV: Record<Role, AdminPage[]> = {
   admin: ["settings"],
 };
 
-const ROLE_USERNAMES: Record<Role, string> = {
-  customer: "khachhang.an",
-  receptionist: "tiepnhan",
-  technician: "ktv.khoa",
-  warehouse: "kho.nam",
-  manager: "manager",
-  admin: "admin",
-};
+function accountRole(role: string): Role | null {
+  const normalized = role.toLowerCase();
+  return normalized in ROLE_NAV ? normalized as Role : null;
+}
 
 function PageContent({ page }: { page: AdminPage }) {
   switch (page) {
@@ -86,46 +74,30 @@ function PageLoading() {
   );
 }
 
-function RolePicker({ role, onChange }: { role: Role; onChange: (role: Role) => void }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6">
-      {open && (
-        <div className="mb-2 min-w-[220px] rounded-lg border border-border bg-surface p-3 shadow-xl">
-          <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Đăng nhập với vai trò</p>
-          {(Object.entries(ROLE_LABELS) as [Role, string][]).map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => { onChange(key); setOpen(false); }}
-              className={`flex min-h-11 w-full items-center justify-between rounded-md px-3 text-sm hover:bg-muted ${role === key ? "font-semibold text-primary" : "text-foreground"}`}
-            >
-              {label}{role === key && <span aria-hidden="true">{Icons.check}</span>}
-            </button>
-          ))}
-        </div>
-      )}
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        className="flex min-h-11 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-white shadow-lg hover:bg-primary-hover"
-        aria-expanded={open}
-      >
-        Vai trò: {ROLE_LABELS[role]} <span aria-hidden="true">▾</span>
-      </button>
-    </div>
-  );
-}
-
 export default function App() {
   const route = useAppRoute();
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [role, setRole] = useState<Role>("manager");
-  const allowedPages = ROLE_NAV[role];
+  const [session, setSession] = useState<StoredSession | null>(() => readSession());
+  const role = session ? accountRole(session.account.role) : null;
+  const loggedIn = Boolean(session && role);
+  const allowedPages = role ? ROLE_NAV[role] : [];
   const landingPage = role === "technician" ? "technician" : allowedPages[0];
 
   useEffect(() => {
-    if (!loggedIn) return;
+    if (!session) return;
+
+    authApi.me()
+      .then((account) => {
+        updateStoredAccount(account);
+        setSession((current) => current ? { ...current, account } : current);
+      })
+      .catch(() => {
+        clearSession();
+        setSession(null);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!loggedIn || !role) return;
     if (role === "customer") {
       if (route.area !== "customer") navigateTo(ROUTE_PATHS.customer(), true);
       return;
@@ -135,15 +107,27 @@ export default function App() {
     }
   }, [allowedPages, landingPage, loggedIn, role, route]);
 
-  const handleLogin = () => {
-    setLoggedIn(true);
-    if (role === "customer") navigateTo(ROUTE_PATHS.customer());
-    else if (landingPage) navigateTo(ROUTE_PATHS.admin(landingPage));
+  const handleLogin = (response: LoginResponse, remember: boolean) => {
+    const nextRole = accountRole(response.account.role);
+    if (!nextRole) return;
+
+    const nextSession = saveSession(response, remember);
+    setSession(nextSession);
+    if (nextRole === "customer") navigateTo(ROUTE_PATHS.customer());
+    else {
+      const nextLandingPage = nextRole === "technician" ? "technician" : ROLE_NAV[nextRole][0];
+      if (nextLandingPage) navigateTo(ROUTE_PATHS.admin(nextLandingPage));
+    }
   };
 
-  const handleLogout = () => {
-    setLoggedIn(false);
-    navigateTo("/login", true);
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } finally {
+      clearSession();
+      setSession(null);
+      navigateTo("/login", true);
+    }
   };
 
   if (!loggedIn) {
@@ -151,10 +135,7 @@ export default function App() {
       const publicPage = route.page as PublicPageKey;
       const goPublic = (page: PublicPageKey) => navigateTo(ROUTE_PATHS.public(page));
       const goLogin = () => navigateTo("/login");
-      const goBooking = () => {
-        setRole("customer");
-        navigateTo("/login");
-      };
+      const goBooking = () => navigateTo("/login");
       return (
         <PublicLayout>
           <Suspense fallback={<PageLoading />}>
@@ -163,12 +144,7 @@ export default function App() {
         </PublicLayout>
       );
     }
-    return (
-      <div className="relative">
-        <Login onLogin={handleLogin} onBack={() => navigateTo("/")} account={{ label: ROLE_LABELS[role], username: ROLE_USERNAMES[role] }} />
-        <RolePicker role={role} onChange={setRole} />
-      </div>
-    );
+    return <Login onLogin={handleLogin} onBack={() => navigateTo("/")} />;
   }
 
   if (role === "customer") {
@@ -183,6 +159,8 @@ export default function App() {
       </Suspense>
     );
   }
+
+  if (!role) return null;
 
   const page = route.area === "admin" && allowedPages.includes(route.page) ? route.page : landingPage;
   if (!page) return null;
