@@ -2,11 +2,14 @@ package com.gara.quanlygara.service;
 
 import com.gara.quanlygara.dto.auth.ChangePasswordRequest;
 import com.gara.quanlygara.dto.auth.LoginRequest;
+import com.gara.quanlygara.dto.auth.RegisterRequest;
 import com.gara.quanlygara.entity.Account;
 import com.gara.quanlygara.entity.AccountRole;
+import com.gara.quanlygara.entity.Customer;
 import com.gara.quanlygara.exception.ForbiddenException;
 import com.gara.quanlygara.exception.UnauthorizedException;
 import com.gara.quanlygara.repository.AccountRepository;
+import com.gara.quanlygara.repository.CustomerRepository;
 import com.gara.quanlygara.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +32,9 @@ class AuthServiceTest {
     private AccountRepository accountRepository;
 
     @Mock
+    private CustomerRepository customerRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -38,7 +44,7 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        authService = new AuthService(accountRepository, passwordEncoder, jwtService);
+        authService = new AuthService(accountRepository, customerRepository, passwordEncoder, jwtService);
     }
 
     @Test
@@ -92,6 +98,41 @@ class AuthServiceTest {
 
         assertEquals("new-bcrypt-hash", account.getPasswordHash());
         verify(accountRepository).save(account);
+    }
+
+    @Test
+    void registerCreatesCustomerAccountAndReturnsToken() {
+        var request = new RegisterRequest(
+                "Nguyễn Văn Mới",
+                "0901234567",
+                "moi@example.com",
+                "Quận 1, TP.HCM",
+                "khachmoi",
+                "password123"
+        );
+        when(accountRepository.existsByUsername("khachmoi")).thenReturn(false);
+        when(customerRepository.existsByPhone("0901234567")).thenReturn(false);
+        when(customerRepository.save(org.mockito.ArgumentMatchers.any(Customer.class)))
+                .thenAnswer(invocation -> {
+                    Customer customer = invocation.getArgument(0);
+                    customer.setId(10);
+                    return customer;
+                });
+        when(passwordEncoder.encode("password123")).thenReturn("bcrypt-hash");
+        when(accountRepository.save(org.mockito.ArgumentMatchers.any(Account.class)))
+                .thenAnswer(invocation -> {
+                    Account account = invocation.getArgument(0);
+                    account.setId(20);
+                    return account;
+                });
+        when(jwtService.generateToken(org.mockito.ArgumentMatchers.any(Account.class))).thenReturn("jwt-token");
+        when(jwtService.getExpirationSeconds()).thenReturn(3600L);
+
+        var response = authService.register(request);
+
+        assertEquals("jwt-token", response.accessToken());
+        assertEquals("CUSTOMER", response.account().role());
+        assertEquals(10, response.account().customerId());
     }
 
     private Account account(boolean active) {

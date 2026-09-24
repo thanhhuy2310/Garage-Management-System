@@ -1,6 +1,7 @@
 package com.gara.quanlygara.config;
 
 import com.gara.quanlygara.repository.AccountRepository;
+import com.gara.quanlygara.repository.CustomerRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -28,6 +29,9 @@ class SecurityConfigTest {
 
     @MockitoBean
     private AccountRepository accountRepository;
+
+    @MockitoBean
+    private CustomerRepository customerRepository;
 
     @Test
     void accountApiRejectsRequestWithoutJwt() throws Exception {

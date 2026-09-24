@@ -2,6 +2,7 @@ import type { Account, LoginResponse } from "./types";
 
 const TOKEN_KEY = "garage_access_token";
 const ACCOUNT_KEY = "garage_account";
+const REMEMBERED_USERNAME_KEY = "garage_remembered_username";
 
 export interface StoredSession {
   accessToken: string;
@@ -50,4 +51,16 @@ export function updateStoredAccount(account: Account) {
 export function clearSession() {
   clearStorage(localStorage);
   clearStorage(sessionStorage);
+}
+
+export function readRememberedUsername(): string {
+  return localStorage.getItem(REMEMBERED_USERNAME_KEY) ?? "";
+}
+
+export function rememberUsername(username: string, remember: boolean) {
+  if (remember && username.trim()) {
+    localStorage.setItem(REMEMBERED_USERNAME_KEY, username.trim());
+  } else {
+    localStorage.removeItem(REMEMBERED_USERNAME_KEY);
+  }
 }

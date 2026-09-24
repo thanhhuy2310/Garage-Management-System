@@ -3,6 +3,7 @@ import type { PublicPageKey } from "./components/PublicHeader";
 import AdminLayout from "./layouts/AdminLayout";
 import PublicLayout from "./layouts/PublicLayout";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import { navigateTo, ROUTE_PATHS, useAppRoute, type AdminPage, type Role } from "./router";
 import { authApi, type LoginResponse } from "./api/auth";
 import { clearSession, readSession, saveSession, updateStoredAccount, type StoredSession } from "./api/session";
@@ -131,7 +132,7 @@ export default function App() {
   };
 
   if (!loggedIn) {
-    if (route.area === "public" && route.page !== "login") {
+    if (route.area === "public" && route.page !== "login" && route.page !== "register") {
       const publicPage = route.page as PublicPageKey;
       const goPublic = (page: PublicPageKey) => navigateTo(ROUTE_PATHS.public(page));
       const goLogin = () => navigateTo("/login");
@@ -144,7 +145,10 @@ export default function App() {
         </PublicLayout>
       );
     }
-    return <Login onLogin={handleLogin} onBack={() => navigateTo("/")} />;
+    if (route.area === "public" && route.page === "register") {
+      return <Register onRegistered={handleLogin} onLogin={() => navigateTo("/login")} />;
+    }
+    return <Login onLogin={handleLogin} onBack={() => navigateTo("/")} onRegister={() => navigateTo("/register")} />;
   }
 
   if (role === "customer") {

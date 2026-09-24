@@ -6,9 +6,22 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+  fullName: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  username: string;
+  password: string;
+}
+
 export const authApi = {
   async login(payload: LoginRequest): Promise<LoginResponse> {
     return unwrap(await api.post<ApiResponse<LoginResponse>>("/api/auth/login", payload));
+  },
+
+  async register(payload: RegisterRequest): Promise<LoginResponse> {
+    return unwrap(await api.post<ApiResponse<LoginResponse>>("/api/auth/register", payload));
   },
 
   async me(): Promise<Account> {

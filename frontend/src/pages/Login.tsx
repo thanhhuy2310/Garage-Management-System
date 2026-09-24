@@ -1,28 +1,34 @@
 import { FormEvent, useState } from "react";
-import { GARAGE_NAME } from "../data";
-import { Icons } from "../components/ui";
 import { authApi, type LoginResponse } from "../api/auth";
 import { errorMessage } from "../api/client";
+import { readRememberedUsername, rememberUsername } from "../api/session";
+import AuthLayout from "../components/auth/AuthLayout";
+import { Icons } from "../components/ui";
 
 interface LoginProps {
   onLogin: (response: LoginResponse, remember: boolean) => void;
   onBack: () => void;
+  onRegister: () => void;
 }
 
-const FEATURES = [
-  { icon: Icons.calendar, text: "Quản lý lịch hẹn" },
-  { icon: Icons.wrench, text: "Theo dõi sửa chữa" },
-  { icon: Icons.package, text: "Quản lý kho" },
-  { icon: Icons.barChart, text: "Báo cáo thống kê" },
-];
-
-export default function Login({ onLogin, onBack }: LoginProps) {
-  const [username, setUsername] = useState("");
+export default function Login({ onLogin, onBack, onRegister }: LoginProps) {
+  const rememberedUsername = readRememberedUsername();
+  const [username, setUsername] = useState(rememberedUsername);
   const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
+  const [remember, setRemember] = useState(Boolean(rememberedUsername));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleUsernameChange = (value: string) => {
+    setUsername(value);
+    rememberUsername(value, remember);
+  };
+
+  const handleRememberChange = (checked: boolean) => {
+    setRemember(checked);
+    rememberUsername(username, checked);
+  };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -35,6 +41,7 @@ export default function Login({ onLogin, onBack }: LoginProps) {
     setLoading(true);
     try {
       const response = await authApi.login({ username: username.trim(), password });
+      rememberUsername(username, remember);
       onLogin(response, remember);
     } catch (loginError) {
       setError(errorMessage(
@@ -47,106 +54,61 @@ export default function Login({ onLogin, onBack }: LoginProps) {
   };
 
   return (
-    <div className="flex min-h-dvh bg-background">
-      <section className="relative hidden w-[46%] flex-col justify-between overflow-hidden bg-brand-dark p-10 2xl:p-12 xl:flex">
-        <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-          <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-white/5" />
-          <div className="absolute -bottom-20 -left-20 h-96 w-96 rounded-full bg-white/5" />
-          <div className="absolute bottom-1/3 right-1/4 h-48 w-48 rounded-full bg-amber-500/10" />
+    <AuthLayout>
+      <h2 className="mb-1 text-2xl font-semibold text-foreground">Đăng nhập</h2>
+      <p className="mb-7 text-sm text-muted-foreground">Hệ thống quản lý gara sửa chữa ô tô</p>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label htmlFor="username" className="mb-1.5 block text-sm font-medium text-slate-700">Tên đăng nhập</label>
+          <input id="username" value={username} onChange={(event) => handleUsernameChange(event.target.value)} autoComplete="username" className="h-11 w-full rounded-md border border-border bg-surface px-4 text-base text-foreground shadow-sm transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 sm:text-sm" />
         </div>
-
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-white" aria-hidden="true"><span className="scale-125">{Icons.car}</span></div>
-          <div>
-            <p className="text-lg font-bold leading-tight text-white">{GARAGE_NAME}</p>
-            <p className="text-xs text-white/50">Hệ thống quản lý gara</p>
-          </div>
-        </div>
-
-        <div className="relative z-10 max-w-xl">
-          <svg viewBox="0 0 400 200" className="mb-7 w-full max-w-lg opacity-90" aria-hidden="true">
-            <g transform="translate(40, 60)">
-              <path d="M60 80 L60 50 Q70 30 100 25 L240 25 Q270 30 280 50 L280 80 Z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" strokeWidth="2" />
-              <path d="M80 50 Q90 20 120 15 L230 15 Q260 20 265 50 Z" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" />
-              <path d="M95 47 Q100 28 120 23 L175 23 L175 47 Z" fill="rgba(255,255,255,0.3)" />
-              <path d="M180 23 L230 23 Q250 28 255 47 L180 47 Z" fill="rgba(255,255,255,0.3)" />
-              <circle cx="100" cy="83" r="20" fill="rgba(0,0,0,0.3)" stroke="rgba(255,255,255,0.4)" strokeWidth="2" />
-              <circle cx="100" cy="83" r="10" fill="rgba(255,255,255,0.2)" />
-              <circle cx="240" cy="83" r="20" fill="rgba(0,0,0,0.3)" stroke="rgba(255,255,255,0.4)" strokeWidth="2" />
-              <circle cx="240" cy="83" r="10" fill="rgba(255,255,255,0.2)" />
-              <ellipse cx="280" cy="60" rx="5" ry="8" fill="#f59e0b" opacity="0.8" />
-            </g>
-            <line x1="20" y1="162" x2="380" y2="162" stroke="rgba(255,255,255,0.2)" />
-          </svg>
-          <h1 className="mb-3 text-[28px] font-semibold leading-tight text-white 2xl:text-3xl">Quản lý công việc tại gara</h1>
-          <p className="max-w-sm text-sm leading-relaxed text-white/60">
-            Theo dõi lịch hẹn, tiếp nhận, sửa chữa, kho và hóa đơn trong cùng một hệ thống.
-          </p>
-        </div>
-
-        <div className="relative z-10 grid grid-cols-2 gap-x-5 gap-y-3 border-t border-white/10 pt-6">
-          {FEATURES.map((feature) => (
-            <div key={feature.text} className="flex items-center gap-2 text-sm text-white/70">
-              <span className="text-amber-300" aria-hidden="true">{feature.icon}</span><span>{feature.text}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <main className="flex flex-1 items-center justify-center bg-surface px-4 py-8 sm:p-8 lg:p-10">
-        <div className="w-full max-w-[420px]">
-          <div className="mb-8 flex items-center gap-3 xl:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white" aria-hidden="true">{Icons.car}</div>
-            <p className="font-semibold text-primary">{GARAGE_NAME}</p>
-          </div>
-
-          <h2 className="mb-1 text-2xl font-semibold text-foreground">Đăng nhập</h2>
-          <p className="mb-7 text-sm text-muted-foreground">Hệ thống quản lý gara sửa chữa ô tô</p>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label htmlFor="username" className="mb-1.5 block text-sm font-medium text-slate-700">Tên đăng nhập</label>
-              <input id="username" value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" className="h-11 w-full rounded-md border border-border bg-surface px-4 text-base text-foreground shadow-sm transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 sm:text-sm" />
-            </div>
-            <div>
-              <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-slate-700">Mật khẩu</label>
-              <div className="relative">
-                <input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" className="h-11 w-full rounded-md border border-border bg-surface px-4 pr-20 text-base text-foreground shadow-sm transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 sm:text-sm" />
-                <button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-0 top-1/2 min-h-11 -translate-y-1/2 rounded-md px-3 text-sm font-semibold text-primary hover:bg-secondary" aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}>{showPassword ? "Ẩn" : "Hiện"}</button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <label className="flex min-h-11 cursor-pointer items-center gap-2">
-                <input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} className="h-4 w-4 cursor-pointer accent-primary" />
-                <span className="text-sm text-slate-600">Ghi nhớ đăng nhập</span>
-              </label>
-              <button type="button" className="min-h-11 rounded-md px-1 text-sm font-medium text-primary hover:underline">Quên mật khẩu?</button>
-            </div>
-
-            {error && <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">{error}</p>}
-
-            <button type="submit" disabled={loading} className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-semibold text-primary-foreground transition-all hover:bg-primary-hover disabled:cursor-wait disabled:opacity-70">
-              {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true" />}
-              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+        <div>
+          <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-slate-700">Mật khẩu</label>
+          <div className="relative">
+            <input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" className="h-11 w-full rounded-md border border-border bg-surface px-4 pr-12 text-base text-foreground shadow-sm transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 sm:text-sm" />
+            <button
+              type="button"
+              onClick={() => setShowPassword((visible) => !visible)}
+              className="absolute right-0 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-secondary hover:text-primary"
+              aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              aria-pressed={showPassword}
+            >
+              <span aria-hidden="true" className="scale-110">{showPassword ? Icons.eyeOff : Icons.eye}</span>
             </button>
-          </form>
-
-          <button
-            type="button"
-            onClick={onBack}
-            className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-all hover:text-primary"
-          >
-            <span aria-hidden="true">{Icons.arrowLeft}</span> Về trang chủ
-          </button>
-
-          <div className="mt-7 rounded-lg border border-info/20 bg-info-soft p-4">
-            <p className="text-[13px] leading-relaxed text-slate-700">
-              Đăng nhập bằng tài khoản trong cơ sở dữ liệu. Quyền truy cập được backend xác định tự động theo vai trò của tài khoản.
-            </p>
           </div>
         </div>
-      </main>
-    </div>
+
+        <div className="flex items-center justify-between gap-3">
+          <label className="flex min-h-11 cursor-pointer items-center gap-2">
+            <input type="checkbox" checked={remember} onChange={(event) => handleRememberChange(event.target.checked)} className="h-4 w-4 cursor-pointer accent-primary" />
+            <span className="text-sm text-slate-600">Ghi nhớ đăng nhập</span>
+          </label>
+          <button type="button" className="min-h-11 rounded-md px-1 text-sm font-medium text-primary hover:underline">Quên mật khẩu?</button>
+        </div>
+
+        {error && <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">{error}</p>}
+
+        <button type="submit" disabled={loading} className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary text-sm font-semibold text-primary-foreground transition-all hover:bg-primary-hover disabled:cursor-wait disabled:opacity-70">
+          {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true" />}
+          {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+        </button>
+      </form>
+
+      <p className="mt-5 text-center text-sm text-muted-foreground">
+        Chưa có tài khoản?{" "}
+        <button type="button" onClick={onRegister} className="min-h-11 rounded-md px-1 font-semibold text-primary hover:underline">
+          Đăng ký ngay
+        </button>
+      </p>
+
+      <button
+        type="button"
+        onClick={onBack}
+        className="mt-2 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-muted-foreground transition-all hover:text-primary"
+      >
+        <span aria-hidden="true">{Icons.arrowLeft}</span> Về trang chủ
+      </button>
+    </AuthLayout>
   );
 }

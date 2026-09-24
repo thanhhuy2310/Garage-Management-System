@@ -8,7 +8,7 @@ export type AdminPage =
   | "history" | "notifications" | "reports" | "staff" | "settings"
   | "technician" | "design-system";
 
-export type PublicPage = "home" | "about" | "services" | "parts" | "contact" | "login";
+export type PublicPage = "home" | "about" | "services" | "parts" | "contact" | "login" | "register";
 export type CustomerPage = "overview" | "appointments" | "quotations" | "tracking" | "history" | "notifications" | "profile";
 
 export type AppRoute =
@@ -30,6 +30,7 @@ const PUBLIC_ROUTES: Record<string, PublicPage> = {
   "/parts": "parts",
   "/contact": "contact",
   "/login": "login",
+  "/register": "register",
 };
 
 const CUSTOMER_PAGES = new Set<CustomerPage>([

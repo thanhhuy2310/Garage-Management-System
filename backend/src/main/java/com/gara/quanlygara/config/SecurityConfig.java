@@ -49,7 +49,7 @@ public class SecurityConfig {
                                 writeSecurityError(response, HttpServletResponse.SC_FORBIDDEN,
                                         "Bạn không có quyền sử dụng chức năng này.")))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/health", "/api/auth/login").permitAll()
+                        .requestMatchers("/api/health", "/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/api/accounts/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
