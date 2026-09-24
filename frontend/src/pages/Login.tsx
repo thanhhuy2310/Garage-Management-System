@@ -79,12 +79,11 @@ export default function Login({ onLogin, onBack, onRegister }: LoginProps) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center">
           <label className="flex min-h-11 cursor-pointer items-center gap-2">
             <input type="checkbox" checked={remember} onChange={(event) => handleRememberChange(event.target.checked)} className="h-4 w-4 cursor-pointer accent-primary" />
             <span className="text-sm text-slate-600">Ghi nhớ đăng nhập</span>
           </label>
-          <button type="button" className="min-h-11 rounded-md px-1 text-sm font-medium text-primary hover:underline">Quên mật khẩu?</button>
         </div>
 
         {error && <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">{error}</p>}

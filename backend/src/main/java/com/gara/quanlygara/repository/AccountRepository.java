@@ -11,4 +11,8 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     boolean existsByUsername(String username);
 
     boolean existsByUsernameAndIdNot(String username, Integer id);
+
+    boolean existsByEmployeeId(Integer employeeId);
+
+    boolean existsByEmployeeIdAndIdNot(Integer employeeId, Integer id);
 }

@@ -8,6 +8,7 @@ import com.gara.quanlygara.dto.auth.RegisterRequest;
 import com.gara.quanlygara.entity.Account;
 import com.gara.quanlygara.entity.AccountRole;
 import com.gara.quanlygara.entity.Customer;
+import com.gara.quanlygara.exception.BadRequestException;
 import com.gara.quanlygara.exception.ConflictException;
 import com.gara.quanlygara.exception.ForbiddenException;
 import com.gara.quanlygara.exception.ResourceNotFoundException;
@@ -78,6 +79,7 @@ public class AuthService {
         account.setRole(AccountRole.CUSTOMER);
         account.setActive(true);
         account.setCustomerId(customer.getId());
+        account.setEmployeeId(null);
         account = accountRepository.save(account);
         return issueToken(account);
     }
@@ -91,7 +93,7 @@ public class AuthService {
     public void changePassword(String username, ChangePasswordRequest request) {
         Account account = findByUsername(username);
         if (!passwordEncoder.matches(request.currentPassword(), account.getPasswordHash())) {
-            throw new UnauthorizedException("Mật khẩu hiện tại không đúng.");
+            throw new BadRequestException("Mật khẩu hiện tại không đúng.");
         }
         account.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         accountRepository.save(account);

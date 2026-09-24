@@ -15,6 +15,11 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export const authApi = {
   async login(payload: LoginRequest): Promise<LoginResponse> {
     return unwrap(await api.post<ApiResponse<LoginResponse>>("/api/auth/login", payload));
@@ -30,6 +35,10 @@ export const authApi = {
 
   async logout(): Promise<void> {
     await api.post<ApiResponse<null>>("/api/auth/logout");
+  },
+
+  async changePassword(payload: ChangePasswordRequest): Promise<void> {
+    await api.put<ApiResponse<null>>("/api/auth/change-password", payload);
   },
 };
 

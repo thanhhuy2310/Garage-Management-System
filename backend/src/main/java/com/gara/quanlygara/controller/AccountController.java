@@ -5,11 +5,13 @@ import com.gara.quanlygara.dto.account.AccountResponse;
 import com.gara.quanlygara.dto.account.AccountRoleRequest;
 import com.gara.quanlygara.dto.account.AccountStatusRequest;
 import com.gara.quanlygara.dto.account.CreateAccountRequest;
+import com.gara.quanlygara.dto.account.EmployeeOptionResponse;
 import com.gara.quanlygara.dto.account.UpdateAccountRequest;
 import com.gara.quanlygara.service.AccountService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +25,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/accounts")
+@PreAuthorize("hasRole('ADMIN')")
 public class AccountController {
 
     private final AccountService accountService;
@@ -34,6 +37,14 @@ public class AccountController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<AccountResponse>>> getAll() {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách tài khoản thành công.", accountService.getAll()));
+    }
+
+    @GetMapping("/staff-options")
+    public ResponseEntity<ApiResponse<List<EmployeeOptionResponse>>> getStaffOptions() {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Lấy danh sách nhân viên thành công.",
+                accountService.getEmployeeOptions()
+        ));
     }
 
     @GetMapping("/{id}")

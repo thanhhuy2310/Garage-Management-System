@@ -6,6 +6,8 @@ import com.gara.quanlygara.dto.auth.RegisterRequest;
 import com.gara.quanlygara.entity.Account;
 import com.gara.quanlygara.entity.AccountRole;
 import com.gara.quanlygara.entity.Customer;
+import com.gara.quanlygara.exception.BadRequestException;
+import com.gara.quanlygara.exception.ConflictException;
 import com.gara.quanlygara.exception.ForbiddenException;
 import com.gara.quanlygara.exception.UnauthorizedException;
 import com.gara.quanlygara.repository.AccountRepository;
@@ -21,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -101,6 +104,38 @@ class AuthServiceTest {
     }
 
     @Test
+    void changePasswordRejectsWrongCurrentPassword() {
+        Account account = account(true);
+        when(accountRepository.findByUsername("admin")).thenReturn(Optional.of(account));
+        when(passwordEncoder.matches("wrong-password", account.getPasswordHash())).thenReturn(false);
+
+        assertThrows(BadRequestException.class,
+                () -> authService.changePassword(
+                        "admin",
+                        new ChangePasswordRequest("wrong-password", "new-password")
+                ));
+    }
+
+    @Test
+    void changedPasswordRejectsOldLoginAndAllowsNewLogin() {
+        Account account = account(true);
+        when(accountRepository.findByUsername("admin")).thenReturn(Optional.of(account));
+        when(passwordEncoder.matches("old-password", "bcrypt-hash")).thenReturn(true);
+        when(passwordEncoder.encode("new-password")).thenReturn("new-bcrypt-hash");
+        when(passwordEncoder.matches("old-password", "new-bcrypt-hash")).thenReturn(false);
+        when(passwordEncoder.matches("new-password", "new-bcrypt-hash")).thenReturn(true);
+        when(jwtService.generateToken(account)).thenReturn("new-jwt-token");
+        when(jwtService.getExpirationSeconds()).thenReturn(3600L);
+
+        authService.changePassword("admin", new ChangePasswordRequest("old-password", "new-password"));
+
+        assertThrows(UnauthorizedException.class,
+                () -> authService.login(new LoginRequest("admin", "old-password")));
+        assertEquals("new-jwt-token",
+                authService.login(new LoginRequest("admin", "new-password")).accessToken());
+    }
+
+    @Test
     void registerCreatesCustomerAccountAndReturnsToken() {
         var request = new RegisterRequest(
                 "Nguyễn Văn Mới",
@@ -133,6 +168,34 @@ class AuthServiceTest {
         assertEquals("jwt-token", response.accessToken());
         assertEquals("CUSTOMER", response.account().role());
         assertEquals(10, response.account().customerId());
+        assertNull(response.account().employeeId());
+        verify(passwordEncoder).encode("password123");
+    }
+
+    @Test
+    void registerRejectsDuplicateUsername() {
+        when(accountRepository.existsByUsername("khachmoi")).thenReturn(true);
+
+        assertThrows(ConflictException.class, () -> authService.register(registerRequest()));
+    }
+
+    @Test
+    void registerRejectsDuplicatePhone() {
+        when(accountRepository.existsByUsername("khachmoi")).thenReturn(false);
+        when(customerRepository.existsByPhone("0901234567")).thenReturn(true);
+
+        assertThrows(ConflictException.class, () -> authService.register(registerRequest()));
+    }
+
+    private RegisterRequest registerRequest() {
+        return new RegisterRequest(
+                "Nguyễn Văn Mới",
+                "0901234567",
+                "moi@example.com",
+                "Quận 1, TP.HCM",
+                "khachmoi",
+                "password123"
+        );
     }
 
     private Account account(boolean active) {

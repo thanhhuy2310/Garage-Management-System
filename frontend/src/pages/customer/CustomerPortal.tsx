@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
+import { authApi } from "../../api/auth";
+import { errorMessage } from "../../api/client";
 import { Button, Card, Icons, Input } from "../../components/ui";
 import CustomerLayout from "../../layouts/CustomerLayout";
 import { khachHang } from "../../mock/data";
@@ -33,7 +35,49 @@ interface CustomerPortalProps {
 
 function ProfileTab() {
   const customer = khachHang.find((c) => c.MaKhachHang === CURRENT_CUSTOMER_ID);
-  const [done, setDone] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleChangePassword = async (event: FormEvent) => {
+    event.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setError("Vui lòng nhập đầy đủ ba trường mật khẩu.");
+      return;
+    }
+    if (newPassword.length < 8 || newPassword.length > 72) {
+      setError("Mật khẩu mới phải có từ 8 đến 72 ký tự.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("Mật khẩu xác nhận chưa khớp.");
+      return;
+    }
+    if (newPassword === currentPassword) {
+      setError("Mật khẩu mới phải khác mật khẩu hiện tại.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await authApi.changePassword({ currentPassword, newPassword });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setSuccess("Mật khẩu đã được cập nhật.");
+    } catch (changeError) {
+      setError(errorMessage(changeError, "Không thể đổi mật khẩu. Vui lòng thử lại."));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <Card className="space-y-4 p-4 sm:p-5">
@@ -47,23 +91,42 @@ function ProfileTab() {
       </Card>
       <Card className="p-4 sm:p-5">
         <h3 className="ui-card-title">Đổi mật khẩu</h3>
-        {done ? (
-          <p className="mt-3 rounded-md bg-success-soft px-3 py-2 text-sm text-success" role="status">
-            Mật khẩu đã được cập nhật.
-          </p>
-        ) : (
-          <form
-            className="mt-3 space-y-4"
-            onSubmit={(e) => { e.preventDefault(); setDone(true); }}
-          >
-            <Input label="Mật khẩu hiện tại *" type="password" required />
-            <Input label="Mật khẩu mới *" type="password" required />
-            <Input label="Nhập lại mật khẩu mới *" type="password" required />
-            <div className="flex justify-end">
-              <Button type="submit">Đổi mật khẩu</Button>
-            </div>
-          </form>
-        )}
+        <form className="mt-3 space-y-4" onSubmit={handleChangePassword}>
+          <Input
+            label="Mật khẩu hiện tại *"
+            type="password"
+            autoComplete="current-password"
+            value={currentPassword}
+            onChange={(event) => setCurrentPassword(event.target.value)}
+            required
+          />
+          <Input
+            label="Mật khẩu mới *"
+            type="password"
+            autoComplete="new-password"
+            minLength={8}
+            maxLength={72}
+            helperText="Từ 8 đến 72 ký tự."
+            value={newPassword}
+            onChange={(event) => setNewPassword(event.target.value)}
+            required
+          />
+          <Input
+            label="Nhập lại mật khẩu mới *"
+            type="password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            required
+          />
+          {error && <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">{error}</p>}
+          {success && <p className="rounded-md bg-success-soft px-3 py-2 text-sm text-success" role="status">{success}</p>}
+          <div className="flex justify-end">
+            <Button type="submit" disabled={loading}>
+              {loading ? "Đang cập nhật..." : "Đổi mật khẩu"}
+            </Button>
+          </div>
+        </form>
       </Card>
     </div>
   );
