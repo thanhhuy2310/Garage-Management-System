@@ -1,175 +1,203 @@
-import React, { useState } from "react";
-import { Card, Badge, Button, SearchBox, Pagination, Icons, Modal, Input } from "../components/ui";
-import { khachHang, xe, mockRepairOrders } from "../mock/data";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { customersApi, type Customer, type CustomerPayload } from "../api/customers";
+import { errorMessage } from "../api/client";
+import { Button, Card, Icons, Input, Modal, Pagination, SearchBox } from "../components/ui";
+
+const EMPTY_FORM: CustomerPayload = { fullName: "", phone: "", email: "", address: "" };
+const PER_PAGE = 8;
 
 export default function Customers() {
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [showAdd, setShowAdd] = useState(false);
-  const PER = 8;
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [editing, setEditing] = useState<Customer | null>(null);
+  const [form, setForm] = useState<CustomerPayload>(EMPTY_FORM);
+  const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const filtered = khachHang.filter(customer =>
-    !search || customer.HoTen.toLowerCase().includes(search.toLowerCase()) || customer.SoDienThoai.includes(search)
-  );
-  const paged = filtered.slice((page - 1) * PER, page * PER);
-  const detail = khachHang.find(customer => customer.MaKhachHang === selected);
-  const detailVehicles = xe.filter(vehicle => vehicle.MaKhachHang === detail?.MaKhachHang);
+  const loadCustomers = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      setCustomers(await customersApi.list());
+    } catch (loadError) {
+      setError(errorMessage(loadError, "Không thể tải danh sách khách hàng."));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadCustomers();
+  }, [loadCustomers]);
+
+  const filtered = useMemo(() => {
+    const keyword = search.trim().toLocaleLowerCase("vi");
+    if (!keyword) return customers;
+    return customers.filter((customer) =>
+      customer.fullName.toLocaleLowerCase("vi").includes(keyword)
+      || customer.phone.includes(keyword)
+      || customer.email?.toLocaleLowerCase("vi").includes(keyword),
+    );
+  }, [customers, search]);
+
+  const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const selected = customers.find((customer) => customer.id === selectedId) ?? null;
+
+  const updateField = (field: keyof CustomerPayload, value: string) => {
+    setForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const openCreate = () => {
+    setEditing(null);
+    setForm(EMPTY_FORM);
+    setFormError("");
+    setShowForm(true);
+  };
+
+  const openEdit = (customer: Customer) => {
+    setEditing(customer);
+    setForm({
+      fullName: customer.fullName,
+      phone: customer.phone,
+      email: customer.email ?? "",
+      address: customer.address ?? "",
+    });
+    setFormError("");
+    setShowForm(true);
+  };
+
+  const handleSave = async (event: FormEvent) => {
+    event.preventDefault();
+    setFormError("");
+    setSuccess("");
+    if (!form.fullName.trim() || !form.phone.trim()) {
+      setFormError("Vui lòng nhập họ tên và số điện thoại.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = {
+        fullName: form.fullName.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        address: form.address.trim(),
+      };
+      const saved = editing
+        ? await customersApi.update(editing.id, payload)
+        : await customersApi.create(payload);
+
+      setCustomers((current) => editing
+        ? current.map((customer) => customer.id === saved.id ? saved : customer)
+        : [saved, ...current]);
+      setSelectedId(saved.id);
+      setShowForm(false);
+      setSuccess(editing ? "Đã cập nhật thông tin khách hàng." : "Đã thêm khách hàng mới.");
+    } catch (saveError) {
+      setFormError(errorMessage(saveError, "Không thể lưu thông tin khách hàng."));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div className="page-toolbar">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <SearchBox value={search} onChange={setSearch} placeholder="Tên, số điện thoại..." />
-          <Button variant="outline" size="sm" icon={Icons.filter}>Lọc</Button>
+        <SearchBox value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder="Tên, số điện thoại, email..." />
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => void loadCustomers()} disabled={loading}>Tải lại</Button>
+          <Button icon={Icons.plus} onClick={openCreate}>Thêm khách hàng</Button>
         </div>
-        <Button icon={Icons.plus} onClick={() => setShowAdd(true)}>Thêm khách hàng</Button>
       </div>
 
+      {error && <p className="rounded-md bg-danger-soft px-4 py-3 text-sm text-danger" role="alert">{error}</p>}
+      {success && <p className="rounded-md bg-success-soft px-4 py-3 text-sm text-success" role="status">{success}</p>}
+
       <div className={`grid gap-4 ${selected ? "xl:grid-cols-3" : "grid-cols-1"}`}>
-        {/* Table */}
-        <div className={selected ? "xl:col-span-2" : ""}>
-          <Card>
-            <table className="w-full data-table">
-              <thead>
-                <tr>
-                  <th>Mã KH</th>
-                  <th>Họ tên</th>
-                  <th>Số điện thoại</th>
-                  <th>Email</th>
-                  <th>Địa chỉ</th>
-                  <th className="text-center">Số xe</th>
-                  <th>Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paged.map(customer => {
-                  const vehicleCount = xe.filter(vehicle => vehicle.MaKhachHang === customer.MaKhachHang).length;
-                  return (
-                  <tr
-                    key={customer.MaKhachHang}
-                    tabIndex={0}
-                    aria-selected={selected === customer.MaKhachHang}
-                    className={`cursor-pointer ${selected === customer.MaKhachHang ? "bg-info-soft" : ""}`}
-                    onClick={() => setSelected(customer.MaKhachHang === selected ? null : customer.MaKhachHang)}
-                    onKeyDown={(event) => {
-                      if (event.currentTarget !== event.target || (event.key !== "Enter" && event.key !== " ")) return;
-                      event.preventDefault();
-                      setSelected(customer.MaKhachHang === selected ? null : customer.MaKhachHang);
-                    }}
-                  >
-                    <td><span className="mono text-xs text-slate-400">{customer.MaKhachHang}</span></td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                          {customer.HoTen.charAt(0)}
-                        </div>
-                        <span className="font-medium text-slate-800">{customer.HoTen}</span>
-                      </div>
-                    </td>
-                    <td><span className="mono text-sm">{customer.SoDienThoai}</span></td>
-                    <td className="text-slate-500">{customer.Email || "—"}</td>
-                    <td className="text-slate-500 max-w-[160px] truncate">{customer.DiaChi || "—"}</td>
-                    <td className="text-center">
-                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary-soft text-xs font-bold text-primary">{vehicleCount}</span>
-                    </td>
-                    <td>
-                      <div className="flex gap-1">
-                        <button aria-label={`Xem khách hàng ${customer.HoTen}`} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.eye}</button>
-                        <button aria-label={`Sửa khách hàng ${customer.HoTen}`} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.edit}</button>
-                      </div>
-                    </td>
-                  </tr>
-                )})}
-              </tbody>
-            </table>
-            <div className="flex items-center justify-between border-t border-border px-4 py-3">
-              <p className="text-xs text-slate-500">{filtered.length} khách hàng</p>
-              <Pagination page={page} total={filtered.length} perPage={PER} onChange={setPage} />
-            </div>
-          </Card>
-        </div>
-
-        {/* Detail panel */}
-        {detail && (
-          <div className="detail-panel space-y-4">
-            <Card className="p-4 sm:p-5">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-lg font-bold text-white">
-                    {detail.HoTen.charAt(0)}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-800">{detail.HoTen}</h3>
-                    <p className="text-xs text-slate-500 mono">{detail.MaKhachHang}</p>
-                  </div>
-                </div>
-                <button aria-label="Đóng thông tin khách hàng" onClick={() => setSelected(null)} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.close}</button>
-              </div>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-2 text-slate-600">
-                  <span className="text-slate-400">{Icons.users}</span>
-                  <span className="mono">{detail.SoDienThoai}</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-600">
-                  <span className="text-slate-400">{Icons.send}</span>
-                  <span>{detail.Email || "Chưa cập nhật"}</span>
-                </div>
-                <div className="flex items-start gap-2 text-slate-600">
-                  <span className="text-slate-400 mt-0.5">{Icons.info}</span>
-                  <span>{detail.DiaChi || "Chưa cập nhật"}</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* Vehicles */}
-            <Card className="p-4 sm:p-5">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Xe ({detailVehicles.length})</p>
-              <div className="space-y-2">
-                {detailVehicles.map(vehicle => (
-                  <div key={vehicle.MaXe} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                    <span className="text-primary">{Icons.car}</span>
-                    <div>
-                      <p className="mono text-sm font-semibold text-primary">{vehicle.BienSo}</p>
-                      <p className="text-xs text-slate-500">{vehicle.HangXe} {vehicle.DongXe} {vehicle.NamSanXuat}</p>
+        <Card className={selected ? "xl:col-span-2" : ""}>
+          <div className="space-y-3 p-3 md:hidden">
+            {loading && <p className="py-8 text-center text-sm text-muted-foreground">Đang tải khách hàng...</p>}
+            {!loading && paged.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">Không tìm thấy khách hàng phù hợp.</p>}
+            {paged.map((customer) => (
+              <article key={customer.id} className={`rounded-lg border p-4 ${selectedId === customer.id ? "border-primary bg-primary-soft/40" : "border-border bg-surface"}`}>
+                <button type="button" className="w-full text-left" onClick={() => setSelectedId(customer.id === selectedId ? null : customer.id)}>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary font-bold text-white" aria-hidden="true">{customer.fullName.charAt(0)}</div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-foreground">{customer.fullName}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">{customer.phone}</p>
+                      <p className="mt-1 truncate text-sm text-muted-foreground">{customer.email || "Chưa cập nhật email"}</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* Repair history */}
-            <Card className="p-4 sm:p-5">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Lịch sử gần đây</p>
-              <div className="space-y-2">
-                {mockRepairOrders.filter(r => r.customerId === detail.MaKhachHang).map(r => (
-                  <div key={r.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                    <div>
-                      <p className="mono text-xs text-slate-500">{r.id}</p>
-                      <p className="text-xs font-medium">{r.created.split("-").reverse().join("/")}</p>
-                    </div>
-                    <Badge variant={r.status as any} />
-                  </div>
-                ))}
-              </div>
-            </Card>
+                </button>
+                <Button className="mt-3 w-full" size="sm" variant="outline" icon={Icons.edit} onClick={() => openEdit(customer)}>Chỉnh sửa</Button>
+              </article>
+            ))}
           </div>
+
+          <table className="hidden w-full data-table md:table">
+            <thead><tr><th>Mã KH</th><th>Họ tên</th><th>Số điện thoại</th><th>Email</th><th>Địa chỉ</th><th>Thao tác</th></tr></thead>
+            <tbody>
+              {loading && <tr><td colSpan={6} className="py-10 text-center text-sm text-muted-foreground">Đang tải khách hàng...</td></tr>}
+              {!loading && paged.length === 0 && <tr><td colSpan={6} className="py-10 text-center text-sm text-muted-foreground">Không tìm thấy khách hàng phù hợp.</td></tr>}
+              {paged.map((customer) => (
+                <tr key={customer.id} aria-selected={selectedId === customer.id} className={selectedId === customer.id ? "bg-info-soft" : ""}>
+                  <td className="mono text-xs text-muted-foreground">KH{String(customer.id).padStart(3, "0")}</td>
+                  <td><button type="button" className="min-h-11 text-left font-semibold text-foreground hover:text-primary" onClick={() => setSelectedId(customer.id === selectedId ? null : customer.id)}>{customer.fullName}</button></td>
+                  <td className="mono text-sm">{customer.phone}</td>
+                  <td className="text-muted-foreground">{customer.email || "—"}</td>
+                  <td className="max-w-[220px] truncate text-muted-foreground" title={customer.address ?? undefined}>{customer.address || "—"}</td>
+                  <td><Button size="sm" variant="ghost" icon={Icons.edit} onClick={() => openEdit(customer)}>Sửa</Button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-muted-foreground">{filtered.length} khách hàng</p>
+            <Pagination page={page} total={filtered.length} perPage={PER_PAGE} onChange={setPage} />
+          </div>
+        </Card>
+
+        {selected && (
+          <Card className="detail-panel p-4 sm:p-5">
+            <div className="mb-5 flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-white" aria-hidden="true">{selected.fullName.charAt(0)}</div>
+                <div className="min-w-0"><h3 className="font-bold text-foreground">{selected.fullName}</h3><p className="mono text-xs text-muted-foreground">KH{String(selected.id).padStart(3, "0")}</p></div>
+              </div>
+              <button type="button" aria-label="Đóng thông tin khách hàng" onClick={() => setSelectedId(null)} className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted">{Icons.close}</button>
+            </div>
+            <dl className="space-y-4 text-sm">
+              <div><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Số điện thoại</dt><dd className="mono mt-1 text-foreground">{selected.phone}</dd></div>
+              <div><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Email</dt><dd className="mt-1 break-words text-foreground">{selected.email || "Chưa cập nhật"}</dd></div>
+              <div><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Địa chỉ</dt><dd className="mt-1 text-foreground">{selected.address || "Chưa cập nhật"}</dd></div>
+            </dl>
+            <Button className="mt-6 w-full" variant="outline" icon={Icons.edit} onClick={() => openEdit(selected)}>Chỉnh sửa thông tin</Button>
+          </Card>
         )}
       </div>
 
-      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Thêm khách hàng mới">
-        <div className="space-y-4">
+      <Modal open={showForm} onClose={() => setShowForm(false)} title={editing ? "Cập nhật khách hàng" : "Thêm khách hàng mới"}>
+        <form className="space-y-4" onSubmit={handleSave}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Input label="Họ và tên *" placeholder="Nguyễn Văn A" />
-            <Input label="Số điện thoại *" placeholder="0901234567" />
+            <Input label="Họ và tên *" value={form.fullName} onChange={(event) => updateField("fullName", event.target.value)} maxLength={100} autoFocus required />
+            <Input label="Số điện thoại *" value={form.phone} onChange={(event) => updateField("phone", event.target.value)} inputMode="tel" minLength={8} maxLength={20} required />
           </div>
-          <Input label="Email" placeholder="email@gmail.com" type="email" />
-          <Input label="Địa chỉ" placeholder="Số nhà, đường, quận, TP" />
-          <div className="flex gap-3 pt-2 justify-end">
-            <Button variant="outline" onClick={() => setShowAdd(false)}>Hủy</Button>
-            <Button>Lưu khách hàng</Button>
+          <Input label="Email" type="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} maxLength={150} />
+          <Input label="Địa chỉ" value={form.address} onChange={(event) => updateField("address", event.target.value)} maxLength={255} />
+          {formError && <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">{formError}</p>}
+          <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+            <Button type="button" variant="outline" onClick={() => setShowForm(false)} disabled={saving}>Hủy</Button>
+            <Button type="submit" disabled={saving}>{saving ? "Đang lưu..." : editing ? "Lưu thay đổi" : "Lưu khách hàng"}</Button>
           </div>
-        </div>
+        </form>
       </Modal>
     </div>
   );

@@ -67,6 +67,29 @@ class SecurityConfigTest {
     }
 
     @Test
+    void customerApiRejectsRequestWithoutJwt() throws Exception {
+        mockMvc.perform(get("/api/customers"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    @WithMockUser(roles = "RECEPTIONIST")
+    void receptionistCanReadCustomers() throws Exception {
+        mockMvc.perform(get("/api/customers"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    @WithMockUser(roles = "WAREHOUSE")
+    void warehouseCannotReadCustomers() throws Exception {
+        mockMvc.perform(get("/api/customers"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
     void publicRegisterIgnoresInjectedAdminRole() throws Exception {
         when(customerRepository.save(any(Customer.class))).thenAnswer(invocation -> {
             Customer customer = invocation.getArgument(0);
