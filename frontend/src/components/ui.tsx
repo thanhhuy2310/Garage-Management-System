@@ -198,6 +198,8 @@ export function Modal({ open, onClose, title, children, width = "max-w-lg" }: {
 }) {
   const titleId = React.useId();
   const dialogRef = React.useRef<HTMLDivElement>(null);
+  const onCloseRef = React.useRef(onClose);
+  onCloseRef.current = onClose;
 
   React.useEffect(() => {
     if (!open) return;
@@ -205,19 +207,23 @@ export function Modal({ open, onClose, title, children, width = "max-w-lg" }: {
     const previouslyFocused = document.activeElement as HTMLElement | null;
     const previousOverflow = document.body.style.overflow;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") onCloseRef.current();
     };
 
     document.body.style.overflow = "hidden";
     document.addEventListener("keydown", handleKeyDown);
-    window.requestAnimationFrame(() => dialogRef.current?.focus());
+    const focusFrame = window.requestAnimationFrame(() => {
+      const autoFocusElement = dialogRef.current?.querySelector<HTMLElement>("[autofocus]");
+      (autoFocusElement ?? dialogRef.current)?.focus();
+    });
 
     return () => {
+      window.cancelAnimationFrame(focusFrame);
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
       previouslyFocused?.focus();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
   return createPortal(
