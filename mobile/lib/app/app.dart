@@ -4,12 +4,19 @@ import '../core/constants/app_config.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/splash_screen.dart';
 import '../screens/booking/booking_screen.dart';
+import '../screens/profile/change_password_screen.dart';
+import '../screens/quotations/quotations_screen.dart';
+import '../screens/repairs/repair_progress_screen.dart';
 import '../screens/shared/feature_placeholder_screen.dart';
 import '../screens/shell/customer_shell.dart';
 import '../screens/vehicles/vehicles_screen.dart';
 import '../services/auth_service.dart';
 import '../services/appointment_service.dart';
 import '../services/home_service.dart';
+import '../services/notification_service.dart';
+import '../services/profile_service.dart';
+import '../services/quotation_service.dart';
+import '../services/repair_service.dart';
 import '../services/vehicle_service.dart';
 import 'app_controller.dart';
 import 'app_routes.dart';
@@ -39,6 +46,10 @@ class _GarageCustomerAppState extends State<GarageCustomerApp> {
     widget.homeService ?? const MockHomeService(),
     widget.vehicleService ?? MockVehicleService(),
     widget.appointmentService ?? MockAppointmentService(),
+    MockQuotationService(),
+    MockRepairService(),
+    MockNotificationService(),
+    MockProfileService(),
   );
 
   @override
@@ -70,18 +81,12 @@ class _GarageCustomerAppState extends State<GarageCustomerApp> {
         controller: controller,
         initialIndex: 1,
       ),
-      AppRoutes.quotations => const FeaturePlaceholderScreen(
-        title: 'Báo giá',
-        icon: Icons.request_quote_outlined,
+      AppRoutes.quotations => QuotationsScreen(controller: controller),
+      AppRoutes.history => RepairProgressScreen(
+        controller: controller,
+        historyOnly: true,
       ),
-      AppRoutes.history => const FeaturePlaceholderScreen(
-        title: 'Lịch sử sửa chữa',
-        icon: Icons.history,
-      ),
-      AppRoutes.changePassword => const FeaturePlaceholderScreen(
-        title: 'Đổi mật khẩu',
-        icon: Icons.password_outlined,
-      ),
+      AppRoutes.changePassword => ChangePasswordScreen(controller: controller),
       _ => const FeaturePlaceholderScreen(
         title: 'Không tìm thấy trang',
         icon: Icons.error_outline,

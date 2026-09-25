@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../app/app_controller.dart';
 import '../appointments/appointments_screen.dart';
 import '../home/home_screen.dart';
-import '../shared/feature_placeholder_screen.dart';
+import '../notifications/notifications_screen.dart';
+import '../profile/profile_screen.dart';
+import '../repairs/repair_progress_screen.dart';
 
 class CustomerShell extends StatefulWidget {
   const CustomerShell({
@@ -35,21 +37,9 @@ class _CustomerShellState extends State<CustomerShell> {
         onOpenRoute: _openRoute,
       ),
       AppointmentsScreen(controller: widget.controller, embedded: true),
-      const FeaturePlaceholderScreen(
-        title: 'Theo dõi sửa chữa',
-        icon: Icons.car_repair_outlined,
-        embedded: true,
-      ),
-      const FeaturePlaceholderScreen(
-        title: 'Thông báo',
-        icon: Icons.notifications_none,
-        embedded: true,
-      ),
-      const FeaturePlaceholderScreen(
-        title: 'Tài khoản',
-        icon: Icons.person_outline,
-        embedded: true,
-      ),
+      RepairProgressScreen(controller: widget.controller, embedded: true),
+      NotificationsScreen(controller: widget.controller, embedded: true),
+      ProfileScreen(controller: widget.controller, embedded: true),
     ];
     const titles = [
       'Trang chủ',
