@@ -25,5 +25,13 @@ void main() {
 
     expect(find.text('Trang chủ'), findsWidgets);
     expect(find.text('Nguyễn Văn An'), findsOneWidget);
+
+    await tester.tap(find.text('Đặt lịch'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Đặt lịch mới'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Chọn xe cần sử dụng dịch vụ'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

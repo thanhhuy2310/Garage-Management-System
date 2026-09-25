@@ -119,12 +119,22 @@ class _BookingScreenState extends State<BookingScreen> {
     if (vehicle != null && mounted) setState(() => _vehicle = vehicle);
   }
 
+  bool get _bookingReady =>
+      _vehicle != null && _service != null && _date != null && _time != null;
+
   bool get _canContinue => switch (_step) {
     0 => _vehicle != null,
     1 => _service != null,
     2 => _date != null && _time != null,
-    _ => true,
+    _ => _bookingReady,
   };
+
+  int get _firstIncompleteStep {
+    if (_vehicle == null) return 0;
+    if (_service == null) return 1;
+    if (_date == null || _time == null) return 2;
+    return 3;
+  }
 
   void _goTo(int step) {
     setState(() => _step = step);
@@ -189,17 +199,34 @@ class _BookingScreenState extends State<BookingScreen> {
       }
       setState(() => _time = replacement);
     }
+    if (!mounted) return;
     final session = widget.controller.session;
-    if (session == null) return;
+    final vehicle = _vehicle;
+    final service = _service;
+    final date = _date;
+    final time = _time;
+    if (session == null ||
+        vehicle == null ||
+        service == null ||
+        date == null ||
+        time == null) {
+      _goTo(_firstIncompleteStep);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Vui lòng hoàn tất các bước trước khi xác nhận.'),
+        ),
+      );
+      return;
+    }
     setState(() => _saving = true);
     try {
       final appointment = await widget.controller.createAppointment(
         AppointmentInput(
           customerId: session.customerId,
-          vehicle: _vehicle!,
-          service: _service!,
-          date: _date!,
-          time: _time!,
+          vehicle: vehicle,
+          service: service,
+          date: date,
+          time: time,
           note: _note.text.trim(),
         ),
       );
@@ -237,15 +264,16 @@ class _BookingScreenState extends State<BookingScreen> {
                 children: [
                   _StepHeader(current: _step),
                   Expanded(
-                    child: PageView(
+                    child: PageView.builder(
                       controller: _pageController,
                       physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        _vehicleStep(),
-                        _serviceStep(),
-                        _dateTimeStep(),
-                        _confirmStep(),
-                      ],
+                      itemCount: 4,
+                      itemBuilder: (context, index) => switch (index) {
+                        0 => _vehicleStep(),
+                        1 => _serviceStep(),
+                        2 => _dateTimeStep(),
+                        _ => _confirmStep(),
+                      },
                     ),
                   ),
                 ],
@@ -390,60 +418,120 @@ class _BookingScreenState extends State<BookingScreen> {
     ],
   );
 
-  Widget _confirmStep() => ListView(
-    padding: const EdgeInsets.all(16),
-    children: [
-      Text(
-        'Xác nhận thông tin',
-        style: Theme.of(context).textTheme.titleLarge
-            ?.copyWith(fontWeight: FontWeight.w800),
-      ),
-      const SizedBox(height: 18),
-      Card(
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            children: [
-              _ConfirmRow(
-                icon: Icons.directions_car_outlined,
-                label: 'Xe',
-                value:
-                    '${_vehicle!.plate} · ${_vehicle!.brand} ${_vehicle!.model}',
+  Widget _confirmStep() {
+    final vehicle = _vehicle;
+    final service = _service;
+    final date = _date;
+    final time = _time;
+    if (vehicle == null || service == null || date == null || time == null) {
+      return ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            'Xác nhận thông tin',
+            style: Theme.of(context).textTheme.titleLarge
+                ?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 20),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: AppColors.warningSoft,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(
+                      Icons.fact_check_outlined,
+                      color: AppColors.warning,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Thông tin chưa đầy đủ',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Hãy hoàn tất việc chọn xe, dịch vụ, ngày và khung giờ trước khi xác nhận lịch hẹn.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColors.muted),
+                  ),
+                  const SizedBox(height: 18),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _goTo(_firstIncompleteStep),
+                      icon: const Icon(Icons.arrow_back),
+                      label: const Text('Quay lại bước cần hoàn tất'),
+                    ),
+                  ),
+                ],
               ),
-              const Divider(height: 26),
-              _ConfirmRow(
-                icon: Icons.build_outlined,
-                label: 'Dịch vụ',
-                value: _service!.name,
-              ),
-              const Divider(height: 26),
-              _ConfirmRow(
-                icon: Icons.calendar_month_outlined,
-                label: 'Thời gian',
-                value: '$_time · ${formatDate(_date!)}',
-              ),
-              const Divider(height: 26),
-              _ConfirmRow(
-                icon: Icons.payments_outlined,
-                label: 'Giá tham khảo',
-                value: formatCurrency(_service!.price),
-              ),
-            ],
+            ),
+          ),
+        ],
+      );
+    }
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Text(
+          'Xác nhận thông tin',
+          style: Theme.of(context).textTheme.titleLarge
+              ?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 18),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              children: [
+                _ConfirmRow(
+                  icon: Icons.directions_car_outlined,
+                  label: 'Xe',
+                  value: '${vehicle.plate} · ${vehicle.brand} ${vehicle.model}',
+                ),
+                const Divider(height: 26),
+                _ConfirmRow(
+                  icon: Icons.build_outlined,
+                  label: 'Dịch vụ',
+                  value: service.name,
+                ),
+                const Divider(height: 26),
+                _ConfirmRow(
+                  icon: Icons.calendar_month_outlined,
+                  label: 'Thời gian',
+                  value: '$time · ${formatDate(date)}',
+                ),
+                const Divider(height: 26),
+                _ConfirmRow(
+                  icon: Icons.payments_outlined,
+                  label: 'Giá tham khảo',
+                  value: formatCurrency(service.price),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-      const SizedBox(height: 18),
-      TextField(
-        controller: _note,
-        maxLines: 4,
-        textCapitalization: TextCapitalization.sentences,
-        decoration: const InputDecoration(
-          labelText: 'Ghi chú cho gara (không bắt buộc)',
-          hintText: 'Mô tả tình trạng xe hoặc yêu cầu của bạn',
+        const SizedBox(height: 18),
+        TextField(
+          controller: _note,
+          maxLines: 4,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: const InputDecoration(
+            labelText: 'Ghi chú cho gara (không bắt buộc)',
+            hintText: 'Mô tả tình trạng xe hoặc yêu cầu của bạn',
+          ),
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 }
 
 class _StepHeader extends StatelessWidget {
