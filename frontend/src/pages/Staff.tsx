@@ -40,7 +40,7 @@ export default function Staff() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="rounded-full bg-primary-soft px-2 py-1 text-xs font-medium text-primary">{ROLES[s.role]}</span>
-                  <Badge variant={s.status === "active" ? "completed" : "cancelled"} label={s.status === "active" ? "Đang làm" : "Nghỉ việc"} />
+                  <Badge variant={s.status === "active" ? "completed" : "cancelled"} label={s.status === "active" ? "Đang hoạt động" : "Nghỉ việc"} />
                 </div>
                 <div className="mt-3 text-xs text-slate-500 mono">{s.phone}</div>
               </button>

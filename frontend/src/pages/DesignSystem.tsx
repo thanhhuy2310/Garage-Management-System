@@ -125,7 +125,7 @@ export default function DesignSystem() {
                   <td><span className="mono text-xs text-slate-400">{row.id}</span></td>
                   <td className="font-medium">{row.name}</td>
                   <td className="text-slate-600">{row.role}</td>
-                  <td><Badge variant={row.status} label={row.status === "completed" ? "Đang làm" : "Hoạt động"} /></td>
+                  <td><Badge variant={row.status} label={row.status === "completed" ? "Đang hoạt động" : "Hoạt động"} /></td>
                   <td>
                     <div className="flex gap-1">
                       <button aria-label={`Xem ${row.name}`} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.eye}</button>
