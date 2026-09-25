@@ -9,7 +9,7 @@ export type AdminPage =
   | "technician" | "design-system";
 
 export type PublicPage = "home" | "about" | "services" | "parts" | "contact" | "login" | "register";
-export type CustomerPage = "overview" | "appointments" | "quotations" | "tracking" | "history" | "notifications" | "profile";
+export type CustomerPage = "overview" | "vehicles" | "appointments" | "quotations" | "tracking" | "history" | "notifications" | "profile";
 
 export type AppRoute =
   | { area: "public"; page: PublicPage }
@@ -34,7 +34,7 @@ const PUBLIC_ROUTES: Record<string, PublicPage> = {
 };
 
 const CUSTOMER_PAGES = new Set<CustomerPage>([
-  "overview", "appointments", "quotations", "tracking", "history", "notifications", "profile",
+  "overview", "vehicles", "appointments", "quotations", "tracking", "history", "notifications", "profile",
 ]);
 
 export const ROUTE_PATHS = {

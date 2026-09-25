@@ -4,6 +4,7 @@ import { errorMessage } from "../../api/client";
 import { Button, Card, Icons, Input } from "../../components/ui";
 import CustomerLayout from "../../layouts/CustomerLayout";
 import { khachHang } from "../../mock/data";
+import { toCustomerKey } from "../../features/vehicles/customerVehicleRepository";
 import type { CustomerPage } from "../../router";
 import CustomerAppointments from "./CustomerAppointments";
 import CustomerHistory from "./CustomerHistory";
@@ -11,11 +12,13 @@ import CustomerNotifications from "./CustomerNotifications";
 import CustomerOverview from "./CustomerOverview";
 import CustomerQuotations from "./CustomerQuotations";
 import CustomerTracking from "./CustomerTracking";
+import CustomerVehicles from "./CustomerVehicles";
 
 export type CustomerTab = CustomerPage;
 
 const TABS: { key: CustomerTab; label: string; icon: React.ReactNode }[] = [
   { key: "overview", label: "Tổng quan", icon: Icons.home },
+  { key: "vehicles", label: "Xe của tôi", icon: Icons.car },
   { key: "appointments", label: "Lịch hẹn", icon: Icons.calendar },
   { key: "quotations", label: "Báo giá", icon: Icons.fileText },
   { key: "tracking", label: "Tiến độ sửa chữa", icon: Icons.wrench },
@@ -24,17 +27,15 @@ const TABS: { key: CustomerTab; label: string; icon: React.ReactNode }[] = [
   { key: "profile", label: "Hồ sơ", icon: Icons.userCheck },
 ];
 
-// Demo: tài khoản khachhang.an ↔ KH001 (Nguyễn Văn An).
-const CURRENT_CUSTOMER_ID = "KH001";
-
 interface CustomerPortalProps {
   onLogout: () => void;
   page: CustomerPage;
+  customerId: number;
   onNavigate: (page: CustomerPage) => void;
 }
 
-function ProfileTab() {
-  const customer = khachHang.find((c) => c.MaKhachHang === CURRENT_CUSTOMER_ID);
+function ProfileTab({ customerKey }: { customerKey: string }) {
+  const customer = khachHang.find((c) => c.MaKhachHang === customerKey);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -132,8 +133,9 @@ function ProfileTab() {
   );
 }
 
-export default function CustomerPortal({ onLogout, page, onNavigate }: CustomerPortalProps) {
-  const customer = khachHang.find((c) => c.MaKhachHang === CURRENT_CUSTOMER_ID);
+export default function CustomerPortal({ onLogout, page, customerId, onNavigate }: CustomerPortalProps) {
+  const customerKey = toCustomerKey(customerId);
+  const customer = khachHang.find((c) => c.MaKhachHang === customerKey);
 
   return (
     <CustomerLayout
@@ -163,12 +165,13 @@ export default function CustomerPortal({ onLogout, page, onNavigate }: CustomerP
     >
       <div key={page} className="customer-page-enter space-y-6">
         {page === "overview" && <CustomerOverview onNavigate={onNavigate} />}
-        {page === "appointments" && <CustomerAppointments />}
+        {page === "vehicles" && <CustomerVehicles customerKey={customerKey} />}
+        {page === "appointments" && <CustomerAppointments customerKey={customerKey} />}
         {page === "quotations" && <CustomerQuotations />}
         {page === "tracking" && <CustomerTracking />}
         {page === "history" && <CustomerHistory />}
         {page === "notifications" && <CustomerNotifications />}
-        {page === "profile" && <ProfileTab />}
+        {page === "profile" && <ProfileTab customerKey={customerKey} />}
       </div>
     </CustomerLayout>
   );

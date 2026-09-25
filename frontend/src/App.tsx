@@ -157,6 +157,7 @@ export default function App() {
       <Suspense fallback={<PageLoading />}>
         <CustomerPortal
           page={customerPage}
+          customerId={session?.account.customerId ?? 0}
           onNavigate={(next) => navigateTo(ROUTE_PATHS.customer(next))}
           onLogout={handleLogout}
         />

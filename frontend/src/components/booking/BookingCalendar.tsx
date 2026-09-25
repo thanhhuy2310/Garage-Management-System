@@ -58,7 +58,7 @@ export default function BookingCalendar({ selectedDate, onSelectDate }: BookingC
   const monthLabel = `Tháng ${String(visibleMonth.getMonth() + 1).padStart(2, "0")} / ${visibleMonth.getFullYear()}`;
 
   return (
-    <section aria-labelledby="booking-calendar-title" className="rounded-lg border border-border bg-white p-2 sm:p-5">
+    <section aria-labelledby="booking-calendar-title" className="bg-white p-3 sm:p-5 lg:border-r lg:border-border">
       <div className="flex items-center justify-between gap-3 border-b border-border pb-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent">Chọn ngày</p>

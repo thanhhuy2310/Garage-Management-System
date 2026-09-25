@@ -63,7 +63,7 @@ function SlotGroup({ label, slots, available, selectedDate, selectedTime, unavai
 export default function TimeSlotPicker({ selectedDate, selectedTime, unavailableSlots, onSelectTime }: TimeSlotPickerProps) {
   if (!selectedDate) {
     return (
-      <section aria-labelledby="booking-slots-title" className="flex min-h-[360px] items-center justify-center rounded-lg border border-dashed border-border bg-surface-subtle p-6 text-center">
+      <section aria-labelledby="booking-slots-title" className="flex min-h-[320px] items-center justify-center border-t border-border bg-surface-subtle p-6 text-center lg:min-h-[360px] lg:border-t-0">
         <div className="max-w-xs">
           <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary-soft text-primary" aria-hidden="true">{Icons.calendar}</span>
           <h3 id="booking-slots-title" className="mt-4 font-bold text-foreground">Chọn ngày trên lịch</h3>
@@ -76,10 +76,10 @@ export default function TimeSlotPicker({ selectedDate, selectedTime, unavailable
   const available = new Set(getBookingAvailability(selectedDate));
 
   return (
-    <section key={selectedDate} aria-labelledby="booking-slots-title" className="booking-slots-enter rounded-lg border border-border bg-surface-subtle p-4 sm:p-5">
+    <section key={selectedDate} aria-labelledby="booking-slots-title" className="booking-slots-enter border-t border-border bg-surface-subtle p-4 sm:p-5 lg:border-t-0">
       <div className="border-b border-border pb-4">
-        <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent">Khung giờ còn trống</p>
-        <h3 id="booking-slots-title" className="mt-1 text-base font-bold text-foreground">{formatBookingDate(selectedDate)}</h3>
+        <h3 id="booking-slots-title" className="text-base font-bold text-foreground">{formatBookingDate(selectedDate)}</h3>
+        <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-accent">Khung giờ còn trống</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">Khung giờ màu đỏ đã có lịch hẹn và không thể chọn.</p>
       </div>
 

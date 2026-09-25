@@ -2,14 +2,14 @@ import { useMemo, useState } from "react";
 import BookingCalendar from "../../components/booking/BookingCalendar";
 import TimeSlotPicker from "../../components/booking/TimeSlotPicker";
 import { Badge, Button, Card, Icons, Modal } from "../../components/ui";
+import AddVehicleModal from "../../features/vehicles/AddVehicleModal";
+import { useCustomerVehicles } from "../../features/vehicles/customerVehicleRepository";
 import {
   SIMULATED_CONFLICT,
   formatBookingDate,
   getSuggestedBookingSlots,
 } from "../../mock/bookingAvailability";
-import { dichVu, formatCurrency, lichHen, xe, type AppointmentStatus } from "../../mock/data";
-
-const CUSTOMER_ID = "KH001";
+import { dichVu, formatCurrency, lichHen, type AppointmentStatus } from "../../mock/data";
 
 const STATUS_VARIANT: Record<AppointmentStatus, "pending" | "confirmed" | "arrived" | "cancelled" | "completed"> = {
   pending: "pending",
@@ -27,8 +27,11 @@ const STATUS_LABEL: Record<AppointmentStatus, string> = {
   completed: "Hoàn tất",
 };
 
-export default function CustomerAppointments({ onBooked }: { onBooked?: () => void }) {
+export default function CustomerAppointments({ customerKey, onBooked }: { customerKey: string; onBooked?: () => void }) {
+  const { vehicles: myVehicles, addVehicle } = useCustomerVehicles(customerKey);
   const [showBook, setShowBook] = useState(false);
+  const [showAddVehicle, setShowAddVehicle] = useState(false);
+  const [vehicleSuccess, setVehicleSuccess] = useState("");
   const [done, setDone] = useState(false);
   const [bookingStep, setBookingStep] = useState(1);
   const [selectedVehicle, setSelectedVehicle] = useState("");
@@ -38,13 +41,12 @@ export default function CustomerAppointments({ onBooked }: { onBooked?: () => vo
   const [unavailableSlots, setUnavailableSlots] = useState<Set<string>>(() => new Set());
   const [conflict, setConflict] = useState<{ date: string; time: string } | null>(null);
 
-  const myVehicles = useMemo(() => xe.filter((v) => v.MaKhachHang === CUSTOMER_ID), []);
   const myAppointments = useMemo(
-    () => lichHen.filter((a) => a.MaKhachHang === CUSTOMER_ID),
-    [],
+    () => lichHen.filter((a) => a.MaKhachHang === customerKey),
+    [customerKey],
   );
 
-  const vehiclePlate = (id: string) => xe.find((v) => v.MaXe === id)?.BienSo ?? id;
+  const vehiclePlate = (id: string) => myVehicles.find((vehicle) => vehicle.MaXe === id)?.BienSo ?? id;
   const serviceName = (id: string | null) => dichVu.find((s) => s.MaDichVu === id)?.TenDichVu ?? "Tư vấn chung";
 
   const openBooking = () => {
@@ -55,6 +57,7 @@ export default function CustomerAppointments({ onBooked }: { onBooked?: () => vo
     setSelectedTime("");
     setUnavailableSlots(new Set());
     setConflict(null);
+    setVehicleSuccess("");
     setDone(false);
     setShowBook(true);
   };
@@ -160,11 +163,11 @@ export default function CustomerAppointments({ onBooked }: { onBooked?: () => vo
                 const active = bookingStep === stepNumber;
                 const completed = bookingStep > stepNumber;
                 return (
-                  <li key={label} aria-current={active ? "step" : undefined} className={`flex min-w-0 items-center gap-2 rounded-md border px-2 py-2.5 sm:px-3 ${active ? "border-primary bg-primary-soft" : completed ? "border-success/25 bg-success-soft" : "border-border bg-surface-subtle"}`}>
+                  <li key={label} aria-current={active ? "step" : undefined} className={`flex min-w-0 items-center gap-1 rounded-md border px-1.5 py-2.5 sm:gap-2 sm:px-3 ${active ? "border-primary bg-primary-soft" : completed ? "border-success/25 bg-success-soft" : "border-border bg-surface-subtle"}`}>
                     <span className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold ${active ? "bg-primary text-white" : completed ? "bg-success text-white" : "bg-muted text-muted-foreground"}`} aria-hidden="true">
                       {completed ? Icons.check : stepNumber}
                     </span>
-                    <span className={`truncate text-xs font-semibold sm:text-sm ${active ? "text-primary" : completed ? "text-success" : "text-muted-foreground"}`}>{label}</span>
+                    <span className={`text-[11px] font-semibold leading-tight sm:text-sm ${active ? "text-primary" : completed ? "text-success" : "text-muted-foreground"}`}>{label}</span>
                   </li>
                 );
               })}
@@ -173,13 +176,26 @@ export default function CustomerAppointments({ onBooked }: { onBooked?: () => vo
             <div key={bookingStep} className="booking-step-enter">
               {bookingStep === 1 && (
                 <section aria-labelledby="booking-vehicle-title" className="mx-auto max-w-3xl">
-                  <div className="mb-4">
-                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent">Bước 1</p>
-                    <h3 id="booking-vehicle-title" className="mt-1 text-lg font-bold text-foreground">Chọn xe cần kiểm tra</h3>
+                  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent">Bước 1</p>
+                      <h3 id="booking-vehicle-title" className="mt-1 text-lg font-bold text-foreground">Chọn xe</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">Chọn xe bạn muốn đặt lịch.</p>
+                    </div>
+                    <Button type="button" size="sm" variant="outline" icon={Icons.plus} onClick={() => setShowAddVehicle(true)}>Thêm xe mới</Button>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  {vehicleSuccess && <p className="mb-4 rounded-md bg-success-soft px-4 py-3 text-sm text-success" role="status">{vehicleSuccess}</p>}
+                  {myVehicles.length === 0 ? (
+                    <div className="rounded-lg border border-dashed border-border bg-surface-subtle p-6 text-center">
+                      <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary-soft text-primary" aria-hidden="true">{Icons.car}</span>
+                      <p className="mt-3 font-bold text-foreground">Bạn chưa có xe nào</p>
+                      <p className="mt-1 text-sm text-muted-foreground">Thêm xe để tiếp tục đặt lịch.</p>
+                      <Button className="mt-4" type="button" icon={Icons.plus} onClick={() => setShowAddVehicle(true)}>Thêm xe mới</Button>
+                    </div>
+                  ) : <div className="grid gap-3 sm:grid-cols-2">
                     {myVehicles.map((vehicle) => {
                       const selected = selectedVehicle === vehicle.MaXe;
+                      const vehicleDetails = [vehicle.HangXe, vehicle.DongXe, vehicle.NamSanXuat].filter(Boolean).join(" · ") || "Chưa cập nhật thông tin xe";
                       return (
                         <button
                           key={vehicle.MaXe}
@@ -189,12 +205,12 @@ export default function CustomerAppointments({ onBooked }: { onBooked?: () => vo
                           className={`motion-button flex min-h-20 items-center gap-3 rounded-lg border p-4 text-left ${selected ? "border-primary bg-primary-soft ring-1 ring-primary" : "border-border bg-white hover:border-primary"}`}
                         >
                           <span className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md ${selected ? "bg-primary text-white" : "bg-surface-subtle text-primary"}`} aria-hidden="true">{Icons.car}</span>
-                          <span className="min-w-0 flex-1"><span className="mono block font-bold text-primary">{vehicle.BienSo}</span><span className="mt-1 block text-xs text-muted-foreground">{vehicle.HangXe} {vehicle.DongXe} · {vehicle.NamSanXuat}</span></span>
+                          <span className="min-w-0 flex-1"><span className="mono block font-bold text-primary">{vehicle.BienSo}</span><span className="mt-1 block text-xs text-muted-foreground">{vehicleDetails}</span></span>
                           {selected && <span className="text-primary" aria-hidden="true">{Icons.checkCircle}</span>}
                         </button>
                       );
                     })}
-                  </div>
+                  </div>}
                 </section>
               )}
 
@@ -225,13 +241,13 @@ export default function CustomerAppointments({ onBooked }: { onBooked?: () => vo
               )}
 
               {bookingStep === 3 && (
-                <section aria-labelledby="booking-datetime-title">
-                  <div className="mb-4">
+                <section aria-labelledby="booking-datetime-title" className="mx-auto w-full max-w-5xl text-left">
+                  <div className="mb-5 text-left">
                     <p className="text-xs font-bold uppercase tracking-[0.12em] text-accent">Bước 3</p>
-                    <h3 id="booking-datetime-title" className="mt-1 text-lg font-bold text-foreground">Chọn ngày & giờ</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">Gara sẽ kiểm tra lại lịch trước khi ghi nhận cuộc hẹn.</p>
+                    <h3 id="booking-datetime-title" className="mt-1 text-xl font-bold text-foreground">Chọn ngày đặt lịch</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">Chọn ngày và khung giờ phù hợp để mang xe đến gara.</p>
                   </div>
-                  <div className="grid gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
+                  <div className="grid overflow-hidden rounded-lg border border-border bg-white lg:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.92fr)]">
                     <BookingCalendar selectedDate={selectedDate} onSelectDate={chooseDate} />
                     <TimeSlotPicker selectedDate={selectedDate} selectedTime={selectedTime} unavailableSlots={unavailableSlots} onSelectTime={chooseTime} />
                   </div>
@@ -286,6 +302,16 @@ export default function CustomerAppointments({ onBooked }: { onBooked?: () => vo
           </div>
         )}
       </Modal>
+
+      <AddVehicleModal
+        open={showAddVehicle}
+        onClose={() => setShowAddVehicle(false)}
+        onSubmit={addVehicle}
+        onCreated={(vehicle) => {
+          setSelectedVehicle(vehicle.MaXe);
+          setVehicleSuccess("Đã thêm xe.");
+        }}
+      />
     </div>
   );
 }
