@@ -3,14 +3,25 @@ import 'package:flutter/foundation.dart';
 import '../models/customer_profile.dart';
 import '../models/home_summary.dart';
 import '../models/user_session.dart';
+import '../models/vehicle.dart';
+import '../models/appointment.dart';
+import '../services/appointment_service.dart';
 import '../services/auth_service.dart';
 import '../services/home_service.dart';
+import '../services/vehicle_service.dart';
 
 class AppController extends ChangeNotifier {
-  AppController(this._authService, this._homeService);
+  AppController(
+    this._authService,
+    this._homeService,
+    this.vehicleService,
+    this.appointmentService,
+  );
 
   final AuthService _authService;
   final HomeService _homeService;
+  final VehicleService vehicleService;
+  final AppointmentService appointmentService;
 
   UserSession? session;
   CustomerProfile? profile;
@@ -20,6 +31,9 @@ class AppController extends ChangeNotifier {
   bool loadingHome = false;
   String? authError;
   String? homeError;
+  List<Vehicle> vehicles = const [];
+  List<GarageServiceItem> services = const [];
+  List<Appointment> appointments = const [];
 
   bool get isLoggedIn => session != null;
 
@@ -73,6 +87,36 @@ class AppController extends ChangeNotifier {
     }
   }
 
+  Future<void> loadBookingData() async {
+    final current = session;
+    if (current == null) return;
+    final values = await Future.wait([
+      vehicleService.getVehicles(current.customerId),
+      appointmentService.getServices(),
+      appointmentService.getAppointments(current.customerId),
+    ]);
+    vehicles = values[0] as List<Vehicle>;
+    services = values[1] as List<GarageServiceItem>;
+    appointments = values[2] as List<Appointment>;
+    notifyListeners();
+  }
+
+  Future<Vehicle> addVehicle(VehicleInput input) async {
+    final current = session;
+    if (current == null) throw StateError('Chưa đăng nhập.');
+    final vehicle = await vehicleService.addVehicle(current.customerId, input);
+    vehicles = [...vehicles, vehicle];
+    notifyListeners();
+    return vehicle;
+  }
+
+  Future<Appointment> createAppointment(AppointmentInput input) async {
+    final appointment = await appointmentService.createAppointment(input);
+    appointments = [appointment, ...appointments];
+    notifyListeners();
+    return appointment;
+  }
+
   void updateProfile(CustomerProfile value) {
     profile = value;
     notifyListeners();
@@ -83,6 +127,9 @@ class AppController extends ChangeNotifier {
     session = null;
     profile = null;
     summary = null;
+    vehicles = const [];
+    services = const [];
+    appointments = const [];
     notifyListeners();
     if (current != null) await _authService.logout(current);
   }

@@ -3,19 +3,31 @@ import 'package:flutter/material.dart';
 import '../core/constants/app_config.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/splash_screen.dart';
+import '../screens/booking/booking_screen.dart';
 import '../screens/shared/feature_placeholder_screen.dart';
 import '../screens/shell/customer_shell.dart';
+import '../screens/vehicles/vehicles_screen.dart';
 import '../services/auth_service.dart';
+import '../services/appointment_service.dart';
 import '../services/home_service.dart';
+import '../services/vehicle_service.dart';
 import 'app_controller.dart';
 import 'app_routes.dart';
 import 'app_theme.dart';
 
 class GarageCustomerApp extends StatefulWidget {
-  const GarageCustomerApp({super.key, this.authService, this.homeService});
+  const GarageCustomerApp({
+    super.key,
+    this.authService,
+    this.homeService,
+    this.vehicleService,
+    this.appointmentService,
+  });
 
   final AuthService? authService;
   final HomeService? homeService;
+  final VehicleService? vehicleService;
+  final AppointmentService? appointmentService;
 
   @override
   State<GarageCustomerApp> createState() => _GarageCustomerAppState();
@@ -25,6 +37,8 @@ class _GarageCustomerAppState extends State<GarageCustomerApp> {
   late final AppController controller = AppController(
     widget.authService ?? ApiAuthService(),
     widget.homeService ?? const MockHomeService(),
+    widget.vehicleService ?? MockVehicleService(),
+    widget.appointmentService ?? MockAppointmentService(),
   );
 
   @override
@@ -38,10 +52,7 @@ class _GarageCustomerAppState extends State<GarageCustomerApp> {
       AppRoutes.splash => SplashScreen(controller: controller),
       AppRoutes.login => LoginScreen(controller: controller),
       AppRoutes.home => CustomerShell(controller: controller),
-      AppRoutes.booking => CustomerShell(
-        controller: controller,
-        initialIndex: 1,
-      ),
+      AppRoutes.booking => BookingScreen(controller: controller),
       AppRoutes.repairProgress => CustomerShell(
         controller: controller,
         initialIndex: 2,
@@ -54,13 +65,10 @@ class _GarageCustomerAppState extends State<GarageCustomerApp> {
         controller: controller,
         initialIndex: 4,
       ),
-      AppRoutes.vehicles => const FeaturePlaceholderScreen(
-        title: 'Xe của tôi',
-        icon: Icons.directions_car_outlined,
-      ),
-      AppRoutes.appointments => const FeaturePlaceholderScreen(
-        title: 'Lịch hẹn',
-        icon: Icons.event_note_outlined,
+      AppRoutes.vehicles => VehiclesScreen(controller: controller),
+      AppRoutes.appointments => CustomerShell(
+        controller: controller,
+        initialIndex: 1,
       ),
       AppRoutes.quotations => const FeaturePlaceholderScreen(
         title: 'Báo giá',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/app_controller.dart';
+import '../appointments/appointments_screen.dart';
 import '../home/home_screen.dart';
 import '../shared/feature_placeholder_screen.dart';
 
@@ -33,11 +34,7 @@ class _CustomerShellState extends State<CustomerShell> {
         onSelectTab: _selectTab,
         onOpenRoute: _openRoute,
       ),
-      const FeaturePlaceholderScreen(
-        title: 'Đặt lịch',
-        icon: Icons.calendar_month_outlined,
-        embedded: true,
-      ),
+      AppointmentsScreen(controller: widget.controller, embedded: true),
       const FeaturePlaceholderScreen(
         title: 'Theo dõi sửa chữa',
         icon: Icons.car_repair_outlined,
@@ -56,7 +53,7 @@ class _CustomerShellState extends State<CustomerShell> {
     ];
     const titles = [
       'Trang chủ',
-      'Đặt lịch',
+      'Lịch hẹn',
       'Theo dõi',
       'Thông báo',
       'Tài khoản',
@@ -95,7 +92,7 @@ class _CustomerShellState extends State<CustomerShell> {
           NavigationDestination(
             icon: Icon(Icons.calendar_month_outlined),
             selectedIcon: Icon(Icons.calendar_month),
-            label: 'Đặt lịch',
+            label: 'Lịch hẹn',
           ),
           NavigationDestination(
             icon: Icon(Icons.car_repair_outlined),
