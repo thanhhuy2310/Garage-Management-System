@@ -28,6 +28,9 @@ public class Customer {
     @Column(name = "DiaChi", length = 255)
     private String address;
 
+    @Column(name = "TrangThai", nullable = false)
+    private boolean active = true;
+
     public Integer getId() {
         return id;
     }
@@ -66,5 +69,13 @@ public class Customer {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

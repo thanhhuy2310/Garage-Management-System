@@ -7,7 +7,8 @@ public record CustomerResponse(
         String fullName,
         String phone,
         String email,
-        String address
+        String address,
+        boolean active
 ) {
     public static CustomerResponse from(Customer customer) {
         return new CustomerResponse(
@@ -15,7 +16,8 @@ public record CustomerResponse(
                 customer.getFullName(),
                 customer.getPhone(),
                 customer.getEmail(),
-                customer.getAddress()
+                customer.getAddress(),
+                customer.isActive()
         );
     }
 }

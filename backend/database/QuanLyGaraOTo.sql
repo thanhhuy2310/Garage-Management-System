@@ -31,7 +31,8 @@ CREATE TABLE KhachHang (
     HoTen              NVARCHAR(100) NOT NULL,
     SoDienThoai        VARCHAR(20) NOT NULL,
     Email              VARCHAR(150) NULL,
-    DiaChi             NVARCHAR(255) NULL
+    DiaChi             NVARCHAR(255) NULL,
+    TrangThai          BIT NOT NULL CONSTRAINT DF_KhachHang_TrangThai DEFAULT 1
 );
 GO
 

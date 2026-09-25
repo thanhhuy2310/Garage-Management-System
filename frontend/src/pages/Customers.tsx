@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { customersApi, type Customer, type CustomerPayload } from "../api/customers";
 import { errorMessage } from "../api/client";
-import { Button, Card, Icons, Input, Modal, Pagination, SearchBox } from "../components/ui";
+import { Badge, Button, Card, Icons, Input, Modal, Pagination, SearchBox } from "../components/ui";
 
 const EMPTY_FORM: CustomerPayload = { fullName: "", phone: "", email: "", address: "" };
 const PER_PAGE = 8;
@@ -14,8 +14,10 @@ export default function Customers() {
   const [editing, setEditing] = useState<Customer | null>(null);
   const [form, setForm] = useState<CustomerPayload>(EMPTY_FORM);
   const [showForm, setShowForm] = useState(false);
+  const [statusTarget, setStatusTarget] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [changingStatus, setChangingStatus] = useState(false);
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
   const [success, setSuccess] = useState("");
@@ -106,6 +108,26 @@ export default function Customers() {
     }
   };
 
+  const handleStatusChange = async () => {
+    if (!statusTarget) return;
+
+    setChangingStatus(true);
+    setError("");
+    setSuccess("");
+    try {
+      const updated = await customersApi.changeStatus(statusTarget.id, !statusTarget.active);
+      setCustomers((current) => current.map((customer) => customer.id === updated.id ? updated : customer));
+      setStatusTarget(null);
+      setSuccess(updated.active
+        ? "Đã kích hoạt lại khách hàng và tài khoản liên kết."
+        : "Đã ngừng hoạt động khách hàng và khóa tài khoản liên kết.");
+    } catch (statusError) {
+      setError(errorMessage(statusError, "Không thể thay đổi trạng thái khách hàng."));
+    } finally {
+      setChangingStatus(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="page-toolbar">
@@ -130,30 +152,52 @@ export default function Customers() {
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary font-bold text-white" aria-hidden="true">{customer.fullName.charAt(0)}</div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-foreground">{customer.fullName}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold text-foreground">{customer.fullName}</p>
+                        <Badge variant={customer.active ? "completed" : "gray"} label={customer.active ? "Đang hoạt động" : "Ngừng hoạt động"} />
+                      </div>
                       <p className="mt-1 text-sm text-muted-foreground">{customer.phone}</p>
                       <p className="mt-1 truncate text-sm text-muted-foreground">{customer.email || "Chưa cập nhật email"}</p>
                     </div>
                   </div>
                 </button>
-                <Button className="mt-3 w-full" size="sm" variant="outline" icon={Icons.edit} onClick={() => openEdit(customer)}>Chỉnh sửa</Button>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <Button size="sm" variant="outline" icon={Icons.edit} onClick={() => openEdit(customer)}>Chỉnh sửa</Button>
+                  <Button size="sm" variant={customer.active ? "danger" : "primary"} icon={customer.active ? Icons.xCircle : Icons.checkCircle} onClick={() => setStatusTarget(customer)}>
+                    {customer.active ? "Ngừng hoạt động" : "Kích hoạt lại"}
+                  </Button>
+                </div>
               </article>
             ))}
           </div>
 
           <table className="hidden w-full data-table md:table">
-            <thead><tr><th>Mã KH</th><th>Họ tên</th><th>Số điện thoại</th><th>Email</th><th>Địa chỉ</th><th>Thao tác</th></tr></thead>
+            <thead><tr><th>Mã KH</th><th>Họ tên</th><th>Số điện thoại</th><th>Email</th><th>Trạng thái</th><th>Địa chỉ</th><th>Thao tác</th></tr></thead>
             <tbody>
-              {loading && <tr><td colSpan={6} className="py-10 text-center text-sm text-muted-foreground">Đang tải khách hàng...</td></tr>}
-              {!loading && paged.length === 0 && <tr><td colSpan={6} className="py-10 text-center text-sm text-muted-foreground">Không tìm thấy khách hàng phù hợp.</td></tr>}
+              {loading && <tr><td colSpan={7} className="py-10 text-center text-sm text-muted-foreground">Đang tải khách hàng...</td></tr>}
+              {!loading && paged.length === 0 && <tr><td colSpan={7} className="py-10 text-center text-sm text-muted-foreground">Không tìm thấy khách hàng phù hợp.</td></tr>}
               {paged.map((customer) => (
-                <tr key={customer.id} aria-selected={selectedId === customer.id} className={selectedId === customer.id ? "bg-info-soft" : ""}>
+                <tr key={customer.id} aria-selected={selectedId === customer.id} className={`${selectedId === customer.id ? "bg-info-soft" : ""} ${customer.active ? "" : "opacity-70"}`}>
                   <td className="mono text-xs text-muted-foreground">KH{String(customer.id).padStart(3, "0")}</td>
                   <td><button type="button" className="min-h-11 text-left font-semibold text-foreground hover:text-primary" onClick={() => setSelectedId(customer.id === selectedId ? null : customer.id)}>{customer.fullName}</button></td>
                   <td className="mono text-sm">{customer.phone}</td>
                   <td className="text-muted-foreground">{customer.email || "—"}</td>
+                  <td><Badge variant={customer.active ? "completed" : "gray"} label={customer.active ? "Đang hoạt động" : "Ngừng hoạt động"} /></td>
                   <td className="max-w-[220px] truncate text-muted-foreground" title={customer.address ?? undefined}>{customer.address || "—"}</td>
-                  <td><Button size="sm" variant="ghost" icon={Icons.edit} onClick={() => openEdit(customer)}>Sửa</Button></td>
+                  <td>
+                    <div className="flex flex-wrap gap-1">
+                      <Button size="sm" variant="ghost" icon={Icons.edit} onClick={() => openEdit(customer)}>Sửa</Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className={customer.active ? "text-danger hover:bg-danger-soft hover:text-danger" : "text-success hover:bg-success-soft hover:text-success"}
+                        icon={customer.active ? Icons.xCircle : Icons.checkCircle}
+                        onClick={() => setStatusTarget(customer)}
+                      >
+                        {customer.active ? "Ngừng" : "Kích hoạt"}
+                      </Button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -170,7 +214,11 @@ export default function Customers() {
             <div className="mb-5 flex items-start justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-white" aria-hidden="true">{selected.fullName.charAt(0)}</div>
-                <div className="min-w-0"><h3 className="font-bold text-foreground">{selected.fullName}</h3><p className="mono text-xs text-muted-foreground">KH{String(selected.id).padStart(3, "0")}</p></div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-foreground">{selected.fullName}</h3>
+                  <p className="mono text-xs text-muted-foreground">KH{String(selected.id).padStart(3, "0")}</p>
+                  <Badge className="mt-2" variant={selected.active ? "completed" : "gray"} label={selected.active ? "Đang hoạt động" : "Ngừng hoạt động"} />
+                </div>
               </div>
               <button type="button" aria-label="Đóng thông tin khách hàng" onClick={() => setSelectedId(null)} className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted">{Icons.close}</button>
             </div>
@@ -179,7 +227,12 @@ export default function Customers() {
               <div><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Email</dt><dd className="mt-1 break-words text-foreground">{selected.email || "Chưa cập nhật"}</dd></div>
               <div><dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Địa chỉ</dt><dd className="mt-1 text-foreground">{selected.address || "Chưa cập nhật"}</dd></div>
             </dl>
-            <Button className="mt-6 w-full" variant="outline" icon={Icons.edit} onClick={() => openEdit(selected)}>Chỉnh sửa thông tin</Button>
+            <div className="mt-6 space-y-2">
+              <Button className="w-full" variant="outline" icon={Icons.edit} onClick={() => openEdit(selected)}>Chỉnh sửa thông tin</Button>
+              <Button className="w-full" variant={selected.active ? "danger" : "primary"} icon={selected.active ? Icons.xCircle : Icons.checkCircle} onClick={() => setStatusTarget(selected)}>
+                {selected.active ? "Ngừng hoạt động" : "Kích hoạt lại"}
+              </Button>
+            </div>
           </Card>
         )}
       </div>
@@ -198,6 +251,31 @@ export default function Customers() {
             <Button type="submit" disabled={saving}>{saving ? "Đang lưu..." : editing ? "Lưu thay đổi" : "Lưu khách hàng"}</Button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        open={Boolean(statusTarget)}
+        onClose={() => { if (!changingStatus) setStatusTarget(null); }}
+        title={statusTarget?.active ? "Xác nhận ngừng hoạt động" : "Kích hoạt lại khách hàng"}
+      >
+        {statusTarget && (
+          <div className="space-y-5">
+            <div className={`rounded-lg border p-4 ${statusTarget.active ? "border-danger/20 bg-danger-soft" : "border-success/20 bg-success-soft"}`}>
+              <p className="font-semibold text-foreground">{statusTarget.fullName}</p>
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                {statusTarget.active
+                  ? "Khách hàng sẽ không bị xóa. Toàn bộ xe, lịch hẹn và lịch sử sửa chữa vẫn được giữ lại; tài khoản đăng nhập liên kết sẽ bị khóa."
+                  : "Khách hàng và tài khoản đăng nhập liên kết sẽ được hoạt động trở lại."}
+              </p>
+            </div>
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button type="button" variant="outline" onClick={() => setStatusTarget(null)} disabled={changingStatus}>Hủy</Button>
+              <Button type="button" variant={statusTarget.active ? "danger" : "primary"} onClick={() => void handleStatusChange()} disabled={changingStatus}>
+                {changingStatus ? "Đang cập nhật..." : statusTarget.active ? "Ngừng hoạt động" : "Kích hoạt lại"}
+              </Button>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

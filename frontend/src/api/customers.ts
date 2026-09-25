@@ -7,6 +7,7 @@ export interface Customer {
   phone: string;
   email: string | null;
   address: string | null;
+  active: boolean;
 }
 
 export interface CustomerPayload {
@@ -27,5 +28,9 @@ export const customersApi = {
 
   async update(id: number, payload: CustomerPayload): Promise<Customer> {
     return unwrap(await api.put<ApiResponse<Customer>>(`/api/customers/${id}`, payload));
+  },
+
+  async changeStatus(id: number, active: boolean): Promise<Customer> {
+    return unwrap(await api.patch<ApiResponse<Customer>>(`/api/customers/${id}/status`, { active }));
   },
 };

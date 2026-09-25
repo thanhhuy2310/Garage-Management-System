@@ -2,9 +2,11 @@ package com.gara.quanlygara.service;
 
 import com.gara.quanlygara.dto.customer.CustomerRequest;
 import com.gara.quanlygara.dto.customer.CustomerResponse;
+import com.gara.quanlygara.entity.Account;
 import com.gara.quanlygara.entity.Customer;
 import com.gara.quanlygara.exception.ConflictException;
 import com.gara.quanlygara.exception.ResourceNotFoundException;
+import com.gara.quanlygara.repository.AccountRepository;
 import com.gara.quanlygara.repository.CustomerRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -16,9 +18,11 @@ import java.util.List;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final AccountRepository accountRepository;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, AccountRepository accountRepository) {
         this.customerRepository = customerRepository;
+        this.accountRepository = accountRepository;
     }
 
     @Transactional(readOnly = true)
@@ -58,6 +62,15 @@ public class CustomerService {
         return CustomerResponse.from(customerRepository.save(customer));
     }
 
+    @Transactional
+    public CustomerResponse changeStatus(Integer id, boolean active) {
+        Customer customer = findEntity(id);
+        customer.setActive(active);
+
+        accountRepository.findByCustomerId(id).ifPresent(account -> syncAccountStatus(account, active));
+        return CustomerResponse.from(customerRepository.save(customer));
+    }
+
     private Customer findEntity(Integer id) {
         return customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khách hàng."));
@@ -68,6 +81,11 @@ public class CustomerService {
         customer.setPhone(phone);
         customer.setEmail(normalizeOptional(request.email()));
         customer.setAddress(normalizeOptional(request.address()));
+    }
+
+    private void syncAccountStatus(Account account, boolean active) {
+        account.setActive(active);
+        accountRepository.save(account);
     }
 
     private String normalizeRequired(String value) {

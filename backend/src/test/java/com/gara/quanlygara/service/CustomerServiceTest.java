@@ -1,9 +1,11 @@
 package com.gara.quanlygara.service;
 
 import com.gara.quanlygara.dto.customer.CustomerRequest;
+import com.gara.quanlygara.entity.Account;
 import com.gara.quanlygara.entity.Customer;
 import com.gara.quanlygara.exception.ConflictException;
 import com.gara.quanlygara.exception.ResourceNotFoundException;
+import com.gara.quanlygara.repository.AccountRepository;
 import com.gara.quanlygara.repository.CustomerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,9 +16,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,11 +29,14 @@ class CustomerServiceTest {
     @Mock
     private CustomerRepository customerRepository;
 
+    @Mock
+    private AccountRepository accountRepository;
+
     private CustomerService customerService;
 
     @BeforeEach
     void setUp() {
-        customerService = new CustomerService(customerRepository);
+        customerService = new CustomerService(customerRepository, accountRepository);
     }
 
     @Test
@@ -85,6 +92,24 @@ class CustomerServiceTest {
         when(customerRepository.findById(404)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> customerService.getById(404));
+    }
+
+    @Test
+    void changeStatusKeepsCustomerHistoryAndLocksLinkedAccount() {
+        Customer customer = customer(3, "Khách hàng", "0900000000");
+        Account account = new Account();
+        account.setId(7);
+        account.setActive(true);
+        when(customerRepository.findById(3)).thenReturn(Optional.of(customer));
+        when(customerRepository.save(customer)).thenReturn(customer);
+        when(accountRepository.findByCustomerId(3)).thenReturn(Optional.of(account));
+
+        var response = customerService.changeStatus(3, false);
+
+        assertFalse(response.active());
+        assertFalse(account.isActive());
+        verify(accountRepository).save(account);
+        verify(customerRepository).save(customer);
     }
 
     private CustomerRequest request(String phone) {
