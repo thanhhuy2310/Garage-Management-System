@@ -87,7 +87,7 @@ export default function Invoice() {
           </div>
         )}
 
-        <p className="text-xs leading-5 text-muted-foreground">sp_GhiNhanThanhToan cho phép nhiều lần thanh toán và cập nhật trạng thái hóa đơn theo tổng đã trả.</p>
+        <p className="text-xs leading-5 text-muted-foreground">Hệ thống hỗ trợ thanh toán nhiều lần và tự động cập nhật trạng thái theo tổng số tiền đã trả.</p>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button variant="outline" className="min-h-11" onClick={() => setShowPay(false)}>Hủy</Button>
           <Button className="min-h-11" onClick={confirmPayment} disabled={method === "transfer" && !qrValid}>

@@ -46,7 +46,7 @@ export default function Login({ onLogin, onBack, onRegister }: LoginProps) {
     } catch (loginError) {
       setError(errorMessage(
         loginError,
-        "Chưa kết nối được backend. Hãy đợi Garage Backend khởi động xong rồi thử lại.",
+        "Không thể kết nối đến hệ thống. Vui lòng kiểm tra mạng và thử lại.",
       ));
     } finally {
       setLoading(false);

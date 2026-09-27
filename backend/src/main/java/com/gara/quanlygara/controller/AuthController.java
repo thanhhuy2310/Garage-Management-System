@@ -41,7 +41,7 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout() {
-        return ResponseEntity.ok(ApiResponse.success("Đăng xuất thành công. Hãy xóa token ở phía ứng dụng."));
+        return ResponseEntity.ok(ApiResponse.success("Đăng xuất thành công."));
     }
 
     @GetMapping("/me")

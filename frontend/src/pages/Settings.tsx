@@ -62,7 +62,7 @@ export default function Settings() {
       setAccounts(accountRows);
       setEmployees(employeeRows);
     } catch (loadError) {
-      setError(errorMessage(loadError, "Không thể tải dữ liệu tài khoản từ máy chủ."));
+      setError(errorMessage(loadError, "Không thể tải danh sách tài khoản. Vui lòng thử lại."));
     } finally {
       setLoading(false);
     }
@@ -197,7 +197,7 @@ export default function Settings() {
           <Card className="p-5 xl:col-span-3">
             <div className="mb-5">
               <h3 className="font-semibold">{ROLES[role]}</h3>
-              <p className="text-xs text-muted-foreground">Vai trò được backend kiểm soát theo TaiKhoan.VaiTro.</p>
+              <p className="text-xs text-muted-foreground">Quyền truy cập được áp dụng theo vai trò của từng tài khoản.</p>
             </div>
             <div className="space-y-2">
               {(ROLE_PERMISSIONS[role] ?? []).map((permission) => (
@@ -215,7 +215,7 @@ export default function Settings() {
         <div className="space-y-4">
           <div className="page-toolbar">
             <p className="text-sm text-slate-600">
-              {loading ? "Đang tải tài khoản..." : `${accounts.length} tài khoản từ cơ sở dữ liệu`}
+              {loading ? "Đang tải tài khoản..." : `${accounts.length} tài khoản`}
             </p>
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" onClick={() => void loadAccountData()} disabled={loading}>Tải lại</Button>

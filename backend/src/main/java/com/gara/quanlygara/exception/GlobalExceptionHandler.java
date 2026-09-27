@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleDataIntegrity() {
-        return error(HttpStatus.CONFLICT, "Dữ liệu bị trùng hoặc vi phạm liên kết trong cơ sở dữ liệu.");
+        return error(HttpStatus.CONFLICT, "Thông tin bị trùng hoặc đang được sử dụng ở nơi khác.");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

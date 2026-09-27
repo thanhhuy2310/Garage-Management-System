@@ -19,8 +19,9 @@ class FeaturePlaceholderScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final content = EmptyState(
       icon: icon,
-      title: 'Chức năng đang được hoàn thiện',
-      message: 'Nội dung sẽ được bổ sung trong phase tiếp theo.',
+      title: 'Không thể mở trang này',
+      message:
+          'Đường dẫn không tồn tại hoặc không còn khả dụng. Vui lòng quay lại trang trước.',
     );
     if (embedded) return content;
     return Scaffold(

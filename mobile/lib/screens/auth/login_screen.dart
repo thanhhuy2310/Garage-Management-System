@@ -173,15 +173,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: _submit,
                             loading: widget.controller.signingIn,
                           ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Android Emulator kết nối backend qua 10.0.2.2:8080.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: AppColors.muted,
-                              fontSize: 12,
-                            ),
-                          ),
                         ],
                       ),
                     ),

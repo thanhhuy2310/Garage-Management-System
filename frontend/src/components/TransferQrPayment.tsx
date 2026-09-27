@@ -149,7 +149,7 @@ export default function TransferQrPayment({ amount, amountLabel, invoiceId, onVa
       </div>
 
       <p className="mt-4 rounded-md border border-info/20 bg-info-soft px-3 py-2 text-xs leading-5 text-info">
-        Kiểm tra đúng số tiền và nội dung trước khi xác nhận. Thông tin tài khoản hiện là dữ liệu demo và cần thay bằng tài khoản gara khi triển khai thực tế.
+        Kiểm tra đúng số tiền, nội dung chuyển khoản và thông tin người nhận trước khi xác nhận thanh toán.
       </p>
       <p className="sr-only" aria-live="polite">{expired ? "Mã QR chuyển khoản đã hết hạn. Hãy tạo mã QR mới để tiếp tục." : ""}</p>
     </section>

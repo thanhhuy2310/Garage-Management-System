@@ -60,7 +60,7 @@ export default function PublicFooter({ onNavigate, onBook }: PublicFooterProps) 
           <nav aria-label="Về gara"><p className="public-footer-title">Gara</p><ul className="mt-3">{GARAGE_LINKS.map((link) => <li key={link.label}><button type="button" onClick={() => onNavigate(link.key)} className="inline-flex min-h-11 items-center transition-all hover:text-white">{link.label}</button></li>)}</ul></nav>
           <div><p className="public-footer-title">Liên hệ</p><ul className="mt-3 text-sm"><li className="flex min-h-11 items-center">123 Lê Lợi, Q.1, TP.HCM</li><li><a href="tel:0901234567" className="inline-flex min-h-11 items-center font-extrabold text-white hover:text-accent">0901 234 567</a></li><li><button type="button" onClick={onBook} className="inline-flex min-h-11 items-center gap-2 font-bold text-accent hover:text-white">Đặt lịch sửa chữa <span aria-hidden="true">{Icons.arrowRight}</span></button></li></ul></div>
         </div>
-        <div className="border-t border-white/10"><div className="mx-auto flex w-full max-w-7xl flex-col gap-1 px-4 py-5 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between sm:px-6"><p>© 2026 {GARAGE_NAME}. Khóa luận tốt nghiệp — Hệ thống quản lý gara ô tô.</p><p>Dữ liệu demo phục vụ học tập.</p></div></div>
+        <div className="border-t border-white/10"><div className="mx-auto flex w-full max-w-7xl flex-col gap-1 px-4 py-5 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between sm:px-6"><p>© 2026 {GARAGE_NAME}. Bảo lưu mọi quyền.</p><p>Chăm sóc xe minh bạch, thuận tiện và chuyên nghiệp.</p></div></div>
       </footer>
     </>
   );

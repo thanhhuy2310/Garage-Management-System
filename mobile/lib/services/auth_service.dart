@@ -74,14 +74,16 @@ class ApiAuthService implements AuthService {
       rethrow;
     } on TimeoutException {
       throw const AuthException(
-        'Máy chủ phản hồi quá lâu. Vui lòng kiểm tra kết nối và thử lại.',
+        'Kết nối bị gián đoạn. Vui lòng kiểm tra mạng và thử lại.',
       );
     } on SocketException {
       throw const AuthException(
-        'Không thể kết nối đến máy chủ. Hãy kiểm tra backend đang chạy.',
+        'Không thể kết nối đến hệ thống. Vui lòng kiểm tra mạng và thử lại.',
       );
     } on FormatException {
-      throw const AuthException('Dữ liệu phản hồi từ máy chủ không hợp lệ.');
+      throw const AuthException(
+        'Không thể xử lý yêu cầu lúc này. Vui lòng thử lại.',
+      );
     }
   }
 

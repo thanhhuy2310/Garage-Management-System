@@ -29,7 +29,7 @@ export function unwrap<T>(response: { data: ApiResponse<T> }): T {
   return response.data.data;
 }
 
-export function errorMessage(error: unknown, fallback = "Không thể kết nối đến máy chủ."): string {
+export function errorMessage(error: unknown, fallback = "Không thể thực hiện yêu cầu. Vui lòng thử lại."): string {
   if (axios.isAxiosError<ApiResponse<unknown>>(error)) {
     return error.response?.data?.message ?? fallback;
   }

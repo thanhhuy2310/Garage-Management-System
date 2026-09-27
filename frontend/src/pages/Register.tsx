@@ -56,7 +56,7 @@ export default function Register({ onRegistered, onLogin }: RegisterProps) {
     } catch (registerError) {
       setError(errorMessage(
         registerError,
-        "Chưa kết nối được backend. Hãy đợi Garage Backend khởi động xong rồi thử lại.",
+        "Không thể kết nối đến hệ thống. Vui lòng kiểm tra mạng và thử lại.",
       ));
     } finally {
       setLoading(false);
