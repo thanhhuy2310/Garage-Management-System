@@ -326,16 +326,7 @@ class _BookingScreenState extends State<BookingScreen> {
       ),
       const SizedBox(height: 20),
       if (widget.controller.vehicles.isEmpty)
-        EmptyState(
-          icon: Icons.directions_car_outlined,
-          title: 'Bạn chưa có xe',
-          message: 'Hãy thêm xe trước khi đặt lịch.',
-          action: FilledButton.icon(
-            onPressed: _addVehicle,
-            icon: const Icon(Icons.add),
-            label: const Text('Thêm xe'),
-          ),
-        )
+        _NoVehicleBookingCard(onAddVehicle: _addVehicle)
       else ...[
         for (final vehicle in widget.controller.vehicles) ...[
           VehicleCard(
@@ -639,4 +630,97 @@ class _ConfirmRow extends StatelessWidget {
       ),
     ],
   );
+}
+
+class _NoVehicleBookingCard extends StatelessWidget {
+  const _NoVehicleBookingCard({required this.onAddVehicle});
+
+  final VoidCallback onAddVehicle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      container: true,
+      label: 'Bạn chưa có xe. Thêm xe ngay trong bước đặt lịch để tiếp tục.',
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final wide = constraints.maxWidth >= 640;
+            final image = Image.asset(
+              'assets/images/booking_vehicle_empty.png',
+              fit: BoxFit.cover,
+              height: wide ? 230 : 190,
+              width: double.infinity,
+              excludeFromSemantics: true,
+              errorBuilder: (_, _, _) => Container(
+                height: wide ? 230 : 190,
+                color: AppColors.primarySoft,
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.directions_car_outlined,
+                  size: 64,
+                  color: AppColors.primary,
+                ),
+              ),
+            );
+            final content = Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.primarySoft,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.add_road_outlined,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'Bạn chưa có xe',
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Nhập biển số và thông tin cơ bản. Xe vừa thêm sẽ được chọn tự động cho lịch hẹn này.',
+                    style: TextStyle(color: AppColors.muted),
+                  ),
+                  const SizedBox(height: 18),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: onAddVehicle,
+                      icon: const Icon(Icons.add),
+                      label: const Text('Thêm xe để tiếp tục'),
+                    ),
+                  ),
+                ],
+              ),
+            );
+
+            if (wide) {
+              return IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: image),
+                    Expanded(child: content),
+                  ],
+                ),
+              );
+            }
+            return Column(children: [image, content]);
+          },
+        ),
+      ),
+    );
+  }
 }
