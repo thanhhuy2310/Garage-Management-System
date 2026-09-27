@@ -1,19 +1,45 @@
-# Backend - Garage Management System
+# Backend
 
-REST API dùng Java 21, Spring Boot 3.5.6, Maven Wrapper và SQL Server.
+REST API của hệ thống gara, sử dụng Java 21, Spring Boot 3.5.6, Spring Security, JWT, Spring Data JPA và SQL Server.
 
-## Chạy nhanh
+## Chuẩn bị
 
-1. Chạy `database/QuanLyGaraOTo.sql` trong SQL Server/SSMS.
-2. Sao chép `.env.example` thành `.env` và điền thông tin local. File `.env` đã được Git bỏ qua.
-3. Chạy:
+1. Chạy `database/QuanLyGaraOTo.sql` trong SQL Server Management Studio.
+2. Sao chép `.env.example` thành `.env`.
+3. Điền kết nối SQL Server, `JWT_SECRET` và các biến còn lại trong `.env`.
+
+File `.env` không được đưa lên Git.
+
+## Chạy backend
 
 ```powershell
 .\run-dev.ps1
 ```
 
-Script đọc `.env`, đưa các biến vào process và gọi Maven Wrapper. Spring Boot cũng tự import `.env` local, nên trong IntelliJ có thể chọn cấu hình **Garage Backend** hoặc chạy trực tiếp `QuanLyGaraApplication`.
+Hoặc chạy main class `com.gara.quanlygara.QuanLyGaraApplication` trong IntelliJ IDEA.
 
-Kiểm tra tại `http://localhost:8080/api/health`.
+API mặc định chạy tại `http://localhost:8080`. Có thể kiểm tra nhanh bằng:
 
-Hướng dẫn đầy đủ cho backend, frontend và IntelliJ nằm trong `../README.md`.
+```text
+GET http://localhost:8080/api/health
+```
+
+## API hiện có
+
+- `/api/auth`: đăng nhập, đăng ký, đăng xuất, lấy tài khoản hiện tại và đổi mật khẩu.
+- `/api/accounts`: quản lý tài khoản và phân quyền nhân viên.
+- `/api/customers`: xem, thêm, sửa và thay đổi trạng thái khách hàng.
+
+Các endpoint tài khoản yêu cầu quyền quản trị. Endpoint khách hàng dành cho quản trị viên, quản lý và nhân viên tiếp nhận.
+
+## Chạy test
+
+```powershell
+.\mvnw.cmd test
+```
+
+## Ghi chú database
+
+Schema được quản lý bằng file SQL trong thư mục `database`. Cấu hình `ddl-auto=none` được giữ để Hibernate không tự thay đổi bảng.
+
+Hướng dẫn chạy website và mobile nằm tại [`../README.md`](../README.md).

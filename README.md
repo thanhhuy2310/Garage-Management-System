@@ -1,31 +1,45 @@
 # Garage Management System
 
-Hệ thống quản lý gara gồm hai ứng dụng chạy độc lập:
+Project khóa luận xây dựng hệ thống quản lý gara ô tô. Repository gồm website dành cho khách hàng và nhân viên, REST API Spring Boot và ứng dụng Flutter dành cho khách hàng.
+
+## Cấu trúc project
 
 ```text
 garage-management-system/
-├── frontend/   # React + TypeScript + Vite
-└── backend/    # Java 21 + Spring Boot + SQL Server
+├── frontend/   Website React + TypeScript + Vite
+├── backend/    REST API Java 21 + Spring Boot + SQL Server
+├── mobile/     Ứng dụng khách hàng viết bằng Flutter
+└── .run/       Cấu hình chạy dùng chung cho IntelliJ IDEA
 ```
+
+## Chức năng hiện có
+
+- Khách hàng: đăng ký, đăng nhập, quản lý xe, đặt lịch, xem báo giá, tiến độ sửa chữa, lịch sử và thông báo.
+- Nhân viên gara: quản lý khách hàng, xe, lịch hẹn, tiếp nhận, sửa chữa, kho, hóa đơn và báo cáo.
+- Phân quyền tài khoản theo các vai trò `ADMIN`, `MANAGER`, `RECEPTIONIST`, `TECHNICIAN`, `WAREHOUSE` và `CUSTOMER`.
+- Thanh toán chuyển khoản bằng mã QR có thời gian hết hạn.
+
+API thật hiện đã được nối cho đăng nhập, đăng ký, đổi mật khẩu, tài khoản và khách hàng. Một số màn hình nghiệp vụ còn sử dụng dữ liệu cục bộ trong lúc chờ bổ sung API tương ứng.
 
 ## Yêu cầu
 
 - JDK 21
-- IntelliJ IDEA
-- SQL Server và SQL Server Management Studio (SSMS)
-- Node.js/npm cho frontend
+- SQL Server và SQL Server Management Studio
+- Node.js 22 trở lên và npm
+- Flutter SDK có Dart 3.13 trở lên nếu chạy ứng dụng mobile
+- IntelliJ IDEA hoặc Android Studio
 
-Không cần cài Maven toàn cục vì backend đã có Maven Wrapper.
+Backend đã có Maven Wrapper nên không cần cài Maven riêng.
 
-## Cách chạy cả project
+## Chuẩn bị database
 
-### 1. Tạo database
+Mở SSMS và chạy file [`backend/database/QuanLyGaraOTo.sql`](backend/database/QuanLyGaraOTo.sql). Script tạo database `QuanLyGaraOTo`, các bảng, dữ liệu ban đầu và tài khoản dùng để kiểm tra.
 
-Mở SQL Server/SSMS và chạy file `backend/database/QuanLyGaraOTo.sql`. Database được sử dụng là `QuanLyGaraOTo`; Spring Boot không tự tạo lại schema (`ddl-auto=none`).
+Spring Boot chỉ đọc schema có sẵn và không tự tạo lại bảng (`ddl-auto=none`).
 
-### 2. Thiết lập biến môi trường backend
+## Chạy backend
 
-Sao chép `backend/.env.example` thành `backend/.env`, sau đó điền cấu hình SQL Server và JWT local:
+Sao chép `backend/.env.example` thành `backend/.env`, sau đó điền thông tin SQL Server và JWT:
 
 ```text
 DB_URL
@@ -36,39 +50,20 @@ JWT_EXPIRATION
 SERVER_PORT
 ```
 
-`DB_PASSWORD` và `JWT_SECRET` là bắt buộc. `JWT_SECRET` cần dài ít nhất 32 ký tự. File `.env` chỉ là cấu hình cục bộ và đã được Git bỏ qua. Backend nạp file này khi chạy trực tiếp từ IntelliJ; script `backend/run-dev.ps1` cũng đưa các biến vào process trước khi chạy Spring Boot.
+`JWT_SECRET` phải có ít nhất 32 ký tự. File `.env` chỉ dùng trên máy cá nhân và đã được Git bỏ qua.
 
-### 3. Chạy backend
-
-Cách 1 — IntelliJ IDEA:
-
-1. Mở thư mục gốc `garage-management-system`.
-2. Đợi IntelliJ import `backend/pom.xml` dưới dạng Maven project.
-3. Chọn Project SDK 21.
-4. Chọn cấu hình **Garage Backend** và nhấn **Run**.
-
-Có thể chạy trực tiếp main class `com.gara.quanlygara.QuanLyGaraApplication` nếu IntelliJ chưa hiển thị cấu hình dùng chung.
-
-Cách 2 — PowerShell trên Windows:
+Chạy bằng PowerShell:
 
 ```powershell
 cd backend
 .\run-dev.ps1
 ```
 
-Nếu Windows chặn script lần đầu, mở PowerShell cho tài khoản hiện tại và chạy `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
+Hoặc mở project bằng IntelliJ IDEA và chạy cấu hình **Garage Backend**.
 
-Cách 3 — build JAR:
+Kiểm tra backend tại `http://localhost:8080/api/health`.
 
-```powershell
-cd backend
-.\mvnw.cmd clean package
-java -jar target/garage-management-backend-0.0.1-SNAPSHOT.jar
-```
-
-### 4. Chạy frontend
-
-Trong IntelliJ chọn **Garage Frontend**, hoặc chạy:
+## Chạy website
 
 ```powershell
 cd frontend
@@ -76,33 +71,62 @@ npm install
 npm run dev
 ```
 
-Sau khi đã cấu hình backend, có thể chọn **Garage Full Stack** để chạy đồng thời frontend và backend.
+Website chạy tại `http://localhost:5173`. Trong chế độ phát triển, Vite chuyển các request `/api` sang backend ở cổng `8080`, vì vậy cần chạy backend trước khi đăng nhập.
 
-### 5. Địa chỉ kiểm tra
+Trong IntelliJ IDEA có thể chọn **Garage Full Stack** để chạy website và backend cùng lúc.
 
-- Frontend: http://localhost:5173
-- Backend: http://localhost:8080
-- Health check: http://localhost:8080/api/health
+## Chạy ứng dụng Flutter
 
-Trong môi trường phát triển, frontend gọi các đường dẫn `/api` và Vite tự chuyển tiếp sang backend ở cổng `8080`. Vì vậy cần chạy cả **Garage Backend** và **Garage Frontend** (hoặc cấu hình **Garage Full Stack**) trước khi đăng nhập. Khi frontend sẵn sàng, Vite tự mở trang `http://localhost:5173`; không mở cổng `8080` để xem giao diện vì đây chỉ là API backend.
+```powershell
+cd mobile
+flutter pub get
+flutter run
+```
 
-Các tài khoản mẫu trong script SQL gồm `khach01`, `tiepnhan`, `ktvbao`, `ktvhung`, `kho`, `manager` và `admin`; mật khẩu demo dùng chung là `demo123`. Chỉ sử dụng các tài khoản này cho dữ liệu mẫu local.
+Android Emulator dùng sẵn địa chỉ `http://10.0.2.2:8080/api`. Khi chạy trên điện thoại thật, truyền địa chỉ IP của máy đang chạy backend:
 
-Backend hiện chưa tích hợp Swagger/OpenAPI.
+```powershell
+flutter run --dart-define=API_BASE_URL=http://192.168.1.10:8080/api
+```
 
-## IntelliJ IDEA khuyến nghị
+Thay `192.168.1.10` bằng địa chỉ IP trong mạng nội bộ của máy tính. Điện thoại và máy tính phải dùng cùng mạng Wi-Fi.
 
-- Project SDK: JDK 21
-- Language level: 21
-- Build system: Maven, dùng Maven Wrapper
-- Bật **Settings > Build, Execution, Deployment > Compiler > Annotation Processors > Enable annotation processing**.
+## Tài khoản kiểm tra
 
-Backend hiện không dùng Lombok hoặc MapStruct nên không cần cài plugin tương ứng.
+Các tài khoản dưới đây được tạo bởi script SQL và có chung mật khẩu `demo123`:
 
-## Xử lý lỗi thường gặp
+| Tên đăng nhập | Vai trò |
+| --- | --- |
+| `khach01` | Khách hàng |
+| `tiepnhan` | Nhân viên tiếp nhận |
+| `ktvbao`, `ktvhung` | Kỹ thuật viên |
+| `kho` | Nhân viên kho |
+| `manager` | Quản lý |
+| `admin` | Quản trị viên |
 
-- `Could not resolve placeholder 'DB_PASSWORD'`: chưa khai báo mật khẩu SQL Server trong môi trường chạy.
-- `Could not resolve placeholder 'JWT_SECRET'`: chưa khai báo JWT secret hoặc secret quá ngắn.
-- `Connection refused`/`Login failed for user`: kiểm tra SQL Server đang chạy, TCP/IP port `1433`, tài khoản và database `QuanLyGaraOTo`.
-- Port `8080` đang bận: đóng ứng dụng đang dùng port hoặc đặt `SERVER_PORT` sang port khác.
-- Frontend không gọi được API: mặc định backend chỉ cho phép các origin local đã khai báo, gồm `http://localhost:5173`.
+Chỉ sử dụng các tài khoản này khi chạy project ở máy local.
+
+## Kiểm tra trước khi bàn giao
+
+```powershell
+# Frontend
+cd frontend
+npm run build
+.\node_modules\.bin\tsc.cmd --noEmit
+
+# Backend
+cd ..\backend
+.\mvnw.cmd test
+
+# Mobile
+cd ..\mobile
+flutter analyze
+flutter test
+```
+
+## Lỗi thường gặp
+
+- Mở `http://localhost:8080` chỉ thấy JSON: đây là cổng API; giao diện web nằm ở `http://localhost:5173`.
+- Port `8080` đang được sử dụng: dừng backend đang chạy trước đó rồi chạy lại.
+- Không kết nối được SQL Server: kiểm tra dịch vụ SQL Server, TCP/IP, port `1433` và thông tin trong `backend/.env`.
+- Mobile chạy trên máy thật không đăng nhập được: kiểm tra IP máy tính, Windows Firewall và kết nối Wi-Fi của hai thiết bị.
