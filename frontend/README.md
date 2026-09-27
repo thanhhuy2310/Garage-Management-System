@@ -1,42 +1,39 @@
 # Frontend
 
-Website quản lý gara được viết bằng React, TypeScript, Vite và Tailwind CSS. Website có phần công khai, khu vực khách hàng và màn hình làm việc theo vai trò nhân viên.
+Thư mục này chứa website của hệ thống gara.
 
-## Chạy project
+Website có 3 khu vực chính:
 
-Yêu cầu Node.js 22 trở lên và npm.
+- Trang giới thiệu và đặt lịch cho khách chưa đăng nhập.
+- Trang khách hàng để quản lý xe, lịch hẹn, báo giá và tiến độ sửa chữa.
+- Trang làm việc của nhân viên gara.
+
+## Cách chạy
+
+Backend cần được chạy trước. Sau đó mở terminal tại thư mục `frontend` và chạy:
 
 ```powershell
 npm install
 npm run dev
 ```
 
-Mặc định website chạy tại `http://localhost:5173`.
+Mở `http://localhost:5173` để xem giao diện.
 
-Frontend gọi API bằng đường dẫn `/api`. Khi chạy local, Vite chuyển tiếp request sang Spring Boot tại `http://localhost:8080`, vì vậy backend cần được khởi động trước khi đăng nhập.
-
-## Các lệnh thường dùng
+## Các lệnh cần dùng
 
 ```powershell
-npm run dev       # chạy môi trường phát triển
-npm run build     # tạo bản build production
-npm run preview   # xem lại bản build
-npm run format    # định dạng mã nguồn
+npm run dev
+npm run build
+npm run preview
+npm run format
 ```
 
-Kiểm tra TypeScript:
+Kiểm tra lỗi TypeScript:
 
 ```powershell
 .\node_modules\.bin\tsc.cmd --noEmit
 ```
 
-## Thư mục chính
+Những phần đã kết nối backend nằm trong `src/api`. Một số màn hình chưa có API vẫn lấy dữ liệu từ `src/mock`.
 
-- `src/api`: cấu hình gọi API và lưu phiên đăng nhập.
-- `src/components`: component dùng chung và các phần của trang công khai.
-- `src/features`: chức năng được tách theo nghiệp vụ.
-- `src/layouts`: layout công khai, khách hàng và quản trị.
-- `src/pages`: các trang của website.
-- `src/mock`: dữ liệu tạm cho những nghiệp vụ chưa có API.
-
-Hướng dẫn chạy toàn bộ hệ thống nằm tại [`../README.md`](../README.md).
+Xem hướng dẫn chạy toàn bộ project tại [`../README.md`](../README.md).

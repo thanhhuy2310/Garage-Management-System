@@ -1,39 +1,35 @@
-# Ứng dụng khách hàng
+# Mobile
 
-Ứng dụng Flutter dành cho khách hàng của Gara Ô Tô Thành Công. Người dùng có thể đăng nhập, quản lý xe, đặt lịch, xem báo giá, theo dõi sửa chữa, xem lịch sử và nhận thông báo.
+Đây là ứng dụng Flutter dành cho khách hàng của gara.
 
-## Chạy ứng dụng
+Các màn hình hiện có gồm đăng nhập, xe của tôi, đặt lịch, lịch hẹn, báo giá, tiến độ sửa chữa, lịch sử, thông báo và hồ sơ cá nhân.
+
+## Cách chạy
+
+Khởi động Android Emulator rồi chạy:
 
 ```powershell
 flutter pub get
 flutter run
 ```
 
-Ứng dụng yêu cầu Dart 3.13 trở lên.
+Android Emulator sẽ gọi backend tại `http://10.0.2.2:8080/api`.
 
-## Kết nối backend
-
-Khi chạy bằng Android Emulator, ứng dụng mặc định gọi API tại:
-
-```text
-http://10.0.2.2:8080/api
-```
-
-Khi chạy trên điện thoại thật, truyền IP của máy tính đang chạy backend:
+Nếu dùng điện thoại thật, thay IP dưới đây bằng IP của máy tính đang chạy backend:
 
 ```powershell
 flutter run --dart-define=API_BASE_URL=http://192.168.1.10:8080/api
 ```
 
-Thay địa chỉ trong ví dụ bằng IP mạng nội bộ của máy tính. Hai thiết bị phải cùng mạng và Windows Firewall cần cho phép kết nối đến cổng `8080`.
+Điện thoại và máy tính phải dùng cùng mạng Wi-Fi.
 
-## Kiểm tra mã nguồn
+## Kiểm tra code
 
 ```powershell
 flutter analyze
 flutter test
 ```
 
-Đăng nhập hiện đã sử dụng API Spring Boot. Dữ liệu xe, lịch hẹn, báo giá, sửa chữa và thông báo vẫn được quản lý cục bộ cho đến khi các API tương ứng hoàn thành.
+Đăng nhập đã gọi backend. Các dữ liệu khác hiện vẫn được lưu và xử lý trong ứng dụng, chưa đồng bộ với database.
 
-Hướng dẫn chạy toàn bộ hệ thống nằm tại [`../README.md`](../README.md).
+Xem hướng dẫn chạy toàn bộ project tại [`../README.md`](../README.md).
