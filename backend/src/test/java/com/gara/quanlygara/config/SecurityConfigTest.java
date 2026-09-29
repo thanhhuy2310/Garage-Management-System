@@ -4,6 +4,8 @@ import com.gara.quanlygara.repository.AccountRepository;
 import com.gara.quanlygara.repository.CustomerRepository;
 import com.gara.quanlygara.repository.EmployeeRepository;
 import com.gara.quanlygara.repository.GarageServiceRepository;
+import com.gara.quanlygara.repository.RepairOrderRepository;
+import com.gara.quanlygara.repository.TechnicianAssignmentRepository;
 import com.gara.quanlygara.repository.TechnicianRepository;
 import com.gara.quanlygara.entity.Account;
 import com.gara.quanlygara.entity.AccountRole;
@@ -54,6 +56,12 @@ class SecurityConfigTest {
 
     @MockitoBean
     private GarageServiceRepository garageServiceRepository;
+
+    @MockitoBean
+    private RepairOrderRepository repairOrderRepository;
+
+    @MockitoBean
+    private TechnicianAssignmentRepository technicianAssignmentRepository;
 
     @Test
     void accountApiRejectsRequestWithoutJwt() throws Exception {
