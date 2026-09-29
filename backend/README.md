@@ -25,6 +25,9 @@ http://localhost:8080/api/health
 - `/api/auth`: đăng nhập, đăng ký, đăng xuất và đổi mật khẩu.
 - `/api/accounts`: quản lý tài khoản nhân viên.
 - `/api/customers`: quản lý khách hàng.
+- `/api/services`: xem, tìm kiếm, thêm và cập nhật dịch vụ.
+
+Ví dụ request và quyền truy cập: [Test API dịch vụ và phân công](docs/API_SERVICE_TECHNICIAN_ASSIGNMENT.md).
 
 Các nghiệp vụ xe, lịch hẹn, sửa chữa, kho, báo giá và hóa đơn chưa có API đầy đủ.
 
