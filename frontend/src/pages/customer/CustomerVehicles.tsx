@@ -5,11 +5,12 @@ import VehicleCard from "../../features/vehicles/VehicleCard"
 import { useCustomerVehicles } from "../../features/vehicles/customerVehicleRepository"
 
 export default function CustomerVehicles({
-  customerKey,
+  customerId,
 }: {
-  customerKey: string
+  customerId: number
 }) {
-  const { vehicles, addVehicle } = useCustomerVehicles(customerKey)
+  const { vehicles, loading, error, reload, addVehicle } =
+    useCustomerVehicles(customerId)
   const [showAdd, setShowAdd] = useState(false)
   const [success, setSuccess] = useState("")
 
@@ -36,7 +37,23 @@ export default function CustomerVehicles({
         </p>
       )}
 
-      {vehicles.length === 0 ? (
+      {error && (
+        <div
+          className="flex flex-col gap-3 rounded-md bg-danger-soft px-4 py-3 text-sm text-danger sm:flex-row sm:items-center sm:justify-between"
+          role="alert"
+        >
+          <span>{error}</span>
+          <Button size="sm" variant="outline" onClick={() => void reload()}>
+            Thử lại
+          </Button>
+        </div>
+      )}
+
+      {loading ? (
+        <Card className="p-6 text-center text-sm text-muted-foreground">
+          Đang tải danh sách xe...
+        </Card>
+      ) : vehicles.length === 0 && !error ? (
         <Card className="flex min-h-72 items-center justify-center p-6 text-center">
           <div className="max-w-sm">
             <span
@@ -63,7 +80,7 @@ export default function CustomerVehicles({
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {vehicles.map((vehicle) => (
-            <VehicleCard key={vehicle.MaXe} vehicle={vehicle} />
+            <VehicleCard key={vehicle.id} vehicle={vehicle} />
           ))}
         </div>
       )}

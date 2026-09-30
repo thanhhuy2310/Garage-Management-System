@@ -1,90 +1,61 @@
 import { useCallback, useEffect, useState } from "react"
-import { xe, type Xe } from "../../mock/data"
+import {
+  toVehiclePayload,
+  vehicleErrorMessage,
+  vehiclesApi,
+  type Vehicle,
+  type VehicleFormValue,
+} from "../../api/vehicles"
 
-const STORAGE_KEY = "garage:customer-vehicles:v1"
-const CHANGE_EVENT = "garage:customer-vehicles-changed"
+export type { VehicleFormValue }
 
-export interface VehicleFormValue {
-  plate: string
-  brand: string
-  model: string
-  year: number | null
-  mileage: number | null
-}
-
+// Mã hiển thị kiểu KH001, vẫn được CustomerPortal dùng cho các màn hình còn dữ liệu mẫu.
 export function toCustomerKey(customerId: number) {
   return `KH${String(customerId).padStart(3, "0")}`
 }
 
-function readStoredVehicles(): Xe[] {
-  try {
-    const value = window.localStorage.getItem(STORAGE_KEY)
-    return value ? JSON.parse(value) as Xe[] : []
-  } catch {
-    return []
-  }
-}
+/** Xe của khách hàng đang đăng nhập, lấy từ backend (bảng Xe trong SQL Server). */
+export function useCustomerVehicles(customerId: number) {
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
-function writeStoredVehicles(vehicles: Xe[]) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(vehicles))
-  window.dispatchEvent(new Event(CHANGE_EVENT))
-}
-
-export function listCustomerVehicles(customerKey: string): Xe[] {
-  return [...xe, ...readStoredVehicles()].filter(
-    (vehicle) => vehicle.MaKhachHang === customerKey,
-  )
-}
-
-function createVehicle(customerKey: string, value: VehicleFormValue): Xe {
-  const plate = value.plate.trim().toUpperCase()
-  const allVehicles = [...xe, ...readStoredVehicles()]
-  if (allVehicles.some((vehicle) => vehicle.BienSo.toUpperCase() === plate)) {
-    throw new Error("Biển số xe đã tồn tại.")
-  }
-
-  const vehicle: Xe = {
-    MaXe: `XE-LOCAL-${Date.now()}`,
-    MaKhachHang: customerKey,
-    BienSo: plate,
-    HangXe: value.brand.trim() || null,
-    DongXe: value.model.trim() || null,
-    NamSanXuat: value.year,
-    SoKm: value.mileage,
-  }
-
-  // TODO: Replace this local persistence with the customer-scoped Vehicle API when it is available.
-  writeStoredVehicles([...readStoredVehicles(), vehicle])
-  return vehicle
-}
-
-export function useCustomerVehicles(customerKey: string) {
-  const [vehicles, setVehicles] = useState<Xe[]>(() =>
-    listCustomerVehicles(customerKey),
-  )
-
-  const refresh = useCallback(() => {
-    setVehicles(listCustomerVehicles(customerKey))
-  }, [customerKey])
+  const reload = useCallback(async () => {
+    if (!customerId) {
+      setVehicles([])
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    setError("")
+    try {
+      setVehicles(await vehiclesApi.listByCustomer(customerId))
+    } catch (loadError) {
+      setError(vehicleErrorMessage(loadError, "Không thể tải danh sách xe."))
+    } finally {
+      setLoading(false)
+    }
+  }, [customerId])
 
   useEffect(() => {
-    refresh()
-    window.addEventListener(CHANGE_EVENT, refresh)
-    window.addEventListener("storage", refresh)
-    return () => {
-      window.removeEventListener(CHANGE_EVENT, refresh)
-      window.removeEventListener("storage", refresh)
-    }
-  }, [refresh])
+    void reload()
+  }, [reload])
 
   const addVehicle = useCallback(
-    (value: VehicleFormValue) => {
-      const vehicle = createVehicle(customerKey, value)
-      setVehicles(listCustomerVehicles(customerKey))
-      return vehicle
+    async (value: VehicleFormValue): Promise<Vehicle> => {
+      if (!customerId) {
+        throw new Error("Tài khoản chưa liên kết với khách hàng nên không thể thêm xe.")
+      }
+      try {
+        const created = await vehiclesApi.create(toVehiclePayload(customerId, value))
+        setVehicles((current) => [created, ...current])
+        return created
+      } catch (saveError) {
+        throw new Error(vehicleErrorMessage(saveError, "Không thể thêm xe. Vui lòng thử lại."))
+      }
     },
-    [customerKey],
+    [customerId],
   )
 
-  return { vehicles, addVehicle }
+  return { vehicles, loading, error, reload, addVehicle }
 }

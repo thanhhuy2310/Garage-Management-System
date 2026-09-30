@@ -7,6 +7,7 @@ import com.gara.quanlygara.repository.GarageServiceRepository;
 import com.gara.quanlygara.repository.RepairOrderRepository;
 import com.gara.quanlygara.repository.TechnicianAssignmentRepository;
 import com.gara.quanlygara.repository.TechnicianRepository;
+import com.gara.quanlygara.repository.VehicleRepository;
 import com.gara.quanlygara.entity.Account;
 import com.gara.quanlygara.entity.AccountRole;
 import com.gara.quanlygara.entity.Customer;
@@ -53,6 +54,9 @@ class SecurityConfigTest {
 
     @MockitoBean
     private TechnicianRepository technicianRepository;
+
+    @MockitoBean
+    private VehicleRepository vehicleRepository;
 
     @MockitoBean
     private GarageServiceRepository garageServiceRepository;

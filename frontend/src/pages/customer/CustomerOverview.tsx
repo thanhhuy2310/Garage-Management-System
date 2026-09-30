@@ -2,14 +2,18 @@ import { Badge, Button, Card, Icons } from "../../components/ui";
 import type { CustomerPage } from "../../router";
 import { baoGia, lichHen, phieuSuaChua, phieuTiepNhan, xe } from "../../mock/data";
 import { thongBao } from "../../mock/schemaData";
+import { useCustomerVehicles } from "../../features/vehicles/customerVehicleRepository";
 
 const CUSTOMER_ID = "KH001";
 
 interface CustomerOverviewProps {
   onNavigate: (page: CustomerPage) => void;
+  customerId: number;
 }
 
-export default function CustomerOverview({ onNavigate }: CustomerOverviewProps) {
+export default function CustomerOverview({ onNavigate, customerId }: CustomerOverviewProps) {
+  // Số xe lấy từ API thật; myVehicles (mock) chỉ còn để nối dữ liệu lịch hẹn/sửa chữa mẫu của module khác.
+  const { vehicles: realVehicles, loading: vehiclesLoading } = useCustomerVehicles(customerId);
   const myVehicles = xe.filter((vehicle) => vehicle.MaKhachHang === CUSTOMER_ID);
   const vehicleIds = new Set(myVehicles.map((vehicle) => vehicle.MaXe));
   const myReceptions = phieuTiepNhan.filter((reception) => vehicleIds.has(reception.MaXe));
@@ -27,7 +31,7 @@ export default function CustomerOverview({ onNavigate }: CustomerOverviewProps) 
   const activeVehicle = myVehicles.find((vehicle) => vehicle.MaXe === activeReception?.MaXe);
 
   const summaries = [
-    { label: "Xe của tôi", value: myVehicles.length, icon: Icons.car, tint: "bg-primary-soft text-primary" },
+    { label: "Xe của tôi", value: vehiclesLoading ? "…" : realVehicles.length, icon: Icons.car, tint: "bg-primary-soft text-primary" },
     { label: "Lịch hẹn sắp tới", value: upcomingAppointments.length, icon: Icons.calendar, tint: "bg-info-soft text-info" },
     { label: "Xe đang trong xưởng", value: activeRepairs.length, icon: Icons.wrench, tint: "bg-warning-soft text-warning" },
     { label: "Thông báo chưa đọc", value: unreadNotices.length, icon: Icons.bell, tint: "bg-danger-soft text-danger" },
