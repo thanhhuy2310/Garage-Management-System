@@ -36,7 +36,7 @@ const ROLE_NAV: Record<Role, AdminPage[]> = {
   technician: ["technician"],
   warehouse: ["inventory"],
   manager: ["dashboard", "staff", "services", "repair", "reports"],
-  admin: ["settings"],
+  admin: ["settings", "services", "repair"],
 };
 
 function accountRole(role: string): Role | null {

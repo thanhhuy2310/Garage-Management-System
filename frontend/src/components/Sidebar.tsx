@@ -1,4 +1,6 @@
 import { GARAGE_NAME } from "../data";
+import { readSession } from "../api/session";
+import { ROLE_LABELS } from "./Header";
 import { Icons } from "./ui";
 
 const ALL_NAV_ITEMS = [
@@ -21,14 +23,6 @@ const ALL_NAV_ITEMS = [
   { key: "design-system", label: "Hệ thống giao diện", icon: Icons.info },
 ];
 
-const ROLE_AVATARS: Record<string, { bg: string; initial: string; name: string; title: string }> = {
-  admin: { bg: "bg-violet-600", initial: "A", name: "Admin Hệ thống", title: "Quản trị viên" },
-  manager: { bg: "bg-blue-600", initial: "B", name: "Nguyễn Hữu Bảo", title: "Quản lý" },
-  receptionist: { bg: "bg-emerald-600", initial: "T", name: "Phạm Minh Tuấn", title: "Nhân viên tiếp nhận" },
-  technician: { bg: "bg-orange-600", initial: "K", name: "Trần Văn Khoa", title: "Kỹ thuật viên" },
-  warehouse: { bg: "bg-amber-600", initial: "N", name: "Đỗ Văn Nam", title: "Nhân viên kho" },
-};
-
 interface SidebarProps {
   active: string;
   onNavigate: (key: string) => void;
@@ -48,7 +42,7 @@ export default function Sidebar({
   onClose,
   onLogout,
 }: SidebarProps) {
-  const avatar = ROLE_AVATARS[role] ?? ROLE_AVATARS.manager;
+  const username = readSession()?.account.username ?? "";
   const visibleNav = allowedPages
     ? ALL_NAV_ITEMS.filter((item) => allowedPages.includes(item.key))
     : ALL_NAV_ITEMS;
@@ -87,10 +81,10 @@ export default function Sidebar({
 
       <div className="border-t border-white/10 p-3">
         <div className="flex min-h-12 items-center gap-3 rounded-md px-2">
-          <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${avatar.bg} text-sm font-bold text-white shadow`}>{avatar.initial}</div>
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white shadow">{username.slice(0, 1).toUpperCase()}</div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-white">{avatar.name}</p>
-            <p className="truncate text-xs text-white/60">{avatar.title}</p>
+            <p className="truncate text-sm font-semibold text-white">{username}</p>
+            <p className="truncate text-xs text-white/60">{ROLE_LABELS[role] ?? role}</p>
           </div>
           <button type="button" onClick={onLogout} className="flex h-11 w-11 items-center justify-center rounded-md text-white/60 hover:bg-white/10 hover:text-white" title="Đăng xuất" aria-label="Đăng xuất">
             {Icons.logOut}
