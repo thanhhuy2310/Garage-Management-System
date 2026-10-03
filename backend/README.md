@@ -27,6 +27,7 @@ http://localhost:8080/api/health
 - `/api/customers`: quản lý khách hàng.
 - `/api/services`: xem, tìm kiếm, thêm và cập nhật dịch vụ.
 - `/api/technicians`: danh sách kỹ thuật viên để quản lý phân công.
+- `/api/repair-orders` và `/api/repair-orders/{id}`: danh sách và chi tiết phiếu, xe, khách hàng, dịch vụ, người được phân công. Quản lý/admin/lễ tân được xem; KTV chỉ xem phiếu của mình.
 - `/api/repair-orders/{id}/technicians`: xem và thêm phân công cho phiếu sửa chữa.
 - `/api/technicians/me/repair-orders`: kỹ thuật viên xem công việc của mình.
 
@@ -39,5 +40,13 @@ Các nghiệp vụ xe, lịch hẹn, sửa chữa, kho, báo giá và hóa đơn
 ```powershell
 .\mvnw.cmd test
 ```
+
+Kiểm tra thêm với SQL Server trong `.env` (chỉ dùng database phát triển):
+
+```powershell
+.\mvnw.cmd "-Dtest=SqlServerApiIT" test
+```
+
+Test thêm dữ liệu trong transaction rồi rollback, không sửa schema hay xóa dữ liệu sẵn có. Số identity có thể tăng sau khi chạy test.
 
 Xem hướng dẫn chạy toàn bộ project tại [`../README.md`](../README.md).

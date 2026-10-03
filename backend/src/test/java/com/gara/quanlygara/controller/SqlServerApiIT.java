@@ -102,6 +102,24 @@ class SqlServerApiIT {
         account.setEmployeeId(technicianId);
         account.setRole(AccountRole.TECHNICIAN);
         account = accountRepository.saveAndFlush(account);
+        int serviceId = insertId("""
+                INSERT INTO DichVu (TenDichVu, DonGia) OUTPUT INSERTED.MaDichVu VALUES (?, 250000)
+                """, "Dịch vụ kiểm thử " + unique);
+        jdbcTemplate.update("""
+                INSERT INTO ChiTietDichVu (MaPhieuSuaChua, MaDichVu, SoLuong, DonGia)
+                VALUES (?, ?, 2, 200000)
+                """, orderId, serviceId);
+
+        mockMvc.perform(get("/api/repair-orders/{id}", orderId).with(user("manager").roles("MANAGER")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.order.licensePlate").value(unique.substring(0, 20)))
+                .andExpect(jsonPath("$.data.order.customerName").value("Khách kiểm thử " + unique))
+                .andExpect(jsonPath("$.data.services[0].id").value(serviceId))
+                .andExpect(jsonPath("$.data.services[0].unitPrice").value(200000))
+                .andExpect(jsonPath("$.data.services[0].quantity").value(2));
+        mockMvc.perform(get("/api/repair-orders/{id}", orderId)
+                        .header("Authorization", "Bearer " + jwtService.generateToken(account)))
+                .andExpect(status().isNotFound());
 
         String url = "/api/repair-orders/" + orderId + "/technicians";
         String request = objectMapper.writeValueAsString(Map.of("technicianId", technicianId,
@@ -124,6 +142,15 @@ class SqlServerApiIT {
                 .andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].repairOrderId").value(orderId))
                 .andExpect(jsonPath("$.data[0].receptionId").value(receptionId));
+        mockMvc.perform(get("/api/repair-orders")
+                        .header("Authorization", "Bearer " + jwtService.generateToken(account)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].id").value(orderId));
+        mockMvc.perform(get("/api/repair-orders/{id}", orderId)
+                        .header("Authorization", "Bearer " + jwtService.generateToken(account)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.assignments[0].technician.id").value(technicianId));
     }
 
     private int insertId(String sql, Object... parameters) {
