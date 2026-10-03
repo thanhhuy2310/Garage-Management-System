@@ -15,6 +15,10 @@ public interface SparePartRepository extends JpaRepository<SparePart, Integer> {
     Page<SparePart> findByNameContainingIgnoreCaseOrManufacturerContainingIgnoreCase(
             String name, String manufacturer, Pageable pageable);
 
+    // Từ khóa là số: khớp mã phụ tùng (MaPhuTung) HOẶC tên/hãng chứa chuỗi số đó.
+    Page<SparePart> findByIdOrNameContainingIgnoreCaseOrManufacturerContainingIgnoreCase(
+            Integer id, String name, String manufacturer, Pageable pageable);
+
     // Bảng Kho thuộc nghiệp vụ kho (Tuần 8): ở đây chỉ đọc để kiểm tra khóa ngoại và đổ danh sách chọn.
     @Query(value = "SELECT COUNT(1) FROM Kho WHERE MaKho = :id", nativeQuery = true)
     long countWarehouse(@Param("id") Integer id);

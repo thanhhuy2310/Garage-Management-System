@@ -189,7 +189,7 @@ export default function SpareParts() {
   return (
     <div className="space-y-6">
       <div className="page-toolbar">
-        <SearchBox value={search} onChange={setSearch} placeholder="Tìm theo tên hoặc hãng sản xuất..." />
+        <SearchBox value={search} onChange={setSearch} placeholder="Tìm theo mã, tên hoặc hãng sản xuất..." />
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={() => setRefreshKey((key) => key + 1)} disabled={loading}>Tải lại</Button>
           <Button icon={Icons.plus} onClick={openCreate}>Thêm phụ tùng</Button>

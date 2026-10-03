@@ -132,6 +132,21 @@ class SparePartApiTest {
 
     @Test
     @WithMockUser(roles = "MANAGER")
+    void searchByPartIdReturnsThatPart() throws Exception {
+        when(sparePartRepository.findByIdOrNameContainingIgnoreCaseOrManufacturerContainingIgnoreCase(
+                eq(2), eq("2"), eq("2"), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(part(2, "Bugi", 3)), PageRequest.of(0, 10), 1));
+
+        mockMvc.perform(get("/api/spare-parts").param("search", "2").param("page", "0").param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items.length()").value(1))
+                .andExpect(jsonPath("$.data.items[0].id").value(2))
+                .andExpect(jsonPath("$.data.items[0].name").value("Bugi"))
+                .andExpect(jsonPath("$.data.totalElements").value(1));
+    }
+
+    @Test
+    @WithMockUser(roles = "MANAGER")
     void getByIdReturnsPart() throws Exception {
         when(sparePartRepository.findById(2)).thenReturn(Optional.of(part(2, "Bugi", 3)));
 

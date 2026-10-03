@@ -129,6 +129,51 @@ class SparePartServiceTest {
     }
 
     @Test
+    void getAllNumericKeywordMatchesPartIdOrText() {
+        when(sparePartRepository.findByIdOrNameContainingIgnoreCaseOrManufacturerContainingIgnoreCase(
+                eq(5), eq("5"), eq("5"), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(part(5, "Bugi", 12))));
+
+        var response = sparePartService.getAll(0, 10, " 5 ");
+
+        assertEquals(1, response.items().size());
+        assertEquals(5, response.items().get(0).id());
+        verify(sparePartRepository, never()).findAll(any(Pageable.class));
+        verify(sparePartRepository, never()).findByNameContainingIgnoreCaseOrManufacturerContainingIgnoreCase(
+                any(), any(), any(Pageable.class));
+    }
+
+    @Test
+    void getAllNonNumericOrOversizedKeywordSearchesTextOnly() {
+        when(sparePartRepository.findByNameContainingIgnoreCaseOrManufacturerContainingIgnoreCase(
+                any(), any(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
+
+        sparePartService.getAll(0, 10, "5W-30");
+        sparePartService.getAll(0, 10, "99999999999");
+
+        verify(sparePartRepository, never()).findByIdOrNameContainingIgnoreCaseOrManufacturerContainingIgnoreCase(
+                any(), any(), any(), any(Pageable.class));
+    }
+
+    @Test
+    void getAllNumericSearchKeepsPaginationAndSorting() {
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        when(sparePartRepository.findByIdOrNameContainingIgnoreCaseOrManufacturerContainingIgnoreCase(
+                eq(7), eq("7"), eq("7"), captor.capture()))
+                .thenReturn(new PageImpl<>(List.of(part(7, "Bugi", 1)), PageRequest.of(2, 5), 11));
+
+        var response = sparePartService.getAll(2, 5, "7");
+
+        assertEquals(2, response.page());
+        assertEquals(11, response.totalElements());
+        assertEquals(3, response.totalPages());
+        assertEquals(2, captor.getValue().getPageNumber());
+        assertEquals(5, captor.getValue().getPageSize());
+        assertEquals("name", captor.getValue().getSort().iterator().next().getProperty());
+    }
+
+    @Test
     void updateChangesCatalogFieldsButNeverTouchesStock() {
         SparePart part = part(3, "Bugi", 12);
         when(sparePartRepository.findById(3)).thenReturn(Optional.of(part));

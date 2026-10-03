@@ -41,10 +41,17 @@ public class SparePartService {
                 Sort.by("name").and(Sort.by("id")));
 
         String keyword = normalizeOptional(search);
-        Page<SparePart> result = keyword == null
-                ? sparePartRepository.findAll(pageable)
-                : sparePartRepository.findByNameContainingIgnoreCaseOrManufacturerContainingIgnoreCase(
-                        keyword, keyword, pageable);
+        Page<SparePart> result;
+        if (keyword == null) {
+            result = sparePartRepository.findAll(pageable);
+        } else {
+            Integer partId = parsePartId(keyword);
+            result = partId == null
+                    ? sparePartRepository.findByNameContainingIgnoreCaseOrManufacturerContainingIgnoreCase(
+                            keyword, keyword, pageable)
+                    : sparePartRepository.findByIdOrNameContainingIgnoreCaseOrManufacturerContainingIgnoreCase(
+                            partId, keyword, keyword, pageable);
+        }
         return SparePartPageResponse.from(result);
     }
 
@@ -97,6 +104,11 @@ public class SparePartService {
         part.setManufacturer(normalizeOptional(request.manufacturer()));
         part.setUnitPrice(request.unitPrice().setScale(2, RoundingMode.HALF_UP));
         part.setMinStockLevel(request.minStockLevel() == null ? 0 : request.minStockLevel());
+    }
+
+    /** Từ khóa chỉ gồm chữ số (tối đa 9 chữ số, vừa kiểu INT) được hiểu thêm là mã phụ tùng. */
+    private Integer parsePartId(String keyword) {
+        return keyword.matches("\\d{1,9}") ? Integer.valueOf(keyword) : null;
     }
 
     private String normalizeOptional(String value) {
