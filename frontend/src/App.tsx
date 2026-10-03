@@ -17,6 +17,8 @@ const Customers = lazy(() => import("./pages/Customers"));
 const Vehicles = lazy(() => import("./pages/Vehicles"));
 const Services = lazy(() => import("./pages/Services"));
 const Inventory = lazy(() => import("./pages/Inventory"));
+const SpareParts = lazy(() => import("./pages/SpareParts"));
+const RepairDetails = lazy(() => import("./pages/RepairDetails"));
 const Invoice = lazy(() => import("./pages/Invoice"));
 const History = lazy(() => import("./pages/History"));
 const Notifications = lazy(() => import("./pages/Notifications"));
@@ -30,7 +32,7 @@ const CustomerPortal = lazy(() => import("./pages/customer/CustomerPortal"));
 
 export type Page = AdminPage;
 
-const ROLE_NAV: Record<Role, AdminPage[]> = {
+const BASE_ROLE_NAV: Record<Role, AdminPage[]> = {
   customer: [],
   receptionist: ["customers", "vehicles", "appointments", "reception", "repair", "quotation", "invoice", "history"],
   technician: ["technician"],
@@ -38,6 +40,17 @@ const ROLE_NAV: Record<Role, AdminPage[]> = {
   manager: ["dashboard", "staff", "services", "repair", "reports"],
   admin: ["settings"],
 };
+
+// Tuần 7: danh mục phụ tùng và chi tiết phiếu sửa chữa, gộp thêm vào menu theo vai trò.
+const WEEK7_ROLE_NAV: Partial<Record<Role, AdminPage[]>> = {
+  receptionist: ["repair-details"],
+  warehouse: ["spare-parts"],
+  manager: ["spare-parts", "repair-details"],
+};
+
+const ROLE_NAV: Record<Role, AdminPage[]> = Object.fromEntries(
+  (Object.keys(BASE_ROLE_NAV) as Role[]).map((role) => [role, [...BASE_ROLE_NAV[role], ...(WEEK7_ROLE_NAV[role] ?? [])]]),
+) as Record<Role, AdminPage[]>;
 
 function accountRole(role: string): Role | null {
   const normalized = role.toLowerCase();
@@ -55,6 +68,8 @@ function PageContent({ page }: { page: AdminPage }) {
     case "vehicles": return <Vehicles />;
     case "services": return <Services />;
     case "inventory": return <Inventory />;
+    case "spare-parts": return <SpareParts />;
+    case "repair-details": return <RepairDetails />;
     case "invoice": return <Invoice />;
     case "history": return <History />;
     case "notifications": return <Notifications />;

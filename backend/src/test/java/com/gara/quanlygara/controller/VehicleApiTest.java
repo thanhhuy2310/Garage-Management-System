@@ -11,6 +11,9 @@ import com.gara.quanlygara.repository.VehicleRepository;
 import com.gara.quanlygara.repository.GarageServiceRepository;
 import com.gara.quanlygara.repository.RepairOrderRepository;
 import com.gara.quanlygara.repository.TechnicianAssignmentRepository;
+import com.gara.quanlygara.repository.RepairPartItemRepository;
+import com.gara.quanlygara.repository.RepairServiceItemRepository;
+import com.gara.quanlygara.repository.SparePartRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -77,6 +80,15 @@ class VehicleApiTest {
 
     @MockitoBean
         private TechnicianAssignmentRepository technicianAssignmentRepository;
+
+        @MockitoBean
+        private RepairPartItemRepository repairPartItemRepository;
+
+        @MockitoBean
+        private RepairServiceItemRepository repairServiceItemRepository;
+
+        @MockitoBean
+        private SparePartRepository sparePartRepository;
 
     @Test
     void listRejectsRequestWithoutJwt() throws Exception {

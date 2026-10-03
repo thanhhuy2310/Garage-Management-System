@@ -11,6 +11,8 @@ const ALL_NAV_ITEMS = [
   { key: "vehicles", label: "Xe", icon: Icons.car },
   { key: "services", label: "Dịch vụ", icon: Icons.clipboard },
   { key: "inventory", label: "Phụ tùng & Kho", icon: Icons.package },
+  { key: "spare-parts", label: "Danh mục phụ tùng", icon: Icons.package },
+  { key: "repair-details", label: "Chi tiết phiếu sửa", icon: Icons.wrench },
   { key: "invoice", label: "Hóa đơn & Thanh toán", icon: Icons.creditCard },
   { key: "history", label: "Lịch sử sửa chữa", icon: Icons.history },
   { key: "notifications", label: "Thông báo", icon: Icons.bell, badge: 4 },
