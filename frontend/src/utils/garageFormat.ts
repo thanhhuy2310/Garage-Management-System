@@ -23,6 +23,8 @@ export function formatGarageDate(value: string | null) {
 
 const STATUS_LABELS: Record<string, string> = {
   MOI_TAO: "Mới tạo",
+  DANG_KIEM_TRA: "Đang kiểm tra",
+  CHUA_THUC_HIEN: "Chưa thực hiện",
   CHO_SUA: "Chờ sửa chữa",
   CHO_XAC_NHAN: "Chờ xác nhận",
   DANG_SUA: "Đang sửa chữa",

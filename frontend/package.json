@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test:e2e": "playwright test garage-workflow.spec.ts",
+    "test:e2e": "playwright test garage-workflow.spec.ts repair-billing.spec.ts",
     "test:live": "playwright test garage-live.spec.ts --project=desktop",
     "format": "oxfmt"
   },

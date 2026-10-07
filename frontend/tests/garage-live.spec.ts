@@ -58,11 +58,13 @@ test("real SQL services and repair orders render without mock data", async ({
     await expect(
       page.getByRole("heading", { name: orders[0].licensePlate, exact: true }),
     ).toBeVisible()
-    await page
-      .getByRole("button", { name: "Phân công KTV", exact: true })
-      .click()
-    await expect(page.getByRole("dialog")).toBeVisible()
-    await page.getByRole("button", { name: "Hủy", exact: true }).click()
+    if (!["HOAN_TAT", "HUY", "DA_HUY"].includes(orders[0].status)) {
+      await page
+        .getByRole("button", { name: "Phân công KTV", exact: true })
+        .click()
+      await expect(page.getByRole("dialog")).toBeVisible()
+      await page.getByRole("button", { name: "Hủy", exact: true }).click()
+    }
   } else {
     await expect(page.getByText("Chưa có phiếu sửa chữa.")).toBeVisible()
   }
@@ -78,5 +80,26 @@ test("real SQL services and repair orders render without mock data", async ({
       fullPage: true,
     })
   }
+  expect(errors).toEqual([])
+  const invoiceResponse = await request.get("/api/invoices", { headers })
+  expect(invoiceResponse.ok()).toBe(true)
+  const { data: invoices } = await invoiceResponse.json()
+  await page.goto("/admin/invoice")
+  if (invoices.length) {
+    await expect(
+      page.getByRole("heading", {
+        name: `Hóa đơn #${invoices[0].id}`,
+        exact: true,
+      }),
+    ).toBeVisible()
+    await expect(
+      page.getByText(invoices[0].licensePlate, { exact: true }),
+    ).toBeVisible()
+  }
+  await page
+    .getByRole("button", { name: "Tài khoản ngân hàng", exact: true })
+    .click()
+  await expect(page.getByLabel("Số tài khoản", { exact: true })).toBeVisible()
+  await page.getByRole("button", { name: "Đóng hộp thoại" }).click()
   expect(errors).toEqual([])
 })

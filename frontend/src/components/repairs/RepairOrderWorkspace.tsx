@@ -3,7 +3,8 @@ import { garageApi } from "../../api/garage"
 import { useGarageQuery } from "../../hooks/useGarageQuery"
 import { formatGarageDate, repairStatusLabel } from "../../utils/garageFormat"
 import { QueryState } from "../garage/QueryState"
-import { Button, Card, SearchBox, Select } from "../ui"
+import { Button, Card, SearchBox, Select, Modal } from "../ui"
+import RepairServiceForm from "./RepairServiceForm"
 import RepairOrderDetails from "./RepairOrderDetails"
 import RepairStatusBadge from "./RepairStatusBadge"
 
@@ -18,6 +19,8 @@ export default function RepairOrderWorkspace({
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("")
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [createOpen, setCreateOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
   const orders = query.data ?? []
   const statuses = [...new Set(orders.map((order) => order.status))]
   const keyword = search.trim().toLocaleLowerCase("vi")
@@ -56,6 +59,11 @@ export default function RepairOrderWorkspace({
             ? "Xem xe, yêu cầu sửa chữa và nội dung phân công của bạn."
             : "Chọn phiếu để xem chi tiết xe, dịch vụ và kỹ thuật viên phụ trách."}
         </p>
+        {!technician && (
+          <Button className="mt-4" onClick={() => setCreateOpen(true)}>
+            Lập phiếu sửa chữa
+          </Button>
+        )}
       </div>
       <Card className="space-y-4 p-4 sm:p-5">
         <div className="grid gap-3 sm:grid-cols-[1fr_220px_auto] sm:items-end">
@@ -138,6 +146,25 @@ export default function RepairOrderWorkspace({
                 : "Chưa có phiếu sửa chữa."}
           </Card>
         ))}
+      <Modal
+        open={createOpen}
+        onClose={() => {
+          if (!saving) setCreateOpen(false)
+        }}
+        title="Lập phiếu sửa chữa"
+      >
+        {createOpen && (
+          <RepairServiceForm
+            onBusyChange={setSaving}
+            onCancel={() => setCreateOpen(false)}
+            onSaved={(value) => {
+              setCreateOpen(false)
+              setSelectedId(value.order.id)
+              query.reload()
+            }}
+          />
+        )}
+      </Modal>
     </div>
   )
 }

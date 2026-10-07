@@ -53,4 +53,26 @@ export interface RepairOrderDetail {
   order: RepairOrder
   services: RepairServiceLine[]
   assignments: TechnicianAssignment[]
+  progress: RepairProgress[]
+}
+
+export interface RepairProgress {
+  id: number
+  serviceId: number | null
+  status: string
+  notes: string
+  updatedBy: string
+  createdAt: string
+}
+
+export interface ProgressRequest {
+  status: string
+  expectedStatus: string
+  notes: string
+}
+
+export interface ReceptionOption {
+  id: number
+  licensePlate: string
+  customerName: string
 }

@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react"
 import { garageApi } from "../../api/garage"
+import { readSession } from "../../api/session"
 import { useGarageQuery } from "../../hooks/useGarageQuery"
 import type { TechnicianAssignment } from "../../types/garage"
 import { formatGarageDate, formatMoney } from "../../utils/garageFormat"
@@ -7,6 +8,11 @@ import { QueryState } from "../garage/QueryState"
 import { Button, Card, Icons, Modal } from "../ui"
 import AssignmentForm from "./AssignmentForm"
 import RepairStatusBadge from "./RepairStatusBadge"
+import RepairProgressForm, {
+  nextRepairStates,
+  nextServiceStates,
+} from "./RepairProgressForm"
+import RepairServiceForm from "./RepairServiceForm"
 
 export default function RepairOrderDetails({
   orderId,
@@ -26,6 +32,19 @@ export default function RepairOrderDetails({
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState("")
   const detail = query.data
+  const role = readSession()?.account.role
+  const canUpdate = role === "TECHNICIAN" || canAssign
+  const [progressTarget, setProgressTarget] = useState<number | "order" | null>(
+    null,
+  )
+  const [serviceOpen, setServiceOpen] = useState(false)
+  const closed = detail
+    ? ["HOAN_TAT", "HUY", "DA_HUY"].includes(detail.order.status)
+    : false
+  const canAddService =
+    role !== "TECHNICIAN" &&
+    !!detail &&
+    ["MOI_TAO", "DANG_KIEM_TRA", "CHO_SUA"].includes(detail.order.status)
 
   function handleAssigned(assignment: TechnicianAssignment) {
     query.setData((current) =>
@@ -95,6 +114,21 @@ export default function RepairOrderDetails({
                 </div>
               ))}
             </dl>
+            {canUpdate &&
+              !closed &&
+              (nextRepairStates[detail.order.status]?.length ?? 0) > 0 && (
+                <Button
+                  disabled={!detail.assignments.length}
+                  onClick={() => setProgressTarget("order")}
+                >
+                  Cập nhật tiến độ
+                </Button>
+              )}
+            {!closed && !detail.assignments.length && (
+              <p className="text-sm text-muted-foreground">
+                Cần phân công kỹ thuật viên trước khi bắt đầu công việc.
+              </p>
+            )}
           </Card>
           <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.65fr)]">
             <div className="order-2 min-w-0 space-y-5 lg:order-1">
@@ -134,6 +168,15 @@ export default function RepairOrderDetails({
                 <h3 className="mb-4 font-semibold text-foreground">
                   Dịch vụ trên phiếu ({detail.services.length})
                 </h3>
+                {canAddService && (
+                  <Button
+                    variant="outline"
+                    className="mb-4"
+                    onClick={() => setServiceOpen(true)}
+                  >
+                    Thêm dịch vụ
+                  </Button>
+                )}
                 {detail.services.length ? (
                   <ul className="divide-y divide-border">
                     {detail.services.map((line) => (
@@ -152,6 +195,18 @@ export default function RepairOrderDetails({
                             {formatMoney(line.quantity * line.unitPrice)}
                           </span>
                         </div>
+                        {canUpdate &&
+                          detail.order.status === "DANG_SUA" &&
+                          nextServiceStates(line.status).length > 0 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setProgressTarget(line.id)}
+                              aria-label={`Cập nhật ${line.name}`}
+                            >
+                              Cập nhật dịch vụ
+                            </Button>
+                          )}
                       </li>
                     ))}
                   </ul>
@@ -171,7 +226,7 @@ export default function RepairOrderDetails({
                   {detail.assignments.length} người được phân công
                 </p>
               </div>
-              {canAssign && (
+              {canAssign && !closed && (
                 <Button
                   icon={Icons.userCheck}
                   className="w-full"
@@ -211,6 +266,39 @@ export default function RepairOrderDetails({
               )}
             </Card>
           </div>
+          <Card className="space-y-4 p-5">
+            <h3 className="font-semibold">Lịch sử cập nhật tiến độ</h3>
+            {(detail.progress ?? []).length ? (
+              <ol className="space-y-4">
+                {detail.progress.map((event) => (
+                  <li
+                    key={event.id}
+                    className="border-l-2 border-primary/30 pl-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <RepairStatusBadge status={event.status} />
+                      <span className="text-xs text-muted-foreground">
+                        {formatGarageDate(event.createdAt)} · {event.updatedBy}
+                      </span>
+                    </div>
+                    {event.serviceId && (
+                      <p className="mt-2 text-sm font-medium">
+                        {detail.services.find((s) => s.id === event.serviceId)
+                          ?.name ?? `Dịch vụ #${event.serviceId}`}
+                      </p>
+                    )}
+                    <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed">
+                      {event.notes}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Chưa có nhật ký cập nhật cho phiếu này.
+              </p>
+            )}
+          </Card>
         </>
       )}
       <Modal
@@ -227,6 +315,47 @@ export default function RepairOrderDetails({
             onSaved={handleAssigned}
             onCancel={() => setAssignmentOpen(false)}
             onBusyChange={setSaving}
+          />
+        )}
+      </Modal>
+      <Modal
+        open={progressTarget !== null}
+        onClose={() => {
+          if (!saving) setProgressTarget(null)
+        }}
+        title="Cập nhật tiến độ sửa chữa"
+      >
+        {progressTarget !== null && detail && (
+          <RepairProgressForm
+            detail={detail}
+            serviceId={progressTarget === "order" ? undefined : progressTarget}
+            onBusyChange={setSaving}
+            onCancel={() => setProgressTarget(null)}
+            onSaved={(value) => {
+              query.setData(value)
+              setProgressTarget(null)
+              setSuccess("Đã lưu tiến độ sửa chữa.")
+            }}
+          />
+        )}
+      </Modal>
+      <Modal
+        open={serviceOpen}
+        onClose={() => {
+          if (!saving) setServiceOpen(false)
+        }}
+        title="Bổ sung dịch vụ"
+      >
+        {serviceOpen && detail && (
+          <RepairServiceForm
+            detail={detail}
+            onBusyChange={setSaving}
+            onCancel={() => setServiceOpen(false)}
+            onSaved={(value) => {
+              query.setData(value)
+              setServiceOpen(false)
+              setSuccess("Đã thêm dịch vụ.")
+            }}
           />
         )}
       </Modal>
