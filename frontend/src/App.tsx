@@ -45,7 +45,7 @@ const BASE_ROLE_NAV: Record<Role, AdminPage[]> = {
 const WEEK7_ROLE_NAV: Partial<Record<Role, AdminPage[]>> = {
   receptionist: ["repair-details"],
   warehouse: ["spare-parts"],
-  manager: ["spare-parts", "repair-details"],
+  manager: ["spare-parts", "repair-details", "inventory"],
 };
 
 const ROLE_NAV: Record<Role, AdminPage[]> = Object.fromEntries(

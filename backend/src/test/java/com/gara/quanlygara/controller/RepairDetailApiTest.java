@@ -19,6 +19,13 @@ import com.gara.quanlygara.repository.SparePartRepository;
 import com.gara.quanlygara.repository.TechnicianAssignmentRepository;
 import com.gara.quanlygara.repository.TechnicianRepository;
 import com.gara.quanlygara.repository.VehicleRepository;
+import com.gara.quanlygara.repository.InventoryCheckItemRepository;
+import com.gara.quanlygara.repository.InventoryCheckRepository;
+import com.gara.quanlygara.repository.StockIssueItemRepository;
+import com.gara.quanlygara.repository.StockIssueRepository;
+import com.gara.quanlygara.repository.StockMovementRepository;
+import com.gara.quanlygara.repository.StockReceiptItemRepository;
+import com.gara.quanlygara.repository.StockReceiptRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -91,6 +98,27 @@ class RepairDetailApiTest {
 
     @MockitoBean
     private VehicleRepository vehicleRepository;
+
+    @MockitoBean
+    private InventoryCheckItemRepository inventoryCheckItemRepository;
+
+    @MockitoBean
+    private InventoryCheckRepository inventoryCheckRepository;
+
+    @MockitoBean
+    private StockIssueItemRepository stockIssueItemRepository;
+
+    @MockitoBean
+    private StockIssueRepository stockIssueRepository;
+
+    @MockitoBean
+    private StockMovementRepository stockMovementRepository;
+
+    @MockitoBean
+    private StockReceiptItemRepository stockReceiptItemRepository;
+
+    @MockitoBean
+    private StockReceiptRepository stockReceiptRepository;
 
     @Test
     void listRejectsRequestWithoutJwt() throws Exception {
