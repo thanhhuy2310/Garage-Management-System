@@ -12,7 +12,7 @@ Website đã có giao diện cho các công việc chính của gara như quản
 
 Ứng dụng mobile có các màn hình đăng nhập, quản lý xe, đặt lịch, xem báo giá, theo dõi sửa chữa, lịch sử và thông báo.
 
-Các phần đăng nhập, đăng ký, đổi mật khẩu, tài khoản và khách hàng đã kết nối backend và SQL Server. Những phần còn lại vẫn đang dùng dữ liệu mẫu hoặc dữ liệu lưu trên máy, cần làm thêm API khi phát triển tiếp.
+Các phần đăng nhập, đăng ký, đổi mật khẩu, tài khoản, khách hàng, danh mục dịch vụ, phân công KTV, sửa chữa và hóa đơn trên web đã kết nối backend và SQL Server. Flutter đã nối đăng nhập và theo dõi tiến độ sửa chữa. Những phần khác vẫn còn dữ liệu mẫu hoặc lưu trên máy, cần làm tiếp API.
 
 ## Cần cài gì?
 
@@ -32,7 +32,11 @@ Mở SQL Server Management Studio và chạy file:
 backend/database/QuanLyGaraOTo.sql
 ```
 
-Script sẽ tạo database `QuanLyGaraOTo` cùng dữ liệu cần thiết để chạy thử.
+Script sẽ tạo database `QuanLyGaraOTo` cùng dữ liệu ban đầu để chạy thử. Chỉ chạy khi tạo mới; không chạy lại trên database đang dùng.
+
+Sau đó chọn database `QuanLyGaraOTo` và chạy lần lượt các file trong `backend/database/migrations`: **V002** (nhật ký sửa chữa, mã yêu cầu thanh toán), **V003** (tài khoản ngân hàng). Với database đã có, chỉ chạy migration bổ sung, không cần xóa/import lại dữ liệu.
+
+Cách thử sửa chữa → hóa đơn → thanh toán → theo dõi trên mobile: [hướng dẫn ngắn](backend/docs/REPAIR_BILLING.md).
 
 ## 2. Chạy backend
 

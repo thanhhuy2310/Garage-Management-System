@@ -30,6 +30,10 @@ flutter analyze
 flutter test
 ```
 
-Đăng nhập đã gọi backend. Các dữ liệu khác hiện vẫn được lưu và xử lý trong ứng dụng, chưa đồng bộ với database.
+Đăng nhập và theo dõi sửa chữa đã gọi backend. Tab **Theo dõi** lấy xe, trạng thái, dịch vụ, kỹ thuật viên và nhật ký từ SQL theo tài khoản khách đang đăng nhập. Kéo xuống để tải lại; tab **Đã kết thúc** xem phiếu hoàn tất/hủy. Không tự hiển thị tiến độ mẫu khi mất mạng hoặc chưa có dữ liệu.
+
+Backend cần chạy migration V002 và V003 trước. Xem [cách thử luồng sửa chữa](../backend/docs/REPAIR_BILLING.md).
+
+Các phần trang chủ, xe, đặt lịch, báo giá, thông báo và hồ sơ vẫn chưa đồng bộ hết với database. Dữ liệu ở các màn này còn dùng service mẫu; không dùng chúng để kiểm chứng tiến độ sửa chữa thật.
 
 Xem hướng dẫn chạy toàn bộ project tại [`../README.md`](../README.md).

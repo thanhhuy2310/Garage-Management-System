@@ -37,7 +37,11 @@ class _CustomerShellState extends State<CustomerShell> {
         onOpenRoute: _openRoute,
       ),
       AppointmentsScreen(controller: widget.controller, embedded: true),
-      RepairProgressScreen(controller: widget.controller, embedded: true),
+      RepairProgressScreen(
+        controller: widget.controller,
+        embedded: true,
+        active: _index == 2,
+      ),
       NotificationsScreen(controller: widget.controller, embedded: true),
       ProfileScreen(controller: widget.controller, embedded: true),
     ];
