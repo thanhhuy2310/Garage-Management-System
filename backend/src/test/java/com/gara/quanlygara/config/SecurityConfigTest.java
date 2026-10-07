@@ -63,6 +63,12 @@ class SecurityConfigTest {
     @MockitoBean
     private TechnicianAssignmentRepository technicianAssignmentRepository;
 
+    @MockitoBean private com.gara.quanlygara.repository.InvoiceRepository invoiceRepository;
+    @MockitoBean private com.gara.quanlygara.repository.PaymentRepository paymentRepository;
+    @MockitoBean private com.gara.quanlygara.repository.RepairProgressRepository progressRepository;
+    @MockitoBean private com.gara.quanlygara.repository.ReceivingBankAccountRepository bankRepository;
+    @MockitoBean private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
     @Test
     void accountApiRejectsRequestWithoutJwt() throws Exception {
         mockMvc.perform(get("/api/accounts"))

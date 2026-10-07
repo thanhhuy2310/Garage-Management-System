@@ -13,7 +13,7 @@ public class RepairOrderMapper {
                 order.getId(), order.getReceptionId(), order.getCreatedAt(), order.getStartedAt(),
                 order.getCompletedAt(), order.getStatus(), order.getResult(), order.getLicensePlate(),
                 order.getBrand(), order.getModel(), order.getCustomerName(),
-                order.getCustomerRequest(), order.getInitialCondition());
+                order.getCustomerRequest(), order.getInitialCondition(), order.getVehicleId(), order.getCustomerId());
     }
 
     public ServiceLineResponse toServiceLine(RepairOrderRepository.ServiceLine line) {

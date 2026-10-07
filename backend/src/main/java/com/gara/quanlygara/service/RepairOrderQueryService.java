@@ -10,6 +10,7 @@ import com.gara.quanlygara.exception.UnauthorizedException;
 import com.gara.quanlygara.mapper.RepairOrderMapper;
 import com.gara.quanlygara.repository.AccountRepository;
 import com.gara.quanlygara.repository.RepairOrderRepository;
+import com.gara.quanlygara.repository.RepairProgressRepository;
 import com.gara.quanlygara.repository.TechnicianAssignmentRepository;
 import com.gara.quanlygara.repository.TechnicianRepository;
 import org.springframework.security.core.Authentication;
@@ -27,17 +28,20 @@ public class RepairOrderQueryService {
     private final AccountRepository accountRepository;
     private final TechnicianRepository technicianRepository;
     private final RepairOrderMapper mapper;
+    private final RepairProgressRepository progressRepository;
 
     public RepairOrderQueryService(RepairOrderRepository repairOrderRepository,
                                    TechnicianAssignmentRepository assignmentRepository,
                                    AccountRepository accountRepository,
                                    TechnicianRepository technicianRepository,
-                                   RepairOrderMapper mapper) {
+                                   RepairOrderMapper mapper,
+                                   RepairProgressRepository progressRepository) {
         this.repairOrderRepository = repairOrderRepository;
         this.assignmentRepository = assignmentRepository;
         this.accountRepository = accountRepository;
         this.technicianRepository = technicianRepository;
         this.mapper = mapper;
+        this.progressRepository = progressRepository;
     }
 
     public List<RepairOrderResponse> getAll(Authentication authentication) {
@@ -54,7 +58,8 @@ public class RepairOrderQueryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu sửa chữa."));
         return new RepairOrderDetailResponse(order,
                 repairOrderRepository.findServiceLines(id).stream().map(mapper::toServiceLine).toList(),
-                assignmentRepository.findAssignments(id));
+                assignmentRepository.findAssignments(id),
+                progressRepository.findByRepairOrderIdOrderByCreatedAtDescIdDesc(id));
     }
 
     private int technicianScope(Authentication authentication) {

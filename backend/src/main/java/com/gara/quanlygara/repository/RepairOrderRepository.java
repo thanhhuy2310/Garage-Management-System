@@ -3,19 +3,29 @@ package com.gara.quanlygara.repository;
 import com.gara.quanlygara.entity.RepairOrder;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Lock;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface RepairOrderRepository extends JpaRepository<RepairOrder, Integer> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select r from RepairOrder r where r.id = :id")
+    Optional<RepairOrder> findForUpdate(@Param("id") Integer id);
+
+    boolean existsByReceptionId(Integer receptionId);
 
     @Query(value = """
             SELECT p.MaPhieuSuaChua AS id, p.MaTiepNhan AS receptionId,
                    p.NgayLap AS createdAt, p.NgayBatDau AS startedAt,
                    p.NgayHoanThanh AS completedAt, p.TrangThai AS status, p.KetQua AS result,
                    x.BienSo AS licensePlate, x.HangXe AS brand, x.DongXe AS model,
+                   x.MaXe AS vehicleId, x.MaKhachHang AS customerId,
                    k.HoTen AS customerName, t.YeuCauKhachHang AS customerRequest,
                    t.TinhTrangBanDau AS initialCondition
             FROM PhieuSuaChua p
@@ -52,6 +62,8 @@ public interface RepairOrderRepository extends JpaRepository<RepairOrder, Intege
         String getCustomerName();
         String getCustomerRequest();
         String getInitialCondition();
+        Integer getVehicleId();
+        Integer getCustomerId();
     }
 
     interface ServiceLine {

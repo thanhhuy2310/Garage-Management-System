@@ -15,6 +15,8 @@ public record RepairOrderResponse(
         String model,
         String customerName,
         String customerRequest,
-        String initialCondition
+        String initialCondition,
+        Integer vehicleId,
+        Integer customerId
 ) {
 }
