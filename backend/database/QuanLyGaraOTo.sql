@@ -8,6 +8,8 @@
 --   3) Bo sung xac nhan su dung phu tung truoc khi tru ton kho.
 --   4) Bo sung FUNCTION / PROCEDURE / TRIGGER phuc vu nghiep vu thuc te.
 --   5) Bo sung du lieu mau lien ket xuyen suot cac nghiep vu.
+-- Test rieng dich vu / sua chua / thanh toan / Flutter:
+-- sau khi chay migrations, chay seeds/Seed_Huy_Repair_Billing.sql.
 -- ============================================================
 
 IF DB_ID(N'QuanLyGaraOTo') IS NULL
@@ -1197,7 +1199,7 @@ INSERT INTO ChiTietDichVu (MaPhieuSuaChua, MaDichVu, SoLuong, DonGia, TrangThai)
 VALUES
 (1, 3, 1, 300000, N'HOAN_TAT'),
 (1, 4, 1, 500000, N'HOAN_TAT'),
-(2, 2, 1, 1200000, N'DANG_THUC_HIEN'),
+(2, 2, 1, 1200000, N'DANG_SUA'),
 (3, 6, 1, 250000, N'HOAN_TAT');
 GO
 

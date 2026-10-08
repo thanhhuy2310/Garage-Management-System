@@ -53,6 +53,8 @@ Các nghiệp vụ chưa được liệt kê trong mục này chưa có tài li�
 
 ## Chạy test
 
+Để có nhiều phiếu tiếp nhận, sửa chữa và hóa đơn phục vụ thử trên giao diện, xem [bộ dữ liệu test của Huy](database/seeds/README.md). File seed chạy riêng trên database local, không xóa dữ liệu đang có.
+
 ```powershell
 .\mvnw.cmd test
 ```
