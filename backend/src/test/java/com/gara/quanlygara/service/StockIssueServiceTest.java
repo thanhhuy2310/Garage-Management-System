@@ -27,6 +27,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.jpa.repository.Lock;
+import jakarta.persistence.LockModeType;
+import java.lang.reflect.Method;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -289,12 +292,12 @@ class StockIssueServiceTest {
 
     @Test
     void confirmRejectsUnknownItemAndIssueWithoutRepairOrder() {
-        when(itemRepository.findById(new StockIssueItem.Key(ISSUE_ID, PART_ID))).thenReturn(Optional.empty());
+        when(itemRepository.findForUpdate(ISSUE_ID, PART_ID)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class,
                 () -> service.confirmUsage(ISSUE_ID, PART_ID, new ConfirmUsageRequest(1, null), TECHNICIAN_ID, true));
 
         StockIssueItem item = issueItem(5);
-        when(itemRepository.findById(new StockIssueItem.Key(ISSUE_ID, PART_ID))).thenReturn(Optional.of(item));
+        when(itemRepository.findForUpdate(ISSUE_ID, PART_ID)).thenReturn(Optional.of(item));
         StockIssue noOrder = issue();
         noOrder.setRepairOrderId(null);
         when(issueRepository.findById(ISSUE_ID)).thenReturn(Optional.of(noOrder));
@@ -323,6 +326,61 @@ class StockIssueServiceTest {
 
         assertEquals(1, page.items().size());
         verify(issueRepository, never()).findAllByOrderByIdDesc(any(Pageable.class));
+    }
+
+    @Test
+    void confirmLocksTheIssueItemRowInsteadOfAPlainRead() throws Exception {
+        arrangeConfirm(5, 12, 3, null);
+
+        service.confirmUsage(ISSUE_ID, PART_ID, new ConfirmUsageRequest(3, null), TECHNICIAN_ID, true);
+
+        verify(itemRepository).findForUpdate(ISSUE_ID, PART_ID);
+        verify(itemRepository, never()).findById(any());
+        Method lockedRead = StockIssueItemRepository.class.getMethod("findForUpdate", Integer.class, Integer.class);
+        assertEquals(LockModeType.PESSIMISTIC_WRITE, lockedRead.getAnnotation(Lock.class).value());
+    }
+
+    @Test
+    void secondConfirmationOfTheSameItemNeverReducesStockOrWritesMovementTwice() {
+        // Khóa dòng làm request thứ hai chờ rồi đọc lại trạng thái đã xác nhận; ở đây mô phỏng đúng bước đọc lại đó.
+        // (Hai request chạy song song thật cần SQL Server: xem backend/database/migrations/README.md.)
+        StockIssueItem item = arrangeConfirm(5, 12, 3, null);
+
+        service.confirmUsage(ISSUE_ID, PART_ID, new ConfirmUsageRequest(3, null), TECHNICIAN_ID, true);
+        assertThrows(ConflictException.class,
+                () -> service.confirmUsage(ISSUE_ID, PART_ID, new ConfirmUsageRequest(3, null), TECHNICIAN_ID, true));
+
+        verify(sparePartRepository, times(1)).updateStockQuantity(PART_ID, 9);
+        verify(movementRepository, times(1)).save(any(StockMovement.class));
+        verify(repairPartItemRepository, times(1)).saveAndFlush(any(RepairPartItem.class));
+        assertTrue(item.isConfirmed());
+    }
+
+    @Test
+    void technicianCanReadAnIssueRelatedToThem() {
+        when(issueRepository.countRelatedToTechnician(ISSUE_ID, TECHNICIAN_ID)).thenReturn(1L);
+        when(issueRepository.findById(ISSUE_ID)).thenReturn(Optional.of(issue()));
+        when(itemRepository.findByIssueId(ISSUE_ID)).thenReturn(List.of(issueItem(5)));
+
+        assertEquals(ISSUE_ID, service.get(ISSUE_ID, TECHNICIAN_ID).id());
+    }
+
+    @Test
+    void technicianCannotReadAnUnrelatedIssueAndNoDataIsLoaded() {
+        when(issueRepository.countRelatedToTechnician(ISSUE_ID, 99)).thenReturn(0L);
+
+        assertThrows(AccessDeniedException.class, () -> service.get(ISSUE_ID, 99));
+        verify(issueRepository, never()).findById(any());
+        verify(itemRepository, never()).findByIssueId(any());
+    }
+
+    @Test
+    void staffReadIssuesWithoutARelationCheck() {
+        when(issueRepository.findById(ISSUE_ID)).thenReturn(Optional.of(issue()));
+        when(itemRepository.findByIssueId(ISSUE_ID)).thenReturn(List.of());
+
+        assertEquals(ISSUE_ID, service.get(ISSUE_ID).id());
+        verify(issueRepository, never()).countRelatedToTechnician(any(), anyInt());
     }
 
     @Test
@@ -360,7 +418,7 @@ class StockIssueServiceTest {
     /** Dựng ngữ cảnh xác nhận hợp lệ: đã phân công, báo giá đã xác nhận, phiếu sửa chữa đang sửa. */
     private StockIssueItem arrangeConfirm(int issued, int stock, long confirmedTotal, RepairPartItem existingLine) {
         StockIssueItem item = issueItem(issued);
-        lenient().when(itemRepository.findById(new StockIssueItem.Key(ISSUE_ID, PART_ID))).thenReturn(Optional.of(item));
+        lenient().when(itemRepository.findForUpdate(ISSUE_ID, PART_ID)).thenReturn(Optional.of(item));
         lenient().when(issueRepository.findById(ISSUE_ID)).thenReturn(Optional.of(issue()));
         lenient().when(itemRepository.countAssignment(ORDER_ID, TECHNICIAN_ID)).thenReturn(1L);
         lenient().when(itemRepository.countConfirmedQuotation(ORDER_ID)).thenReturn(1L);

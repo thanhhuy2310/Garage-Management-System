@@ -143,7 +143,7 @@ public class StockIssueService {
             Integer issueId, Integer partId, ConfirmUsageRequest request,
             Integer callerEmployeeId, boolean callerIsTechnician
     ) {
-        StockIssueItem item = itemRepository.findById(new StockIssueItem.Key(issueId, partId))
+        StockIssueItem item = itemRepository.findForUpdate(issueId, partId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chi tiết phiếu xuất."));
         if (item.isConfirmed()) {
             throw new ConflictException("Phụ tùng này đã được xác nhận sử dụng.");
@@ -201,6 +201,15 @@ public class StockIssueService {
 
     @Transactional(readOnly = true)
     public IssueResponse get(Integer id) {
+        return get(id, 0);
+    }
+
+    /** technicianId = 0: không giới hạn; khác 0: chỉ được xem phiếu liên quan tới KTV đó, ngược lại AccessDenied (403). */
+    @Transactional(readOnly = true)
+    public IssueResponse get(Integer id, int technicianId) {
+        if (technicianId != 0 && issueRepository.countRelatedToTechnician(id, technicianId) == 0) {
+            throw new AccessDeniedException("Bạn không có quyền xem phiếu xuất này.");
+        }
         StockIssue issue = issueRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu xuất kho."));
         List<StockIssueItem> items = itemRepository.findByIssueId(id);

@@ -22,4 +22,11 @@ public interface StockIssueRepository extends JpaRepository<StockIssue, Integer>
             + "OR EXISTS (SELECT 1 FROM PhanCongKyThuatVien pc WHERE pc.MaPhieuSuaChua = px.MaPhieuSuaChua "
             + "AND pc.MaKyThuatVien = :technicianId)", nativeQuery = true)
     List<Integer> findIdsRelatedToTechnician(@Param("technicianId") Integer technicianId);
+
+    // Một phiếu xuất có liên quan tới KTV không (cùng điều kiện với findIdsRelatedToTechnician).
+    @Query(value = "SELECT COUNT(1) FROM PhieuXuatKho px WHERE px.MaPhieuXuat = :issueId "
+            + "AND (px.MaKyThuatVienYeuCau = :technicianId "
+            + "OR EXISTS (SELECT 1 FROM PhanCongKyThuatVien pc WHERE pc.MaPhieuSuaChua = px.MaPhieuSuaChua "
+            + "AND pc.MaKyThuatVien = :technicianId))", nativeQuery = true)
+    long countRelatedToTechnician(@Param("issueId") Integer issueId, @Param("technicianId") Integer technicianId);
 }

@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -352,6 +353,84 @@ class WarehouseApiTest {
                 .andExpect(status().isOk());
     }
 
+    // ------------------------------------------------------------------ CHI TIẾT PHIẾU XUẤT THEO QUYỀN
+
+    @Test
+    @WithMockUser(username = "ktv", roles = "TECHNICIAN")
+    void technicianReadsAnIssueRelatedToThem() throws Exception {
+        account("ktv", AccountRole.TECHNICIAN, 2);
+        stubIssueDetail();
+        when(stockIssueRepository.countRelatedToTechnician(1, 2)).thenReturn(1L);
+
+        mockMvc.perform(get("/api/warehouse/exports/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.items[0].partId").value(5));
+    }
+
+    @Test
+    @WithMockUser(username = "ktv", roles = "TECHNICIAN")
+    void technicianGets403AndNoDataForAnUnrelatedIssue() throws Exception {
+        account("ktv", AccountRole.TECHNICIAN, 2);
+        stubIssueDetail();
+        when(stockIssueRepository.countRelatedToTechnician(1, 2)).thenReturn(0L);
+
+        mockMvc.perform(get("/api/warehouse/exports/1"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("Thay bugi"))));
+        verify(stockIssueRepository, never()).findById(any());
+    }
+
+    @Test
+    @WithMockUser(username = "quanly", roles = "MANAGER")
+    void managerReadsAnyIssue() throws Exception {
+        account("quanly", AccountRole.MANAGER, 1);
+        stubIssueDetail();
+
+        mockMvc.perform(get("/api/warehouse/exports/1")).andExpect(status().isOk());
+        verify(stockIssueRepository, never()).countRelatedToTechnician(any(), any());
+    }
+
+    @Test
+    @WithMockUser(username = "kho", roles = "WAREHOUSE")
+    void warehouseReadsAnyIssue() throws Exception {
+        account("kho", AccountRole.WAREHOUSE, 7);
+        stubIssueDetail();
+
+        mockMvc.perform(get("/api/warehouse/exports/1")).andExpect(status().isOk());
+        verify(stockIssueRepository, never()).countRelatedToTechnician(any(), any());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void adminReadsAnyIssue() throws Exception {
+        account("admin", AccountRole.ADMIN, null);
+        stubIssueDetail();
+
+        mockMvc.perform(get("/api/warehouse/exports/1")).andExpect(status().isOk());
+        verify(stockIssueRepository, never()).countRelatedToTechnician(any(), any());
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerCannotReadIssues() throws Exception {
+        mockMvc.perform(get("/api/warehouse/exports/1")).andExpect(status().isForbidden());
+    }
+
+    private void stubIssueDetail() {
+        StockIssue issue = new StockIssue();
+        issue.setId(1);
+        issue.setRepairOrderId(9);
+        issue.setReason("Thay bugi");
+        StockIssueItem item = new StockIssueItem();
+        item.setIssueId(1);
+        item.setPartId(5);
+        item.setQuantity(5);
+        item.setUnitPrice(new BigDecimal("180000.00"));
+        when(stockIssueRepository.findById(1)).thenReturn(Optional.of(issue));
+        when(stockIssueItemRepository.findByIssueId(1)).thenReturn(List.of(item));
+    }
+
     // ------------------------------------------------------------------ KIỂM KÊ
 
     @Test
@@ -468,7 +547,7 @@ class WarehouseApiTest {
         issue.setRepairOrderId(9);
         issue.setReason("Thay bugi");
 
-        when(stockIssueItemRepository.findById(new StockIssueItem.Key(1, 5))).thenReturn(Optional.of(item));
+        when(stockIssueItemRepository.findForUpdate(1, 5)).thenReturn(Optional.of(item));
         when(stockIssueRepository.findById(1)).thenReturn(Optional.of(issue));
         when(stockIssueItemRepository.countAssignment(9, 2)).thenReturn(1L);
         when(stockIssueItemRepository.countConfirmedQuotation(9)).thenReturn(1L);

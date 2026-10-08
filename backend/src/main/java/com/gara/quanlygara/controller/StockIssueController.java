@@ -47,8 +47,10 @@ public class StockIssueController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<IssueResponse>> get(@PathVariable Integer id) {
-        return ResponseEntity.ok(ApiResponse.success("Lấy phiếu xuất thành công.", issueService.get(id)));
+    public ResponseEntity<ApiResponse<IssueResponse>> get(@PathVariable Integer id, Authentication authentication) {
+        // Kỹ thuật viên chỉ xem được phiếu xuất liên quan tới mình; backend trả 403 nếu không liên quan.
+        int technicianId = staffContext.isTechnician(authentication) ? staffContext.employeeId(authentication) : 0;
+        return ResponseEntity.ok(ApiResponse.success("Lấy phiếu xuất thành công.", issueService.get(id, technicianId)));
     }
 
     @PostMapping

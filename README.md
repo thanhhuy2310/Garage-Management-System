@@ -34,6 +34,21 @@ backend/database/QuanLyGaraOTo.sql
 
 Script sẽ tạo database `QuanLyGaraOTo` cùng dữ liệu cần thiết để chạy thử.
 
+<!-- TV3-TUAN8-AUDIT:db-setup BEGIN -->
+### Cập nhật cấu trúc database (bắt buộc)
+
+Sau khi chạy `QuanLyGaraOTo.sql`, chạy tiếp các migration trong `backend/database/migrations/` **theo thứ tự**:
+
+1. `V001__add_customer_status.sql`
+2. `V002__warehouse_actual_used_and_stock_check.sql` — bắt buộc cho kho (Tuần 8): thêm `SoLuongThucDung`, `SoLuongHoanTra`, bảng `PhieuKiemKe`/`ChiTietKiemKe`; sửa `sp_XacNhanSuDungPhuTung` (trừ tồn theo số lượng thực dùng) và `sp_KiemKeTonKho` (chỉ ghi nhận, không tự đổi tồn; chỉ MANAGER duyệt qua ứng dụng).
+3. `V003__confirm_usage_row_lock.sql` — khóa dòng khi xác nhận thực dùng, chặn xác nhận trùng đồng thời.
+
+Kiểm thử nghiệp vụ kho (tùy chọn): chạy `backend/database/Test_Warehouse.sql` trong SQL Server Management Studio, xem bảng PASS/FAIL (script tự dọn dữ liệu test).
+Chi tiết từng file: `backend/database/migrations/README.md`.
+
+Kho phụ tùng (tồn kho, nhập kho, xuất/cấp phát, xác nhận thực dùng, kiểm kê có phê duyệt, lịch sử biến động) **đã có API thật** từ Tuần 8; trang Kho trên website dùng API này, không còn dữ liệu mẫu.
+<!-- TV3-TUAN8-AUDIT:db-setup END -->
+
 ## 2. Chạy backend
 
 Sao chép file:
