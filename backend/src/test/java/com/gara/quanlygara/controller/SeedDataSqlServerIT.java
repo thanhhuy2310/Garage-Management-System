@@ -52,6 +52,20 @@ class SeedDataSqlServerIT {
                 SELECT COUNT(*) FROM PhieuTiepNhan t WHERE t.GhiChu LIKE 'HUY-SEED-QA-%'
                 AND NOT EXISTS (SELECT 1 FROM PhieuSuaChua p WHERE p.MaTiepNhan=t.MaTiepNhan)
                 """));
+        // Reproduce old display labels, then verify the cleanup keeps IDs, prices and links.
+        jdbc.update("UPDATE KhachHang SET HoTen=N'[TEST HUY] '+HoTen WHERE Email LIKE '%huy-seed-qa@example.test'");
+        jdbc.update("UPDATE NhanVien SET HoTen=N'[TEST HUY] '+HoTen WHERE Email LIKE '%huy-seed-qa@example.test'");
+        jdbc.update("UPDATE DichVu SET TenDichVu=N'[TEST HUY] '+TenDichVu, MoTa=N'Bộ kiểm thử sửa chữa và thanh toán của Huy.' WHERE TenDichVu LIKE N'[[]TEST HUY QA] %'");
+        String cleanup = Files.readString(Path.of("database/seeds/Normalize_Huy_Display_Data.sql"), StandardCharsets.UTF_8)
+                .replace("DECLARE @DisplayPrefix NVARCHAR(30) = N'';",
+                        "DECLARE @DisplayPrefix NVARCHAR(30) = N'[TEST HUY QA] ';")
+                .replace("huy-test@", "huy-seed-qa@");
+        for (int run = 0; run < 2; run++) {
+            for (String batch : cleanup.split("(?im)^GO\\s*$")) if (!batch.isBlank()) jdbc.execute(batch);
+        }
+        assertEquals(10, count("SELECT COUNT(*) FROM DichVu WHERE TenDichVu LIKE N'[[]TEST HUY QA] %' AND MoTa NOT LIKE N'%kiểm thử%'"));
+        assertEquals(8, count("SELECT COUNT(*) FROM KhachHang WHERE HoTen LIKE N'[[]TEST HUY QA] %'"));
+        assertEquals(4, count("SELECT COUNT(*) FROM NhanVien WHERE HoTen LIKE N'[[]TEST HUY QA] %'"));
         int logs = count("SELECT COUNT(*) FROM NhatKySuaChua");
         runSeed();
         assertEquals(originalReceptions + 24, count("SELECT COUNT(*) FROM PhieuTiepNhan"));
@@ -124,7 +138,9 @@ class SeedDataSqlServerIT {
 
     private void runSeed() throws Exception {
         String sql = Files.readString(Path.of("database/seeds/Seed_Huy_Repair_Billing.sql"), StandardCharsets.UTF_8)
-                .replace("[TEST HUY]", "[TEST HUY QA]").replace("099970", "099971")
+                .replace("DECLARE @DisplayPrefix NVARCHAR(30) = N'';",
+                        "DECLARE @DisplayPrefix NVARCHAR(30) = N'[TEST HUY QA] ';")
+                .replace("099970", "099971")
                 .replace("huy-test@", "huy-seed-qa@").replace("test_huy_", "qa_huy_seed_")
                 .replace("51H-990.", "51H-991.").replace("HUY-TEST-V1-", "HUY-SEED-QA-");
         for (String batch : sql.split("(?im)^GO\\s*$")) {

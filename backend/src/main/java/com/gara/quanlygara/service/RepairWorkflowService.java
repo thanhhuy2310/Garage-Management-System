@@ -164,6 +164,9 @@ public class RepairWorkflowService {
     private void addLine(Integer orderId, RepairRequests.ServiceLine line) {
         var service = services.findById(line.serviceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dịch vụ."));
+        if (!service.isActive()) {
+            throw new ConflictException("Dịch vụ đã ngừng sử dụng. Vui lòng chọn dịch vụ khác.");
+        }
         jdbc.update("""
                 INSERT INTO ChiTietDichVu (MaPhieuSuaChua, MaDichVu, SoLuong, DonGia, TrangThai)
                 VALUES (?, ?, ?, ?, N'CHO_SUA')

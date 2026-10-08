@@ -1,5 +1,5 @@
 -- DỮ LIỆU TEST LOCAL: dịch vụ, phân công KTV, sửa chữa, hóa đơn, Flutter theo dõi.
--- Chạy V001, V002, V003 trước. KHÔNG chạy trên database vận hành thật.
+-- Chạy V001 đến V004 trước. KHÔNG chạy trên database vận hành thật.
 -- Tài khoản test_huy_* dùng mật khẩu demo123. Không có tài khoản ngân hàng giả.
 -- Chỉ INSERT; không xóa, đổi mật khẩu hoặc đặt lại tiến độ khi chạy lại.
 -- Chi tiết các ca thử và tài khoản: README.md trong cùng thư mục.
@@ -12,7 +12,8 @@ IF OBJECT_ID(N'dbo.NhatKySuaChua', N'U') IS NULL
     OR OBJECT_ID(N'dbo.TaiKhoanNganHangGara', N'U') IS NULL
     OR COL_LENGTH(N'dbo.ThanhToan', N'MaYeuCau') IS NULL
     OR COL_LENGTH(N'dbo.KhachHang', N'TrangThai') IS NULL
-    THROW 51000, N'Cần chạy migrations V001, V002, V003 trước khi thêm dữ liệu test.', 1;
+    OR COL_LENGTH(N'dbo.DichVu', N'TrangThai') IS NULL
+    THROW 51000, N'Cần chạy migrations V001 đến V004 trước khi thêm dữ liệu test.', 1;
 
 BEGIN TRY
     BEGIN TRANSACTION;
@@ -23,6 +24,9 @@ BEGIN TRY
     IF @LockResult < 0 THROW 51001, N'Bộ dữ liệu test đang được nạp ở phiên khác.', 1;
 
     DECLARE @Now DATETIME2(0) = SYSDATETIME();
+    DECLARE @DisplayPrefix NVARCHAR(30) = N'';
+    IF @DisplayPrefix = N'' AND EXISTS (SELECT 1 FROM dbo.DichVu WHERE TenDichVu LIKE N'[[]TEST HUY] %')
+        THROW 51010, N'Chạy Normalize_Huy_Display_Data.sql trước để đổi tên dữ liệu đã nạp từ bản cũ.', 1;
     -- BCrypt của demo123, chỉ dùng cho các tài khoản TEST mới bên dưới.
     DECLARE @PasswordHash VARCHAR(255) = '$2a$10$cmQuil5sXrlLUZ540DVtcuEAIKD4PNfBsj9F0Z2iCby2wUQmaWppK';
     DECLARE @Customers TABLE (
@@ -30,21 +34,21 @@ BEGIN TRY
         Email VARCHAR(150), TenDangNhap VARCHAR(100), MaKhachHang INT
     );
     INSERT INTO @Customers (Stt, HoTen, DienThoai, Email, TenDangNhap) VALUES
-    (1, N'[TEST HUY] Nguyễn Minh Huy', '0999700001', 'kh01.huy-test@example.test', 'test_huy_khach01'),
-    (2, N'[TEST HUY] Trần Ngọc Anh',   '0999700002', 'kh02.huy-test@example.test', 'test_huy_khach02'),
-    (3, N'[TEST HUY] Lê Hoàng Nam',    '0999700003', 'kh03.huy-test@example.test', 'test_huy_khach03'),
-    (4, N'[TEST HUY] Phạm Thu Hà',     '0999700004', 'kh04.huy-test@example.test', 'test_huy_khach04'),
-    (5, N'[TEST HUY] Võ Quốc Bảo',     '0999700005', 'kh05.huy-test@example.test', 'test_huy_khach05'),
-    (6, N'[TEST HUY] Đặng Mỹ Linh',    '0999700006', 'kh06.huy-test@example.test', 'test_huy_khach06'),
-    (7, N'[TEST HUY] Bùi Thanh Tùng',  '0999700007', 'kh07.huy-test@example.test', 'test_huy_khach07'),
-    (8, N'[TEST HUY] Đỗ Khánh Vy',     '0999700008', 'kh08.huy-test@example.test', 'test_huy_khach08');
+    (1, N'Nguyễn Minh Huy', '0999700001', 'kh01.huy-test@example.test', 'test_huy_khach01'),
+    (2, N'Trần Ngọc Anh',   '0999700002', 'kh02.huy-test@example.test', 'test_huy_khach02'),
+    (3, N'Lê Hoàng Nam',    '0999700003', 'kh03.huy-test@example.test', 'test_huy_khach03'),
+    (4, N'Phạm Thu Hà',     '0999700004', 'kh04.huy-test@example.test', 'test_huy_khach04'),
+    (5, N'Võ Quốc Bảo',     '0999700005', 'kh05.huy-test@example.test', 'test_huy_khach05'),
+    (6, N'Đặng Mỹ Linh',    '0999700006', 'kh06.huy-test@example.test', 'test_huy_khach06'),
+    (7, N'Bùi Thanh Tùng',  '0999700007', 'kh07.huy-test@example.test', 'test_huy_khach07'),
+    (8, N'Đỗ Khánh Vy',     '0999700008', 'kh08.huy-test@example.test', 'test_huy_khach08');
 
     -- Không gắn tài khoản test vào khách thật nếu số điện thoại vô tình bị trùng.
     IF EXISTS (SELECT 1 FROM @Customers s JOIN dbo.KhachHang k ON k.SoDienThoai = s.DienThoai
                WHERE ISNULL(k.Email, '') <> s.Email)
         THROW 51002, N'Số điện thoại test trùng khách khác. Dừng để bảo vệ dữ liệu.', 1;
     INSERT INTO dbo.KhachHang (HoTen, SoDienThoai, Email, DiaChi, TrangThai)
-    SELECT s.HoTen, s.DienThoai, s.Email, N'TP. Hồ Chí Minh — dữ liệu kiểm thử của Huy', 1
+    SELECT @DisplayPrefix + s.HoTen, s.DienThoai, s.Email, N'TP. Hồ Chí Minh', 1
     FROM @Customers s WHERE NOT EXISTS (SELECT 1 FROM dbo.KhachHang k WHERE k.SoDienThoai = s.DienThoai);
     UPDATE s SET MaKhachHang = k.MaKhachHang
     FROM @Customers s JOIN dbo.KhachHang k ON k.SoDienThoai = s.DienThoai;
@@ -54,15 +58,15 @@ BEGIN TRY
         ChucVu NVARCHAR(100), TenDangNhap VARCHAR(100), VaiTro NVARCHAR(50), MaNhanVien INT
     );
     INSERT INTO @Staff (Stt, HoTen, DienThoai, Email, ChucVu, TenDangNhap, VaiTro) VALUES
-    (1, N'[TEST HUY] Quản lý', '0999700101', 'manager.huy-test@example.test', N'QUAN_LY', 'test_huy_manager', N'MANAGER'),
-    (2, N'[TEST HUY] Tiếp nhận', '0999700102', 'reception.huy-test@example.test', N'NHAN_VIEN_TIEP_NHAN', 'test_huy_tiepnhan', N'RECEPTIONIST'),
-    (3, N'[TEST HUY] KTV Minh', '0999700103', 'ktv01.huy-test@example.test', N'KY_THUAT_VIEN', 'test_huy_ktv01', N'TECHNICIAN'),
-    (4, N'[TEST HUY] KTV Phúc', '0999700104', 'ktv02.huy-test@example.test', N'KY_THUAT_VIEN', 'test_huy_ktv02', N'TECHNICIAN');
+    (1, N'Quản lý', '0999700101', 'manager.huy-test@example.test', N'QUAN_LY', 'test_huy_manager', N'MANAGER'),
+    (2, N'Tiếp nhận', '0999700102', 'reception.huy-test@example.test', N'NHAN_VIEN_TIEP_NHAN', 'test_huy_tiepnhan', N'RECEPTIONIST'),
+    (3, N'KTV Minh', '0999700103', 'ktv01.huy-test@example.test', N'KY_THUAT_VIEN', 'test_huy_ktv01', N'TECHNICIAN'),
+    (4, N'KTV Phúc', '0999700104', 'ktv02.huy-test@example.test', N'KY_THUAT_VIEN', 'test_huy_ktv02', N'TECHNICIAN');
     IF EXISTS (SELECT s.Email FROM @Staff s JOIN dbo.NhanVien n ON n.Email = s.Email
                GROUP BY s.Email HAVING COUNT(*) > 1)
         THROW 51003, N'Email nhân viên test bị trùng nhiều bản ghi. Cần kiểm tra trước.', 1;
     INSERT INTO dbo.NhanVien (HoTen, SoDienThoai, Email, ChucVu)
-    SELECT s.HoTen, s.DienThoai, s.Email, s.ChucVu FROM @Staff s
+    SELECT @DisplayPrefix + s.HoTen, s.DienThoai, s.Email, s.ChucVu FROM @Staff s
     WHERE NOT EXISTS (SELECT 1 FROM dbo.NhanVien n WHERE n.Email = s.Email);
     UPDATE s SET MaNhanVien = n.MaNhanVien FROM @Staff s JOIN dbo.NhanVien n ON n.Email = s.Email;
     INSERT INTO dbo.KyThuatVien (MaNhanVien)
@@ -81,24 +85,25 @@ BEGIN TRY
     SELECT s.TenDangNhap, @PasswordHash, s.VaiTro, 1, NULL, s.MaNhanVien FROM @Staff s
     WHERE NOT EXISTS (SELECT 1 FROM dbo.TaiKhoan a WHERE a.TenDangNhap = s.TenDangNhap);
 
-    DECLARE @Services TABLE (Stt INT PRIMARY KEY, Ten NVARCHAR(150), Loai NVARCHAR(100), Gia DECIMAL(18,2), MaDichVu INT);
-    INSERT INTO @Services (Stt, Ten, Loai, Gia) VALUES
-    (1, N'[TEST HUY] Kiểm tra tổng quát', N'KIEM_TRA', 150000),
-    (2, N'[TEST HUY] Thay dầu động cơ', N'BAO_DUONG', 350000),
-    (3, N'[TEST HUY] Bảo dưỡng định kỳ', N'BAO_DUONG', 600000),
-    (4, N'[TEST HUY] Kiểm tra hệ thống phanh', N'KIEM_TRA', 250000),
-    (5, N'[TEST HUY] Công thay má phanh', N'SUA_CHUA', 450000),
-    (6, N'[TEST HUY] Kiểm tra điều hòa', N'KIEM_TRA', 200000),
-    (7, N'[TEST HUY] Vệ sinh dàn lạnh', N'BAO_DUONG', 500000),
-    (8, N'[TEST HUY] Cân chỉnh thước lái', N'SUA_CHUA', 400000),
-    (9, N'[TEST HUY] Đọc lỗi điện tử', N'KIEM_TRA', 220000),
-    (10, N'[TEST HUY] Kiểm tra sau bảo hành miễn phí', N'KIEM_TRA', 0);
-    IF EXISTS (SELECT s.Ten FROM @Services s JOIN dbo.DichVu d ON d.TenDichVu = s.Ten GROUP BY s.Ten HAVING COUNT(*) > 1)
+    DECLARE @Services TABLE (Stt INT PRIMARY KEY, Ten NVARCHAR(150), Loai NVARCHAR(100), Gia DECIMAL(18,2), MoTa NVARCHAR(500), MaDichVu INT);
+    INSERT INTO @Services (Stt, Ten, Loai, Gia, MoTa) VALUES
+    (1, N'Kiểm tra tổng quát', N'Kiểm tra', 150000, N'Kiểm tra tình trạng vận hành và các hạng mục an toàn cơ bản của xe.'),
+    (2, N'Thay dầu động cơ', N'Bảo dưỡng', 350000, N'Thay dầu phù hợp với động cơ và kiểm tra mức dầu sau khi thay.'),
+    (3, N'Bảo dưỡng định kỳ', N'Bảo dưỡng', 600000, N'Kiểm tra và bảo dưỡng các hạng mục theo số km hoặc thời gian sử dụng.'),
+    (4, N'Kiểm tra hệ thống phanh', N'Kiểm tra', 250000, N'Kiểm tra má phanh, đĩa phanh, dầu phanh và khả năng hoạt động của hệ thống.'),
+    (5, N'Công thay má phanh', N'Sửa chữa', 450000, N'Thay má phanh và kiểm tra lại độ an toàn trước khi bàn giao xe.'),
+    (6, N'Kiểm tra điều hòa', N'Kiểm tra', 200000, N'Kiểm tra khả năng làm lạnh, lưu lượng gió và tình trạng hệ thống điều hòa.'),
+    (7, N'Vệ sinh dàn lạnh', N'Bảo dưỡng', 500000, N'Vệ sinh dàn lạnh, loại bỏ bụi bẩn và hạn chế mùi khó chịu trong xe.'),
+    (8, N'Cân chỉnh thước lái', N'Sửa chữa', 400000, N'Kiểm tra và cân chỉnh góc đặt bánh xe để xe vận hành ổn định.'),
+    (9, N'Đọc lỗi điện tử', N'Kiểm tra', 220000, N'Kết nối thiết bị chẩn đoán để đọc mã lỗi và kiểm tra hệ thống điện tử.'),
+    (10, N'Kiểm tra sau bảo hành miễn phí', N'Kiểm tra', 0, N'Kiểm tra lại hạng mục đã sửa chữa theo chính sách bảo hành của gara.');
+    UPDATE @Services SET Ten = @DisplayPrefix + Ten;
+    IF EXISTS (SELECT s.Ten FROM @Services s JOIN dbo.DichVu d ON d.TenDichVu COLLATE Latin1_General_100_BIN2 = s.Ten GROUP BY s.Ten HAVING COUNT(*) > 1)
         THROW 51005, N'Tên dịch vụ test trùng nhiều bản ghi. Cần kiểm tra trước.', 1;
     INSERT INTO dbo.DichVu (TenDichVu, LoaiDichVu, DonGia, MoTa)
-    SELECT s.Ten, s.Loai, s.Gia, N'Bộ kiểm thử sửa chữa và thanh toán của Huy.' FROM @Services s
-    WHERE NOT EXISTS (SELECT 1 FROM dbo.DichVu d WHERE d.TenDichVu = s.Ten);
-    UPDATE s SET MaDichVu = d.MaDichVu FROM @Services s JOIN dbo.DichVu d ON d.TenDichVu = s.Ten;
+    SELECT s.Ten, s.Loai, s.Gia, s.MoTa FROM @Services s
+    WHERE NOT EXISTS (SELECT 1 FROM dbo.DichVu d WHERE d.TenDichVu COLLATE Latin1_General_100_BIN2 = s.Ten);
+    UPDATE s SET MaDichVu = d.MaDichVu FROM @Services s JOIN dbo.DichVu d ON d.TenDichVu COLLATE Latin1_General_100_BIN2 = s.Ten;
 
     -- Mỗi ca có một biển số riêng. Tám ca đầu cố ý CHƯA có phiếu sửa chữa.
     DECLARE @Cases TABLE (

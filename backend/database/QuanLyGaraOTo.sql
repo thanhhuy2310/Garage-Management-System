@@ -110,6 +110,7 @@ CREATE TABLE DichVu (
     LoaiDichVu         NVARCHAR(100) NULL,
     DonGia             DECIMAL(18,2) NOT NULL,
     MoTa               NVARCHAR(500) NULL,
+    TrangThai          BIT NOT NULL CONSTRAINT DF_DichVu_TrangThai DEFAULT 1,
 
     CONSTRAINT CK_DichVu_DonGia CHECK (DonGia >= 0)
 );
@@ -1132,14 +1133,16 @@ VALUES
 ('admin',     '$2a$10$cmQuil5sXrlLUZ540DVtcuEAIKD4PNfBsj9F0Z2iCby2wUQmaWppK', N'ADMIN',        1, NULL, 6);
 GO
 
-INSERT INTO DichVu (TenDichVu, LoaiDichVu, DonGia, MoTa)
+-- Dịch vụ đời đầu chỉ giữ cho các lịch hẹn/phiếu cũ bên dưới.
+-- Danh mục đang dùng được thêm từ seeds/Seed_Huy_Repair_Billing.sql.
+INSERT INTO DichVu (TenDichVu, LoaiDichVu, DonGia, MoTa, TrangThai)
 VALUES
-(N'Thay dau dong co', N'BAO_DUONG', 450000, N'Thay dau dong co theo dung cap dau khuyen nghi.'),
-(N'Bao duong dinh ky', N'BAO_DUONG', 1200000, N'Kiem tra tong quat cac hang muc bao duong dinh ky.'),
-(N'Kiem tra he thong phanh', N'KIEM_TRA', 300000, N'Kiem tra dia phanh, ma phanh, dau phanh va he thong lien quan.'),
-(N'Thay ma phanh truoc', N'SUA_CHUA', 500000, N'Cong thay ma phanh truoc.'),
-(N'Ve sinh kim phun', N'BAO_DUONG', 700000, N'Ve sinh kim phun nhien lieu.'),
-(N'Kiem tra dieu hoa', N'KIEM_TRA', 250000, N'Kiem tra kha nang lam lanh va cac thanh phan co ban cua he thong dieu hoa.');
+(N'Thay dau dong co', N'BAO_DUONG', 450000, N'Thay dau dong co theo dung cap dau khuyen nghi.', 0),
+(N'Bao duong dinh ky', N'BAO_DUONG', 1200000, N'Kiem tra tong quat cac hang muc bao duong dinh ky.', 0),
+(N'Kiem tra he thong phanh', N'KIEM_TRA', 300000, N'Kiem tra dia phanh, ma phanh, dau phanh va he thong lien quan.', 0),
+(N'Thay ma phanh truoc', N'SUA_CHUA', 500000, N'Cong thay ma phanh truoc.', 0),
+(N'Ve sinh kim phun', N'BAO_DUONG', 700000, N'Ve sinh kim phun nhien lieu.', 0),
+(N'Kiem tra dieu hoa', N'KIEM_TRA', 250000, N'Kiem tra kha nang lam lanh va cac thanh phan co ban cua he thong dieu hoa.', 0);
 GO
 
 INSERT INTO Kho (TenKho, DiaChi)

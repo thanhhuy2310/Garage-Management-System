@@ -93,6 +93,20 @@ class RepairBillingWorkflowTest extends ApiTestSupport {
     }
 
     @Test @WithMockUser(roles = "MANAGER")
+    void retiredServiceCannotBeAddedButExistingInvoiceStillIncludesIt() throws Exception {
+        jdbc.update("UPDATE DichVu SET TrangThai=0 WHERE MaDichVu IN (9201,9202)");
+        mockMvc.perform(post("/api/repair-orders").contentType(APPLICATION_JSON)
+                        .content("{\"receptionId\":9203,\"services\":[{\"serviceId\":9202,\"quantity\":1}]}"))
+                .andExpect(status().isConflict());
+        mockMvc.perform(post("/api/repair-orders/9201/services").contentType(APPLICATION_JSON)
+                        .content("{\"serviceId\":9202,\"quantity\":1}"))
+                .andExpect(status().isConflict());
+        createInvoice().andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.invoice.total").value(200000))
+                .andExpect(jsonPath("$.data.lines.length()").value(2));
+    }
+
+    @Test @WithMockUser(roles = "MANAGER")
     void invoiceUsesStoredLaborAndPartsPricesNotCurrentCatalogPrice() throws Exception {
         createInvoice().andExpect(status().isCreated()).andExpect(jsonPath("$.data.invoice.total").value(200000))
                 .andExpect(jsonPath("$.data.lines.length()").value(2));

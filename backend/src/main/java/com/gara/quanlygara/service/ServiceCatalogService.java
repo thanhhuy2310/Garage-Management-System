@@ -25,8 +25,8 @@ public class ServiceCatalogService {
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
         String search = keyword == null ? "" : keyword.strip();
         List<GarageService> services = search.isEmpty()
-                ? serviceRepository.findAll(sort)
-                : serviceRepository.findByNameContainingIgnoreCaseOrTypeContainingIgnoreCase(search, search, sort);
+                ? serviceRepository.findByActiveTrue(sort)
+                : serviceRepository.findByActiveTrueAndNameContainingIgnoreCaseOrActiveTrueAndTypeContainingIgnoreCase(search, search, sort);
         return services.stream().map(ServiceResponse::from).toList();
     }
 

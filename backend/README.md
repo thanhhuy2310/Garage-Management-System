@@ -4,9 +4,10 @@ Thư mục này chứa API của hệ thống gara. Backend dùng Java 21, Sprin
 
 ## Cách chạy
 
-1. Chạy file `database/QuanLyGaraOTo.sql` trong SQL Server Management Studio.
-2. Sao chép `.env.example` thành `.env` và điền thông tin kết nối SQL Server.
-3. Chạy lệnh:
+1. Nếu chưa có database, chạy `database/QuanLyGaraOTo.sql` trong SQL Server Management Studio. Database đang có dữ liệu thì không chạy lại file này.
+2. Chọn database `QuanLyGaraOTo`, chạy các file trong `database/migrations` theo thứ tự V001 → V004. Các file chỉ bổ sung bảng/cột, không xóa dữ liệu. Có thể chạy lại an toàn. V004 thêm trạng thái sử dụng cho dịch vụ.
+3. Sao chép `.env.example` thành `.env` và điền thông tin kết nối SQL Server.
+4. Chạy lệnh:
 
 ```powershell
 .\run-dev.ps1

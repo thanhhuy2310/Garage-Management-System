@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 
@@ -30,6 +31,10 @@ public class GarageService {
     @Column(name = "MoTa", length = 500)
     private String description;
 
+    @Column(name = "TrangThai", nullable = false)
+    @ColumnDefault("1")
+    private boolean active = true;
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public String getName() { return name; }
@@ -40,4 +45,6 @@ public class GarageService {
     public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 }

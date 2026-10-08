@@ -2,14 +2,18 @@
 
 File cần chạy: `Seed_Huy_Repair_Billing.sql`.
 
-Bộ này thêm dữ liệu vào SQL thật để web và Flutter gọi API lấy lên. Không thêm mock vào code giao diện. Tên khách, nhân viên và dịch vụ có tiền tố `[TEST HUY]` để phân biệt với dữ liệu khác. Đây vẫn là dữ liệu giả lập để thử chức năng, không phải giao dịch kinh doanh thật.
+Bộ này thêm dữ liệu vào SQL thật để web và Flutter gọi API lấy lên. Không thêm mock vào code giao diện. Tên khách, nhân viên và dịch vụ hiển thị bình thường, không có tiền tố kiểm thử. Đây vẫn là dữ liệu giả lập để thử chức năng, không phải giao dịch kinh doanh thật.
 
 ## Cách nạp
 
-1. Dùng database local `QuanLyGaraOTo`, chạy migrations V001, V002, V003 nếu chưa chạy.
+1. Dùng database local `QuanLyGaraOTo`, chạy migrations V001 → V004 nếu chưa chạy.
 2. Mở file seed trong SSMS và chạy cả file. **Không chạy lại `QuanLyGaraOTo.sql` trên database đã có dữ liệu.**
 3. Bảng kết quả cuối file cho biết mã phiếu và hóa đơn của từng ca. ID được SQL tự cấp, không cố định là 1, 2, 3.
 4. Tải lại trang web. Đăng nhập tài khoản test tương ứng khi kiểm tra phân quyền hoặc mobile.
+
+Nếu đã nạp bản cũ có nhãn `[TEST HUY]`, chạy `Normalize_Huy_Display_Data.sql` trước khi chạy lại seed. File này bỏ tiền tố trong tên, thay mô tả kiểm thử bằng mô tả dịch vụ và cho 6 dịch vụ không dấu cũ ngừng sử dụng. Phiếu sửa chữa, lịch hẹn, hóa đơn vẫn giữ nguyên; không đổi ID, mật khẩu hoặc giá. Khởi động lại backend sau khi cập nhật code và V004.
+
+Tên đăng nhập `test_huy_*` và mã ca trong ghi chú vẫn giữ để không ảnh hưởng tài khoản hay khả năng chạy lại seed. Có thể khôi phục một dịch vụ cũ bằng cách đặt `DichVu.TrangThai = 1` cho đúng mã dịch vụ; không cần phục hồi bản ghi đã xóa.
 
 Lần đầu thêm 8 khách, 4 nhân viên (2 KTV), 12 tài khoản, 10 dịch vụ, 24 xe, 24 phiếu tiếp nhận, 16 phiếu sửa chữa, 4 hóa đơn và 4 lần thanh toán. Có nhật ký từng dịch vụ và thông báo hoàn tất từ trigger.
 

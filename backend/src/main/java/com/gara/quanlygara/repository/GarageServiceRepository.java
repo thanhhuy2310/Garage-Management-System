@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface GarageServiceRepository extends JpaRepository<GarageService, Integer> {
-    List<GarageService> findByNameContainingIgnoreCaseOrTypeContainingIgnoreCase(
+    List<GarageService> findByActiveTrue(Sort sort);
+
+    List<GarageService> findByActiveTrueAndNameContainingIgnoreCaseOrActiveTrueAndTypeContainingIgnoreCase(
             String name, String type, Sort sort);
 }

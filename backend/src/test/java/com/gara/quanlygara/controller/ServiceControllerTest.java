@@ -83,6 +83,24 @@ class ServiceControllerTest extends ApiTestSupport {
 
     @Test
     @WithMockUser(roles = "MANAGER")
+    void inactiveServicesAreHiddenFromListAndSearchButKeepTheirHistoryIdentity() throws Exception {
+        GarageService archived = saveService("Bao duong cu", "Bảo dưỡng");
+        archived.setActive(false);
+        serviceRepository.saveAndFlush(archived);
+        GarageService active = saveService("Bảo dưỡng mới", "Bảo dưỡng");
+        for (String keyword : new String[]{"", "Bao duong cu", "Bảo dưỡng"}) {
+            mockMvc.perform(get("/api/services").param("keyword", keyword))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.data.length()").value(keyword.equals("Bao duong cu") ? 0 : 1));
+        }
+        mockMvc.perform(get("/api/services/{id}", archived.getId()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(archived.getId()));
+        assertEquals(2, serviceRepository.count());
+        assertEquals(true, serviceRepository.findById(active.getId()).orElseThrow().isActive());
+    }
+
+    @Test
+    @WithMockUser(roles = "MANAGER")
     void duplicateNamesAreAllowedByCurrentSchema() throws Exception {
         saveService("Bảo dưỡng", "Định kỳ");
         mockMvc.perform(post("/api/services").contentType(APPLICATION_JSON)
