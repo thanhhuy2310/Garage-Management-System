@@ -16,7 +16,7 @@ test("real SQL services and repair orders render without mock data", async ({
   })
   expect(login.ok()).toBe(true)
   const { data: session } = await login.json()
-  expect(["MANAGER", "ADMIN"]).toContain(session.account.role)
+  expect(session.account.role).toBe("MANAGER")
   await page.addInitScript((session) => {
     localStorage.setItem("garage_access_token", session.accessToken)
     localStorage.setItem("garage_account", JSON.stringify(session.account))

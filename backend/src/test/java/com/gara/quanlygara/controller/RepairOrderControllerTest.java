@@ -59,7 +59,7 @@ class RepairOrderControllerTest extends ApiTestSupport {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"ADMIN", "MANAGER", "RECEPTIONIST"})
+    @ValueSource(strings = {"MANAGER", "RECEPTIONIST"})
     void staffCanReadRealVehicleAndServiceData(String role) throws Exception {
         mockMvc.perform(get("/api/repair-orders").with(user("staff").roles(role)))
                 .andExpect(status().isOk())
@@ -101,7 +101,7 @@ class RepairOrderControllerTest extends ApiTestSupport {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"CUSTOMER", "WAREHOUSE"})
+    @ValueSource(strings = {"ADMIN", "CUSTOMER", "WAREHOUSE"})
     void otherRolesCannotReadRepairOrders(String role) throws Exception {
         mockMvc.perform(get("/api/repair-orders").with(user("other").roles(role)))
                 .andExpect(status().isForbidden());

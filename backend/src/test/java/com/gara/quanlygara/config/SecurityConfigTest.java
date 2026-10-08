@@ -23,9 +23,13 @@ import com.gara.quanlygara.entity.Account;
 import com.gara.quanlygara.entity.AccountRole;
 import com.gara.quanlygara.entity.Customer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -38,6 +42,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -53,6 +59,9 @@ class SecurityConfigTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @MockitoBean
     private AccountRepository accountRepository;
@@ -124,6 +133,92 @@ class SecurityConfigTest {
         mockMvc.perform(get("/api/accounts"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "GET, /api/customers",
+            "GET, /api/customers/1",
+            "POST, /api/customers",
+            "PUT, /api/customers/1",
+            "PATCH, /api/customers/1/status",
+            "GET, /api/services",
+            "GET, /api/services/1",
+            "POST, /api/services",
+            "PUT, /api/services/1",
+            "GET, /api/technicians",
+            "GET, /api/technicians/me/repair-orders",
+            "GET, /api/repair-orders",
+            "GET, /api/repair-orders/1",
+            "GET, /api/repair-orders/receptions",
+            "POST, /api/repair-orders",
+            "POST, /api/repair-orders/1/services",
+            "PUT, /api/repair-orders/1/progress",
+            "PUT, /api/repair-orders/1/services/1/progress",
+            "GET, /api/repair-orders/1/technicians",
+            "POST, /api/repair-orders/1/technicians",
+            "GET, /api/invoices",
+            "GET, /api/invoices/1",
+            "POST, /api/invoices",
+            "POST, /api/invoices/1/payments",
+            "GET, /api/bank-accounts",
+            "POST, /api/bank-accounts",
+            "PUT, /api/bank-accounts/1",
+            "GET, /api/customer/repairs",
+            "GET, /api/customer/repairs/1",
+            "GET, /api/unknown-business-endpoint"
+    })
+    @WithMockUser(roles = "ADMIN")
+    void adminCannotAccessBusinessApis(String method, String path) throws Exception {
+        mockMvc.perform(request(HttpMethod.valueOf(method), path)
+                        .contentType(APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    @WithMockUser(roles = {"ADMIN", "MANAGER"})
+    void adminCannotBypassBusinessRestrictionWithAnAdditionalRole() throws Exception {
+        mockMvc.perform(get("/api/repair-orders"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void adminCanReadAccountsAndStaffOptions() throws Exception {
+        mockMvc.perform(get("/api/accounts"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+        mockMvc.perform(get("/api/accounts/staff-options"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void adminCanReadOwnAccountChangePasswordAndLogout() throws Exception {
+        Account account = new Account();
+        account.setId(1);
+        account.setUsername("admin");
+        account.setPasswordHash(passwordEncoder.encode("current-password"));
+        account.setRole(AccountRole.ADMIN);
+        account.setActive(true);
+        when(accountRepository.findByUsername("admin")).thenReturn(Optional.of(account));
+
+        mockMvc.perform(get("/api/auth/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.role").value("ADMIN"));
+        mockMvc.perform(put("/api/auth/change-password")
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {"currentPassword":"current-password","newPassword":"new-password"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+        mockMvc.perform(post("/api/auth/logout"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
     }
 
     @Test

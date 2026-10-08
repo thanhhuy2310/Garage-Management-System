@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/invoices")
-@PreAuthorize("hasAnyRole('ADMIN','MANAGER','RECEPTIONIST')")
+@PreAuthorize("hasAnyRole('MANAGER','RECEPTIONIST')")
 public class BillingController {
     private final BillingService billing;
     public BillingController(BillingService billing) { this.billing = billing; }

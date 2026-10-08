@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/services")
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize("isAuthenticated() and !hasRole('ADMIN')")
 public class ServiceController {
 
     private final ServiceCatalogService serviceCatalogService;
@@ -45,14 +45,14 @@ public class ServiceController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<ServiceResponse>> create(@Valid @RequestBody ServiceRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
                 "Thêm dịch vụ thành công.", serviceCatalogService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<ServiceResponse>> update(
             @PathVariable Integer id, @Valid @RequestBody ServiceRequest request
     ) {

@@ -22,7 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/customers")
-@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST')")
+@PreAuthorize("hasAnyRole('MANAGER', 'RECEPTIONIST')")
 public class CustomerController {
 
     private final CustomerService customerService;

@@ -60,7 +60,7 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"ADMIN", "MANAGER"})
+    @ValueSource(strings = {"MANAGER"})
     void managerRolesCanListAndAssignMultipleTechnicians(String role) throws Exception {
         mockMvc.perform(get("/api/technicians").with(user("manager").roles(role)))
                 .andExpect(status().isOk())
@@ -138,7 +138,7 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     }
 
     @ParameterizedTest
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(roles = "MANAGER")
     @ValueSource(strings = {"{}", "{\"technicianId\":0}", "{\"technicianId\":-1}",
             "{\"technicianId\":\"abc\"}", "{invalid"})
     void invalidAssignmentReturnsBadRequest(String request) throws Exception {
@@ -149,7 +149,7 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(roles = "MANAGER")
     void notesMustFitSqlColumn() throws Exception {
         mockMvc.perform(post(assignmentsUrl(firstOrder)).contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
@@ -160,7 +160,7 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"CUSTOMER", "TECHNICIAN", "RECEPTIONIST", "WAREHOUSE"})
+    @ValueSource(strings = {"ADMIN", "CUSTOMER", "TECHNICIAN", "RECEPTIONIST", "WAREHOUSE"})
     void nonManagersCannotAssignOrSeeAllAssignments(String role) throws Exception {
         mockMvc.perform(get("/api/technicians").with(user("reader").roles(role)))
                 .andExpect(status().isForbidden());

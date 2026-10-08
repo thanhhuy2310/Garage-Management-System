@@ -26,7 +26,7 @@ class ServiceControllerTest extends ApiTestSupport {
     private GarageServiceRepository serviceRepository;
 
     @ParameterizedTest
-    @ValueSource(strings = {"ADMIN", "MANAGER", "RECEPTIONIST", "TECHNICIAN", "CUSTOMER", "WAREHOUSE"})
+    @ValueSource(strings = {"MANAGER", "RECEPTIONIST", "TECHNICIAN", "CUSTOMER", "WAREHOUSE"})
     void authenticatedRolesCanListAndReadServices(String role) throws Exception {
         GarageService service = saveService("Bảo dưỡng", "Định kỳ");
         mockMvc.perform(get("/api/services").with(user("reader").roles(role)))
@@ -56,7 +56,7 @@ class ServiceControllerTest extends ApiTestSupport {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"ADMIN", "MANAGER"})
+    @ValueSource(strings = {"MANAGER"})
     void createAndUpdatePersistNormalizedFields(String role) throws Exception {
         var result = mockMvc.perform(post("/api/services").with(user("editor").roles(role))
                         .contentType(APPLICATION_JSON)
@@ -137,7 +137,7 @@ class ServiceControllerTest extends ApiTestSupport {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(roles = "MANAGER")
     void rejectsLengthsAboveSqlLimitsAndInvalidUpdate() throws Exception {
         var json = objectMapper.writeValueAsString(Map.of("name", "a".repeat(151),
                 "type", "a".repeat(101), "description", "a".repeat(501), "unitPrice", 10));
@@ -166,7 +166,7 @@ class ServiceControllerTest extends ApiTestSupport {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"CUSTOMER", "TECHNICIAN", "RECEPTIONIST", "WAREHOUSE"})
+    @ValueSource(strings = {"ADMIN", "CUSTOMER", "TECHNICIAN", "RECEPTIONIST", "WAREHOUSE"})
     void nonManagersCannotWrite(String role) throws Exception {
         mockMvc.perform(post("/api/services").with(user("reader").roles(role))
                         .contentType(APPLICATION_JSON).content("{\"name\":\"Thay dầu\",\"unitPrice\":1}"))
