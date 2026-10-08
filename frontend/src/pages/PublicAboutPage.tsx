@@ -15,12 +15,13 @@ interface PublicAboutPageProps {
   onNavigate: (page: PublicPageKey) => void;
   onLogin: () => void;
   onBook: () => void;
+  accountLabel?: string;
 }
 
-export default function PublicAboutPage({ onNavigate, onLogin, onBook }: PublicAboutPageProps) {
+export default function PublicAboutPage({ onNavigate, onLogin, onBook, accountLabel }: PublicAboutPageProps) {
   return (
     <div className="min-h-screen bg-background">
-      <PublicHeader active="about" onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} />
+      <PublicHeader active="about" onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} accountLabel={accountLabel} />
       <main>
         <div className="border-b border-border bg-surface-subtle">
           <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">

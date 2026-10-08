@@ -16,9 +16,10 @@ interface PublicPartsPageProps {
   onNavigate: (page: PublicPageKey) => void;
   onLogin: () => void;
   onBook: () => void;
+  accountLabel?: string;
 }
 
-export default function PublicPartsPage({ onNavigate, onLogin, onBook }: PublicPartsPageProps) {
+export default function PublicPartsPage({ onNavigate, onLogin, onBook, accountLabel }: PublicPartsPageProps) {
   const [status, setStatus] = useState<"all" | InventoryStatus>("all");
   const [search, setSearch] = useState("");
 
@@ -37,7 +38,7 @@ export default function PublicPartsPage({ onNavigate, onLogin, onBook }: PublicP
 
   return (
     <div className="min-h-screen bg-background">
-      <PublicHeader active="parts" onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} />
+      <PublicHeader active="parts" onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} accountLabel={accountLabel} />
       <main>
         <div className="border-b border-border bg-surface-subtle">
           <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">

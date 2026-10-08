@@ -17,9 +17,10 @@ interface PublicHomeProps {
   onNavigate: (page: PublicPageKey) => void;
   onLogin: () => void;
   onBook: () => void;
+  accountLabel?: string;
 }
 
-export default function PublicHome({ page, onNavigate, onLogin, onBook }: PublicHomeProps) {
+export default function PublicHome({ page, onNavigate, onLogin, onBook, accountLabel }: PublicHomeProps) {
   const homeRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -48,20 +49,20 @@ export default function PublicHome({ page, onNavigate, onLogin, onBook }: Public
   }, [page]);
 
   if (page === "about") {
-    return <div key={page} className="public-page-enter"><PublicAboutPage onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} /></div>;
+    return <div key={page} className="public-page-enter"><PublicAboutPage onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} accountLabel={accountLabel} /></div>;
   }
   if (page === "contact") {
-    return <div key={page} className="public-page-enter"><PublicContactPage onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} /></div>;
+    return <div key={page} className="public-page-enter"><PublicContactPage onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} accountLabel={accountLabel} /></div>;
   }
   if (page === "services") {
-    return <div key={page} className="public-page-enter"><PublicServicesPage onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} /></div>;
+    return <div key={page} className="public-page-enter"><PublicServicesPage onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} accountLabel={accountLabel} /></div>;
   }
   if (page === "parts") {
-    return <div key={page} className="public-page-enter"><PublicPartsPage onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} /></div>;
+    return <div key={page} className="public-page-enter"><PublicPartsPage onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} accountLabel={accountLabel} /></div>;
   }
   return (
     <div className="min-h-screen bg-background">
-      <PublicHeader active={page} onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} />
+      <PublicHeader active={page} onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} accountLabel={accountLabel} />
       <main ref={homeRef} className="public-home">
         <PublicHero onBook={onBook} onViewServices={() => onNavigate("services")} />
         <PublicServices onBook={onBook} onViewAll={() => onNavigate("services")} />

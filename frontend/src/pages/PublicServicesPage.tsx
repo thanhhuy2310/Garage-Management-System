@@ -7,9 +7,10 @@ interface PublicServicesPageProps {
   onNavigate: (page: PublicPageKey) => void;
   onLogin: () => void;
   onBook: () => void;
+  accountLabel?: string;
 }
 
-export default function PublicServicesPage({ onNavigate, onLogin, onBook }: PublicServicesPageProps) {
+export default function PublicServicesPage({ onNavigate, onLogin, onBook, accountLabel }: PublicServicesPageProps) {
   const [category, setCategory] = useState("Tất cả");
   const [search, setSearch] = useState("");
 
@@ -27,7 +28,7 @@ export default function PublicServicesPage({ onNavigate, onLogin, onBook }: Publ
 
   return (
     <div className="min-h-screen bg-background">
-      <PublicHeader active="services" onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} />
+      <PublicHeader active="services" onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} accountLabel={accountLabel} />
       <main>
         {/* Page hero */}
         <div className="border-b border-border bg-surface-subtle">
