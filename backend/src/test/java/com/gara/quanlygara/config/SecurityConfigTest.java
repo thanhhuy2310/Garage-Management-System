@@ -18,6 +18,7 @@ import com.gara.quanlygara.repository.StockIssueRepository;
 import com.gara.quanlygara.repository.StockMovementRepository;
 import com.gara.quanlygara.repository.StockReceiptItemRepository;
 import com.gara.quanlygara.repository.StockReceiptRepository;
+import com.gara.quanlygara.repository.RepairHistoryRepository;
 import com.gara.quanlygara.entity.Account;
 import com.gara.quanlygara.entity.AccountRole;
 import com.gara.quanlygara.entity.Customer;
@@ -106,6 +107,9 @@ class SecurityConfigTest {
 
     @MockitoBean
     private StockReceiptRepository stockReceiptRepository;
+
+    @MockitoBean
+    private RepairHistoryRepository repairHistoryRepository;
 
     @Test
     void accountApiRejectsRequestWithoutJwt() throws Exception {

@@ -5,13 +5,15 @@ import '../screens/auth/login_screen.dart';
 import '../screens/auth/splash_screen.dart';
 import '../screens/booking/booking_screen.dart';
 import '../screens/profile/change_password_screen.dart';
+import '../screens/history/history_screen.dart';
 import '../screens/quotations/quotations_screen.dart';
-import '../screens/repairs/repair_progress_screen.dart';
+// import '../screens/repairs/repair_progress_screen.dart';
 import '../screens/shared/feature_placeholder_screen.dart';
 import '../screens/shell/customer_shell.dart';
 import '../screens/vehicles/vehicles_screen.dart';
 import '../services/auth_service.dart';
 import '../services/appointment_service.dart';
+import '../services/history_service.dart';
 import '../services/home_service.dart';
 import '../services/notification_service.dart';
 import '../services/profile_service.dart';
@@ -29,12 +31,14 @@ class GarageCustomerApp extends StatefulWidget {
     this.homeService,
     this.vehicleService,
     this.appointmentService,
+    this.historyService,
   });
 
   final AuthService? authService;
   final HomeService? homeService;
   final VehicleService? vehicleService;
   final AppointmentService? appointmentService;
+  final HistoryService? historyService;
 
   @override
   State<GarageCustomerApp> createState() => _GarageCustomerAppState();
@@ -51,6 +55,11 @@ class _GarageCustomerAppState extends State<GarageCustomerApp> {
     MockNotificationService(),
     MockProfileService(),
   );
+
+  // Lịch sử sửa chữa gọi Spring Boot API thật bằng token của phiên đăng nhập hiện tại.
+  late final HistoryService _historyService =
+      widget.historyService ??
+      ApiHistoryService(tokenProvider: () => controller.session?.accessToken);
 
   @override
   void dispose() {
@@ -82,10 +91,7 @@ class _GarageCustomerAppState extends State<GarageCustomerApp> {
         initialIndex: 1,
       ),
       AppRoutes.quotations => QuotationsScreen(controller: controller),
-      AppRoutes.history => RepairProgressScreen(
-        controller: controller,
-        historyOnly: true,
-      ),
+      AppRoutes.history => HistoryScreen(service: _historyService),
       AppRoutes.changePassword => ChangePasswordScreen(controller: controller),
       _ => const FeaturePlaceholderScreen(
         title: 'Không tìm thấy trang',
