@@ -140,12 +140,19 @@ class AppController extends ChangeNotifier {
     if (current == null) return;
     final values = await Future.wait([
       quotationService.getQuotations(current.customerId),
-      repairService.getRepairs(current.customerId),
       notificationService.getNotifications(current.customerId),
     ]);
     quotations = values[0] as List<Quotation>;
-    repairs = values[1] as List<RepairOrder>;
-    notifications = values[2] as List<CustomerNotification>;
+    notifications = values[1] as List<CustomerNotification>;
+    notifyListeners();
+  }
+
+  Future<void> loadRepairs() async {
+    final current = session;
+    if (current == null) return;
+    final loaded = await repairService.getRepairs(current);
+    if (!identical(session, current)) return;
+    repairs = loaded;
     notifyListeners();
   }
 

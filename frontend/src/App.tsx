@@ -37,8 +37,8 @@ const BASE_ROLE_NAV: Record<Role, AdminPage[]> = {
   receptionist: ["customers", "vehicles", "appointments", "reception", "repair", "quotation", "invoice", "history"],
   technician: ["technician"],
   warehouse: ["inventory"],
-  manager: ["dashboard", "staff", "services", "repair", "reports"],
-  admin: ["settings"],
+  manager: ["dashboard", "staff", "services", "repair", "invoice", "reports"],
+  admin: ["settings", "services", "repair", "invoice"],
 };
 
 // Tuần 7: danh mục phụ tùng và chi tiết phiếu sửa chữa, gộp thêm vào menu theo vai trò.

@@ -40,7 +40,10 @@ class TechnicianAssignmentServiceTest {
     void setUp() {
         service = new TechnicianAssignmentService(repairOrderRepository, technicianRepository,
                 assignmentRepository, accountRepository);
-        when(repairOrderRepository.existsById(1)).thenReturn(true);
+        var order = new com.gara.quanlygara.entity.RepairOrder();
+        order.setId(1);
+        order.setStatus("DANG_SUA");
+        when(repairOrderRepository.findForUpdate(1)).thenReturn(Optional.of(order));
         when(technicianRepository.findOptionById(2))
                 .thenReturn(Optional.of(new TechnicianResponse(2, "Kỹ thuật viên")));
     }

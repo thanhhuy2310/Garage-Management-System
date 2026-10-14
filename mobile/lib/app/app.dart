@@ -51,7 +51,7 @@ class _GarageCustomerAppState extends State<GarageCustomerApp> {
     widget.vehicleService ?? MockVehicleService(),
     widget.appointmentService ?? MockAppointmentService(),
     MockQuotationService(),
-    MockRepairService(),
+    ApiRepairService(),
     MockNotificationService(),
     MockProfileService(),
   );

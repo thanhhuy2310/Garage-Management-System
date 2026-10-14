@@ -58,7 +58,11 @@ public class TechnicianAssignmentService {
 
     @Transactional
     public TechnicianAssignmentResponse assign(Integer repairOrderId, TechnicianAssignmentRequest request) {
-        requireRepairOrder(repairOrderId);
+        var order = repairOrderRepository.findForUpdate(repairOrderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu sửa chữa."));
+        if (java.util.Set.of("HOAN_TAT", "HUY", "DA_HUY").contains(order.getStatus())) {
+            throw new ConflictException("Phiếu đã kết thúc, không thể phân công thêm kỹ thuật viên.");
+        }
         TechnicianResponse technician = technicianRepository.findOptionById(request.technicianId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỹ thuật viên."));
         TechnicianAssignmentId id = new TechnicianAssignmentId(repairOrderId, technician.id());

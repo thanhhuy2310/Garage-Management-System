@@ -1,112 +1,180 @@
-import { useMemo, useState } from "react";
-import { Button, Card, Icons, Input, Modal, SearchBox, Select, TableContainer, Textarea } from "../components/ui";
-import { dichVu, formatCurrency } from "../mock/data";
+import { useState } from "react"
+import { garageApi } from "../api/garage"
+import { QueryState } from "../components/garage/QueryState"
+import ServiceForm from "../components/services/ServiceForm"
+import { Button, Card, Icons, Modal, SearchBox, Select } from "../components/ui"
+import { useGarageQuery } from "../hooks/useGarageQuery"
+import type { GarageService } from "../types/garage"
+import { formatMoney } from "../utils/garageFormat"
 
 export default function Services() {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("Tất cả");
-  const [showAdd, setShowAdd] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
+  const query = useGarageQuery(garageApi.services)
+  const [search, setSearch] = useState("")
+  const [category, setCategory] = useState("")
+  const [editing, setEditing] = useState<GarageService | null>(null)
+  const [formOpen, setFormOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [success, setSuccess] = useState("")
 
-  const categories = useMemo(
-    () => ["Tất cả", ...Array.from(new Set(dichVu.map((service) => service.LoaiDichVu).filter(Boolean))) as string[]],
-    [],
-  );
-  const keyword = search.trim().toLowerCase();
-  const filtered = dichVu.filter((service) =>
-    (category === "Tất cả" || service.LoaiDichVu === category)
-    && (!keyword || service.TenDichVu.toLowerCase().includes(keyword)),
-  );
-  const detail = dichVu.find((service) => service.MaDichVu === selected);
-  const averagePrice = dichVu.length
-    ? dichVu.reduce((sum, service) => sum + service.DonGia, 0) / dichVu.length
-    : 0;
+  const services = query.data ?? []
+  const categories = [
+    ...new Set(
+      services
+        .map((service) => service.type)
+        .filter((type): type is string => Boolean(type)),
+    ),
+  ]
+  const keyword = search.trim().toLocaleLowerCase("vi")
+  const filtered = services.filter(
+    (service) =>
+      (!category || service.type === category) &&
+      `${service.name} ${service.type ?? ""}`
+        .toLocaleLowerCase("vi")
+        .includes(keyword),
+  )
+
+  function openForm(service: GarageService | null) {
+    setEditing(service)
+    setSuccess("")
+    setFormOpen(true)
+  }
+
+  function handleSaved(service: GarageService) {
+    query.setData((current) =>
+      editing
+        ? (current ?? []).map((item) =>
+            item.id === service.id ? service : item,
+          )
+        : [...(current ?? []), service],
+    )
+    setFormOpen(false)
+    setSuccess(editing ? "Đã cập nhật dịch vụ." : "Đã thêm dịch vụ.")
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {[
-          { label: "Tổng dịch vụ", value: dichVu.length, icon: Icons.wrench },
-          { label: "Nhóm dịch vụ", value: categories.length - 1, icon: Icons.clipboard },
-          { label: "Đơn giá trung bình", value: formatCurrency(averagePrice), icon: Icons.creditCard },
-        ].map((item) => (
-          <Card key={item.label} className="flex items-center gap-4 p-4 sm:p-5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-soft text-primary">{item.icon}</div>
-            <div><p className="text-xs text-muted-foreground">{item.label}</p><p className="text-xl font-bold text-foreground">{item.value}</p></div>
-          </Card>
-        ))}
+    <div className="mx-auto max-w-6xl space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-foreground">
+            Danh mục dịch vụ
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Quản lý tên dịch vụ, nhóm và đơn giá tại gara.
+          </p>
+        </div>
+        <Button icon={Icons.plus} onClick={() => openForm(null)}>
+          Thêm dịch vụ
+        </Button>
       </div>
-
-      <div className="page-toolbar">
-        <div className="flex flex-wrap items-center gap-3">
-          <SearchBox value={search} onChange={setSearch} placeholder="Tên dịch vụ..." />
-          <div className="flex flex-wrap gap-1.5">
-            {categories.map((item) => (
-              <button key={item} type="button" onClick={() => setCategory(item)} aria-pressed={category === item} className={`min-h-11 rounded-full border px-4 text-sm font-medium transition-all ${category === item ? "border-primary bg-primary text-white" : "border-border bg-surface text-muted-foreground hover:border-primary hover:text-primary"}`}>{item}</button>
+      {success && (
+        <p
+          role="status"
+          className="rounded-lg bg-success-soft p-3 text-sm text-success"
+        >
+          {success}
+        </p>
+      )}
+      <Card className="space-y-4 p-4 sm:p-5">
+        <div className="grid gap-3 sm:grid-cols-[1fr_240px_auto] sm:items-end">
+          <SearchBox
+            value={search}
+            onChange={setSearch}
+            placeholder="Tìm tên hoặc nhóm dịch vụ..."
+          />
+          <Select
+            label="Nhóm dịch vụ"
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+            options={[
+              { value: "", label: "Tất cả nhóm" },
+              ...categories.map((item) => ({ value: item, label: item })),
+            ]}
+          />
+          <Button
+            variant="outline"
+            disabled={query.loading}
+            onClick={query.reload}
+          >
+            Làm mới
+          </Button>
+        </div>
+        {!query.loading && !query.error && (
+          <p className="text-sm text-muted-foreground">
+            {filtered.length} dịch vụ
+          </p>
+        )}
+      </Card>
+      <QueryState
+        loading={query.loading}
+        error={query.error}
+        onRetry={query.reload}
+      />
+      {!query.loading &&
+        !query.error &&
+        (filtered.length ? (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {filtered.map((service) => (
+              <Card key={service.id} className="flex flex-col p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <span
+                    className="rounded-md bg-primary-soft p-2 text-primary"
+                    aria-hidden="true"
+                  >
+                    {Icons.wrench}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    DV #{service.id}
+                  </span>
+                </div>
+                <h3 className="mt-4 break-words text-base font-semibold text-foreground">
+                  {service.name}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {service.type || "Chưa phân nhóm"}
+                </p>
+                <p className="mt-3 mb-5 whitespace-pre-wrap break-words text-sm leading-relaxed text-muted-foreground">
+                  {service.description || "Chưa có mô tả."}
+                </p>
+                <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+                  <span className="font-semibold text-primary">
+                    {formatMoney(service.unitPrice)}
+                  </span>
+                  <Button
+                    variant="outline"
+                    icon={Icons.edit}
+                    aria-label={`Sửa ${service.name}`}
+                    onClick={() => openForm(service)}
+                  >
+                    Chỉnh sửa
+                  </Button>
+                </div>
+              </Card>
             ))}
           </div>
-        </div>
-        <Button icon={Icons.plus} onClick={() => setShowAdd(true)}>Thêm dịch vụ</Button>
-      </div>
-
-      <div className={`grid gap-4 ${selected ? "xl:grid-cols-3" : "grid-cols-1"}`}>
-        <div className={selected ? "xl:col-span-2" : ""}>
-          <Card>
-            <TableContainer>
-            <table className="data-table w-full min-w-[720px]">
-              <thead><tr><th>Mã DV</th><th>Tên dịch vụ</th><th>Loại dịch vụ</th><th className="text-right">Đơn giá</th><th>Mô tả</th><th>Thao tác</th></tr></thead>
-              <tbody>
-                {filtered.map((service) => (
-                  <tr
-                    key={service.MaDichVu}
-                    tabIndex={0}
-                    aria-selected={selected === service.MaDichVu}
-                    onClick={() => setSelected(service.MaDichVu === selected ? null : service.MaDichVu)}
-                    onKeyDown={(event) => {
-                      if (event.currentTarget !== event.target || (event.key !== "Enter" && event.key !== " ")) return;
-                      event.preventDefault();
-                      setSelected(service.MaDichVu === selected ? null : service.MaDichVu);
-                    }}
-                    className={`cursor-pointer ${selected === service.MaDichVu ? "bg-primary-soft" : ""}`}
-                  >
-                    <td><span className="mono text-xs text-slate-400">{service.MaDichVu}</span></td>
-                    <td className="font-medium text-slate-800">{service.TenDichVu}</td>
-                    <td><span className="rounded-full bg-primary-soft px-2 py-1 text-xs font-medium text-primary">{service.LoaiDichVu || "—"}</span></td>
-                    <td className="mono text-right font-semibold">{formatCurrency(service.DonGia)}</td>
-                    <td className="max-w-[240px] truncate text-slate-500">{service.MoTa || "—"}</td>
-                    <td><button type="button" aria-label={`Sửa ${service.TenDichVu}`} className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.edit}</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filtered.length === 0 && <p className="py-10 text-center text-sm text-slate-400">Không tìm thấy dịch vụ.</p>}
-            </TableContainer>
+        ) : (
+          <Card className="p-10 text-center text-muted-foreground">
+            {services.length
+              ? "Không tìm thấy dịch vụ phù hợp."
+              : "Chưa có dịch vụ. Thêm dịch vụ đầu tiên để bắt đầu."}
           </Card>
-        </div>
-
-        {detail && (
-          <Card className="h-fit space-y-4 p-4 sm:p-5">
-            <div className="flex items-start justify-between">
-              <div><span className="mono text-xs text-slate-400">{detail.MaDichVu}</span><h3 className="mt-1 font-bold leading-tight text-slate-800">{detail.TenDichVu}</h3></div>
-              <button type="button" onClick={() => setSelected(null)} aria-label="Đóng chi tiết" className="flex h-11 w-11 items-center justify-center rounded text-slate-500 hover:bg-slate-100">{Icons.close}</button>
-            </div>
-            <div className="rounded-lg bg-surface-subtle p-3"><p className="text-xs text-muted-foreground">Loại dịch vụ</p><p className="font-semibold">{detail.LoaiDichVu || "Chưa phân loại"}</p></div>
-            <div className="rounded-lg bg-surface-subtle p-3"><p className="text-xs text-muted-foreground">Đơn giá</p><p className="font-bold text-primary">{formatCurrency(detail.DonGia)}</p></div>
-            <div><p className="mb-1 text-xs text-slate-400">Mô tả</p><p className="text-sm leading-relaxed text-slate-600">{detail.MoTa || "Chưa có mô tả"}</p></div>
-            <Button variant="secondary" size="sm" className="w-full" icon={Icons.edit}>Chỉnh sửa</Button>
-          </Card>
+        ))}
+      <Modal
+        open={formOpen}
+        onClose={() => {
+          if (!saving) setFormOpen(false)
+        }}
+        title={editing ? "Chỉnh sửa dịch vụ" : "Thêm dịch vụ"}
+      >
+        {formOpen && (
+          <ServiceForm
+            key={editing?.id ?? "new"}
+            service={editing}
+            onSaved={handleSaved}
+            onCancel={() => setFormOpen(false)}
+            onBusyChange={setSaving}
+          />
         )}
-      </div>
-
-      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Thêm dịch vụ mới">
-        <div className="space-y-4">
-          <Input label="Tên dịch vụ *" placeholder="Ví dụ: Bảo dưỡng định kỳ" />
-          <Select label="Loại dịch vụ" options={[{ value: "", label: "-- Chọn loại --" }, ...categories.filter((item) => item !== "Tất cả").map((item) => ({ value: item, label: item }))]} />
-          <Input label="Đơn giá (VNĐ) *" type="number" min="0" placeholder="250000" />
-          <Textarea label="Mô tả" />
-          <div className="flex justify-end gap-3 pt-2"><Button variant="outline" onClick={() => setShowAdd(false)}>Hủy</Button><Button onClick={() => setShowAdd(false)}>Lưu dịch vụ</Button></div>
-        </div>
       </Modal>
     </div>
-  );
+  )
 }
