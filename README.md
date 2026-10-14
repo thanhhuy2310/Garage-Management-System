@@ -12,7 +12,9 @@ Website đã có giao diện cho các công việc chính của gara như quản
 
 Ứng dụng mobile có các màn hình đăng nhập, quản lý xe, đặt lịch, xem báo giá, theo dõi sửa chữa, lịch sử và thông báo.
 
-Các phần đăng nhập, đăng ký, đổi mật khẩu, tài khoản và khách hàng đã kết nối backend và SQL Server. Những phần còn lại vẫn đang dùng dữ liệu mẫu hoặc dữ liệu lưu trên máy, cần làm thêm API khi phát triển tiếp.
+<!-- TV3-TUAN9-AUDIT:integration-status BEGIN -->
+Backend đã kết nối SQL Server cho: đăng nhập, đăng ký, đổi mật khẩu, tài khoản, khách hàng, xe, phụ tùng, chi tiết phiếu sửa chữa, kho phụ tùng (tồn kho, nhập/xuất, kiểm kê, biến động) và lịch sử sửa chữa, bảo dưỡng của khách hàng. Website quản trị dùng các API này cho xe, phụ tùng, chi tiết phiếu sửa chữa và kho. Trên mobile, đăng nhập và lịch sử sửa chữa/bảo dưỡng gọi API thật; các màn hình mobile khác vẫn dùng dữ liệu mẫu hoặc dữ liệu lưu trên máy cho đến khi có API tương ứng.
+<!-- TV3-TUAN9-AUDIT:integration-status END -->
 
 ## Cần cài gì?
 

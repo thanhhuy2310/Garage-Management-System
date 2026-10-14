@@ -3,6 +3,8 @@ package com.gara.quanlygara.service;
 
 import com.gara.quanlygara.dto.history.HistoryDetailResponse;
 import com.gara.quanlygara.dto.history.HistoryItemResponse;
+import com.gara.quanlygara.dto.history.HistoryPageResponse;
+import com.gara.quanlygara.dto.history.HistoryVehicleResponse;
 import com.gara.quanlygara.exception.BadRequestException;
 import com.gara.quanlygara.exception.ResourceNotFoundException;
 import com.gara.quanlygara.repository.RepairHistoryRepository;
@@ -31,6 +33,8 @@ public class RepairHistoryService {
     public static final String REPAIR = "SUA_CHUA";
     public static final String MIXED = "BAO_DUONG_SUA_CHUA";
 
+    public static final int MAX_PAGE_SIZE = 50;
+
     private static final int SUMMARY_SERVICES = 3;
 
     private final RepairHistoryRepository repository;
@@ -39,24 +43,47 @@ public class RepairHistoryService {
         this.repository = repository;
     }
 
-    /** vehicleId null = mọi xe của khách hàng; xe không thuộc khách hàng => 404 (không tiết lộ xe có tồn tại hay không). */
+    /**
+     * Một trang lịch sử, mới nhất trước. vehicleId null = mọi xe của khách hàng; xe không thuộc khách hàng => 404
+     * (không tiết lộ xe có tồn tại hay không). totalElements/totalPages cho biết đầy đủ số lượt, không cắt âm thầm.
+     */
     @Transactional(readOnly = true)
-    public List<HistoryItemResponse> getHistory(Integer customerId, Integer vehicleId) {
+    public HistoryPageResponse getHistory(Integer customerId, Integer vehicleId, int page, int size) {
         if (vehicleId != null) {
             if (vehicleId <= 0) throw new BadRequestException("Mã xe không hợp lệ.");
             if (repository.countOwnedVehicle(vehicleId, customerId) == 0) {
                 throw new ResourceNotFoundException("Không tìm thấy xe.");
             }
         }
-        List<Object[]> rows = repository.findHistoryRows(customerId, vehicleId == null ? 0 : vehicleId, 0);
-        return build(rows).stream().map(Built::item).toList();
+        int pageIndex = Math.max(page, 0);
+        int pageSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+        int vehicleFilter = vehicleId == null ? 0 : vehicleId;
+
+        long total = repository.countHistory(customerId, vehicleFilter);
+        int totalPages = (int) ((total + pageSize - 1) / pageSize);
+        long offset = (long) pageIndex * pageSize;
+
+        List<HistoryItemResponse> items = List.of();
+        if (offset < total) {
+            items = build(repository.findHistoryRows(customerId, vehicleFilter, 0, (int) offset, pageSize))
+                    .stream().map(Built::item).toList();
+        }
+        return new HistoryPageResponse(items, pageIndex, pageSize, total, totalPages);
+    }
+
+    /** Toàn bộ xe có lịch sử của khách hàng (không phụ thuộc trang đang xem). */
+    @Transactional(readOnly = true)
+    public List<HistoryVehicleResponse> getVehicles(Integer customerId) {
+        return repository.findHistoryVehicles(customerId).stream()
+                .map(row -> new HistoryVehicleResponse(
+                        toInt(row[0]), toText(row[1]), toText(row[2]), toText(row[3]), toInt(row[4])))
+                .toList();
     }
 
     /** Phiếu không tồn tại, chưa hoàn tất hoặc của khách hàng khác đều trả 404 giống nhau. */
     @Transactional(readOnly = true)
     public HistoryDetailResponse getDetail(Integer customerId, Integer repairOrderId) {
-        List<Object[]> rows = repository.findHistoryRows(customerId, 0, repairOrderId);
-        List<Built> built = build(rows);
+        List<Built> built = build(repository.findHistoryRows(customerId, 0, repairOrderId, 0, 1));
         if (built.isEmpty()) {
             throw new ResourceNotFoundException("Không tìm thấy lịch sử sửa chữa.");
         }

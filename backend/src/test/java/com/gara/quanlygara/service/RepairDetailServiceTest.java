@@ -13,6 +13,7 @@ import com.gara.quanlygara.repository.RepairDetailRow;
 import com.gara.quanlygara.repository.RepairPartItemRepository;
 import com.gara.quanlygara.repository.RepairServiceItemRepository;
 import com.gara.quanlygara.repository.SparePartRepository;
+import com.gara.quanlygara.repository.StockIssueItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,11 +47,14 @@ class RepairDetailServiceTest {
     @Mock
     private SparePartRepository sparePartRepository;
 
+    @Mock
+    private StockIssueItemRepository stockIssueItemRepository;
+
     private RepairDetailService service;
 
     @BeforeEach
     void setUp() {
-        service = new RepairDetailService(serviceItemRepository, partItemRepository, sparePartRepository);
+        service = new RepairDetailService(serviceItemRepository, partItemRepository, sparePartRepository, stockIssueItemRepository);
     }
 
     @Test
@@ -246,6 +250,59 @@ class RepairDetailServiceTest {
         when(serviceItemRepository.findById(new RepairServiceItem.Key(1, 9))).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.delete(1, RepairDetailType.SERVICE, 9));
+    }
+
+    @Test
+    void partLineWithConfirmedUsageCannotBeEditedByHand() {
+        openOrder(1, "DANG_SUA");
+        when(stockIssueItemRepository.sumConfirmedActual(1, 5)).thenReturn(3L);
+
+        assertThrows(ConflictException.class,
+                () -> service.update(1, RepairDetailType.SPARE_PART, 5, new RepairDetailUpdateRequest(9, null)));
+        verify(partItemRepository, never()).findById(any());
+        verify(partItemRepository, never()).saveAndFlush(any(RepairPartItem.class));
+    }
+
+    @Test
+    void partLineWithConfirmedUsageCannotBeDeleted() {
+        openOrder(1, "DANG_SUA");
+        when(stockIssueItemRepository.sumConfirmedActual(1, 5)).thenReturn(3L);
+
+        assertThrows(ConflictException.class, () -> service.delete(1, RepairDetailType.SPARE_PART, 5));
+        verify(partItemRepository, never()).delete(any(RepairPartItem.class));
+    }
+
+    @Test
+    void partLineWithoutConfirmedUsageIsStillEditableAndDeletable() {
+        openOrder(1, "DANG_SUA");
+        RepairPartItem item = partItem(1, 5, 2, "180000.00");
+        when(partItemRepository.findById(new RepairPartItem.Key(1, 5))).thenReturn(Optional.of(item));
+        when(serviceItemRepository.findDetailRows(1)).thenReturn(List.of());
+        when(partItemRepository.findDetailRows(1)).thenReturn(List.of(row(5, "Bugi", 6, "180000.00", null)));
+
+        service.update(1, RepairDetailType.SPARE_PART, 5, new RepairDetailUpdateRequest(6, null));
+        service.delete(1, RepairDetailType.SPARE_PART, 5);
+
+        assertEquals(6, item.getQuantity());
+        verify(partItemRepository).delete(item);
+    }
+
+    @Test
+    void serviceLinesAreNotAffectedByTheConfirmedUsageGuard() {
+        openOrder(1, "DANG_SUA");
+        RepairServiceItem item = new RepairServiceItem();
+        item.setRepairOrderId(1);
+        item.setServiceId(3);
+        item.setQuantity(1);
+        item.setUnitPrice(new java.math.BigDecimal("300000.00"));
+        when(serviceItemRepository.findById(new RepairServiceItem.Key(1, 3))).thenReturn(Optional.of(item));
+        when(serviceItemRepository.findDetailRows(1)).thenReturn(List.of(row(3, "Kiểm tra phanh", 2, "300000.00", null)));
+        when(partItemRepository.findDetailRows(1)).thenReturn(List.of());
+
+        service.update(1, RepairDetailType.SERVICE, 3, new RepairDetailUpdateRequest(2, null));
+
+        assertEquals(2, item.getQuantity());
+        verify(stockIssueItemRepository, never()).sumConfirmedActual(any(), any());
     }
 
     private void openOrder(int id, String status) {

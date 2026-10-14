@@ -47,7 +47,9 @@ Kho phụ tùng (tồn kho, nhập kho, xuất/cấp phát, xác nhận thực d
 
 Ví dụ request và quyền truy cập: [Test API dịch vụ và phân công](docs/API_SERVICE_TECHNICIAN_ASSIGNMENT.md).
 
-Các nghiệp vụ xe, lịch hẹn, sửa chữa, báo giá và hóa đơn chưa có API đầy đủ.
+<!-- TV3-TUAN9-AUDIT:unlisted-api BEGIN -->
+Các nghiệp vụ chưa được liệt kê trong mục này chưa có tài liệu API đầy đủ.
+<!-- TV3-TUAN9-AUDIT:unlisted-api END -->
 
 ## Chạy test
 
@@ -66,3 +68,17 @@ Xem hướng dẫn chạy toàn bộ project tại [`../README.md`](../README.md
 - `POST /api/warehouse/exports/{issueId}/items/{partId}/confirm`: kỹ thuật viên xác nhận số lượng thực dùng; chỉ lúc này tồn mới giảm, theo số lượng thực dùng.
 - `GET|POST /api/warehouse/checks`, `GET /api/warehouse/checks/{id}`, `PUT /api/warehouse/checks/{id}/items/{partId}`, `POST /api/warehouse/checks/{id}/approve|reject`: kiểm kê; chỉ MANAGER duyệt hoặc từ chối, tồn chỉ đổi sau khi duyệt.
 <!-- TV3-TUAN8-AUDIT:warehouse-api END -->
+
+<!-- TV3-TUAN9-AUDIT:history-api BEGIN -->
+## API lịch sử sửa chữa của khách hàng (Tuần 9)
+
+Chỉ tài khoản `CUSTOMER`. Backend xác định khách hàng từ tài khoản trong JWT; **không có tham số `customerId`** nên khách hàng không thể xem dữ liệu của người khác.
+
+- `GET /api/customers/me/history`: lịch sử sửa chữa/bảo dưỡng đã hoàn tất (`HOAN_TAT`), mới nhất trước. Tham số: `page` (từ 0, mặc định 0), `size` (mặc định 10, tối đa 50), `vehicleId` (lọc theo xe). Trả `items`, `page`, `size`, `totalElements`, `totalPages` — `totalElements` luôn là tổng đầy đủ, không bị cắt.
+- `GET /api/customers/me/history/vehicles`: danh sách xe của khách hàng có lịch sử hoàn tất, dùng làm bộ lọc (không phụ thuộc trang).
+- `GET /api/customers/me/history/{repairOrderId}`: chi tiết một lượt (dịch vụ, phụ tùng thực dùng, chi phí).
+
+Xe không thuộc khách hàng, phiếu chưa hoàn tất hoặc phiếu của khách hàng khác đều trả 404 giống nhau. Dữ liệu được tổng hợp từ `PhieuSuaChua`, `PhieuTiepNhan`, `Xe`, `ChiTietDichVu`, `ChiTietPhuTung`, `DichVu`, `PhuTung` và `dbo.fn_TinhTongChiPhiSuaChua`, không có bảng lịch sử riêng.
+
+Integration test trên SQL Server thật (không chạy trong `mvnw test`): đặt `RUN_SQLSERVER_IT=true` cùng `DB_URL`/`DB_USERNAME`/`DB_PASSWORD`, rồi chạy `.\mvnw.cmd -Dtest=RepairHistorySqlServerIT test`. Dữ liệu test được rollback.
+<!-- TV3-TUAN9-AUDIT:history-api END -->

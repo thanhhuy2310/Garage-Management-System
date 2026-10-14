@@ -30,6 +30,12 @@ flutter analyze
 flutter test
 ```
 
-Đăng nhập đã gọi backend. Các dữ liệu khác hiện vẫn được lưu và xử lý trong ứng dụng, chưa đồng bộ với database.
+<!-- TV3-TUAN9-AUDIT:backend-status BEGIN -->
+Trạng thái kết nối backend:
+
+- **Đăng nhập** gọi API backend (`/api/auth`).
+- **Lịch sử sửa chữa, bảo dưỡng** gọi API backend thật (`GET /api/customers/me/history`): phân trang ("Tải thêm"), lọc theo xe, màn chi tiết gọi `GET /api/customers/me/history/{repairOrderId}`. Địa chỉ backend lấy từ `API_BASE_URL` (mặc định `http://10.0.2.2:8080/api` cho Android Emulator; điện thoại thật dùng `--dart-define=API_BASE_URL=http://<IP máy tính>:8080/api`).
+- **Các màn hình còn lại** hiện vẫn dùng dữ liệu mẫu hoặc dữ liệu lưu trong ứng dụng, chưa đồng bộ với database, trừ khi được ghi rõ ở trên là đã tích hợp.
+<!-- TV3-TUAN9-AUDIT:backend-status END -->
 
 Xem hướng dẫn chạy toàn bộ project tại [`../README.md`](../README.md).

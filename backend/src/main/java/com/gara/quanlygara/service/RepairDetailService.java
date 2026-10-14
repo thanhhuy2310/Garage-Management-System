@@ -15,6 +15,7 @@ import com.gara.quanlygara.repository.RepairDetailRow;
 import com.gara.quanlygara.repository.RepairPartItemRepository;
 import com.gara.quanlygara.repository.RepairServiceItemRepository;
 import com.gara.quanlygara.repository.SparePartRepository;
+import com.gara.quanlygara.repository.StockIssueItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,15 +39,18 @@ public class RepairDetailService {
     private final RepairServiceItemRepository serviceItemRepository;
     private final RepairPartItemRepository partItemRepository;
     private final SparePartRepository sparePartRepository;
+    private final StockIssueItemRepository stockIssueItemRepository;
 
     public RepairDetailService(
             RepairServiceItemRepository serviceItemRepository,
             RepairPartItemRepository partItemRepository,
-            SparePartRepository sparePartRepository
+            SparePartRepository sparePartRepository,
+            StockIssueItemRepository stockIssueItemRepository
     ) {
         this.serviceItemRepository = serviceItemRepository;
         this.partItemRepository = partItemRepository;
         this.sparePartRepository = sparePartRepository;
+        this.stockIssueItemRepository = stockIssueItemRepository;
     }
 
     @Transactional(readOnly = true)
@@ -103,6 +107,7 @@ public class RepairDetailService {
                 serviceItemRepository.saveAndFlush(item);
             }
             case SPARE_PART -> {
+                requireNoConfirmedUsage(repairOrderId, itemId);
                 RepairPartItem item = partItemRepository
                         .findById(new RepairPartItem.Key(repairOrderId, itemId))
                         .orElseThrow(this::itemNotFound);
@@ -126,6 +131,7 @@ public class RepairDetailService {
                 serviceItemRepository.delete(item);
             }
             case SPARE_PART -> {
+                requireNoConfirmedUsage(repairOrderId, itemId);
                 RepairPartItem item = partItemRepository
                         .findById(new RepairPartItem.Key(repairOrderId, itemId))
                         .orElseThrow(this::itemNotFound);
@@ -163,6 +169,14 @@ public class RepairDetailService {
         item.setQuantity(request.quantity());
         item.setUnitPrice(scale(request.unitPrice() != null ? request.unitPrice() : part.getUnitPrice()));
         partItemRepository.saveAndFlush(item);
+    }
+
+    // Tuần 8: ChiTietPhuTung.SoLuong = tổng số lượng THỰC DÙNG đã được KTV xác nhận. Không cho sửa/xóa tay dòng đó,
+    // nếu không số lượng dự kiến sẽ ghi đè số thực dùng (và làm lệch chi phí so với tồn kho đã trừ).
+    private void requireNoConfirmedUsage(Integer repairOrderId, Integer sparePartId) {
+        if (stockIssueItemRepository.sumConfirmedActual(repairOrderId, sparePartId) > 0) {
+            throw new ConflictException("Phụ tùng đã được kỹ thuật viên xác nhận thực dùng, không thể sửa hoặc xóa hạng mục này.");
+        }
     }
 
     private String requireOrderStatus(Integer repairOrderId) {

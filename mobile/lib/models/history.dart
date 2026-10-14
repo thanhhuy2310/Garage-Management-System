@@ -155,3 +155,61 @@ class HistoryDetail {
   final int serviceTotal;
   final int partsTotal;
 }
+
+
+/// Một trang lịch sử từ backend; page bắt đầu từ 0. totalElements là tổng số lượt (không bị cắt).
+class HistoryPage {
+  const HistoryPage({
+    required this.items,
+    required this.page,
+    required this.size,
+    required this.totalElements,
+    required this.totalPages,
+  });
+
+  factory HistoryPage.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'];
+    return HistoryPage(
+      items: raw is List
+          ? raw.whereType<Map<String, dynamic>>().map(HistoryItem.fromJson).toList()
+          : <HistoryItem>[],
+      page: _asInt(json['page']),
+      size: _asInt(json['size']),
+      totalElements: _asInt(json['totalElements']),
+      totalPages: _asInt(json['totalPages']),
+    );
+  }
+
+  final List<HistoryItem> items;
+  final int page;
+  final int size;
+  final int totalElements;
+  final int totalPages;
+
+  bool get hasMore => page + 1 < totalPages;
+}
+
+/// Xe có lịch sử hoàn tất của khách hàng, dùng làm bộ lọc (lấy từ toàn bộ lịch sử, không chỉ trang đầu).
+class HistoryVehicle {
+  const HistoryVehicle({
+    required this.id,
+    required this.plate,
+    required this.brand,
+    required this.model,
+    required this.completedCount,
+  });
+
+  factory HistoryVehicle.fromJson(Map<String, dynamic> json) => HistoryVehicle(
+    id: _asInt(json['vehicleId']),
+    plate: _asText(json['licensePlate']),
+    brand: _asText(json['brand']),
+    model: _asText(json['model']),
+    completedCount: _asInt(json['completedCount']),
+  );
+
+  final int id;
+  final String plate;
+  final String brand;
+  final String model;
+  final int completedCount;
+}
