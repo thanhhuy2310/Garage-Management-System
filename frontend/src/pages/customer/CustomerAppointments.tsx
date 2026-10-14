@@ -9,7 +9,7 @@ import {
   formatBookingDate,
   getSuggestedBookingSlots,
 } from "../../mock/bookingAvailability";
-import { dichVu, formatCurrency, lichHen, type AppointmentStatus } from "../../mock/data";
+import { dichVu, formatCurrency, lichHen, xe as mockVehicles, type AppointmentStatus } from "../../mock/data";
 
 const STATUS_VARIANT: Record<AppointmentStatus, "pending" | "confirmed" | "arrived" | "cancelled" | "completed"> = {
   pending: "pending",
@@ -27,8 +27,8 @@ const STATUS_LABEL: Record<AppointmentStatus, string> = {
   completed: "Hoàn tất",
 };
 
-export default function CustomerAppointments({ customerKey, onBooked }: { customerKey: string; onBooked?: () => void }) {
-  const { vehicles: myVehicles, addVehicle } = useCustomerVehicles(customerKey);
+export default function CustomerAppointments({ customerKey, customerId, onBooked }: { customerKey: string; customerId: number; onBooked?: () => void }) {
+  const { vehicles: myVehicles, addVehicle } = useCustomerVehicles(customerId);
   const [showBook, setShowBook] = useState(false);
   const [showAddVehicle, setShowAddVehicle] = useState(false);
   const [vehicleSuccess, setVehicleSuccess] = useState("");
@@ -46,7 +46,10 @@ export default function CustomerAppointments({ customerKey, onBooked }: { custom
     [customerKey],
   );
 
-  const vehiclePlate = (id: string) => myVehicles.find((vehicle) => vehicle.MaXe === id)?.BienSo ?? id;
+  // Lịch hẹn vẫn là dữ liệu mẫu (mã xe dạng chuỗi), nên tra thêm trong dữ liệu mẫu nếu không có xe thật.
+  const vehiclePlate = (id: string) => myVehicles.find((vehicle) => String(vehicle.id) === id)?.licensePlate
+    ?? mockVehicles.find((vehicle) => vehicle.MaXe === id)?.BienSo
+    ?? id;
   const serviceName = (id: string | null) => dichVu.find((s) => s.MaDichVu === id)?.TenDichVu ?? "Tư vấn chung";
 
   const openBooking = () => {
@@ -194,18 +197,18 @@ export default function CustomerAppointments({ customerKey, onBooked }: { custom
                     </div>
                   ) : <div className="grid gap-3 sm:grid-cols-2">
                     {myVehicles.map((vehicle) => {
-                      const selected = selectedVehicle === vehicle.MaXe;
-                      const vehicleDetails = [vehicle.HangXe, vehicle.DongXe, vehicle.NamSanXuat].filter(Boolean).join(" · ") || "Chưa cập nhật thông tin xe";
+                      const selected = selectedVehicle === String(vehicle.id);
+                      const vehicleDetails = [vehicle.brand, vehicle.model, vehicle.year].filter(Boolean).join(" · ") || "Chưa cập nhật thông tin xe";
                       return (
                         <button
-                          key={vehicle.MaXe}
+                          key={vehicle.id}
                           type="button"
                           aria-pressed={selected}
-                          onClick={() => setSelectedVehicle(vehicle.MaXe)}
+                          onClick={() => setSelectedVehicle(String(vehicle.id))}
                           className={`motion-button flex min-h-20 items-center gap-3 rounded-lg border p-4 text-left ${selected ? "border-primary bg-primary-soft ring-1 ring-primary" : "border-border bg-white hover:border-primary"}`}
                         >
                           <span className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md ${selected ? "bg-primary text-white" : "bg-surface-subtle text-primary"}`} aria-hidden="true">{Icons.car}</span>
-                          <span className="min-w-0 flex-1"><span className="mono block font-bold text-primary">{vehicle.BienSo}</span><span className="mt-1 block text-xs text-muted-foreground">{vehicleDetails}</span></span>
+                          <span className="min-w-0 flex-1"><span className="mono block font-bold text-primary">{vehicle.licensePlate}</span><span className="mt-1 block text-xs text-muted-foreground">{vehicleDetails}</span></span>
                           {selected && <span className="text-primary" aria-hidden="true">{Icons.checkCircle}</span>}
                         </button>
                       );
@@ -308,7 +311,7 @@ export default function CustomerAppointments({ customerKey, onBooked }: { custom
         onClose={() => setShowAddVehicle(false)}
         onSubmit={addVehicle}
         onCreated={(vehicle) => {
-          setSelectedVehicle(vehicle.MaXe);
+          setSelectedVehicle(String(vehicle.id));
           setVehicleSuccess("Đã thêm xe.");
         }}
       />

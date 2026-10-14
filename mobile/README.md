@@ -30,10 +30,12 @@ flutter analyze
 flutter test
 ```
 
-Đăng nhập và theo dõi sửa chữa đã gọi backend. Tab **Theo dõi** lấy xe, trạng thái, dịch vụ, kỹ thuật viên và nhật ký từ SQL theo tài khoản khách đang đăng nhập. Kéo xuống để tải lại; tab **Đã kết thúc** xem phiếu hoàn tất/hủy. Không tự hiển thị tiến độ mẫu khi mất mạng hoặc chưa có dữ liệu.
+<!-- TV3-TUAN9-AUDIT:backend-status BEGIN -->
+Trạng thái kết nối backend:
 
-Backend cần chạy migration V002 và V003 trước. Xem [cách thử luồng sửa chữa](../backend/docs/REPAIR_BILLING.md).
-
-Các phần trang chủ, xe, đặt lịch, báo giá, thông báo và hồ sơ vẫn chưa đồng bộ hết với database. Dữ liệu ở các màn này còn dùng service mẫu; không dùng chúng để kiểm chứng tiến độ sửa chữa thật.
+- **Đăng nhập** gọi API backend (`/api/auth`).
+- **Lịch sử sửa chữa, bảo dưỡng** gọi API backend thật (`GET /api/customers/me/history`): phân trang ("Tải thêm"), lọc theo xe, màn chi tiết gọi `GET /api/customers/me/history/{repairOrderId}`. Địa chỉ backend lấy từ `API_BASE_URL` (mặc định `http://10.0.2.2:8080/api` cho Android Emulator; điện thoại thật dùng `--dart-define=API_BASE_URL=http://<IP máy tính>:8080/api`).
+- **Các màn hình còn lại** hiện vẫn dùng dữ liệu mẫu hoặc dữ liệu lưu trong ứng dụng, chưa đồng bộ với database, trừ khi được ghi rõ ở trên là đã tích hợp.
+<!-- TV3-TUAN9-AUDIT:backend-status END -->
 
 Xem hướng dẫn chạy toàn bộ project tại [`../README.md`](../README.md).

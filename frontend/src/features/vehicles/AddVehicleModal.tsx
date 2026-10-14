@@ -1,13 +1,12 @@
-import type { Xe } from "../../mock/data"
 import { Modal } from "../../components/ui"
-import type { VehicleFormValue } from "./customerVehicleRepository"
+import type { Vehicle, VehicleFormValue } from "../../api/vehicles"
 import VehicleForm from "./VehicleForm"
 
 interface AddVehicleModalProps {
   open: boolean
   onClose: () => void
-  onSubmit: (value: VehicleFormValue) => Xe
-  onCreated: (vehicle: Xe) => void
+  onSubmit: (value: VehicleFormValue) => Promise<Vehicle>
+  onCreated: (vehicle: Vehicle) => void
 }
 
 export default function AddVehicleModal({
@@ -16,15 +15,23 @@ export default function AddVehicleModal({
   onSubmit,
   onCreated,
 }: AddVehicleModalProps) {
-  const handleSubmit = (value: VehicleFormValue) => {
-    const vehicle = onSubmit(value)
+  const handleSubmit = async (value: VehicleFormValue) => {
+    // Nếu API lỗi, onSubmit ném Error và VehicleForm hiển thị message; modal vẫn mở.
+    const vehicle = await onSubmit(value)
     onCreated(vehicle)
     onClose()
   }
 
   return (
     <Modal open={open} onClose={onClose} title="Thêm xe mới" width="max-w-xl">
-      {open && <VehicleForm onSubmit={handleSubmit} onCancel={onClose} />}
+      {open && (
+        <VehicleForm
+          onSubmit={handleSubmit}
+          onCancel={onClose}
+          submitLabel="Thêm xe"
+          savingLabel="Đang thêm..."
+        />
+      )}
     </Modal>
   )
 }

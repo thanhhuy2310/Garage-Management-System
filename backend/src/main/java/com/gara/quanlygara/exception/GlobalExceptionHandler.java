@@ -66,6 +66,7 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, "Dữ liệu không đúng định dạng. Vui lòng kiểm tra lại.");
     }
 
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleUnexpected() {
         return error(HttpStatus.INTERNAL_SERVER_ERROR, "Hệ thống đang gặp lỗi. Vui lòng thử lại sau.");

@@ -1,18 +1,38 @@
 import { FormEvent, useState } from "react"
-import { Button, Input } from "../../components/ui"
-import type { VehicleFormValue } from "./customerVehicleRepository"
+import { Button, Input, Select } from "../../components/ui"
+import type { VehicleFormValue } from "../../api/vehicles"
+
+export interface CustomerOption {
+  value: number
+  label: string
+}
 
 interface VehicleFormProps {
   onSubmit: (value: VehicleFormValue) => void | Promise<void>
   onCancel: () => void
+  initialValue?: VehicleFormValue
+  /** Khi có danh sách khách hàng, form hiển thị ô chọn chủ xe (dùng cho nhân viên). */
+  customerOptions?: CustomerOption[]
+  lockCustomer?: boolean
+  submitLabel?: string
+  savingLabel?: string
 }
 
-export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
-  const [plate, setPlate] = useState("")
-  const [brand, setBrand] = useState("")
-  const [model, setModel] = useState("")
-  const [year, setYear] = useState("")
-  const [mileage, setMileage] = useState("")
+export default function VehicleForm({
+  onSubmit,
+  onCancel,
+  initialValue,
+  customerOptions,
+  lockCustomer = false,
+  submitLabel = "Thêm xe",
+  savingLabel = "Đang lưu...",
+}: VehicleFormProps) {
+  const [customerId, setCustomerId] = useState(initialValue?.customerId?.toString() ?? "")
+  const [plate, setPlate] = useState(initialValue?.plate ?? "")
+  const [brand, setBrand] = useState(initialValue?.brand ?? "")
+  const [model, setModel] = useState(initialValue?.model ?? "")
+  const [year, setYear] = useState(initialValue?.year?.toString() ?? "")
+  const [mileage, setMileage] = useState(initialValue?.mileage?.toString() ?? "")
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
 
@@ -24,6 +44,10 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
     const parsedMileage = mileage ? Number(mileage) : null
     const maxYear = new Date().getFullYear() + 1
 
+    if (customerOptions && !customerId) {
+      setError("Vui lòng chọn chủ xe.")
+      return
+    }
     if (!normalizedPlate) {
       setError("Vui lòng nhập biển số xe.")
       return
@@ -48,6 +72,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
     setSaving(true)
     try {
       await onSubmit({
+        customerId: customerId ? Number(customerId) : null,
         plate: normalizedPlate,
         brand,
         model,
@@ -58,7 +83,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
       setError(
         submitError instanceof Error
           ? submitError.message
-          : "Không thể thêm xe. Vui lòng thử lại.",
+          : "Không thể lưu xe. Vui lòng thử lại.",
       )
     } finally {
       setSaving(false)
@@ -67,6 +92,19 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
+      {customerOptions && (
+        <Select
+          label="Chủ xe *"
+          value={customerId}
+          onChange={(event) => setCustomerId(event.target.value)}
+          disabled={lockCustomer}
+          helperText={lockCustomer ? "Không thể đổi chủ xe vì xe có thể đã gắn với lịch hẹn và phiếu tiếp nhận." : undefined}
+          options={[
+            { value: "", label: "— Chọn khách hàng —" },
+            ...customerOptions.map((option) => ({ value: String(option.value), label: option.label })),
+          ]}
+        />
+      )}
       <Input
         label="Biển số xe *"
         value={plate}
@@ -130,7 +168,7 @@ export default function VehicleForm({ onSubmit, onCancel }: VehicleFormProps) {
           Hủy
         </Button>
         <Button type="submit" disabled={saving}>
-          {saving ? "Đang thêm..." : "Thêm xe"}
+          {saving ? savingLabel : submitLabel}
         </Button>
       </div>
     </form>

@@ -12,7 +12,9 @@ Website đã có giao diện cho các công việc chính của gara như quản
 
 Ứng dụng mobile có các màn hình đăng nhập, quản lý xe, đặt lịch, xem báo giá, theo dõi sửa chữa, lịch sử và thông báo.
 
-Các phần đăng nhập, đăng ký, đổi mật khẩu, tài khoản, khách hàng, danh mục dịch vụ, phân công KTV, sửa chữa và hóa đơn trên web đã kết nối backend và SQL Server. Flutter đã nối đăng nhập và theo dõi tiến độ sửa chữa. Những phần khác vẫn còn dữ liệu mẫu hoặc lưu trên máy, cần làm tiếp API.
+<!-- TV3-TUAN9-AUDIT:integration-status BEGIN -->
+Backend đã kết nối SQL Server cho: đăng nhập, đăng ký, đổi mật khẩu, tài khoản, khách hàng, xe, phụ tùng, chi tiết phiếu sửa chữa, kho phụ tùng (tồn kho, nhập/xuất, kiểm kê, biến động) và lịch sử sửa chữa, bảo dưỡng của khách hàng. Website quản trị dùng các API này cho xe, phụ tùng, chi tiết phiếu sửa chữa và kho. Trên mobile, đăng nhập và lịch sử sửa chữa/bảo dưỡng gọi API thật; các màn hình mobile khác vẫn dùng dữ liệu mẫu hoặc dữ liệu lưu trên máy cho đến khi có API tương ứng.
+<!-- TV3-TUAN9-AUDIT:integration-status END -->
 
 ## Cần cài gì?
 
@@ -32,11 +34,22 @@ Mở SQL Server Management Studio và chạy file:
 backend/database/QuanLyGaraOTo.sql
 ```
 
-Script sẽ tạo database `QuanLyGaraOTo` cùng dữ liệu ban đầu để chạy thử. Chỉ chạy khi tạo mới; không chạy lại trên database đang dùng.
+Script sẽ tạo database `QuanLyGaraOTo` cùng dữ liệu cần thiết để chạy thử.
 
-Sau đó chọn database `QuanLyGaraOTo` và chạy lần lượt các file trong `backend/database/migrations`: **V002** (nhật ký sửa chữa, mã yêu cầu thanh toán), **V003** (tài khoản ngân hàng). Với database đã có, chỉ chạy migration bổ sung, không cần xóa/import lại dữ liệu.
+<!-- TV3-TUAN8-AUDIT:db-setup BEGIN -->
+### Cập nhật cấu trúc database (bắt buộc)
 
-Cách thử sửa chữa → hóa đơn → thanh toán → theo dõi trên mobile: [hướng dẫn ngắn](backend/docs/REPAIR_BILLING.md).
+Sau khi chạy `QuanLyGaraOTo.sql`, chạy tiếp các migration trong `backend/database/migrations/` **theo thứ tự**:
+
+1. `V001__add_customer_status.sql`
+2. `V002__warehouse_actual_used_and_stock_check.sql` — bắt buộc cho kho (Tuần 8): thêm `SoLuongThucDung`, `SoLuongHoanTra`, bảng `PhieuKiemKe`/`ChiTietKiemKe`; sửa `sp_XacNhanSuDungPhuTung` (trừ tồn theo số lượng thực dùng) và `sp_KiemKeTonKho` (chỉ ghi nhận, không tự đổi tồn; chỉ MANAGER duyệt qua ứng dụng).
+3. `V003__confirm_usage_row_lock.sql` — khóa dòng khi xác nhận thực dùng, chặn xác nhận trùng đồng thời.
+
+Kiểm thử nghiệp vụ kho (tùy chọn): chạy `backend/database/Test_Warehouse.sql` trong SQL Server Management Studio, xem bảng PASS/FAIL (script tự dọn dữ liệu test).
+Chi tiết từng file: `backend/database/migrations/README.md`.
+
+Kho phụ tùng (tồn kho, nhập kho, xuất/cấp phát, xác nhận thực dùng, kiểm kê có phê duyệt, lịch sử biến động) **đã có API thật** từ Tuần 8; trang Kho trên website dùng API này, không còn dữ liệu mẫu.
+<!-- TV3-TUAN8-AUDIT:db-setup END -->
 
 ## 2. Chạy backend
 

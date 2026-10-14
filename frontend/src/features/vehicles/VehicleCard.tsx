@@ -1,9 +1,9 @@
 import { Icons } from "../../components/ui"
-import type { Xe } from "../../mock/data"
+import type { Vehicle } from "../../api/vehicles"
 
-export default function VehicleCard({ vehicle }: { vehicle: Xe }) {
+export default function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
   const description =
-    [vehicle.HangXe, vehicle.DongXe].filter(Boolean).join(" ") ||
+    [vehicle.brand, vehicle.model].filter(Boolean).join(" ") ||
     "Chưa cập nhật hãng và dòng xe"
 
   return (
@@ -17,7 +17,7 @@ export default function VehicleCard({ vehicle }: { vehicle: Xe }) {
         </span>
         <div className="min-w-0 flex-1">
           <p className="mono text-lg font-bold text-primary">
-            {vehicle.BienSo}
+            {vehicle.licensePlate}
           </p>
           <p className="mt-1 text-sm font-medium text-foreground">
             {description}
@@ -28,15 +28,15 @@ export default function VehicleCard({ vehicle }: { vehicle: Xe }) {
         <div>
           <dt className="text-xs text-muted-foreground">Năm sản xuất</dt>
           <dd className="mt-1 font-semibold text-foreground">
-            {vehicle.NamSanXuat ?? "Chưa cập nhật"}
+            {vehicle.year ?? "Chưa cập nhật"}
           </dd>
         </div>
         <div>
           <dt className="text-xs text-muted-foreground">Số km</dt>
           <dd className="mono mt-1 font-semibold text-foreground">
-            {vehicle.SoKm === null
+            {vehicle.mileage === null
               ? "Chưa cập nhật"
-              : `${vehicle.SoKm.toLocaleString("vi-VN")} km`}
+              : `${vehicle.mileage.toLocaleString("vi-VN")} km`}
           </dd>
         </div>
       </dl>

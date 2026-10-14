@@ -164,9 +164,9 @@ export default function CustomerPortal({ onLogout, page, customerId, onNavigate 
       }
     >
       <div key={page} className="customer-page-enter space-y-6">
-        {page === "overview" && <CustomerOverview onNavigate={onNavigate} />}
-        {page === "vehicles" && <CustomerVehicles customerKey={customerKey} />}
-        {page === "appointments" && <CustomerAppointments customerKey={customerKey} />}
+        {page === "overview" && <CustomerOverview onNavigate={onNavigate} customerId={customerId} />}
+        {page === "vehicles" && <CustomerVehicles customerId={customerId} />}
+        {page === "appointments" && <CustomerAppointments customerKey={customerKey} customerId={customerId} />}
         {page === "quotations" && <CustomerQuotations />}
         {page === "tracking" && <CustomerTracking />}
         {page === "history" && <CustomerHistory />}

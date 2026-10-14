@@ -7,6 +7,18 @@ import com.gara.quanlygara.repository.GarageServiceRepository;
 import com.gara.quanlygara.repository.RepairOrderRepository;
 import com.gara.quanlygara.repository.TechnicianAssignmentRepository;
 import com.gara.quanlygara.repository.TechnicianRepository;
+import com.gara.quanlygara.repository.VehicleRepository;
+import com.gara.quanlygara.repository.RepairPartItemRepository;
+import com.gara.quanlygara.repository.RepairServiceItemRepository;
+import com.gara.quanlygara.repository.SparePartRepository;
+import com.gara.quanlygara.repository.InventoryCheckItemRepository;
+import com.gara.quanlygara.repository.InventoryCheckRepository;
+import com.gara.quanlygara.repository.StockIssueItemRepository;
+import com.gara.quanlygara.repository.StockIssueRepository;
+import com.gara.quanlygara.repository.StockMovementRepository;
+import com.gara.quanlygara.repository.StockReceiptItemRepository;
+import com.gara.quanlygara.repository.StockReceiptRepository;
+import com.gara.quanlygara.repository.RepairHistoryRepository;
 import com.gara.quanlygara.entity.Account;
 import com.gara.quanlygara.entity.AccountRole;
 import com.gara.quanlygara.entity.Customer;
@@ -55,6 +67,9 @@ class SecurityConfigTest {
     private TechnicianRepository technicianRepository;
 
     @MockitoBean
+    private VehicleRepository vehicleRepository;
+
+    @MockitoBean
     private GarageServiceRepository garageServiceRepository;
 
     @MockitoBean
@@ -63,11 +78,38 @@ class SecurityConfigTest {
     @MockitoBean
     private TechnicianAssignmentRepository technicianAssignmentRepository;
 
-    @MockitoBean private com.gara.quanlygara.repository.InvoiceRepository invoiceRepository;
-    @MockitoBean private com.gara.quanlygara.repository.PaymentRepository paymentRepository;
-    @MockitoBean private com.gara.quanlygara.repository.RepairProgressRepository progressRepository;
-    @MockitoBean private com.gara.quanlygara.repository.ReceivingBankAccountRepository bankRepository;
-    @MockitoBean private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+    @MockitoBean
+    private RepairPartItemRepository repairPartItemRepository;
+
+    @MockitoBean
+    private RepairServiceItemRepository repairServiceItemRepository;
+
+    @MockitoBean
+    private SparePartRepository sparePartRepository;
+
+    @MockitoBean
+    private InventoryCheckItemRepository inventoryCheckItemRepository;
+
+    @MockitoBean
+    private InventoryCheckRepository inventoryCheckRepository;
+
+    @MockitoBean
+    private StockIssueItemRepository stockIssueItemRepository;
+
+    @MockitoBean
+    private StockIssueRepository stockIssueRepository;
+
+    @MockitoBean
+    private StockMovementRepository stockMovementRepository;
+
+    @MockitoBean
+    private StockReceiptItemRepository stockReceiptItemRepository;
+
+    @MockitoBean
+    private StockReceiptRepository stockReceiptRepository;
+
+    @MockitoBean
+    private RepairHistoryRepository repairHistoryRepository;
 
     @Test
     void accountApiRejectsRequestWithoutJwt() throws Exception {

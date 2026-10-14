@@ -6,7 +6,7 @@ export type AdminPage =
   | "dashboard" | "appointments" | "reception" | "repair" | "quotation"
   | "customers" | "vehicles" | "services" | "inventory" | "invoice"
   | "history" | "notifications" | "reports" | "staff" | "settings"
-  | "technician" | "design-system";
+  | "technician" | "design-system" | "spare-parts" | "repair-details";
 
 export type PublicPage = "home" | "about" | "services" | "parts" | "contact" | "login" | "register";
 export type CustomerPage = "overview" | "vehicles" | "appointments" | "quotations" | "tracking" | "history" | "notifications" | "profile";
@@ -20,7 +20,7 @@ export const ADMIN_PAGES = new Set<AdminPage>([
   "dashboard", "appointments", "reception", "repair", "quotation",
   "customers", "vehicles", "services", "inventory", "invoice",
   "history", "notifications", "reports", "staff", "settings",
-  "technician", "design-system",
+  "technician", "design-system", "spare-parts", "repair-details",
 ]);
 
 const PUBLIC_ROUTES: Record<string, PublicPage> = {
