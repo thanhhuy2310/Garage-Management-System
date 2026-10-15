@@ -16,14 +16,7 @@ import 'history_detail_screen.dart';
       HistoryCategory.mixed => ('Bảo dưỡng & sửa chữa', AppStatusTone.info),
     };
 
-class _VehicleOption {
-  const _VehicleOption({required this.id, required this.plate});
-
-  final int id;
-  final String plate;
-}
-
-/// Lịch sử sửa chữa, bảo dưỡng đã hoàn tất của khách hàng, lấy từ Spring Boot API.
+/// Lịch sử sửa chữa, bảo dưỡng đã hoàn tất của khách hàng, lấy từ Spring Boot API theo từng trang.
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key, required this.service});
 
@@ -34,55 +27,132 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
+  static const _pageSize = 10;
+  int _requestId = 0;
   bool _loading = true;
+  bool _loadingMore = false;
   String? _error;
+  String? _moreError;
   List<HistoryItem> _items = const [];
-  List<_VehicleOption> _vehicles = const [];
+  List<HistoryVehicle> _vehicles = const [];
   int? _vehicleId;
+  int _nextPage = 0;
+  int _total = 0;
+  bool _hasMore = false;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _reload();
+    _loadVehicles();
   }
 
-  Future<void> _load() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+  Future<void> _loadVehicles() async {
     try {
-      final items = await widget.service.getHistory(vehicleId: _vehicleId);
-      if (!mounted) return;
-      setState(() {
-        _items = items;
-        // Danh sách xe để lọc lấy từ lịch sử chưa lọc của chính khách hàng.
-        if (_vehicleId == null) _vehicles = _distinctVehicles(items);
-      });
-    } on HistoryException catch (error) {
-      if (mounted) setState(() => _error = error.message);
+      final vehicles = await widget.service.getHistoryVehicles();
+      if (mounted) setState(() => _vehicles = vehicles);
     } catch (_) {
-      if (mounted) {
-        setState(() => _error = 'Không thể tải lịch sử sửa chữa.');
-      }
-    } finally {
-      if (mounted) setState(() => _loading = false);
+      // Bộ lọc là phần bổ trợ; lịch sử vẫn dùng được khi request này lỗi.
     }
   }
 
-  List<_VehicleOption> _distinctVehicles(List<HistoryItem> items) {
-    final seen = <int>{};
-    return [
-      for (final item in items)
-        if (seen.add(item.vehicleId))
-          _VehicleOption(id: item.vehicleId, plate: item.plate),
-    ];
+  Future<void> _reload({bool showLoading = true}) async {
+    final requestId = ++_requestId;
+    setState(() {
+      _loadingMore = false;
+      _moreError = null;
+      if (showLoading) {
+        _loading = true;
+        _error = null;
+      }
+    });
+    try {
+      final page = await widget.service.getHistory(
+        vehicleId: _vehicleId,
+        page: 0,
+        size: _pageSize,
+      );
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        _items = page.items;
+        _nextPage = 1;
+        _total = page.totalElements;
+        _hasMore = page.hasMore;
+        _loading = false;
+        _error = null;
+      });
+    } on HistoryException catch (error) {
+      _fail(requestId, error.message);
+    } catch (_) {
+      _fail(requestId, 'Không thể tải lịch sử sửa chữa.');
+    }
+  }
+
+  void _fail(int requestId, String message) {
+    if (!mounted || requestId != _requestId) return;
+    setState(() {
+      _loading = false;
+      if (_items.isEmpty) _error = message;
+    });
+    if (_items.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_loading || _loadingMore || !_hasMore) return;
+    final requestId = _requestId;
+    setState(() {
+      _loadingMore = true;
+      _moreError = null;
+    });
+    try {
+      final page = await widget.service.getHistory(
+        vehicleId: _vehicleId,
+        page: _nextPage,
+        size: _pageSize,
+      );
+      if (!mounted || requestId != _requestId) return;
+      setState(() {
+        final known = _items.map((item) => item.repairOrderId).toSet();
+        _items = [
+          ..._items,
+          ...page.items.where((item) => !known.contains(item.repairOrderId)),
+        ];
+        _nextPage += 1;
+        _total = page.totalElements;
+        _hasMore = page.hasMore;
+        _loadingMore = false;
+      });
+    } on HistoryException catch (error) {
+      _failMore(requestId, error.message);
+    } catch (_) {
+      _failMore(requestId, 'Không thể tải thêm lịch sử.');
+    }
+  }
+
+  void _failMore(int requestId, String message) {
+    if (!mounted || requestId != _requestId) return;
+    setState(() {
+      _loadingMore = false;
+      _moreError = message;
+    });
   }
 
   void _selectVehicle(int? vehicleId) {
     if (vehicleId == _vehicleId) return;
-    setState(() => _vehicleId = vehicleId);
-    _load();
+    setState(() {
+      _vehicleId = vehicleId;
+      _items = const [];
+      _hasMore = false;
+      _total = 0;
+    });
+    _reload();
+  }
+
+  Future<void> _refresh() async {
+    _loadVehicles();
+    await _reload(showLoading: false);
   }
 
   void _open(HistoryItem item) {
@@ -144,7 +214,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _buildContent() {
     if (_loading) return const LoadingState(label: 'Đang tải lịch sử...');
     if (_error != null) {
-      return _refreshable(ErrorState(message: _error!, onRetry: _load));
+      return _refreshable(ErrorState(message: _error!, onRetry: _reload));
     }
     if (_items.isEmpty) {
       return _refreshable(
@@ -158,22 +228,63 @@ class _HistoryScreenState extends State<HistoryScreen> {
       );
     }
     return RefreshIndicator(
-      onRefresh: _load,
-      child: ListView.separated(
+      onRefresh: _refresh,
+      child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
-        itemCount: _items.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 12),
-        itemBuilder: (_, index) =>
-            _HistoryCard(item: _items[index], onTap: () => _open(_items[index])),
+        itemCount: _items.length + 2,
+        itemBuilder: (_, index) {
+          if (index == 0) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                'Hiển thị ${_items.length}/$_total lượt',
+                style: const TextStyle(fontSize: 12, color: AppColors.muted),
+              ),
+            );
+          }
+          if (index == _items.length + 1) return _buildFooter();
+          final item = _items[index - 1];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _HistoryCard(item: item, onTap: () => _open(item)),
+          );
+        },
       ),
     );
+  }
+
+  Widget _buildFooter() {
+    if (_loadingMore) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_moreError != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          children: [
+            Text(_moreError!, textAlign: TextAlign.center),
+            TextButton(onPressed: _loadMore, child: const Text('Thử lại')),
+          ],
+        ),
+      );
+    }
+    if (_hasMore) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: OutlinedButton(onPressed: _loadMore, child: const Text('Tải thêm')),
+      );
+    }
+    return const SizedBox(height: 8);
   }
 
   /// Cho phép kéo để làm mới ngay cả khi đang hiển thị trạng thái rỗng/lỗi.
   Widget _refreshable(Widget child) {
     return RefreshIndicator(
-      onRefresh: _load,
+      onRefresh: _refresh,
       child: LayoutBuilder(
         builder: (context, constraints) => ListView(
           physics: const AlwaysScrollableScrollPhysics(),

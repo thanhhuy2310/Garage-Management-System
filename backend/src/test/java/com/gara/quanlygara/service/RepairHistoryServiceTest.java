@@ -47,7 +47,8 @@ class RepairHistoryServiceTest {
 
     @Test
     void historyKeepsTheNewestFirstOrderOfTheQueryAndBuildsSummaryAndCosts() {
-        when(repository.findHistoryRows(CUSTOMER_ID, 0, 0)).thenReturn(rows(
+        when(repository.countHistory(CUSTOMER_ID, 0)).thenReturn(2L);
+        when(repository.findHistoryRows(CUSTOMER_ID, 0, 0, 0, 10)).thenReturn(rows(
                 header(12, 1, "51G-123.45", Timestamp.valueOf("2026-09-20 10:00:00"), "1500000"),
                 header(5, 2, "51A-456.78", Timestamp.valueOf("2026-06-01 09:00:00"), "300000")));
         when(repository.findServiceLines(any())).thenReturn(rows(
@@ -55,7 +56,7 @@ class RepairHistoryServiceTest {
                 service(5, 3, "Kiểm tra hệ thống phanh", "KIEM_TRA", 1, "300000")));
         when(repository.findPartLines(any())).thenReturn(rows(part(12, 9, "Lọc dầu", 1, "300000")));
 
-        var items = service.getHistory(CUSTOMER_ID, null);
+        var items = service.getHistory(CUSTOMER_ID, null, 0, 10).items();
 
         assertEquals(List.of(12, 5), items.stream().map(item -> item.repairOrderId()).toList());
         assertEquals("51G-123.45", items.get(0).licensePlate());
@@ -81,7 +82,8 @@ class RepairHistoryServiceTest {
 
     @Test
     void summaryMentionsMoreServicesAndFallsBackToPartsOrResult() {
-        when(repository.findHistoryRows(CUSTOMER_ID, 0, 0)).thenReturn(rows(
+        when(repository.countHistory(CUSTOMER_ID, 0)).thenReturn(3L);
+        when(repository.findHistoryRows(CUSTOMER_ID, 0, 0, 0, 10)).thenReturn(rows(
                 header(1, 1, "A", Timestamp.valueOf("2026-01-01 00:00:00"), "0"),
                 header(2, 1, "A", Timestamp.valueOf("2026-01-02 00:00:00"), "0"),
                 header(3, 1, "A", Timestamp.valueOf("2026-01-03 00:00:00"), "0")));
@@ -90,7 +92,7 @@ class RepairHistoryServiceTest {
                 service(1, 3, "A3", "SUA_CHUA", 1, "1"), service(1, 4, "A4", "SUA_CHUA", 1, "1")));
         when(repository.findPartLines(any())).thenReturn(rows(part(2, 9, "Bugi", 4, "180000")));
 
-        var items = service.getHistory(CUSTOMER_ID, null);
+        var items = service.getHistory(CUSTOMER_ID, null, 0, 10).items();
 
         assertEquals("A1, A2, A3 và 1 hạng mục khác", items.get(0).summary());
         assertEquals("Thay phụ tùng: Bugi", items.get(1).summary());
@@ -99,9 +101,10 @@ class RepairHistoryServiceTest {
 
     @Test
     void emptyHistoryIsAnEmptyListWithoutLineQueries() {
-        when(repository.findHistoryRows(CUSTOMER_ID, 0, 0)).thenReturn(new ArrayList<>());
+        when(repository.countHistory(CUSTOMER_ID, 0)).thenReturn(0L);
 
-        assertTrue(service.getHistory(CUSTOMER_ID, null).isEmpty());
+        assertTrue(service.getHistory(CUSTOMER_ID, null, 0, 10).items().isEmpty());
+        verify(repository, never()).findHistoryRows(any(), any(), any(), any(), any());
         verify(repository, never()).findServiceLines(any());
         verify(repository, never()).findPartLines(any());
     }
@@ -110,28 +113,29 @@ class RepairHistoryServiceTest {
     void filteringByAVehicleOfAnotherCustomerIsRejectedBeforeAnyHistoryQuery() {
         when(repository.countOwnedVehicle(99, CUSTOMER_ID)).thenReturn(0L);
 
-        assertThrows(ResourceNotFoundException.class, () -> service.getHistory(CUSTOMER_ID, 99));
-        verify(repository, never()).findHistoryRows(any(), any(), any());
+        assertThrows(ResourceNotFoundException.class, () -> service.getHistory(CUSTOMER_ID, 99, 0, 10));
+        verify(repository, never()).findHistoryRows(any(), any(), any(), any(), any());
     }
 
     @Test
     void filteringByAnOwnedVehicleScopesTheQueryToThatVehicleAndCustomer() {
         when(repository.countOwnedVehicle(3, CUSTOMER_ID)).thenReturn(1L);
-        when(repository.findHistoryRows(CUSTOMER_ID, 3, 0)).thenReturn(new ArrayList<>());
+        when(repository.countHistory(CUSTOMER_ID, 3)).thenReturn(1L);
+        when(repository.findHistoryRows(CUSTOMER_ID, 3, 0, 0, 10)).thenReturn(new ArrayList<>());
 
-        assertTrue(service.getHistory(CUSTOMER_ID, 3).isEmpty());
-        verify(repository).findHistoryRows(CUSTOMER_ID, 3, 0);
+        assertTrue(service.getHistory(CUSTOMER_ID, 3, 0, 10).items().isEmpty());
+        verify(repository).findHistoryRows(CUSTOMER_ID, 3, 0, 0, 10);
     }
 
     @Test
     void invalidVehicleIdIsABadRequest() {
-        assertThrows(BadRequestException.class, () -> service.getHistory(CUSTOMER_ID, 0));
-        assertThrows(BadRequestException.class, () -> service.getHistory(CUSTOMER_ID, -4));
+        assertThrows(BadRequestException.class, () -> service.getHistory(CUSTOMER_ID, 0, 0, 10));
+        assertThrows(BadRequestException.class, () -> service.getHistory(CUSTOMER_ID, -4, 0, 10));
     }
 
     @Test
     void detailReturnsOnlyThatOrderWithServicesPartsAndTotals() {
-        when(repository.findHistoryRows(CUSTOMER_ID, 0, 12)).thenReturn(rows(
+        when(repository.findHistoryRows(CUSTOMER_ID, 0, 12, 0, 1)).thenReturn(rows(
                 header(12, 1, "51G-123.45", Timestamp.valueOf("2026-09-20 10:00:00"), "1380000")));
         when(repository.findServiceLines(any())).thenReturn(rows(
                 service(12, 2, "Bảo dưỡng định kỳ", "BAO_DUONG", 1, "1200000")));
@@ -149,7 +153,7 @@ class RepairHistoryServiceTest {
 
     @Test
     void detailOfAnUnknownOrAnotherCustomersOrderIsNotFound() {
-        when(repository.findHistoryRows(CUSTOMER_ID, 0, 77)).thenReturn(new ArrayList<>());
+        when(repository.findHistoryRows(CUSTOMER_ID, 0, 77, 0, 1)).thenReturn(new ArrayList<>());
 
         assertThrows(ResourceNotFoundException.class, () -> service.getDetail(CUSTOMER_ID, 77));
         verify(repository, never()).findServiceLines(any());

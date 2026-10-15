@@ -3,7 +3,8 @@ package com.gara.quanlygara.controller;
 
 import com.gara.quanlygara.dto.ApiResponse;
 import com.gara.quanlygara.dto.history.HistoryDetailResponse;
-import com.gara.quanlygara.dto.history.HistoryItemResponse;
+import com.gara.quanlygara.dto.history.HistoryPageResponse;
+import com.gara.quanlygara.dto.history.HistoryVehicleResponse;
 import com.gara.quanlygara.security.StaffContext;
 import com.gara.quanlygara.service.RepairHistoryService;
 import org.springframework.http.ResponseEntity;
@@ -36,12 +37,20 @@ public class CustomerHistoryController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<HistoryItemResponse>>> getHistory(
+    public ResponseEntity<ApiResponse<HistoryPageResponse>> getHistory(
             @RequestParam(required = false) Integer vehicleId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
             Authentication authentication
     ) {
         return ResponseEntity.ok(ApiResponse.success("Lấy lịch sử sửa chữa thành công.",
-                historyService.getHistory(customerId(authentication), vehicleId)));
+                historyService.getHistory(customerId(authentication), vehicleId, page, size)));
+    }
+
+    @GetMapping("/vehicles")
+    public ResponseEntity<ApiResponse<List<HistoryVehicleResponse>>> getVehicles(Authentication authentication) {
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách xe có lịch sử thành công.",
+                historyService.getVehicles(customerId(authentication))));
     }
 
     @GetMapping("/{repairOrderId}")

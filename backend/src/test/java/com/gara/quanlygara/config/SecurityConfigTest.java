@@ -56,18 +56,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class SecurityConfigTest {
-    @MockitoBean private com.gara.quanlygara.repository.InventoryCheckItemRepository mergedInventoryCheckItemRepository;
-    @MockitoBean private com.gara.quanlygara.repository.InventoryCheckRepository mergedInventoryCheckRepository;
-    @MockitoBean private com.gara.quanlygara.repository.RepairHistoryRepository mergedRepairHistoryRepository;
-    @MockitoBean private com.gara.quanlygara.repository.RepairPartItemRepository mergedRepairPartItemRepository;
-    @MockitoBean private com.gara.quanlygara.repository.RepairServiceItemRepository mergedRepairServiceItemRepository;
-    @MockitoBean private com.gara.quanlygara.repository.SparePartRepository mergedSparePartRepository;
-    @MockitoBean private com.gara.quanlygara.repository.StockIssueItemRepository mergedStockIssueItemRepository;
-    @MockitoBean private com.gara.quanlygara.repository.StockIssueRepository mergedStockIssueRepository;
-    @MockitoBean private com.gara.quanlygara.repository.StockMovementRepository mergedStockMovementRepository;
-    @MockitoBean private com.gara.quanlygara.repository.StockReceiptItemRepository mergedStockReceiptItemRepository;
-    @MockitoBean private com.gara.quanlygara.repository.StockReceiptRepository mergedStockReceiptRepository;
-    @MockitoBean private com.gara.quanlygara.repository.VehicleRepository mergedVehicleRepository;
     @MockitoBean private com.gara.quanlygara.service.RepairBusinessRules mergedRules;
 
 
@@ -133,6 +121,12 @@ class SecurityConfigTest {
 
     @MockitoBean
     private RepairHistoryRepository repairHistoryRepository;
+
+    @MockitoBean private com.gara.quanlygara.repository.InvoiceRepository invoiceRepository;
+    @MockitoBean private com.gara.quanlygara.repository.PaymentRepository paymentRepository;
+    @MockitoBean private com.gara.quanlygara.repository.RepairProgressRepository progressRepository;
+    @MockitoBean private com.gara.quanlygara.repository.ReceivingBankAccountRepository bankRepository;
+    @MockitoBean private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     @Test
     void accountApiRejectsRequestWithoutJwt() throws Exception {

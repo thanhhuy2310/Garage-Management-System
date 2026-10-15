@@ -1,6 +1,6 @@
 # Kết quả tích hợp và rà soát nghiệp vụ — 15/10/2026
 
-Nhánh làm việc: `integration`. Nhánh `main` không bị sửa. Mã nguồn từ bảy commit của Cẩm trên `feature/cam-mobile-history` đã được tích hợp cùng phần sửa chữa, thanh toán, hồ sơ khách hàng và giao diện hiện có.
+Nhánh làm việc: `integration`. Nhánh `main` không bị sửa. Tip mới nhất của `feature/cam-mobile-history` (`839524b`) đã có trong lịch sử tích hợp cùng phần sửa chữa, thanh toán, hồ sơ khách hàng và giao diện hiện có.
 
 ## Trạng thái module
 
@@ -19,7 +19,7 @@ Nhánh làm việc: `integration`. Nhánh `main` không bị sửa. Mã nguồn 
 | Nhập kho, xuất kho, tồn, biến động | REAL | Xuất kho chưa trừ tồn; chỉ trừ khi đúng KTV xác nhận thực dùng |
 | Kiểm kê kho | REAL | WAREHOUSE ghi nhận, MANAGER duyệt/từ chối có khóa dòng |
 | Hóa đơn và thanh toán | REAL | Lập sau hoàn tất; phụ tùng phải khớp thực dùng; thanh toán có khóa hóa đơn và mã chống lặp |
-| Lịch sử khách hàng | REAL | Web/Flutter lấy từ phiếu hoàn tất thuộc xe của tài khoản đăng nhập |
+| Lịch sử khách hàng | REAL | Web/Flutter phân trang toàn bộ phiếu hoàn tất thuộc xe của tài khoản đăng nhập; bộ lọc xe không phụ thuộc trang hiện tại |
 | Tổng quan quản lý | MIXED | Phiếu sửa chữa và cảnh báo kho REAL; lịch hẹn, báo giá và biểu đồ ghi rõ `MOCK_ONLY` |
 | Lịch hẹn Web/Flutter | MOCK_ONLY | Schema có `LichHen`, chưa có API |
 | Khách xác nhận/từ chối báo giá | MOCK_ONLY | Schema/procedure có, chưa có API xác thực theo khách hàng |
@@ -50,7 +50,7 @@ Nhánh làm việc: `integration`. Nhánh `main` không bị sửa. Mã nguồn 
 
 ## Kiểm thử
 
-- Backend: test đơn vị và API trên H2; test tích hợp hồ sơ, sửa chữa, thanh toán và xác nhận thực dùng trên SQL Server local.
+- Backend: test đơn vị và API trên H2; test tích hợp hồ sơ, sửa chữa, thanh toán, lịch sử hơn 200 bản ghi và xác nhận thực dùng trên SQL Server local.
 - Web: TypeScript, production build và Playwright trên desktop/tablet/mobile.
 - Flutter: analyze và toàn bộ widget/service test; adapter API có kiểm thử token, hồ sơ, xe, đổi mật khẩu, lỗi phiên và tiền có phần lẻ.
 - SQL: migration chạy trên `QuanLyGaraOTo`; `Test_Warehouse.sql` kiểm tra procedure kho và tự dọn dữ liệu thử.

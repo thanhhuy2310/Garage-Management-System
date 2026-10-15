@@ -9,8 +9,9 @@ import 'package:garage_customer_mobile/services/history_service.dart';
 const _listPayload = {
   'success': true,
   'message': 'ok',
-  'data': [
-    {
+  'data': {
+    'items': [
+      {
       'repairOrderId': 12,
       'vehicleId': 3,
       'licensePlate': '51G-123.45',
@@ -25,8 +26,13 @@ const _listPayload = {
       'partCount': 1,
       'totalCost': 1380000.0,
       'result': 'Hoàn tất tốt',
-    },
-  ],
+      },
+    ],
+    'page': 0,
+    'size': 10,
+    'totalElements': 1,
+    'totalPages': 1,
+  },
 };
 
 const _detailPayload = {
@@ -109,30 +115,33 @@ void main() {
     final server = await _serve(recorded, 200, _listPayload);
     addTearDown(() => server.close(force: true));
 
-    final items = await _service(server).getHistory();
+    final page = await _service(server).getHistory();
 
     expect(recorded.method, 'GET');
     expect(recorded.path, '/api/customers/me/history');
-    expect(recorded.query, isEmpty);
+    expect(recorded.query, 'page=0&size=10');
     expect(recorded.authorization, 'Bearer tok');
-    expect(items, hasLength(1));
-    expect(items.first.repairOrderId, 12);
-    expect(items.first.plate, '51G-123.45');
-    expect(items.first.vehicleName, 'Toyota Camry');
-    expect(items.first.category, HistoryCategory.maintenance);
-    expect(items.first.totalCost, 1380000);
-    expect(items.first.date, DateTime(2026, 9, 20, 10));
+    expect(page.items, hasLength(1));
+    expect(page.totalElements, 1);
+    expect(page.items.first.repairOrderId, 12);
+    expect(page.items.first.plate, '51G-123.45');
+    expect(page.items.first.vehicleName, 'Toyota Camry');
+    expect(page.items.first.category, HistoryCategory.maintenance);
+    expect(page.items.first.totalCost, 1380000.0);
+    expect(page.items.first.date, DateTime(2026, 9, 20, 10));
   });
 
   test('getHistory passes the vehicle filter as a query parameter', () async {
     final recorded = _Recorded();
-    final server = await _serve(recorded, 200, {'data': <Object>[]});
+    final server = await _serve(recorded, 200, {
+      'data': {'items': <Object>[], 'page': 0, 'size': 10, 'totalElements': 0, 'totalPages': 0},
+    });
     addTearDown(() => server.close(force: true));
 
-    final items = await _service(server).getHistory(vehicleId: 3);
+    final page = await _service(server).getHistory(vehicleId: 3);
 
-    expect(recorded.query, 'vehicleId=3');
-    expect(items, isEmpty);
+    expect(recorded.query, 'page=0&size=10&vehicleId=3');
+    expect(page.items, isEmpty);
   });
 
   test('getHistoryDetail parses services, parts and totals', () async {

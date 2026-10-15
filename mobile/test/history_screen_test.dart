@@ -38,15 +38,46 @@ class _FakeHistoryService implements HistoryService {
   int detailCalls = 0;
 
   @override
-  Future<List<HistoryItem>> getHistory({int? vehicleId}) async {
+  Future<HistoryPage> getHistory({
+    int? vehicleId,
+    int page = 0,
+    int size = 10,
+  }) async {
     calls.add(vehicleId);
     if (failFirst) {
       failFirst = false;
       throw const HistoryException('Không thể kết nối đến hệ thống.');
     }
-    return vehicleId == null
+    final filtered = vehicleId == null
         ? items
         : items.where((item) => item.vehicleId == vehicleId).toList();
+    final start = page * size;
+    final pageItems = start >= filtered.length
+        ? <HistoryItem>[]
+        : filtered.sublist(start, (start + size).clamp(0, filtered.length));
+    return HistoryPage(
+      items: pageItems,
+      page: page,
+      size: size,
+      totalElements: filtered.length,
+      totalPages: filtered.isEmpty ? 0 : (filtered.length + size - 1) ~/ size,
+    );
+  }
+
+  @override
+  Future<List<HistoryVehicle>> getHistoryVehicles() async {
+    final seen = <int>{};
+    return [
+      for (final item in items)
+        if (seen.add(item.vehicleId))
+          HistoryVehicle(
+            id: item.vehicleId,
+            plate: item.plate,
+            brand: item.brand,
+            model: item.model,
+            completedCount: items.where((entry) => entry.vehicleId == item.vehicleId).length,
+          ),
+    ];
   }
 
   @override
