@@ -13,6 +13,9 @@ import type {
 } from "../types/garage"
 
 export const garageApi = {
+  async allServices(signal?: AbortSignal) {
+    return unwrap(await api.get<ApiResponse<GarageService[]>>("/api/services", { signal, params: { includeInactive: true } }));
+  },
   async receptions(signal?: AbortSignal) {
     return unwrap(
       await api.get<ApiResponse<ReceptionOption[]>>(

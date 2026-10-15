@@ -35,7 +35,7 @@ export type Page = AdminPage;
 const BASE_ROLE_NAV: Record<Role, AdminPage[]> = {
   customer: [],
   receptionist: ["customers", "vehicles", "appointments", "reception", "repair", "quotation", "invoice", "history"],
-  technician: ["technician"],
+  technician: ["technician", "inventory"],
   warehouse: ["inventory"],
   manager: ["dashboard", "staff", "services", "repair", "invoice", "reports"],
   admin: ["settings"],
@@ -202,6 +202,7 @@ export default function App() {
       onNavigate={(next) => navigateTo(ROUTE_PATHS.admin(next))}
       onLogout={handleLogout}
     >
+      {["appointments", "reception", "quotation", "notifications", "reports", "staff"].includes(page) && <div role="note" className="mb-4 rounded-lg bg-warning-soft p-4 text-sm">MOCK_ONLY · Dữ liệu minh họa. Các thao tác ở màn này chưa được lưu vào hệ thống gara.</div>}
       <Suspense fallback={<PageLoading />}><PageContent page={page} /></Suspense>
     </AdminLayout>
   );

@@ -8,7 +8,7 @@ import type { GarageService } from "../types/garage"
 import { formatMoney } from "../utils/garageFormat"
 
 export default function Services() {
-  const query = useGarageQuery(garageApi.services)
+  const query = useGarageQuery(garageApi.allServices)
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("")
   const [editing, setEditing] = useState<GarageService | null>(null)
@@ -28,7 +28,7 @@ export default function Services() {
   const filtered = services.filter(
     (service) =>
       (!category || service.type === category) &&
-      `${service.name} ${service.type ?? ""}`
+      `${service.name}{service.active === false && " · Ngừng cung cấp"} ${service.type ?? ""}`
         .toLocaleLowerCase("vi")
         .includes(keyword),
   )
@@ -127,7 +127,7 @@ export default function Services() {
                   </span>
                 </div>
                 <h3 className="mt-4 break-words text-base font-semibold text-foreground">
-                  {service.name}
+                  {service.name}{service.active === false && " · Ngừng cung cấp"}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {service.type || "Chưa phân nhóm"}

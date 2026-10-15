@@ -2,8 +2,6 @@ import { useMemo, useState } from "react";
 import { Badge, Button, Card, Icons } from "../../components/ui";
 import { baoGia, chiTietBaoGia, formatCurrency, phieuSuaChua, phieuTiepNhan, xe, type QuotationStatus } from "../../mock/data";
 
-const CUSTOMER_ID = "KH001";
-
 const STATUS_VARIANT: Record<QuotationStatus, "pending" | "confirmed" | "rejected" | "draft"> = {
   pending: "pending",
   confirmed: "confirmed",
@@ -24,13 +22,13 @@ function repairCustomerId(repairId: string): string | null {
   return xe.find((v) => v.MaXe === reception?.MaXe)?.MaKhachHang ?? null;
 }
 
-export default function CustomerQuotations() {
+export default function CustomerQuotations({ customerKey }: { customerKey: string }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [confirmedIds, setConfirmedIds] = useState<string[]>([]);
 
   const myQuotations = useMemo(
-    () => baoGia.filter((q) => repairCustomerId(q.MaPhieuSuaChua) === CUSTOMER_ID),
-    [],
+    () => baoGia.filter((q) => repairCustomerId(q.MaPhieuSuaChua) === customerKey),
+    [customerKey],
   );
   const detail = myQuotations.find((q) => q.MaBaoGia === selected);
   const detailLines = useMemo(

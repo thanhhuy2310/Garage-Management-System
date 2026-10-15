@@ -1,3 +1,4 @@
+import 'package:garage_customer_mobile/services/appointment_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:garage_customer_mobile/app/app.dart';
@@ -9,9 +10,10 @@ import 'package:garage_customer_mobile/services/vehicle_service.dart';
 void main() {
   testWidgets('customer can open login and enter the app', (tester) async {
     await tester.pumpWidget(
-      const GarageCustomerApp(
-        authService: MockAuthService(),
-        homeService: MockHomeService(),
+      GarageCustomerApp(appointmentService: MockAppointmentService(),
+        authService: const MockAuthService(),
+        homeService: const MockHomeService(),
+        vehicleService: MockVehicleService(),
       ),
     );
 
@@ -39,8 +41,8 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const GarageCustomerApp(
-        authService: MockAuthService(),
+      GarageCustomerApp(appointmentService: MockAppointmentService(),
+        authService: const MockAuthService(),
         homeService: MockHomeService(),
         vehicleService: _EmptyVehicleService(),
       ),
@@ -58,6 +60,8 @@ void main() {
 
     expect(find.text('Bạn chưa có xe'), findsOneWidget);
     expect(find.text('Thêm xe để tiếp tục'), findsOneWidget);
+    await tester.ensureVisible(find.widgetWithText(FilledButton, 'Thêm xe để tiếp tục'));
+    await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(FilledButton, 'Thêm xe để tiếp tục'));
     await tester.pumpAndSettle();
 

@@ -1,3 +1,4 @@
+import 'repair_order.dart' show parseGarageDate;
 // TV3-TUAN9
 /// Lượt sửa chữa/bảo dưỡng đã hoàn tất, tổng hợp từ dữ liệu nghiệp vụ gốc bởi backend
 /// (GET /api/customers/me/history). Không có dữ liệu mock.
@@ -8,7 +9,7 @@ int _asInt(Object? value) => value is num ? value.round() : 0;
 String _asText(Object? value) => value?.toString() ?? '';
 
 DateTime? _asDate(Object? value) =>
-    value == null ? null : DateTime.tryParse(value.toString());
+    value == null ? null : parseGarageDate(value.toString());
 
 HistoryCategory _asCategory(Object? value) => switch (value?.toString()) {
   'BAO_DUONG' => HistoryCategory.maintenance,
@@ -44,7 +45,7 @@ class HistoryItem {
     summary: _asText(json['summary']),
     serviceCount: _asInt(json['serviceCount']),
     partCount: _asInt(json['partCount']),
-    totalCost: _asInt(json['totalCost']),
+    totalCost: json['totalCost'] ?? 0,
     result: _asText(json['result']),
     createdAt: _asDate(json['createdAt']),
     startedAt: _asDate(json['startedAt']),
@@ -60,7 +61,7 @@ class HistoryItem {
   final String summary;
   final int serviceCount;
   final int partCount;
-  final int totalCost;
+  final Object totalCost;
   final String result;
   final DateTime? createdAt;
   final DateTime? startedAt;
@@ -88,16 +89,16 @@ class HistoryServiceLine {
         name: _asText(json['name']),
         type: _asText(json['type']),
         quantity: _asInt(json['quantity']),
-        unitPrice: _asInt(json['unitPrice']),
-        lineTotal: _asInt(json['lineTotal']),
+        unitPrice: json['unitPrice'] ?? 0,
+        lineTotal: json['lineTotal'] ?? 0,
       );
 
   final int serviceId;
   final String name;
   final String type;
   final int quantity;
-  final int unitPrice;
-  final int lineTotal;
+  final Object unitPrice;
+  final Object lineTotal;
 }
 
 class HistoryPartLine {
@@ -113,15 +114,15 @@ class HistoryPartLine {
     partId: _asInt(json['partId']),
     name: _asText(json['name']),
     quantity: _asInt(json['quantity']),
-    unitPrice: _asInt(json['unitPrice']),
-    lineTotal: _asInt(json['lineTotal']),
+    unitPrice: json['unitPrice'] ?? 0,
+    lineTotal: json['lineTotal'] ?? 0,
   );
 
   final int partId;
   final String name;
   final int quantity;
-  final int unitPrice;
-  final int lineTotal;
+  final Object unitPrice;
+  final Object lineTotal;
 }
 
 class HistoryDetail {
@@ -144,72 +145,14 @@ class HistoryDetail {
       item: HistoryItem.fromJson(item),
       services: lines(json['services'], HistoryServiceLine.fromJson),
       parts: lines(json['parts'], HistoryPartLine.fromJson),
-      serviceTotal: _asInt(json['serviceTotal']),
-      partsTotal: _asInt(json['partsTotal']),
+      serviceTotal: json['serviceTotal'] ?? 0,
+      partsTotal: json['partsTotal'] ?? 0,
     );
   }
 
   final HistoryItem item;
   final List<HistoryServiceLine> services;
   final List<HistoryPartLine> parts;
-  final int serviceTotal;
-  final int partsTotal;
-}
-
-
-/// Một trang lịch sử từ backend; page bắt đầu từ 0. totalElements là tổng số lượt (không bị cắt).
-class HistoryPage {
-  const HistoryPage({
-    required this.items,
-    required this.page,
-    required this.size,
-    required this.totalElements,
-    required this.totalPages,
-  });
-
-  factory HistoryPage.fromJson(Map<String, dynamic> json) {
-    final raw = json['items'];
-    return HistoryPage(
-      items: raw is List
-          ? raw.whereType<Map<String, dynamic>>().map(HistoryItem.fromJson).toList()
-          : <HistoryItem>[],
-      page: _asInt(json['page']),
-      size: _asInt(json['size']),
-      totalElements: _asInt(json['totalElements']),
-      totalPages: _asInt(json['totalPages']),
-    );
-  }
-
-  final List<HistoryItem> items;
-  final int page;
-  final int size;
-  final int totalElements;
-  final int totalPages;
-
-  bool get hasMore => page + 1 < totalPages;
-}
-
-/// Xe có lịch sử hoàn tất của khách hàng, dùng làm bộ lọc (lấy từ toàn bộ lịch sử, không chỉ trang đầu).
-class HistoryVehicle {
-  const HistoryVehicle({
-    required this.id,
-    required this.plate,
-    required this.brand,
-    required this.model,
-    required this.completedCount,
-  });
-
-  factory HistoryVehicle.fromJson(Map<String, dynamic> json) => HistoryVehicle(
-    id: _asInt(json['vehicleId']),
-    plate: _asText(json['licensePlate']),
-    brand: _asText(json['brand']),
-    model: _asText(json['model']),
-    completedCount: _asInt(json['completedCount']),
-  );
-
-  final int id;
-  final String plate;
-  final String brand;
-  final String model;
-  final int completedCount;
+  final Object serviceTotal;
+  final Object partsTotal;
 }

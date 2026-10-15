@@ -1,3 +1,5 @@
+import 'customer_api.dart';
+export '../demo/profile_demo.dart';
 import '../models/customer_profile.dart';
 
 abstract interface class ProfileService {
@@ -8,21 +10,14 @@ abstract interface class ProfileService {
   });
 }
 
-class MockProfileService implements ProfileService {
-  @override
-  Future<CustomerProfile> updateProfile(CustomerProfile profile) async {
-    await Future<void>.delayed(const Duration(milliseconds: 250));
-    return profile;
-  }
 
+class ApiProfileService implements ProfileService {
+  ApiProfileService(this.api);
+  final CustomerApi api;
   @override
-  Future<void> changePassword({
-    required String currentPassword,
-    required String newPassword,
-  }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    if (currentPassword == 'sai') {
-      throw StateError('Mật khẩu hiện tại không đúng.');
-    }
+  Future<CustomerProfile> updateProfile(CustomerProfile profile) async => throw StateError('Vui lòng liên hệ lễ tân để cập nhật hồ sơ.');
+  @override
+  Future<void> changePassword({required String currentPassword, required String newPassword}) async {
+    await api.request('/auth/change-password', method: 'PUT', body: {'currentPassword': currentPassword, 'newPassword': newPassword});
   }
 }

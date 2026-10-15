@@ -1,6 +1,8 @@
 const currencyFormatter = new Intl.NumberFormat("vi-VN", {
   style: "currency",
   currency: "VND",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
 })
 const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
   dateStyle: "short",

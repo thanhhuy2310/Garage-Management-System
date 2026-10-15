@@ -15,6 +15,7 @@ export default function ServiceForm({
   onCancel: () => void
   onBusyChange: (busy: boolean) => void
 }) {
+  const [active, setActive] = useState(service?.active ?? true)
   const [name, setName] = useState(service?.name ?? "")
   const [type, setType] = useState(service?.type ?? "")
   const [price, setPrice] = useState(service?.unitPrice.toString() ?? "")
@@ -39,6 +40,7 @@ export default function ServiceForm({
     setError("")
     try {
       const request = {
+        active,
         name: name.trim(),
         type: type.trim() || null,
         unitPrice: Number(price),
@@ -86,6 +88,7 @@ export default function ServiceForm({
           value={price}
           onChange={(event) => setPrice(event.target.value)}
         />
+        <label className="flex gap-2 text-sm"><input type="checkbox" checked={active} onChange={e => setActive(e.target.checked)}/>Đang cung cấp dịch vụ</label>
         <Textarea
           label="Mô tả"
           maxLength={500}

@@ -19,8 +19,11 @@ async function rememberAccount(page: Page, role: string, expired = false) {
   await page.route("**/api/auth/logout", (route) => route.fulfill({
     json: { success: true, message: "OK", data: null },
   }))
-  await page.route("**/api/services", (route) => route.fulfill({
+  await page.route("**/api/services**", (route) => route.fulfill({
     json: { success: true, message: "OK", data: [] },
+  }))
+  await page.route("**/api/customer/profile", (route) => route.fulfill({
+    json: { success: true, data: { id: 1, fullName: "Khách quay lại", phone: "0901234567", email: null, address: null, active: true } },
   }))
 }
 

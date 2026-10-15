@@ -257,8 +257,8 @@ class _LineRow extends StatelessWidget {
 
   final String name;
   final int quantity;
-  final int unitPrice;
-  final int lineTotal;
+  final Object unitPrice;
+  final Object lineTotal;
 
   @override
   Widget build(BuildContext context) {

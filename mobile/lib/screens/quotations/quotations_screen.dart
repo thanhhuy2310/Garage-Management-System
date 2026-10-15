@@ -1,3 +1,4 @@
+import '../../core/widgets/demo_notice.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/app_controller.dart';
@@ -43,7 +44,7 @@ class _QuotationsScreenState extends State<QuotationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Báo giá')),
+      appBar: AppBar(title: const Text('Báo giá'), bottom: const DemoNotice()),
       body: SafeArea(
         top: false,
         child: _loading

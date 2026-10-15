@@ -5,6 +5,7 @@ import ImportsTab from "../features/warehouse/ImportsTab";
 import IssuesTab from "../features/warehouse/IssuesTab";
 import MovementsTab from "../features/warehouse/MovementsTab";
 import StockTab from "../features/warehouse/StockTab";
+import { useWarehouseRole } from "../features/warehouse/common";
 import { Tabs } from "../components/ui";
 
 const TABS = [
@@ -17,7 +18,9 @@ const TABS = [
 
 /** Quản lý kho phụ tùng: dữ liệu lấy từ Spring Boot API (SQL Server), không dùng mock. */
 export default function Inventory() {
-  const [tab, setTab] = useState("stock");
+  const { role } = useWarehouseRole();
+  const technician = role === "TECHNICIAN";
+  const [tab, setTab] = useState(technician ? "export" : "stock");
   // Tăng giá trị này sau mỗi thao tác làm thay đổi tồn để các tab khác tải lại.
   const [refreshKey, setRefreshKey] = useState(0);
   const changed = () => setRefreshKey((key) => key + 1);
@@ -25,7 +28,7 @@ export default function Inventory() {
   return (
     <div className="space-y-6">
       <div className="page-toolbar">
-        <Tabs tabs={TABS} active={tab} onChange={setTab} />
+        <Tabs tabs={technician ? TABS.filter(t => t.key === "export") : TABS} active={tab} onChange={setTab} />
       </div>
 
       {tab === "stock" && <StockTab refreshKey={refreshKey} />}

@@ -2,8 +2,6 @@ import { useMemo, useState } from "react";
 import { Card, Icons } from "../../components/ui";
 import { thongBao } from "../../mock/schemaData";
 
-const CUSTOMER_ID = "KH001";
-
 const TYPE_META: Record<string, { icon: React.ReactNode; tint: string; label: string }> = {
   appointment: { icon: Icons.calendar, tint: "bg-info-soft text-info", label: "Lịch hẹn" },
   repair: { icon: Icons.wrench, tint: "bg-primary-soft text-primary", label: "Sửa chữa" },
@@ -11,8 +9,8 @@ const TYPE_META: Record<string, { icon: React.ReactNode; tint: string; label: st
   parts: { icon: Icons.package, tint: "bg-warning-soft text-warning", label: "Phụ tùng" },
 };
 
-export default function CustomerNotifications() {
-  const mine = useMemo(() => thongBao.filter((n) => n.MaKhachHang === CUSTOMER_ID), []);
+export default function CustomerNotifications({ customerKey }: { customerKey: string }) {
+  const mine = useMemo(() => thongBao.filter((n) => n.MaKhachHang === customerKey), [customerKey]);
   const [readIds, setReadIds] = useState<string[]>([]);
   const unreadCount = mine.filter((n) => !n.DaDoc && !readIds.includes(n.MaThongBao)).length;
 

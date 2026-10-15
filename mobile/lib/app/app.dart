@@ -1,3 +1,4 @@
+import '../services/customer_api.dart';
 import 'package:flutter/material.dart';
 
 import '../core/constants/app_config.dart';
@@ -45,15 +46,16 @@ class GarageCustomerApp extends StatefulWidget {
 }
 
 class _GarageCustomerAppState extends State<GarageCustomerApp> {
+  late final CustomerApi _api = CustomerApi(() => controller.session?.accessToken);
   late final AppController controller = AppController(
     widget.authService ?? ApiAuthService(),
-    widget.homeService ?? const MockHomeService(),
-    widget.vehicleService ?? MockVehicleService(),
-    widget.appointmentService ?? MockAppointmentService(),
+    widget.homeService ?? ApiHomeService(_api),
+    widget.vehicleService ?? ApiVehicleService(_api),
+    widget.appointmentService ?? MockAppointmentService(api: _api),
     MockQuotationService(),
     ApiRepairService(),
     MockNotificationService(),
-    MockProfileService(),
+    ApiProfileService(_api),
   );
 
   // Lịch sử sửa chữa gọi Spring Boot API thật bằng token của phiên đăng nhập hiện tại.

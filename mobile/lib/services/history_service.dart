@@ -18,11 +18,7 @@ class HistoryException implements Exception {
 /// Tra cứu lịch sử sửa chữa, bảo dưỡng của khách hàng đang đăng nhập.
 /// Backend lấy khách hàng từ JWT nên client không (và không thể) chọn customerId.
 abstract interface class HistoryService {
-  /// Một trang lịch sử, mới nhất trước. page bắt đầu từ 0.
-  Future<HistoryPage> getHistory({int? vehicleId, int page = 0, int size = 10});
-
-  /// Toàn bộ xe có lịch sử hoàn tất của khách hàng (để lọc), không phụ thuộc trang.
-  Future<List<HistoryVehicle>> getHistoryVehicles();
+  Future<List<HistoryItem>> getHistory({int? vehicleId});
 
   Future<HistoryDetail> getHistoryDetail(int repairOrderId);
 }
@@ -32,7 +28,7 @@ class ApiHistoryService implements HistoryService {
     required this.tokenProvider,
     String? baseUrl,
     HttpClient? client,
-  }) : _baseUrl = (baseUrl ?? AppConfig.apiBaseUrl).replaceAll(RegExp(r'/+$'), ''),
+  }) : _baseUrl = baseUrl ?? AppConfig.apiBaseUrl,
        _client = client ?? HttpClient();
 
   /// Trả về access token của phiên đăng nhập hiện tại (null khi chưa đăng nhập).
@@ -41,34 +37,17 @@ class ApiHistoryService implements HistoryService {
   final HttpClient _client;
 
   @override
-  Future<HistoryPage> getHistory({
-    int? vehicleId,
-    int page = 0,
-    int size = 10,
-  }) async {
+  Future<List<HistoryItem>> getHistory({int? vehicleId}) async {
     final data = await _get(
       '/customers/me/history',
-      query: {
-        'page': '$page',
-        'size': '$size',
-        if (vehicleId != null) 'vehicleId': '$vehicleId',
-      },
+      query: vehicleId == null ? null : {'vehicleId': '$vehicleId'},
     );
-    if (data is! Map<String, dynamic>) {
-      throw const HistoryException('Dữ liệu lịch sử không hợp lệ.');
-    }
-    return HistoryPage.fromJson(data);
-  }
-
-  @override
-  Future<List<HistoryVehicle>> getHistoryVehicles() async {
-    final data = await _get('/customers/me/history/vehicles');
     if (data is! List) {
-      throw const HistoryException('Dữ liệu xe không hợp lệ.');
+      throw const HistoryException('Dữ liệu lịch sử không hợp lệ.');
     }
     return data
         .whereType<Map<String, dynamic>>()
-        .map(HistoryVehicle.fromJson)
+        .map(HistoryItem.fromJson)
         .toList();
   }
 
