@@ -202,7 +202,7 @@ export default function App() {
       onNavigate={(next) => navigateTo(ROUTE_PATHS.admin(next))}
       onLogout={handleLogout}
     >
-      {["appointments", "reception", "quotation", "notifications", "reports", "staff"].includes(page) && <div role="note" className="mb-4 rounded-lg bg-warning-soft p-4 text-sm">MOCK_ONLY · Dữ liệu minh họa. Các thao tác ở màn này chưa được lưu vào hệ thống gara.</div>}
+      {["appointments", "reception", "quotation", "notifications", "staff"].includes(page) && <div role="note" className="mb-4 rounded-lg bg-warning-soft p-4 text-sm">MOCK_ONLY · Dữ liệu minh họa. Các thao tác ở màn này chưa được lưu vào hệ thống gara.</div>}
       <Suspense fallback={<PageLoading />}><PageContent page={page} /></Suspense>
     </AdminLayout>
   );
