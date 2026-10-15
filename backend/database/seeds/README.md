@@ -1,5 +1,13 @@
 # Dữ liệu để Huy test phần sửa chữa và thanh toán
 
+## Bộ demo tích hợp 8 tình huống
+
+Sau khi chạy đủ các script trong `../migrations/README.md`, chạy `Seed_Integrated_Demo.sql`. Script chỉ thêm dữ liệu có dấu nhận diện riêng, không đặt lại dữ liệu hiện có và hỗ trợ chạy lại.
+
+Tám tài khoản `demo_gara_customer_1` đến `demo_gara_customer_8` dùng mật khẩu `demo123`. Bộ dữ liệu liên kết lịch hẹn, xe, tiếp nhận, phiếu sửa chữa, báo giá, phân công, xuất kho, thực dùng, hóa đơn và thanh toán. Các tình huống lần lượt gồm: lịch hẹn tương lai; chờ xác nhận báo giá; chờ phân công; đã cấp phụ tùng nhưng chưa xác nhận thực dùng; chờ phụ tùng; hoàn tất chưa thanh toán; thanh toán đủ; thanh toán một phần. Tài khoản nhân viên là `demo_gara_manager`, `demo_gara_warehouse`, `demo_gara_technician`, cùng mật khẩu `demo123`.
+
+Giá công `250000.50`, giá lọc dầu `120000.25` và hóa đơn `370000.75` được dùng có chủ ý để kiểm tra phần lẻ tiền tệ từ SQL Server đến Web/Flutter.
+
 File cần chạy: `Seed_Huy_Repair_Billing.sql`.
 
 Bộ này thêm dữ liệu vào SQL thật để web và Flutter gọi API lấy lên. Không thêm mock vào code giao diện. Tên khách, nhân viên và dịch vụ hiển thị bình thường, không có tiền tố kiểm thử. Đây vẫn là dữ liệu giả lập để thử chức năng, không phải giao dịch kinh doanh thật.

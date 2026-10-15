@@ -23,7 +23,7 @@ BEGIN TRY
         @LockMode = 'Exclusive', @LockOwner = 'Transaction', @LockTimeout = 10000;
     IF @LockResult < 0 THROW 51001, N'Bộ dữ liệu test đang được nạp ở phiên khác.', 1;
 
-    DECLARE @Now DATETIME2(0) = SYSDATETIME();
+    DECLARE @Now DATETIME2(0) = CONVERT(DATETIME2(0), SYSUTCDATETIME() AT TIME ZONE 'UTC' AT TIME ZONE 'SE Asia Standard Time');
     DECLARE @DisplayPrefix NVARCHAR(30) = N'';
     IF @DisplayPrefix = N'' AND EXISTS (SELECT 1 FROM dbo.DichVu WHERE TenDichVu LIKE N'[[]TEST HUY] %')
         THROW 51010, N'Chạy Normalize_Huy_Display_Data.sql trước để đổi tên dữ liệu đã nạp từ bản cũ.', 1;
@@ -203,6 +203,17 @@ BEGIN TRY
     SELECT l.OrderId, l.ServiceId, CASE WHEN c.Stt = 21 AND l.ThuTu = 2 THEN 2 ELSE 1 END, d.DonGia, l.TrangThai
     FROM @Lines l JOIN dbo.DichVu d ON d.MaDichVu = l.ServiceId
     JOIN @NewOrders n ON n.Id = l.OrderId JOIN @Cases c ON c.MaTiepNhan = n.MaTiepNhan;
+
+    INSERT INTO dbo.BaoGia (MaPhieuSuaChua,NgayLap,TongTien,TrangThai,NgayXacNhan)
+    SELECT n.Id,DATEADD(MINUTE,12,c.MocTiepNhan),SUM(d.SoLuong*d.DonGia),
+        CASE WHEN c.Ktv IS NULL THEN N'CHO_XAC_NHAN' ELSE N'DA_XAC_NHAN' END,
+        CASE WHEN c.Ktv IS NULL THEN NULL ELSE DATEADD(MINUTE,14,c.MocTiepNhan) END
+    FROM @NewOrders n JOIN @Cases c ON c.MaTiepNhan=n.MaTiepNhan
+    JOIN dbo.ChiTietDichVu d ON d.MaPhieuSuaChua=n.Id GROUP BY n.Id,c.MocTiepNhan,c.Ktv;
+    INSERT INTO dbo.ChiTietBaoGia (MaBaoGia,MaDichVu,NoiDung,SoLuong,DonGia)
+    SELECT bg.MaBaoGia,d.MaDichVu,sv.TenDichVu,d.SoLuong,d.DonGia FROM @NewOrders n
+    JOIN dbo.BaoGia bg ON bg.MaPhieuSuaChua=n.Id JOIN dbo.ChiTietDichVu d ON d.MaPhieuSuaChua=n.Id
+    JOIN dbo.DichVu sv ON sv.MaDichVu=d.MaDichVu;
 
     INSERT INTO dbo.NhatKySuaChua (MaPhieuSuaChua, MaDichVu, TrangThai, NoiDung, NguoiCapNhat, ThoiGian)
     SELECT n.Id, NULL, N'MOI_TAO', N'Đã lập phiếu, chờ phân công kỹ thuật viên.', 'test_huy_tiepnhan', DATEADD(MINUTE, 10, c.MocTiepNhan)
