@@ -59,6 +59,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class SparePartApiTest {
+    @MockitoBean private com.gara.quanlygara.repository.RepairProgressRepository integratedRepairProgressRepository;
+    @MockitoBean private com.gara.quanlygara.repository.PaymentRepository integratedPaymentRepository;
+    @MockitoBean private com.gara.quanlygara.repository.InvoiceRepository integratedInvoiceRepository;
+    @MockitoBean private com.gara.quanlygara.repository.ReceivingBankAccountRepository integratedReceivingBankAccountRepository;
+    @MockitoBean private org.springframework.jdbc.core.JdbcTemplate integratedJdbc;
+    @MockitoBean private com.gara.quanlygara.service.RepairBusinessRules integratedRules;
+
 
     private static final String PART_JSON = """
             {"warehouseId":1,"name":"Bugi Iridium","manufacturer":"NGK","unitPrice":210000,"minStockLevel":6}

@@ -69,6 +69,7 @@ class InventoryCheckServiceTest {
             return saved;
         });
         lenient().when(checkRepository.findById(1)).thenAnswer(call -> Optional.ofNullable(check));
+        lenient().when(checkRepository.findForUpdate(1)).thenAnswer(call -> Optional.ofNullable(check));
         lenient().when(itemRepository.save(any(InventoryCheckItem.class))).thenAnswer(call -> {
             InventoryCheckItem item = call.getArgument(0);
             if (!store.contains(item)) store.add(item);

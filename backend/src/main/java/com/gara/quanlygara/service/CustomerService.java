@@ -3,9 +3,12 @@ package com.gara.quanlygara.service;
 import com.gara.quanlygara.dto.customer.CustomerRequest;
 import com.gara.quanlygara.dto.customer.CustomerResponse;
 import com.gara.quanlygara.entity.Account;
+import com.gara.quanlygara.entity.AccountRole;
 import com.gara.quanlygara.entity.Customer;
 import com.gara.quanlygara.exception.ConflictException;
+import com.gara.quanlygara.exception.ForbiddenException;
 import com.gara.quanlygara.exception.ResourceNotFoundException;
+import com.gara.quanlygara.exception.UnauthorizedException;
 import com.gara.quanlygara.repository.AccountRepository;
 import com.gara.quanlygara.repository.CustomerRepository;
 import org.springframework.data.domain.Sort;
@@ -36,6 +39,16 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public CustomerResponse getById(Integer id) {
         return CustomerResponse.from(findEntity(id));
+    }
+
+    @Transactional(readOnly = true)
+    public CustomerResponse getCurrentProfile(String username) {
+        Account account = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new UnauthorizedException("Bạn cần đăng nhập lại."));
+        if (!account.isActive() || account.getRole() != AccountRole.CUSTOMER || account.getCustomerId() == null) {
+            throw new ForbiddenException("Tài khoản chưa được liên kết với khách hàng.");
+        }
+        return getById(account.getCustomerId());
     }
 
     @Transactional

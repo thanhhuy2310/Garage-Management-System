@@ -9,10 +9,11 @@ public record ServiceResponse(
         String name,
         String type,
         BigDecimal unitPrice,
-        String description
+        String description,
+        boolean active
 ) {
     public static ServiceResponse from(GarageService service) {
         return new ServiceResponse(service.getId(), service.getName(), service.getType(),
-                service.getUnitPrice(), service.getDescription());
+                service.getUnitPrice(), service.getDescription(), service.isActive());
     }
 }

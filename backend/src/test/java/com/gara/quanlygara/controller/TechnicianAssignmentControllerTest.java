@@ -43,6 +43,7 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     @Autowired private AccountRepository accountRepository;
     @Autowired private JwtService jwtService;
     @Autowired private EntityManager entityManager;
+    @Autowired private org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     private Employee firstTechnician;
     private Employee secondTechnician;
@@ -52,11 +53,13 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
 
     @BeforeEach
     void setUp() {
+        jdbc.execute("CREATE TABLE IF NOT EXISTS BaoGia (MaBaoGia INT PRIMARY KEY,MaPhieuSuaChua INT,TrangThai NVARCHAR(50))");
         firstTechnician = saveEmployee("Kỹ thuật viên A", true);
         secondTechnician = saveEmployee("Kỹ thuật viên B", true);
         receptionist = saveEmployee("Lễ tân", false);
         firstOrder = saveOrder(1);
         secondOrder = saveOrder(2);
+        jdbc.update("INSERT INTO BaoGia VALUES (?,?,'DA_XAC_NHAN'),(?,?,'DA_XAC_NHAN')", firstOrder.getId(), firstOrder.getId(), secondOrder.getId(), secondOrder.getId());
     }
 
     @ParameterizedTest

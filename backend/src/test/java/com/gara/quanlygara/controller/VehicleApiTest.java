@@ -57,6 +57,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class VehicleApiTest {
+    @MockitoBean private com.gara.quanlygara.repository.RepairProgressRepository integratedRepairProgressRepository;
+    @MockitoBean private com.gara.quanlygara.repository.PaymentRepository integratedPaymentRepository;
+    @MockitoBean private com.gara.quanlygara.repository.InvoiceRepository integratedInvoiceRepository;
+    @MockitoBean private com.gara.quanlygara.repository.ReceivingBankAccountRepository integratedReceivingBankAccountRepository;
+    @MockitoBean private org.springframework.jdbc.core.JdbcTemplate integratedJdbc;
+    @MockitoBean private com.gara.quanlygara.service.RepairBusinessRules integratedRules;
+
 
     private static final String VEHICLE_JSON = """
             {"customerId":1,"licensePlate":"51a-999.99","brand":"Toyota","model":"Vios","year":2021,"mileage":1000}
@@ -163,7 +170,7 @@ class VehicleApiTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(roles = "MANAGER")
     void getByIdReturnsVehicle() throws Exception {
         when(vehicleRepository.findById(2)).thenReturn(Optional.of(vehicle(2, 2, "59K-456.78")));
 
@@ -174,7 +181,7 @@ class VehicleApiTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(roles = "MANAGER")
     void getByIdReturns404WhenMissing() throws Exception {
         when(vehicleRepository.findById(404)).thenReturn(Optional.empty());
 

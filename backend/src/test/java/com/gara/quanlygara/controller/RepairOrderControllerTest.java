@@ -34,7 +34,7 @@ class RepairOrderControllerTest extends ApiTestSupport {
                     SoLuong INT, DonGia DECIMAL(18,2), TrangThai NVARCHAR(50))
                 """);
         jdbc.update("INSERT INTO KhachHang (MaKhachHang, HoTen, SoDienThoai, TrangThai) VALUES (9001, N'Khách A', '0900000001', 1)");
-        jdbc.update("INSERT INTO Xe VALUES (9001, 9001, '51A-12345', 'Toyota', 'Vios')");
+        jdbc.update("INSERT INTO Xe (MaXe,MaKhachHang,BienSo,HangXe,DongXe) VALUES (9001, 9001, '51A-12345', 'Toyota', 'Vios')");
         jdbc.update("INSERT INTO PhieuTiepNhan VALUES (9001, 9001, N'Kiểm tra phanh', N'Phanh kêu')");
         jdbc.update("INSERT INTO PhieuTiepNhan VALUES (9002, 9001, NULL, NULL)");
         jdbc.update("""
@@ -43,7 +43,7 @@ class RepairOrderControllerTest extends ApiTestSupport {
                        (9002, 9002, '2026-10-02 09:00:00', 'HOAN_TAT')
                 """);
         jdbc.update("INSERT INTO DichVu (MaDichVu, TenDichVu, DonGia) VALUES (9001, N'Kiểm tra phanh', 250000)");
-        jdbc.update("INSERT INTO ChiTietDichVu VALUES (9001, 9001, 2, 200000, 'DANG_SUA')");
+        jdbc.update("INSERT INTO ChiTietDichVu (MaPhieuSuaChua,MaDichVu,SoLuong,DonGia,TrangThai) VALUES (9001, 9001, 2, 200000, 'DANG_SUA')");
         jdbc.update("INSERT INTO NhanVien (MaNhanVien, HoTen, ChucVu) VALUES (9001, N'KTV A', N'Kỹ thuật viên'), (9002, N'KTV B', N'Kỹ thuật viên')");
         jdbc.update("INSERT INTO KyThuatVien (MaNhanVien) VALUES (9001), (9002)");
         jdbc.update("""

@@ -20,24 +20,29 @@ class RepairBillingWorkflowTest extends ApiTestSupport {
 
     @BeforeEach
     void prepare() {
+        jdbc.execute("CREATE TABLE IF NOT EXISTS BaoGia (MaBaoGia INT PRIMARY KEY,MaPhieuSuaChua INT,TrangThai NVARCHAR(50))");
         jdbc.execute("CREATE TABLE IF NOT EXISTS Xe (MaXe INT PRIMARY KEY, MaKhachHang INT, BienSo VARCHAR(20), HangXe NVARCHAR(100), DongXe NVARCHAR(100))");
         jdbc.execute("CREATE TABLE IF NOT EXISTS PhieuTiepNhan (MaTiepNhan INT PRIMARY KEY, MaXe INT, YeuCauKhachHang NVARCHAR(1000), TinhTrangBanDau NVARCHAR(1000))");
         jdbc.execute("CREATE TABLE IF NOT EXISTS ChiTietDichVu (MaPhieuSuaChua INT, MaDichVu INT, SoLuong INT, DonGia DECIMAL(18,2), TrangThai NVARCHAR(50))");
         jdbc.execute("CREATE TABLE IF NOT EXISTS PhuTung (MaPhuTung INT PRIMARY KEY, TenPhuTung NVARCHAR(150))");
         jdbc.execute("CREATE TABLE IF NOT EXISTS ChiTietPhuTung (MaPhieuSuaChua INT, MaPhuTung INT, SoLuong INT, DonGia DECIMAL(18,2))");
         jdbc.update("INSERT INTO KhachHang (MaKhachHang,HoTen,SoDienThoai,TrangThai) VALUES (9201,'Khach A','0920000001',1),(9202,'Khach B','0920000002',1)");
-        jdbc.update("INSERT INTO Xe VALUES (9201,9201,'51A-92001','Toyota','Vios'),(9202,9202,'51A-92002','Honda','City')");
+        jdbc.update("INSERT INTO Xe (MaXe,MaKhachHang,BienSo,HangXe,DongXe) VALUES (9201,9201,'51A-92001','Toyota','Vios'),(9202,9202,'51A-92002','Honda','City')");
         jdbc.update("INSERT INTO PhieuTiepNhan VALUES (9201,9201,'Kiem tra phanh','Phanh keu'),(9202,9202,NULL,NULL),(9203,9201,NULL,NULL)");
         jdbc.update("INSERT INTO PhieuSuaChua (MaPhieuSuaChua,MaTiepNhan,NgayLap,TrangThai) VALUES (9201,9201,'2026-10-06 08:00:00','MOI_TAO'),(9202,9202,'2026-10-06 08:00:00','HOAN_TAT')");
         jdbc.update("INSERT INTO DichVu (MaDichVu,TenDichVu,DonGia) VALUES (9201,'Phanh',999999),(9202,'Dau',100000)");
-        jdbc.update("INSERT INTO ChiTietDichVu VALUES (9201,9201,2,200000,'CHO_SUA'),(9202,9201,1,100000,'HOAN_TAT')");
-        jdbc.update("INSERT INTO PhuTung VALUES (9201,'Ma phanh')");
-        jdbc.update("INSERT INTO ChiTietPhuTung VALUES (9202,9201,2,50000)");
+        jdbc.update("INSERT INTO ChiTietDichVu (MaPhieuSuaChua,MaDichVu,SoLuong,DonGia,TrangThai) VALUES (9201,9201,2,200000,'CHO_SUA'),(9202,9201,1,100000,'HOAN_TAT')");
+        jdbc.update("INSERT INTO PhuTung (MaPhuTung,MaKho,TenPhuTung,DonGia,MucTonToiThieu,SoLuongTon) VALUES (9201,1,'Ma phanh',50000,2,10)");
+        jdbc.update("INSERT INTO ChiTietPhuTung (MaPhieuSuaChua,MaPhuTung,SoLuong,DonGia) VALUES (9202,9201,2,50000)");
         jdbc.update("INSERT INTO NhanVien (MaNhanVien,HoTen,ChucVu) VALUES (9201,'Tech A','KTV'),(9202,'Tech B','KTV')");
         jdbc.update("INSERT INTO KyThuatVien VALUES (9201),(9202)");
         jdbc.update("INSERT INTO TaiKhoan (TenDangNhap,MatKhauHash,VaiTro,TrangThai,MaNhanVien) VALUES ('flow-tech','unused','TECHNICIAN',1,9201),('flow-other','unused','TECHNICIAN',1,9202)");
         jdbc.update("INSERT INTO TaiKhoan (TenDangNhap,MatKhauHash,VaiTro,TrangThai,MaKhachHang) VALUES ('flow-customer','unused','CUSTOMER',1,9201),('flow-customer-b','unused','CUSTOMER',1,9202)");
         jdbc.update("INSERT INTO PhanCongKyThuatVien VALUES (9201,9201,'2026-10-06 08:00:00','Kiem tra')");
+        jdbc.update("INSERT INTO BaoGia VALUES (9201,9201,'DA_XAC_NHAN'),(9202,9202,'DA_XAC_NHAN')");
+        jdbc.update("INSERT INTO PhieuXuatKho (MaPhieuXuat,MaPhieuSuaChua,MaNhanVienKho,NgayXuat,LyDo) VALUES (9202,9202,9201,'2026-10-06 08:00:00','Thay ma phanh')");
+        jdbc.update("INSERT INTO ChiTietPhieuXuat (MaPhieuXuat,MaPhuTung,SoLuong,DonGia,DaXacNhanSuDung,SoLuongThucDung,SoLuongHoanTra,MaKyThuatVienXacNhan,NgayXacNhan) VALUES (9202,9201,2,50000,1,2,0,9201,'2026-10-06 09:00:00')");
+
     }
 
     @Test @WithMockUser(username = "flow-tech", roles = "TECHNICIAN")
@@ -176,6 +181,31 @@ class RepairBillingWorkflowTest extends ApiTestSupport {
                         .content(objectMapper.writeValueAsString(Map.of("amount", 50000, "method", "CHUYEN_KHOAN",
                                 "requestId", UUID.randomUUID().toString(), "bankAccountId", bankId))))
                 .andExpect(status().isConflict());
+    }
+
+    @Test @WithMockUser(roles = "MANAGER")
+    void quoteMustBeAcceptedBeforeAssignmentAndRepair() throws Exception {
+        jdbc.update("UPDATE BaoGia SET TrangThai='CHO_XAC_NHAN' WHERE MaPhieuSuaChua=9201");
+        change("/api/repair-orders/9201/progress", "MOI_TAO", "DANG_SUA").andExpect(status().isConflict());
+        mockMvc.perform(post("/api/repair-orders/9201/technicians").contentType(APPLICATION_JSON)
+                .content("{\"technicianId\":9202}")).andExpect(status().isConflict());
+        assertEquals("MOI_TAO", jdbc.queryForObject("SELECT TrangThai FROM PhieuSuaChua WHERE MaPhieuSuaChua=9201", String.class));
+    }
+
+    @Test @WithMockUser(roles = "MANAGER")
+    void acceptedQuotePreventsChangingDetailPrices() throws Exception {
+        mockMvc.perform(put("/api/repair-orders/9201/details/SERVICE/9201").contentType(APPLICATION_JSON)
+                .content("{\"quantity\":1,\"unitPrice\":1}")).andExpect(status().isConflict());
+        assertEquals(200000, jdbc.queryForObject("SELECT DonGia FROM ChiTietDichVu WHERE MaPhieuSuaChua=9201", Integer.class));
+    }
+
+    @Test @WithMockUser(roles = "MANAGER")
+    void invoiceRejectsUnconfirmedOrMismatchedParts() throws Exception {
+        jdbc.update("UPDATE ChiTietPhieuXuat SET DaXacNhanSuDung=0 WHERE MaPhieuXuat=9202");
+        createInvoice().andExpect(status().isConflict());
+        jdbc.update("UPDATE ChiTietPhieuXuat SET DaXacNhanSuDung=1,SoLuongThucDung=1 WHERE MaPhieuXuat=9202");
+        createInvoice().andExpect(status().isConflict());
+        assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM HoaDon", Integer.class));
     }
 
     private org.springframework.test.web.servlet.ResultActions change(String url, String from, String to) throws Exception {

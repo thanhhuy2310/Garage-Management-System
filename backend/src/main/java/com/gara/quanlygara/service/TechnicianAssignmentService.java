@@ -27,6 +27,7 @@ import java.util.List;
 
 @Service
 public class TechnicianAssignmentService {
+    private final RepairBusinessRules rules;
 
     private static final String DUPLICATE_ASSIGNMENT = "Kỹ thuật viên đã được phân công cho phiếu sửa chữa này.";
 
@@ -38,7 +39,8 @@ public class TechnicianAssignmentService {
     public TechnicianAssignmentService(RepairOrderRepository repairOrderRepository,
                                        TechnicianRepository technicianRepository,
                                        TechnicianAssignmentRepository assignmentRepository,
-                                       AccountRepository accountRepository) {
+                                       AccountRepository accountRepository, RepairBusinessRules rules) {
+        this.rules = rules;
         this.repairOrderRepository = repairOrderRepository;
         this.technicianRepository = technicianRepository;
         this.assignmentRepository = assignmentRepository;
@@ -63,6 +65,7 @@ public class TechnicianAssignmentService {
         if (java.util.Set.of("HOAN_TAT", "HUY", "DA_HUY").contains(order.getStatus())) {
             throw new ConflictException("Phiếu đã kết thúc, không thể phân công thêm kỹ thuật viên.");
         }
+        rules.requireAcceptedQuote(repairOrderId);
         TechnicianResponse technician = technicianRepository.findOptionById(request.technicianId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỹ thuật viên."));
         TechnicianAssignmentId id = new TechnicianAssignmentId(repairOrderId, technician.id());

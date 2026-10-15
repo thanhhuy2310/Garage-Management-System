@@ -32,10 +32,13 @@ public class ServiceController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<ServiceResponse>>> getAll(
-            @RequestParam(required = false) String keyword
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "false") boolean includeInactive,
+            org.springframework.security.core.Authentication authentication
     ) {
         return ResponseEntity.ok(ApiResponse.success(
-                "Lấy danh sách dịch vụ thành công.", serviceCatalogService.getAll(keyword)));
+                "Lấy danh sách dịch vụ thành công.", serviceCatalogService.getAll(keyword,
+                        includeInactive && authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER")))));
     }
 
     @GetMapping("/{id}")

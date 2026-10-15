@@ -27,10 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/repair-orders/{repairOrderId}/details")
-@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST', 'TECHNICIAN', 'WAREHOUSE')")
+@PreAuthorize("hasAnyRole('MANAGER', 'RECEPTIONIST', 'TECHNICIAN', 'WAREHOUSE') and @repairAccess.canRead(authentication, #repairOrderId)")
 public class RepairDetailController {
 
-    private static final String CAN_WRITE = "hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST')";
+    private static final String CAN_WRITE = "hasAnyRole('MANAGER', 'RECEPTIONIST')";
 
     private final RepairDetailService repairDetailService;
 

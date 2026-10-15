@@ -72,6 +72,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class WarehouseApiTest {
+    @MockitoBean private com.gara.quanlygara.repository.RepairProgressRepository integratedRepairProgressRepository;
+    @MockitoBean private com.gara.quanlygara.repository.PaymentRepository integratedPaymentRepository;
+    @MockitoBean private com.gara.quanlygara.repository.InvoiceRepository integratedInvoiceRepository;
+    @MockitoBean private com.gara.quanlygara.repository.ReceivingBankAccountRepository integratedReceivingBankAccountRepository;
+    @MockitoBean private org.springframework.jdbc.core.JdbcTemplate integratedJdbc;
+    @MockitoBean private com.gara.quanlygara.service.RepairBusinessRules integratedRules;
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -345,16 +352,16 @@ class WarehouseApiTest {
 
     @Test
     @WithMockUser(username = "quanly", roles = "MANAGER")
-    void managerMustNameTheTechnicianWhenConfirming() throws Exception {
+    void managerCannotImpersonateATechnician() throws Exception {
         account("quanly", AccountRole.MANAGER, 1);
         arrangeConfirmable(5, 12);
 
         mockMvc.perform(post("/api/warehouse/exports/1/items/5/confirm").contentType(APPLICATION_JSON)
                         .content("{\"actualUsed\":3}"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isForbidden());
         mockMvc.perform(post("/api/warehouse/exports/1/items/5/confirm").contentType(APPLICATION_JSON)
                         .content("{\"actualUsed\":3,\"technicianId\":2}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isForbidden());
     }
 
     // ------------------------------------------------------------------ CHI TIẾT PHIẾU XUẤT THEO QUYỀN
@@ -407,11 +414,11 @@ class WarehouseApiTest {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    void adminReadsAnyIssue() throws Exception {
+    void adminCannotReadWarehouseIssues() throws Exception {
         account("admin", AccountRole.ADMIN, null);
         stubIssueDetail();
 
-        mockMvc.perform(get("/api/warehouse/exports/1")).andExpect(status().isOk());
+        mockMvc.perform(get("/api/warehouse/exports/1")).andExpect(status().isForbidden());
         verify(stockIssueRepository, never()).countRelatedToTechnician(any(), any());
     }
 
@@ -451,6 +458,7 @@ class WarehouseApiTest {
             return check;
         });
         when(inventoryCheckRepository.findById(1)).thenAnswer(call -> Optional.of(holder[0]));
+        when(inventoryCheckRepository.findForUpdate(1)).thenAnswer(call -> Optional.of(holder[0]));
         InventoryCheckItem item = new InventoryCheckItem();
         item.setCheckId(1);
         item.setPartId(5);
@@ -492,6 +500,7 @@ class WarehouseApiTest {
         item.setSystemQuantity(10);
         item.setActualQuantity(7);
         when(inventoryCheckRepository.findById(1)).thenReturn(Optional.of(check));
+        when(inventoryCheckRepository.findForUpdate(1)).thenReturn(Optional.of(check));
         when(inventoryCheckRepository.saveAndFlush(any(InventoryCheck.class))).thenAnswer(call -> call.getArgument(0));
         when(inventoryCheckItemRepository.findByCheckIdOrderByPartId(1)).thenReturn(List.of(item));
         when(inventoryCheckItemRepository.save(any(InventoryCheckItem.class))).thenAnswer(call -> call.getArgument(0));
@@ -516,6 +525,7 @@ class WarehouseApiTest {
         check.setId(1);
         check.setStatus(InventoryCheck.PENDING_APPROVAL);
         when(inventoryCheckRepository.findById(1)).thenReturn(Optional.of(check));
+        when(inventoryCheckRepository.findForUpdate(1)).thenReturn(Optional.of(check));
         when(inventoryCheckRepository.saveAndFlush(any(InventoryCheck.class))).thenAnswer(call -> call.getArgument(0));
         when(inventoryCheckItemRepository.findByCheckIdOrderByPartId(1)).thenReturn(List.of());
 

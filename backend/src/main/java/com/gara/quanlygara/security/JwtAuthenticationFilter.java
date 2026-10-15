@@ -12,16 +12,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import com.gara.quanlygara.repository.AccountRepository;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
+    private final AccountRepository accounts;
 
-    public JwtAuthenticationFilter(JwtService jwtService, CustomUserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtService jwtService, CustomUserDetailsService userDetailsService,
+                                   AccountRepository accounts) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.accounts = accounts;
     }
 
     @Override
@@ -40,14 +45,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String username = jwtService.extractUsername(token);
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (userDetails.isEnabled() && jwtService.isValid(token, userDetails.getUsername())) {
+                var account = accounts.findByUsername(username).orElse(null);
+                if (account != null && jwtService.isValid(token, account)) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
-        } catch (JwtException | IllegalArgumentException ignored) {
+        } catch (JwtException | IllegalArgumentException | UsernameNotFoundException ignored) {
             // Token sai hoặc hết hạn sẽ được xử lý như một request chưa đăng nhập.
         }
 

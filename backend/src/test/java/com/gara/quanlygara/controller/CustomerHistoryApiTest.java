@@ -57,6 +57,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class CustomerHistoryApiTest {
+    @MockitoBean private com.gara.quanlygara.repository.RepairProgressRepository integratedRepairProgressRepository;
+    @MockitoBean private com.gara.quanlygara.repository.PaymentRepository integratedPaymentRepository;
+    @MockitoBean private com.gara.quanlygara.repository.InvoiceRepository integratedInvoiceRepository;
+    @MockitoBean private com.gara.quanlygara.repository.ReceivingBankAccountRepository integratedReceivingBankAccountRepository;
+    @MockitoBean private org.springframework.jdbc.core.JdbcTemplate integratedJdbc;
+    @MockitoBean private com.gara.quanlygara.service.RepairBusinessRules integratedRules;
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -160,15 +167,13 @@ class CustomerHistoryApiTest {
     @WithMockUser(roles = "TECHNICIAN")
     void technicianCannotUseTheCustomerHistoryApi() throws Exception {
         mockMvc.perform(get("/api/customers/me/history")).andExpect(status().isForbidden());
-        mockMvc.perform(get("/api/customers/me/history/vehicles")).andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(username = "khachA", roles = "CUSTOMER")
-    void customerSeesOwnHistoryPageAndCustomerIdFromTheClientIsIgnored() throws Exception {
+    void customerSeesOwnHistoryAndCustomerIdFromTheClientIsIgnored() throws Exception {
         account("khachA", AccountRole.CUSTOMER, 1);
-        when(repairHistoryRepository.countHistory(1, 0)).thenReturn(23L);
-        when(repairHistoryRepository.findHistoryRows(1, 0, 0, 0, 10)).thenReturn(rows(header(12, 3, "51G-123.45")));
+        when(repairHistoryRepository.findHistoryRows(1, 0, 0)).thenReturn(rows(header(12, 3, "51G-123.45")));
         when(repairHistoryRepository.findServiceLines(any())).thenReturn(rows(
                 new Object[]{12, 2, "Bảo dưỡng định kỳ", "BAO_DUONG", 1, new BigDecimal("1200000")}));
         when(repairHistoryRepository.findPartLines(any())).thenReturn(rows(
@@ -177,45 +182,25 @@ class CustomerHistoryApiTest {
         // Client cố truyền customerId của người khác: bị bỏ qua, truy vấn luôn dùng customerId của JWT (1).
         mockMvc.perform(get("/api/customers/me/history").param("customerId", "2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.items.length()").value(1))
-                .andExpect(jsonPath("$.data.items[0].repairOrderId").value(12))
-                .andExpect(jsonPath("$.data.items[0].licensePlate").value("51G-123.45"))
-                .andExpect(jsonPath("$.data.items[0].category").value("BAO_DUONG"))
-                .andExpect(jsonPath("$.data.items[0].totalCost").value(1380000.0))
-                .andExpect(jsonPath("$.data.page").value(0))
-                .andExpect(jsonPath("$.data.size").value(10))
-                .andExpect(jsonPath("$.data.totalElements").value(23))
-                .andExpect(jsonPath("$.data.totalPages").value(3));
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].repairOrderId").value(12))
+                .andExpect(jsonPath("$.data[0].licensePlate").value("51G-123.45"))
+                .andExpect(jsonPath("$.data[0].category").value("BAO_DUONG"))
+                .andExpect(jsonPath("$.data[0].totalCost").value(1380000.0));
 
-        verify(repairHistoryRepository).findHistoryRows(1, 0, 0, 0, 10);
-        verify(repairHistoryRepository, never()).findHistoryRows(2, 0, 0, 0, 10);
+        verify(repairHistoryRepository).findHistoryRows(1, 0, 0);
+        verify(repairHistoryRepository, never()).findHistoryRows(2, 0, 0);
     }
 
     @Test
     @WithMockUser(username = "khachA", roles = "CUSTOMER")
-    void customerCanRequestALaterPage() throws Exception {
+    void customerWithNoHistoryGetsAnEmptyList() throws Exception {
         account("khachA", AccountRole.CUSTOMER, 1);
-        when(repairHistoryRepository.countHistory(1, 0)).thenReturn(23L);
-        when(repairHistoryRepository.findHistoryRows(1, 0, 0, 20, 10)).thenReturn(rows(header(2, 3, "51G-123.45")));
-        when(repairHistoryRepository.findServiceLines(any())).thenReturn(new ArrayList<>());
-        when(repairHistoryRepository.findPartLines(any())).thenReturn(new ArrayList<>());
-
-        mockMvc.perform(get("/api/customers/me/history").param("page", "2").param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.page").value(2))
-                .andExpect(jsonPath("$.data.items[0].repairOrderId").value(2));
-    }
-
-    @Test
-    @WithMockUser(username = "khachA", roles = "CUSTOMER")
-    void customerWithNoHistoryGetsAnEmptyPage() throws Exception {
-        account("khachA", AccountRole.CUSTOMER, 1);
-        when(repairHistoryRepository.countHistory(1, 0)).thenReturn(0L);
+        when(repairHistoryRepository.findHistoryRows(1, 0, 0)).thenReturn(new ArrayList<>());
 
         mockMvc.perform(get("/api/customers/me/history"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.items.length()").value(0))
-                .andExpect(jsonPath("$.data.totalElements").value(0));
+                .andExpect(jsonPath("$.data.length()").value(0));
     }
 
     @Test
@@ -223,14 +208,13 @@ class CustomerHistoryApiTest {
     void customerCanFilterByOwnVehicle() throws Exception {
         account("khachA", AccountRole.CUSTOMER, 1);
         when(repairHistoryRepository.countOwnedVehicle(3, 1)).thenReturn(1L);
-        when(repairHistoryRepository.countHistory(1, 3)).thenReturn(1L);
-        when(repairHistoryRepository.findHistoryRows(1, 3, 0, 0, 10)).thenReturn(rows(header(12, 3, "51G-123.45")));
+        when(repairHistoryRepository.findHistoryRows(1, 3, 0)).thenReturn(rows(header(12, 3, "51G-123.45")));
         when(repairHistoryRepository.findServiceLines(any())).thenReturn(new ArrayList<>());
         when(repairHistoryRepository.findPartLines(any())).thenReturn(new ArrayList<>());
 
         mockMvc.perform(get("/api/customers/me/history").param("vehicleId", "3"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.items[0].vehicleId").value(3));
+                .andExpect(jsonPath("$.data[0].vehicleId").value(3));
     }
 
     @Test
@@ -242,7 +226,7 @@ class CustomerHistoryApiTest {
         mockMvc.perform(get("/api/customers/me/history").param("vehicleId", "50"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success").value(false));
-        verify(repairHistoryRepository, never()).findHistoryRows(any(), any(), any(), any(), any());
+        verify(repairHistoryRepository, never()).findHistoryRows(any(), any(), any());
     }
 
     @Test
@@ -256,26 +240,9 @@ class CustomerHistoryApiTest {
 
     @Test
     @WithMockUser(username = "khachA", roles = "CUSTOMER")
-    void vehicleFilterListIsScopedToTheCustomerAndIndependentOfPages() throws Exception {
-        account("khachA", AccountRole.CUSTOMER, 1);
-        when(repairHistoryRepository.findHistoryVehicles(1)).thenReturn(rows(
-                new Object[]{3, "51G-123.45", "Toyota", "Camry", 14L},
-                new Object[]{4, "51A-456.78", "Kia", "Seltos", 2}));
-
-        mockMvc.perform(get("/api/customers/me/history/vehicles"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(2))
-                .andExpect(jsonPath("$.data[0].vehicleId").value(3))
-                .andExpect(jsonPath("$.data[0].completedCount").value(14))
-                .andExpect(jsonPath("$.data[1].licensePlate").value("51A-456.78"));
-        verify(repairHistoryRepository).findHistoryVehicles(1);
-    }
-
-    @Test
-    @WithMockUser(username = "khachA", roles = "CUSTOMER")
     void detailOfTheCustomersOwnOrderHasServicesPartsAndTotals() throws Exception {
         account("khachA", AccountRole.CUSTOMER, 1);
-        when(repairHistoryRepository.findHistoryRows(1, 0, 12, 0, 1)).thenReturn(rows(header(12, 3, "51G-123.45")));
+        when(repairHistoryRepository.findHistoryRows(1, 0, 12)).thenReturn(rows(header(12, 3, "51G-123.45")));
         when(repairHistoryRepository.findServiceLines(any())).thenReturn(rows(
                 new Object[]{12, 2, "Bảo dưỡng định kỳ", "BAO_DUONG", 1, new BigDecimal("1200000")}));
         when(repairHistoryRepository.findPartLines(any())).thenReturn(rows(
@@ -295,7 +262,7 @@ class CustomerHistoryApiTest {
     void detailOfAnotherCustomersOrderIsNotFoundAndLeaksNothing() throws Exception {
         account("khachA", AccountRole.CUSTOMER, 1);
         // Phiếu 99 của khách hàng khác: truy vấn (lọc theo khách hàng A) không trả dòng nào.
-        when(repairHistoryRepository.findHistoryRows(1, 0, 99, 0, 1)).thenReturn(new ArrayList<>());
+        when(repairHistoryRepository.findHistoryRows(1, 0, 99)).thenReturn(new ArrayList<>());
 
         mockMvc.perform(get("/api/customers/me/history/99"))
                 .andExpect(status().isNotFound())
@@ -309,15 +276,13 @@ class CustomerHistoryApiTest {
         account("khachX", AccountRole.CUSTOMER, null);
 
         mockMvc.perform(get("/api/customers/me/history")).andExpect(status().isForbidden());
-        mockMvc.perform(get("/api/customers/me/history/vehicles")).andExpect(status().isForbidden());
-        verify(repairHistoryRepository, never()).countHistory(any(), any());
+        verify(repairHistoryRepository, never()).findHistoryRows(any(), any(), any());
     }
 
     @Test
     void swaggerListsTheHistoryApi() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("/api/customers/me/history")))
-                .andExpect(content().string(containsString("/api/customers/me/history/vehicles")));
+                .andExpect(content().string(containsString("/api/customers/me/history")));
     }
 }

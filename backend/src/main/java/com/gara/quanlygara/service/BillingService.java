@@ -24,13 +24,15 @@ import java.util.Locale;
 @Service
 @Transactional(readOnly = true)
 public class BillingService {
+    private final RepairBusinessRules rules;
     private final InvoiceRepository invoices;
     private final PaymentRepository payments;
     private final RepairOrderRepository orders;
     private final JdbcTemplate jdbc;
     private final ReceivingBankAccountRepository banks;
     public BillingService(InvoiceRepository invoices, PaymentRepository payments,
-                          RepairOrderRepository orders, JdbcTemplate jdbc, ReceivingBankAccountRepository banks) {
+                          RepairOrderRepository orders, JdbcTemplate jdbc, ReceivingBankAccountRepository banks, RepairBusinessRules rules) {
+        this.rules = rules;
         this.invoices = invoices;
         this.payments = payments;
         this.orders = orders;
@@ -70,6 +72,8 @@ public class BillingService {
         var order = orders.findForUpdate(orderId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu sửa chữa."));
         if (!"HOAN_TAT".equals(order.getStatus())) throw new ConflictException("Chỉ lập hóa đơn khi sửa chữa đã hoàn tất.");
         if (invoices.existsByRepairOrderId(orderId)) throw new ConflictException("Phiếu sửa chữa đã có hóa đơn.");
+        rules.requireAcceptedQuote(orderId);
+        rules.requireSettledParts(orderId);
         var lines = lines(orderId);
         if (lines.isEmpty()) throw new ConflictException("Phiếu chưa có chi tiết dịch vụ hoặc phụ tùng.");
         BigDecimal total = lines.stream().map(l -> l.unitPrice().multiply(BigDecimal.valueOf(l.quantity())))

@@ -975,11 +975,14 @@ BEGIN
     IF @SoTien <= 0
         THROW 50040, N'So tien thanh toan phai lon hon 0.', 1;
 
+    BEGIN TRY
+        BEGIN TRAN;
+
     DECLARE @TongHoaDon DECIMAL(18,2);
     DECLARE @DaThanhToan DECIMAL(18,2);
 
     SELECT @TongHoaDon = TongTien
-    FROM HoaDon
+    FROM HoaDon WITH (UPDLOCK, HOLDLOCK)
     WHERE MaHoaDon = @MaHoaDon;
 
     IF @TongHoaDon IS NULL
@@ -990,8 +993,7 @@ BEGIN
     IF @DaThanhToan + @SoTien > @TongHoaDon
         THROW 50042, N'So tien thanh toan vuot qua so tien con lai cua hoa don.', 1;
 
-    BEGIN TRY
-        BEGIN TRAN;
+
 
         INSERT INTO ThanhToan (MaHoaDon, NgayThanhToan, SoTien, PhuongThuc)
         VALUES (

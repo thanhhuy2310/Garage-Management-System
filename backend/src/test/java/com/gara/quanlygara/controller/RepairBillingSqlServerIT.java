@@ -48,6 +48,7 @@ class RepairBillingSqlServerIT {
                         "services", new Object[]{Map.of("serviceId", service, "quantity", 2)}))))
                 .andExpect(status().isCreated()).andReturn();
         int order = json.readTree(created.getResponse().getContentAsString()).path("data").path("order").path("id").asInt();
+        jdbc.update("INSERT INTO BaoGia (MaPhieuSuaChua,NgayLap,TongTien,TrangThai,NgayXacNhan) VALUES (?,SYSDATETIME(),250001,N'DA_XAC_NHAN',SYSDATETIME())", order);
         mvc.perform(post("/api/repair-orders/{id}/technicians", order).with(user("manager").roles("MANAGER"))
                 .contentType(APPLICATION_JSON).content(json.writeValueAsString(Map.of("technicianId", tech))))
                 .andExpect(status().isCreated());

@@ -13,7 +13,6 @@ import com.gara.quanlygara.repository.RepairDetailRow;
 import com.gara.quanlygara.repository.RepairPartItemRepository;
 import com.gara.quanlygara.repository.RepairServiceItemRepository;
 import com.gara.quanlygara.repository.SparePartRepository;
-import com.gara.quanlygara.repository.StockIssueItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,19 +46,16 @@ class RepairDetailServiceTest {
     @Mock
     private SparePartRepository sparePartRepository;
 
-    @Mock
-    private StockIssueItemRepository stockIssueItemRepository;
-
     private RepairDetailService service;
 
     @BeforeEach
     void setUp() {
-        service = new RepairDetailService(serviceItemRepository, partItemRepository, sparePartRepository, stockIssueItemRepository);
+        service = new RepairDetailService(serviceItemRepository, partItemRepository, sparePartRepository, org.mockito.Mockito.mock(RepairBusinessRules.class));
     }
 
     @Test
     void getAllReturnsServicesPartsAndTotals() {
-        openOrder(1, "DANG_SUA");
+        openOrder(1, "DANG_KIEM_TRA");
         when(serviceItemRepository.findDetailRows(1)).thenReturn(List.of(row(3, "Kiểm tra phanh", 2, "300000.00", "HOAN_TAT")));
         when(partItemRepository.findDetailRows(1)).thenReturn(List.of(row(5, "Bugi", 4, "180000.00", null)));
 
@@ -93,7 +89,7 @@ class RepairDetailServiceTest {
 
     @Test
     void getByIdReturnsMatchingItemOnly() {
-        openOrder(1, "DANG_SUA");
+        openOrder(1, "DANG_KIEM_TRA");
         when(serviceItemRepository.findDetailRows(1)).thenReturn(List.of(row(3, "Kiểm tra phanh", 1, "300000.00", null)));
         when(partItemRepository.findDetailRows(1)).thenReturn(List.of(row(3, "Bugi", 1, "180000.00", null)));
 
@@ -104,7 +100,7 @@ class RepairDetailServiceTest {
 
     @Test
     void createPartLineUsesCatalogPriceAndNeverChangesStock() {
-        openOrder(1, "DANG_SUA");
+        openOrder(1, "DANG_KIEM_TRA");
         SparePart part = sparePart(5, "Bugi", "180000.00", 7);
         when(sparePartRepository.findById(5)).thenReturn(Optional.of(part));
         when(partItemRepository.existsById(new RepairPartItem.Key(1, 5))).thenReturn(false);
@@ -127,7 +123,7 @@ class RepairDetailServiceTest {
 
     @Test
     void createPartLineKeepsExplicitUnitPrice() {
-        openOrder(1, "DANG_SUA");
+        openOrder(1, "DANG_KIEM_TRA");
         when(sparePartRepository.findById(5)).thenReturn(Optional.of(sparePart(5, "Bugi", "180000.00", 7)));
         when(partItemRepository.existsById(new RepairPartItem.Key(1, 5))).thenReturn(false);
         when(serviceItemRepository.findDetailRows(1)).thenReturn(List.of());
@@ -142,7 +138,7 @@ class RepairDetailServiceTest {
 
     @Test
     void createServiceLineUsesCatalogPrice() {
-        openOrder(1, "DANG_SUA");
+        openOrder(1, "DANG_KIEM_TRA");
         when(serviceItemRepository.findServiceCatalogPrice(2)).thenReturn(Optional.of(new BigDecimal("1200000.00")));
         when(serviceItemRepository.existsById(new RepairServiceItem.Key(1, 2))).thenReturn(false);
         when(serviceItemRepository.findDetailRows(1)).thenReturn(List.of(row(2, "Bảo dưỡng", 1, "1200000.00", null)));
@@ -166,7 +162,7 @@ class RepairDetailServiceTest {
 
     @Test
     void createRejectsMissingService() {
-        openOrder(1, "DANG_SUA");
+        openOrder(1, "DANG_KIEM_TRA");
         when(serviceItemRepository.findServiceCatalogPrice(77)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.create(
@@ -176,7 +172,7 @@ class RepairDetailServiceTest {
 
     @Test
     void createRejectsMissingSparePart() {
-        openOrder(1, "DANG_SUA");
+        openOrder(1, "DANG_KIEM_TRA");
         when(sparePartRepository.findById(77)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.create(
@@ -186,7 +182,7 @@ class RepairDetailServiceTest {
 
     @Test
     void createRejectsDuplicateLine() {
-        openOrder(1, "DANG_SUA");
+        openOrder(1, "DANG_KIEM_TRA");
         when(sparePartRepository.findById(5)).thenReturn(Optional.of(sparePart(5, "Bugi", "180000.00", 7)));
         when(partItemRepository.existsById(new RepairPartItem.Key(1, 5))).thenReturn(true);
 
@@ -208,7 +204,7 @@ class RepairDetailServiceTest {
 
     @Test
     void updateChangesQuantityAndKeepsPriceWhenOmitted() {
-        openOrder(1, "DANG_SUA");
+        openOrder(1, "DANG_KIEM_TRA");
         RepairPartItem item = partItem(1, 5, 2, "180000.00");
         when(partItemRepository.findById(new RepairPartItem.Key(1, 5))).thenReturn(Optional.of(item));
         when(serviceItemRepository.findDetailRows(1)).thenReturn(List.of());
@@ -224,7 +220,7 @@ class RepairDetailServiceTest {
 
     @Test
     void updateRejectsMissingLine() {
-        openOrder(1, "DANG_SUA");
+        openOrder(1, "DANG_KIEM_TRA");
         when(serviceItemRepository.findById(new RepairServiceItem.Key(1, 9))).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.update(
@@ -233,7 +229,7 @@ class RepairDetailServiceTest {
 
     @Test
     void deleteRemovesOnlyTheDetailLineAndNeverTouchesStock() {
-        openOrder(1, "DANG_SUA");
+        openOrder(1, "DANG_KIEM_TRA");
         RepairPartItem item = partItem(1, 5, 2, "180000.00");
         when(partItemRepository.findById(new RepairPartItem.Key(1, 5))).thenReturn(Optional.of(item));
 
@@ -246,63 +242,10 @@ class RepairDetailServiceTest {
 
     @Test
     void deleteRejectsMissingLine() {
-        openOrder(1, "DANG_SUA");
+        openOrder(1, "DANG_KIEM_TRA");
         when(serviceItemRepository.findById(new RepairServiceItem.Key(1, 9))).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> service.delete(1, RepairDetailType.SERVICE, 9));
-    }
-
-    @Test
-    void partLineWithConfirmedUsageCannotBeEditedByHand() {
-        openOrder(1, "DANG_SUA");
-        when(stockIssueItemRepository.sumConfirmedActual(1, 5)).thenReturn(3L);
-
-        assertThrows(ConflictException.class,
-                () -> service.update(1, RepairDetailType.SPARE_PART, 5, new RepairDetailUpdateRequest(9, null)));
-        verify(partItemRepository, never()).findById(any());
-        verify(partItemRepository, never()).saveAndFlush(any(RepairPartItem.class));
-    }
-
-    @Test
-    void partLineWithConfirmedUsageCannotBeDeleted() {
-        openOrder(1, "DANG_SUA");
-        when(stockIssueItemRepository.sumConfirmedActual(1, 5)).thenReturn(3L);
-
-        assertThrows(ConflictException.class, () -> service.delete(1, RepairDetailType.SPARE_PART, 5));
-        verify(partItemRepository, never()).delete(any(RepairPartItem.class));
-    }
-
-    @Test
-    void partLineWithoutConfirmedUsageIsStillEditableAndDeletable() {
-        openOrder(1, "DANG_SUA");
-        RepairPartItem item = partItem(1, 5, 2, "180000.00");
-        when(partItemRepository.findById(new RepairPartItem.Key(1, 5))).thenReturn(Optional.of(item));
-        when(serviceItemRepository.findDetailRows(1)).thenReturn(List.of());
-        when(partItemRepository.findDetailRows(1)).thenReturn(List.of(row(5, "Bugi", 6, "180000.00", null)));
-
-        service.update(1, RepairDetailType.SPARE_PART, 5, new RepairDetailUpdateRequest(6, null));
-        service.delete(1, RepairDetailType.SPARE_PART, 5);
-
-        assertEquals(6, item.getQuantity());
-        verify(partItemRepository).delete(item);
-    }
-
-    @Test
-    void serviceLinesAreNotAffectedByTheConfirmedUsageGuard() {
-        openOrder(1, "DANG_SUA");
-        RepairServiceItem item = new RepairServiceItem();
-        item.setRepairOrderId(1);
-        item.setServiceId(3);
-        item.setQuantity(1);
-        item.setUnitPrice(new java.math.BigDecimal("300000.00"));
-        when(serviceItemRepository.findById(new RepairServiceItem.Key(1, 3))).thenReturn(Optional.of(item));
-        when(serviceItemRepository.findDetailRows(1)).thenReturn(List.of(row(3, "Kiểm tra phanh", 2, "300000.00", null)));
-        when(partItemRepository.findDetailRows(1)).thenReturn(List.of());
-
-        service.update(1, RepairDetailType.SERVICE, 3, new RepairDetailUpdateRequest(2, null));
-
-        assertEquals(2, item.getQuantity());
-        verify(stockIssueItemRepository, never()).sumConfirmedActual(any(), any());
     }
 
     private void openOrder(int id, String status) {

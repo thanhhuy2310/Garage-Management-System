@@ -39,7 +39,7 @@ class TechnicianAssignmentServiceTest {
     @BeforeEach
     void setUp() {
         service = new TechnicianAssignmentService(repairOrderRepository, technicianRepository,
-                assignmentRepository, accountRepository);
+                assignmentRepository, accountRepository, org.mockito.Mockito.mock(RepairBusinessRules.class));
         var order = new com.gara.quanlygara.entity.RepairOrder();
         order.setId(1);
         order.setStatus("DANG_SUA");

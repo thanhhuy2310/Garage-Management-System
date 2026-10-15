@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/warehouse/checks")
-@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'WAREHOUSE')")
+@PreAuthorize("hasAnyRole('MANAGER', 'WAREHOUSE')")
 public class InventoryCheckController {
 
     private static final String MANAGER_ONLY = "hasRole('MANAGER')";

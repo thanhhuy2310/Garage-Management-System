@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/warehouse/exports")
-@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'WAREHOUSE', 'TECHNICIAN')")
+@PreAuthorize("hasAnyRole('MANAGER', 'WAREHOUSE', 'TECHNICIAN')")
 public class StockIssueController {
 
     private final StockIssueService issueService;
@@ -54,7 +54,7 @@ public class StockIssueController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'WAREHOUSE')")
+    @PreAuthorize("hasAnyRole('MANAGER', 'WAREHOUSE')")
     public ResponseEntity<ApiResponse<IssueResponse>> create(
             @Valid @RequestBody IssueRequest request, Authentication authentication
     ) {
@@ -65,7 +65,7 @@ public class StockIssueController {
     }
 
     @PostMapping("/{issueId}/items/{partId}/confirm")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'TECHNICIAN')")
+    @PreAuthorize("hasRole('TECHNICIAN')")
     public ResponseEntity<ApiResponse<IssueResponse.Item>> confirmUsage(
             @PathVariable Integer issueId,
             @PathVariable Integer partId,
@@ -73,7 +73,7 @@ public class StockIssueController {
             Authentication authentication
     ) {
         boolean technician = staffContext.isTechnician(authentication);
-        // Với ADMIN/MANAGER người xác nhận lấy từ request nên không bắt buộc tài khoản liên kết nhân viên.
+        // Chỉ kỹ thuật viên đã đăng nhập được xác nhận thực dùng.
         Integer callerId = technician ? staffContext.employeeId(authentication) : null;
         return ResponseEntity.ok(ApiResponse.success("Đã xác nhận số lượng thực dùng.",
                 issueService.confirmUsage(issueId, partId, request, callerId, technician)));

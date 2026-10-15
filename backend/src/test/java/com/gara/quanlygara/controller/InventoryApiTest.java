@@ -71,6 +71,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class InventoryApiTest {
+    @MockitoBean private com.gara.quanlygara.repository.RepairProgressRepository integratedRepairProgressRepository;
+    @MockitoBean private com.gara.quanlygara.repository.PaymentRepository integratedPaymentRepository;
+    @MockitoBean private com.gara.quanlygara.repository.InvoiceRepository integratedInvoiceRepository;
+    @MockitoBean private com.gara.quanlygara.repository.ReceivingBankAccountRepository integratedReceivingBankAccountRepository;
+    @MockitoBean private org.springframework.jdbc.core.JdbcTemplate integratedJdbc;
+    @MockitoBean private com.gara.quanlygara.service.RepairBusinessRules integratedRules;
+
 
     @Autowired
     private MockMvc mockMvc;

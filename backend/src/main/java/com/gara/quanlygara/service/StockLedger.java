@@ -52,7 +52,7 @@ public class StockLedger {
         movement.setPartId(partId);
         movement.setReceiptId(receiptId);
         movement.setIssueId(issueId);
-        movement.setMovedAt(LocalDateTime.now());
+        movement.setMovedAt(LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).withNano(0));
         movement.setType(type);
         movement.setQuantity(quantity);
         movement.setQuantityBefore(before);

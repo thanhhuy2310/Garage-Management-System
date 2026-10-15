@@ -78,7 +78,7 @@ class StockIssueServiceTest {
     void setUp() {
         StockLedger ledger = new StockLedger(sparePartRepository, movementRepository);
         service = new StockIssueService(issueRepository, itemRepository, sparePartRepository, movementRepository,
-                repairPartItemRepository, repairServiceItemRepository, ledger);
+                repairPartItemRepository, repairServiceItemRepository, ledger, org.mockito.Mockito.mock(RepairBusinessRules.class));
         lenient().when(sparePartRepository.updateStockQuantity(anyInt(), anyInt())).thenReturn(1);
         lenient().when(movementRepository.save(any(StockMovement.class))).thenAnswer(call -> call.getArgument(0));
         lenient().when(itemRepository.saveAndFlush(any(StockIssueItem.class))).thenAnswer(call -> call.getArgument(0));
@@ -292,12 +292,13 @@ class StockIssueServiceTest {
 
     @Test
     void confirmRejectsUnknownItemAndIssueWithoutRepairOrder() {
+        when(issueRepository.findById(ISSUE_ID)).thenReturn(Optional.of(issue()));
         when(itemRepository.findForUpdate(ISSUE_ID, PART_ID)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class,
                 () -> service.confirmUsage(ISSUE_ID, PART_ID, new ConfirmUsageRequest(1, null), TECHNICIAN_ID, true));
 
         StockIssueItem item = issueItem(5);
-        when(itemRepository.findForUpdate(ISSUE_ID, PART_ID)).thenReturn(Optional.of(item));
+        lenient().when(itemRepository.findForUpdate(ISSUE_ID, PART_ID)).thenReturn(Optional.of(item));
         StockIssue noOrder = issue();
         noOrder.setRepairOrderId(null);
         when(issueRepository.findById(ISSUE_ID)).thenReturn(Optional.of(noOrder));

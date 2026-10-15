@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class StockIssueService {
+    private final RepairBusinessRules rules;
 
     public static final String PENDING = "CHO_XAC_NHAN";
     public static final String CONFIRMED = "DA_XAC_NHAN";
@@ -66,8 +67,8 @@ public class StockIssueService {
             StockMovementRepository movementRepository,
             RepairPartItemRepository repairPartItemRepository,
             RepairServiceItemRepository repairServiceItemRepository,
-            StockLedger ledger
-    ) {
+            StockLedger ledger, RepairBusinessRules rules) {
+        this.rules = rules;
         this.issueRepository = issueRepository;
         this.itemRepository = itemRepository;
         this.sparePartRepository = sparePartRepository;
@@ -79,6 +80,8 @@ public class StockIssueService {
 
     @Transactional
     public IssueResponse create(IssueRequest request, Integer warehouseStaffId) {
+        rules.lock(request.repairOrderId());
+        rules.requireAcceptedQuote(request.repairOrderId());
         Set<Integer> seen = new HashSet<>();
         for (IssueRequest.Item item : request.items()) {
             if (!seen.add(item.partId())) {
@@ -121,7 +124,7 @@ public class StockIssueService {
         issue.setRepairOrderId(request.repairOrderId());
         issue.setWarehouseStaffId(warehouseStaffId);
         issue.setRequestedTechnicianId(request.requestedTechnicianId());
-        issue.setIssueDate(LocalDateTime.now());
+        issue.setIssueDate(LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).withNano(0));
         issue.setReason(request.reason().trim());
         issue = issueRepository.saveAndFlush(issue);
 
@@ -143,6 +146,10 @@ public class StockIssueService {
             Integer issueId, Integer partId, ConfirmUsageRequest request,
             Integer callerEmployeeId, boolean callerIsTechnician
     ) {
+        StockIssue currentIssue = issueRepository.findById(issueId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu xuất kho."));
+        if (currentIssue.getRepairOrderId() == null) throw new ConflictException("Phiếu xuất không gắn phiếu sửa chữa.");
+        rules.lock(currentIssue.getRepairOrderId());
         StockIssueItem item = itemRepository.findForUpdate(issueId, partId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chi tiết phiếu xuất."));
         if (item.isConfirmed()) {
@@ -187,7 +194,7 @@ public class StockIssueService {
         }
 
         item.setConfirmed(true);
-        item.setConfirmedAt(LocalDateTime.now());
+        item.setConfirmedAt(LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).withNano(0));
         item.setConfirmedTechnicianId(technicianId);
         item.setActualUsedQuantity(actual);
         item.setReturnedQuantity(issued - actual);
@@ -256,11 +263,15 @@ public class StockIssueService {
     /**
      * ChiTietPhuTung.SoLuong của (phiếu sửa chữa, phụ tùng) = tổng số lượng THỰC DÙNG đã xác nhận
      * (không phải số cấp phát), đồng thời thay thế số lượng dự kiến do người dùng nhập ở Tuần 7.
-     * Nếu tổng thực dùng = 0 thì không đụng tới dòng sẵn có (ràng buộc SoLuong > 0, và không xóa dữ liệu người dùng).
+     * Tổng thực dùng = 0: xóa dòng dự kiến để không tính tiền phụ tùng đã hoàn trả toàn bộ.
      */
     private void syncRepairPartLine(Integer orderId, Integer partId, StockIssueItem item) {
         long total = itemRepository.sumConfirmedActual(orderId, partId);
-        if (total <= 0) return;
+        if (total <= 0) {
+            repairPartItemRepository.findById(new RepairPartItem.Key(orderId, partId))
+                    .ifPresent(repairPartItemRepository::delete);
+            return;
+        }
 
         BigDecimal unitPrice = item.getUnitPrice();
         if (unitPrice == null) {
@@ -277,6 +288,11 @@ public class StockIssueService {
                     created.setSparePartId(partId);
                     return created;
                 });
+        if (total > Integer.MAX_VALUE) throw new ConflictException("Tổng số lượng thực dùng vượt giới hạn.");
+        if (total > item.getActualUsedQuantity() && line.getUnitPrice() != null
+                && line.getUnitPrice().compareTo(unitPrice) != 0) {
+            throw new ConflictException("Đơn giá khác lần sử dụng trước; cần thống nhất giá trước khi xác nhận.");
+        }
         line.setQuantity((int) total);
         line.setUnitPrice(unitPrice.setScale(2, RoundingMode.HALF_UP));
         repairPartItemRepository.saveAndFlush(line);

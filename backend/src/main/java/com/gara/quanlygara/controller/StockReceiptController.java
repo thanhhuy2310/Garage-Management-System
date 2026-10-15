@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/warehouse/imports")
-@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'WAREHOUSE')")
+@PreAuthorize("hasAnyRole('MANAGER', 'WAREHOUSE')")
 public class StockReceiptController {
 
     private final StockReceiptService receiptService;

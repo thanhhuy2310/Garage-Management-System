@@ -22,8 +22,13 @@ public record ServiceRequest(
         BigDecimal unitPrice,
 
         @Size(max = 500, message = "Mô tả không được vượt quá 500 ký tự.")
-        String description
+        String description,
+        Boolean active
 ) {
+    public ServiceRequest(String name, String type, BigDecimal unitPrice, String description) {
+        this(name, type, unitPrice, description, null);
+    }
+
     public ServiceRequest {
         name = name == null ? null : name.strip();
         type = normalizeOptional(type);
