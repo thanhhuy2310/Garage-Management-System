@@ -24,21 +24,21 @@ public class RepairWorkflowController {
     }
 
     @GetMapping("/receptions")
-    @PreAuthorize("hasAnyRole('ADMIN','MANAGER','RECEPTIONIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','RECEPTIONIST')")
     public ApiResponse<List<Map<String, Object>>> receptions() {
         return ApiResponse.success("Danh sách tiếp nhận chưa lập phiếu.", workflow.availableReceptions());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAnyRole('ADMIN','MANAGER','RECEPTIONIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','RECEPTIONIST')")
     public ApiResponse<RepairOrderDetailResponse> create(@Valid @RequestBody RepairRequests.Create request, Authentication auth) {
         var order = workflow.create(request, auth);
         return ApiResponse.success("Đã lập phiếu sửa chữa.", queries.getById(order.getId(), auth));
     }
 
     @PostMapping("/{id}/services")
-    @PreAuthorize("hasAnyRole('ADMIN','MANAGER','RECEPTIONIST')")
+    @PreAuthorize("hasAnyRole('MANAGER','RECEPTIONIST')")
     public ApiResponse<RepairOrderDetailResponse> addService(@PathVariable Integer id,
             @Valid @RequestBody RepairRequests.ServiceLine request, Authentication auth) {
         workflow.addService(id, request, auth);
@@ -46,7 +46,7 @@ public class RepairWorkflowController {
     }
 
     @PutMapping("/{id}/progress")
-    @PreAuthorize("hasAnyRole('ADMIN','MANAGER','TECHNICIAN')")
+    @PreAuthorize("hasAnyRole('MANAGER','TECHNICIAN')")
     public ApiResponse<RepairOrderDetailResponse> progress(@PathVariable Integer id,
             @Valid @RequestBody RepairRequests.Progress request, Authentication auth) {
         workflow.updateProgress(id, request, auth);
@@ -54,7 +54,7 @@ public class RepairWorkflowController {
     }
 
     @PutMapping("/{id}/services/{serviceId}/progress")
-    @PreAuthorize("hasAnyRole('ADMIN','MANAGER','TECHNICIAN')")
+    @PreAuthorize("hasAnyRole('MANAGER','TECHNICIAN')")
     public ApiResponse<RepairOrderDetailResponse> serviceProgress(@PathVariable Integer id, @PathVariable Integer serviceId,
             @Valid @RequestBody RepairRequests.Progress request, Authentication auth) {
         workflow.updateServiceProgress(id, serviceId, request, auth);

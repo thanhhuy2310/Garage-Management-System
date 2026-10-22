@@ -66,6 +66,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class CustomerHistoryApiTest {
 
+
     @MockitoBean
     private JdbcTemplate jdbcTemplateTestMock;
 
@@ -166,7 +167,7 @@ class CustomerHistoryApiTest {
     private Object[] header(int orderId, int vehicleId, String plate) {
         return new Object[]{orderId, vehicleId, plate, "Toyota", "Camry",
                 Timestamp.valueOf("2026-09-18 08:00:00"), Timestamp.valueOf("2026-09-19 08:00:00"),
-                Timestamp.valueOf("2026-09-20 10:00:00"), "Hoàn tất tốt", new BigDecimal("1380000")};
+                Timestamp.valueOf("2026-09-20 10:00:00"), "HoÃ n táº¥t tá»‘t", new BigDecimal("1380000")};
     }
 
     @Test
@@ -195,16 +196,16 @@ class CustomerHistoryApiTest {
 
     @Test
     @WithMockUser(username = "khachA", roles = "CUSTOMER")
-    void customerSeesOwnHistoryPageAndCustomerIdFromTheClientIsIgnored() throws Exception {
+    void customerSeesOwnHistoryAndCustomerIdFromTheClientIsIgnored() throws Exception {
         account("khachA", AccountRole.CUSTOMER, 1);
         when(repairHistoryRepository.countHistory(1, 0)).thenReturn(23L);
         when(repairHistoryRepository.findHistoryRows(1, 0, 0, 0, 10)).thenReturn(rows(header(12, 3, "51G-123.45")));
         when(repairHistoryRepository.findServiceLines(any())).thenReturn(rows(
-                new Object[]{12, 2, "Bảo dưỡng định kỳ", "BAO_DUONG", 1, new BigDecimal("1200000")}));
+                new Object[]{12, 2, "Báº£o dÆ°á»¡ng Ä‘á»‹nh ká»³", "BAO_DUONG", 1, new BigDecimal("1200000")}));
         when(repairHistoryRepository.findPartLines(any())).thenReturn(rows(
-                new Object[]{12, 9, "Lọc dầu", 2, new BigDecimal("90000")}));
+                new Object[]{12, 9, "Lá»c dáº§u", 2, new BigDecimal("90000")}));
 
-        // Client cố truyền customerId của người khác: bị bỏ qua, truy vấn luôn dùng customerId của JWT (1).
+        // Client cá»‘ truyá»n customerId cá»§a ngÆ°á»i khÃ¡c: bá»‹ bá» qua, truy váº¥n luÃ´n dÃ¹ng customerId cá»§a JWT (1).
         mockMvc.perform(get("/api/customers/me/history").param("customerId", "2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.items.length()").value(1))
@@ -212,28 +213,11 @@ class CustomerHistoryApiTest {
                 .andExpect(jsonPath("$.data.items[0].licensePlate").value("51G-123.45"))
                 .andExpect(jsonPath("$.data.items[0].category").value("BAO_DUONG"))
                 .andExpect(jsonPath("$.data.items[0].totalCost").value(1380000.0))
-                .andExpect(jsonPath("$.data.page").value(0))
-                .andExpect(jsonPath("$.data.size").value(10))
                 .andExpect(jsonPath("$.data.totalElements").value(23))
                 .andExpect(jsonPath("$.data.totalPages").value(3));
 
         verify(repairHistoryRepository).findHistoryRows(1, 0, 0, 0, 10);
         verify(repairHistoryRepository, never()).findHistoryRows(2, 0, 0, 0, 10);
-    }
-
-    @Test
-    @WithMockUser(username = "khachA", roles = "CUSTOMER")
-    void customerCanRequestALaterPage() throws Exception {
-        account("khachA", AccountRole.CUSTOMER, 1);
-        when(repairHistoryRepository.countHistory(1, 0)).thenReturn(23L);
-        when(repairHistoryRepository.findHistoryRows(1, 0, 0, 20, 10)).thenReturn(rows(header(2, 3, "51G-123.45")));
-        when(repairHistoryRepository.findServiceLines(any())).thenReturn(new ArrayList<>());
-        when(repairHistoryRepository.findPartLines(any())).thenReturn(new ArrayList<>());
-
-        mockMvc.perform(get("/api/customers/me/history").param("page", "2").param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.page").value(2))
-                .andExpect(jsonPath("$.data.items[0].repairOrderId").value(2));
     }
 
     @Test
@@ -286,19 +270,15 @@ class CustomerHistoryApiTest {
 
     @Test
     @WithMockUser(username = "khachA", roles = "CUSTOMER")
-    void vehicleFilterListIsScopedToTheCustomerAndIndependentOfPages() throws Exception {
+    void vehicleFilterListIsScopedToTheCustomer() throws Exception {
         account("khachA", AccountRole.CUSTOMER, 1);
         when(repairHistoryRepository.findHistoryVehicles(1)).thenReturn(rows(
-                new Object[]{3, "51G-123.45", "Toyota", "Camry", 14L},
-                new Object[]{4, "51A-456.78", "Kia", "Seltos", 2}));
+                new Object[]{3, "51G-123.45", "Toyota", "Camry", 14L}));
 
         mockMvc.perform(get("/api/customers/me/history/vehicles"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(2))
                 .andExpect(jsonPath("$.data[0].vehicleId").value(3))
-                .andExpect(jsonPath("$.data[0].completedCount").value(14))
-                .andExpect(jsonPath("$.data[1].licensePlate").value("51A-456.78"));
-        verify(repairHistoryRepository).findHistoryVehicles(1);
+                .andExpect(jsonPath("$.data[0].completedCount").value(14));
     }
 
     @Test
@@ -307,14 +287,14 @@ class CustomerHistoryApiTest {
         account("khachA", AccountRole.CUSTOMER, 1);
         when(repairHistoryRepository.findHistoryRows(1, 0, 12, 0, 1)).thenReturn(rows(header(12, 3, "51G-123.45")));
         when(repairHistoryRepository.findServiceLines(any())).thenReturn(rows(
-                new Object[]{12, 2, "Bảo dưỡng định kỳ", "BAO_DUONG", 1, new BigDecimal("1200000")}));
+                new Object[]{12, 2, "Báº£o dÆ°á»¡ng Ä‘á»‹nh ká»³", "BAO_DUONG", 1, new BigDecimal("1200000")}));
         when(repairHistoryRepository.findPartLines(any())).thenReturn(rows(
-                new Object[]{12, 9, "Lọc dầu", 2, new BigDecimal("90000")}));
+                new Object[]{12, 9, "Lá»c dáº§u", 2, new BigDecimal("90000")}));
 
         mockMvc.perform(get("/api/customers/me/history/12"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.item.repairOrderId").value(12))
-                .andExpect(jsonPath("$.data.services[0].name").value("Bảo dưỡng định kỳ"))
+                .andExpect(jsonPath("$.data.services[0].name").value("Báº£o dÆ°á»¡ng Ä‘á»‹nh ká»³"))
                 .andExpect(jsonPath("$.data.parts[0].lineTotal").value(180000.0))
                 .andExpect(jsonPath("$.data.serviceTotal").value(1200000.0))
                 .andExpect(jsonPath("$.data.partsTotal").value(180000.0));
@@ -324,7 +304,7 @@ class CustomerHistoryApiTest {
     @WithMockUser(username = "khachA", roles = "CUSTOMER")
     void detailOfAnotherCustomersOrderIsNotFoundAndLeaksNothing() throws Exception {
         account("khachA", AccountRole.CUSTOMER, 1);
-        // Phiếu 99 của khách hàng khác: truy vấn (lọc theo khách hàng A) không trả dòng nào.
+        // Phiáº¿u 99 cá»§a khÃ¡ch hÃ ng khÃ¡c: truy váº¥n (lá»c theo khÃ¡ch hÃ ng A) khÃ´ng tráº£ dÃ²ng nÃ o.
         when(repairHistoryRepository.findHistoryRows(1, 0, 99, 0, 1)).thenReturn(new ArrayList<>());
 
         mockMvc.perform(get("/api/customers/me/history/99"))

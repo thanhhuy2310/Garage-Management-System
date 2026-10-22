@@ -32,7 +32,6 @@ public class RepairHistoryService {
     public static final String MAINTENANCE = "BAO_DUONG";
     public static final String REPAIR = "SUA_CHUA";
     public static final String MIXED = "BAO_DUONG_SUA_CHUA";
-
     public static final int MAX_PAGE_SIZE = 50;
 
     private static final int SUMMARY_SERVICES = 3;
@@ -43,10 +42,7 @@ public class RepairHistoryService {
         this.repository = repository;
     }
 
-    /**
-     * Một trang lịch sử, mới nhất trước. vehicleId null = mọi xe của khách hàng; xe không thuộc khách hàng => 404
-     * (không tiết lộ xe có tồn tại hay không). totalElements/totalPages cho biết đầy đủ số lượt, không cắt âm thầm.
-     */
+    /** vehicleId null = mọi xe của khách hàng; xe không thuộc khách hàng => 404 (không tiết lộ xe có tồn tại hay không). */
     @Transactional(readOnly = true)
     public HistoryPageResponse getHistory(Integer customerId, Integer vehicleId, int page, int size) {
         if (vehicleId != null) {
@@ -58,11 +54,9 @@ public class RepairHistoryService {
         int pageIndex = Math.max(page, 0);
         int pageSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
         int vehicleFilter = vehicleId == null ? 0 : vehicleId;
-
         long total = repository.countHistory(customerId, vehicleFilter);
         int totalPages = (int) ((total + pageSize - 1) / pageSize);
         long offset = (long) pageIndex * pageSize;
-
         List<HistoryItemResponse> items = List.of();
         if (offset < total) {
             items = build(repository.findHistoryRows(customerId, vehicleFilter, 0, (int) offset, pageSize))
@@ -71,7 +65,6 @@ public class RepairHistoryService {
         return new HistoryPageResponse(items, pageIndex, pageSize, total, totalPages);
     }
 
-    /** Toàn bộ xe có lịch sử của khách hàng (không phụ thuộc trang đang xem). */
     @Transactional(readOnly = true)
     public List<HistoryVehicleResponse> getVehicles(Integer customerId) {
         return repository.findHistoryVehicles(customerId).stream()
@@ -83,7 +76,8 @@ public class RepairHistoryService {
     /** Phiếu không tồn tại, chưa hoàn tất hoặc của khách hàng khác đều trả 404 giống nhau. */
     @Transactional(readOnly = true)
     public HistoryDetailResponse getDetail(Integer customerId, Integer repairOrderId) {
-        List<Built> built = build(repository.findHistoryRows(customerId, 0, repairOrderId, 0, 1));
+        List<Object[]> rows = repository.findHistoryRows(customerId, 0, repairOrderId, 0, 1);
+        List<Built> built = build(rows);
         if (built.isEmpty()) {
             throw new ResourceNotFoundException("Không tìm thấy lịch sử sửa chữa.");
         }

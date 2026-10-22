@@ -1,3 +1,4 @@
+import '../../services/profile_service.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/app_controller.dart';
@@ -135,14 +136,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       TextButton.icon(
-                        onPressed: _saving
+                        onPressed: _saving || widget.controller.profileService is ApiProfileService
                             ? null
                             : () => setState(() => _editing = !_editing),
                         icon: Icon(
                           _editing ? Icons.close : Icons.edit_outlined,
                           size: 18,
                         ),
-                        label: Text(_editing ? 'Hủy' : 'Chỉnh sửa'),
+                        label: Text(widget.controller.profileService is ApiProfileService ? 'Liên hệ lễ tân để sửa' : (_editing ? 'Hủy' : 'Chỉnh sửa')),
                       ),
                     ],
                   ),

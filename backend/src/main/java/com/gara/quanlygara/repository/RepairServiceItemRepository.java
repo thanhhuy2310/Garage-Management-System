@@ -26,6 +26,6 @@ public interface RepairServiceItemRepository extends JpaRepository<RepairService
     @Query(value = "SELECT TrangThai FROM PhieuSuaChua WHERE MaPhieuSuaChua = :repairOrderId", nativeQuery = true)
     Optional<String> findRepairOrderStatus(@Param("repairOrderId") Integer repairOrderId);
 
-    @Query(value = "SELECT DonGia FROM DichVu WHERE MaDichVu = :serviceId", nativeQuery = true)
+    @Query(value = "SELECT DonGia FROM DichVu WHERE MaDichVu = :serviceId AND TrangThai = 1", nativeQuery = true)
     Optional<BigDecimal> findServiceCatalogPrice(@Param("serviceId") Integer serviceId);
 }

@@ -190,7 +190,7 @@ test("multiple banks persist and QR expires without pretending money was receive
     .getByLabel("Số tài khoản", { exact: true })
     .pressSequentially("1234567890")
   await page.getByRole("button", { name: "Lưu tài khoản" }).click()
-  await expect(page.getByRole("status")).toHaveText(
+  await expect(page.getByRole("status").filter({ hasText: "Đã lưu tài khoản ngân hàng." })).toHaveText(
     "Đã lưu tài khoản ngân hàng.",
   )
   await page.getByLabel("Ngân hàng", { exact: true }).selectOption("970436")

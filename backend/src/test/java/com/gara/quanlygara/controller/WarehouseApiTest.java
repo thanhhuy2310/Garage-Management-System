@@ -82,6 +82,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class WarehouseApiTest {
 
     @MockitoBean
+    private com.gara.quanlygara.service.RepairBusinessRules rules;
+
+
+    @MockitoBean
     private JdbcTemplate jdbcTemplateTestMock;
 
 
@@ -186,11 +190,11 @@ class WarehouseApiTest {
     }
 
     private static final String IMPORT_BODY =
-            "{\"supplier\":\"Công ty ABC\",\"items\":[{\"partId\":5,\"quantity\":8,\"unitPrice\":100000}]}";
+            "{\"supplier\":\"CÃ´ng ty ABC\",\"items\":[{\"partId\":5,\"quantity\":8,\"unitPrice\":100000}]}";
     private static final String ISSUE_BODY =
             "{\"repairOrderId\":9,\"requestedTechnicianId\":2,\"reason\":\"Thay bugi\",\"items\":[{\"partId\":5,\"quantity\":5}]}";
 
-    // ------------------------------------------------------------------ NHẬP KHO
+    // ------------------------------------------------------------------ NHáº¬P KHO
 
     @Test
     void importsRequireJwt() throws Exception {
@@ -259,7 +263,7 @@ class WarehouseApiTest {
                 .andExpect(status().isNotFound());
     }
 
-    // ------------------------------------------------------------------ XUẤT KHO / THỰC DÙNG
+    // ------------------------------------------------------------------ XUáº¤T KHO / THá»°C DÃ™NG
 
     @Test
     @WithMockUser(username = "ktv", roles = "TECHNICIAN")
@@ -375,19 +379,19 @@ class WarehouseApiTest {
 
     @Test
     @WithMockUser(username = "quanly", roles = "MANAGER")
-    void managerMustNameTheTechnicianWhenConfirming() throws Exception {
+    void managerCannotImpersonateATechnician() throws Exception {
         account("quanly", AccountRole.MANAGER, 1);
         arrangeConfirmable(5, 12);
 
         mockMvc.perform(post("/api/warehouse/exports/1/items/5/confirm").contentType(APPLICATION_JSON)
                         .content("{\"actualUsed\":3}"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isForbidden());
         mockMvc.perform(post("/api/warehouse/exports/1/items/5/confirm").contentType(APPLICATION_JSON)
                         .content("{\"actualUsed\":3,\"technicianId\":2}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isForbidden());
     }
 
-    // ------------------------------------------------------------------ CHI TIẾT PHIẾU XUẤT THEO QUYỀN
+    // ------------------------------------------------------------------ CHI TIáº¾T PHIáº¾U XUáº¤T THEO QUYá»€N
 
     @Test
     @WithMockUser(username = "ktv", roles = "TECHNICIAN")
@@ -437,11 +441,11 @@ class WarehouseApiTest {
 
     @Test
     @WithMockUser(username = "admin", roles = "ADMIN")
-    void adminReadsAnyIssue() throws Exception {
+    void adminCannotReadWarehouseIssues() throws Exception {
         account("admin", AccountRole.ADMIN, null);
         stubIssueDetail();
 
-        mockMvc.perform(get("/api/warehouse/exports/1")).andExpect(status().isOk());
+        mockMvc.perform(get("/api/warehouse/exports/1")).andExpect(status().isForbidden());
         verify(stockIssueRepository, never()).countRelatedToTechnician(any(), any());
     }
 
@@ -465,7 +469,7 @@ class WarehouseApiTest {
         when(stockIssueItemRepository.findByIssueId(1)).thenReturn(List.of(item));
     }
 
-    // ------------------------------------------------------------------ KIỂM KÊ
+    // ------------------------------------------------------------------ KIá»‚M KÃŠ
 
     @Test
     @WithMockUser(username = "kho", roles = "WAREHOUSE")
@@ -481,6 +485,7 @@ class WarehouseApiTest {
             return check;
         });
         when(inventoryCheckRepository.findById(1)).thenAnswer(call -> Optional.of(holder[0]));
+        when(inventoryCheckRepository.findForUpdate(1)).thenAnswer(call -> Optional.of(holder[0]));
         InventoryCheckItem item = new InventoryCheckItem();
         item.setCheckId(1);
         item.setPartId(5);
@@ -489,7 +494,7 @@ class WarehouseApiTest {
         when(inventoryCheckItemRepository.findByCheckIdOrderByPartId(1)).thenReturn(List.of(item));
 
         mockMvc.perform(post("/api/warehouse/checks").contentType(APPLICATION_JSON)
-                        .content("{\"note\":\"Tháng 10\",\"partIds\":[5]}"))
+                        .content("{\"note\":\"ThÃ¡ng 10\",\"partIds\":[5]}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.status").value("DANG_KIEM_KE"))
                 .andExpect(jsonPath("$.data.items[0].systemQuantity").value(10));
@@ -522,6 +527,7 @@ class WarehouseApiTest {
         item.setSystemQuantity(10);
         item.setActualQuantity(7);
         when(inventoryCheckRepository.findById(1)).thenReturn(Optional.of(check));
+        when(inventoryCheckRepository.findForUpdate(1)).thenReturn(Optional.of(check));
         when(inventoryCheckRepository.saveAndFlush(any(InventoryCheck.class))).thenAnswer(call -> call.getArgument(0));
         when(inventoryCheckItemRepository.findByCheckIdOrderByPartId(1)).thenReturn(List.of(item));
         when(inventoryCheckItemRepository.save(any(InventoryCheckItem.class))).thenAnswer(call -> call.getArgument(0));
@@ -530,7 +536,7 @@ class WarehouseApiTest {
         when(stockMovementRepository.save(any(StockMovement.class))).thenAnswer(call -> call.getArgument(0));
 
         mockMvc.perform(post("/api/warehouse/checks/1/approve").contentType(APPLICATION_JSON)
-                        .content("{\"reason\":\"Đồng ý\"}"))
+                        .content("{\"reason\":\"Äá»“ng Ã½\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("DA_HOAN_TAT"))
                 .andExpect(jsonPath("$.data.approvedBy").value(1));
@@ -546,13 +552,14 @@ class WarehouseApiTest {
         check.setId(1);
         check.setStatus(InventoryCheck.PENDING_APPROVAL);
         when(inventoryCheckRepository.findById(1)).thenReturn(Optional.of(check));
+        when(inventoryCheckRepository.findForUpdate(1)).thenReturn(Optional.of(check));
         when(inventoryCheckRepository.saveAndFlush(any(InventoryCheck.class))).thenAnswer(call -> call.getArgument(0));
         when(inventoryCheckItemRepository.findByCheckIdOrderByPartId(1)).thenReturn(List.of());
 
         mockMvc.perform(post("/api/warehouse/checks/1/reject").contentType(APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(post("/api/warehouse/checks/1/reject").contentType(APPLICATION_JSON)
-                        .content("{\"reason\":\"Cần đếm lại\"}"))
+                        .content("{\"reason\":\"Cáº§n Ä‘áº¿m láº¡i\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("DA_TU_CHOI"));
         verify(sparePartRepository, never()).updateStockQuantity(anyInt(), anyInt());
@@ -569,7 +576,7 @@ class WarehouseApiTest {
 
     // ------------------------------------------------------------------ helpers
 
-    /** Ngữ cảnh xác nhận hợp lệ: đã phân công, báo giá xác nhận, phiếu sửa chữa đang sửa, đã cấp phát 5. */
+    /** Ngá»¯ cáº£nh xÃ¡c nháº­n há»£p lá»‡: Ä‘Ã£ phÃ¢n cÃ´ng, bÃ¡o giÃ¡ xÃ¡c nháº­n, phiáº¿u sá»­a chá»¯a Ä‘ang sá»­a, Ä‘Ã£ cáº¥p phÃ¡t 5. */
     private StockIssueItem arrangeConfirmable(int issued, int stock) {
         StockIssueItem item = new StockIssueItem();
         item.setIssueId(1);

@@ -11,6 +11,8 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Base64;
+import javax.crypto.Mac;
 
 @Service
 public class JwtService {
@@ -35,6 +37,7 @@ public class JwtService {
                 .subject(account.getUsername())
                 .claim("role", account.getRole().name())
                 .claim("accountId", account.getId())
+                .claim("credential", credential(account))
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusMillis(expirationMs)))
                 .signWith(signingKey)
@@ -45,9 +48,28 @@ public class JwtService {
         return parseClaims(token).getSubject();
     }
 
-    public boolean isValid(String token, String username) {
+    public boolean isValid(String token, Account account) {
         Claims claims = parseClaims(token);
-        return username.equals(claims.getSubject()) && claims.getExpiration().after(new Date());
+        return account.isActive()
+                && account.getUsername().equals(claims.getSubject())
+                && account.getId().toString().equals(String.valueOf(claims.get("accountId")))
+                && credential(account).equals(claims.get("credential", String.class))
+                && claims.getExpiration().after(new Date());
+    }
+
+    // Bind a session to its immutable account and current credentials without storing
+    // password hashes in the token or adding a database column.
+    private String credential(Account account) {
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(signingKey);
+            String value = account.getPasswordHash() + ":" + account.getRole() + ":"
+                    + account.getEmployeeId() + ":" + account.getCustomerId();
+            return Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(mac.doFinal(value.getBytes(StandardCharsets.UTF_8)));
+        } catch (java.security.GeneralSecurityException exception) {
+            throw new IllegalStateException("Cannot bind account credentials", exception);
+        }
     }
 
     public long getExpirationSeconds() {

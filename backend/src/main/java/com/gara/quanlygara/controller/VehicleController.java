@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/vehicles")
-@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST')")
+@PreAuthorize("hasAnyRole('MANAGER', 'RECEPTIONIST')")
 public class VehicleController {
 
     private final VehicleService vehicleService;
@@ -46,7 +46,7 @@ public class VehicleController {
 
     // Nhân viên tạo xe cho mọi khách hàng; khách hàng chỉ được thêm xe cho chính mình.
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST')"
+    @PreAuthorize("hasAnyRole('MANAGER', 'RECEPTIONIST')"
             + " or (hasRole('CUSTOMER') and @vehicleAccess.ownsCustomer(authentication, #request.customerId()))")
     public ResponseEntity<ApiResponse<VehicleResponse>> create(@Valid @RequestBody VehicleRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)

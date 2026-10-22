@@ -1,11 +1,10 @@
+import { formatGarageDate, formatMoney } from "../../utils/garageFormat";
 // TV3-TUAN8
 import { useEffect, useState } from "react";
 import { readSession } from "../../api/session";
 
-export const formatPrice = (value: number) =>
-  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND", maximumFractionDigits: 0 }).format(value);
-
-export const formatDateTime = (value: string | null) => (value ? new Date(value).toLocaleString("vi-VN") : "—");
+export const formatPrice = formatMoney;
+export const formatDateTime = formatGarageDate;
 
 export const PER_PAGE = 10;
 
@@ -14,8 +13,8 @@ export function useWarehouseRole() {
   const role = readSession()?.account.role ?? "";
   return {
     role,
-    canWrite: role === "WAREHOUSE" || role === "MANAGER" || role === "ADMIN",
-    canConfirmUsage: role === "MANAGER" || role === "ADMIN" || role === "TECHNICIAN",
+    canWrite: role === "WAREHOUSE" || role === "MANAGER",
+    canConfirmUsage: role === "TECHNICIAN",
     isManager: role === "MANAGER",
     needsTechnicianId: role !== "TECHNICIAN",
   };

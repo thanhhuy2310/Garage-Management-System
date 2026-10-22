@@ -18,9 +18,8 @@ public interface RepairHistoryRepository extends Repository<Vehicle, Integer> {
 
     /**
      * Cột: 0 MaPhieuSuaChua, 1 MaXe, 2 BienSo, 3 HangXe, 4 DongXe, 5 NgayLap, 6 NgayBatDau, 7 NgayHoanThanh,
-     * 8 KetQua, 9 tổng chi phí (dbo.fn_TinhTongChiPhiSuaChua). Mới nhất trước; phân trang bằng OFFSET/FETCH
-     * (không còn giới hạn cố định). vehicleId = 0 và repairOrderId = 0 nghĩa là không lọc.
-     * Chỉ lấy xe của đúng khách hàng và phiếu HOAN_TAT.
+     * 8 KetQua, 9 tổng chi phí (dbo.fn_TinhTongChiPhiSuaChua). Mới nhất trước và phân trang bằng OFFSET/FETCH.
+     * vehicleId = 0 và repairOrderId = 0 nghĩa là không lọc. Chỉ lấy xe của đúng khách hàng và phiếu HOAN_TAT.
      */
     @Query(value = """
             SELECT ps.MaPhieuSuaChua, xe.MaXe, xe.BienSo, xe.HangXe, xe.DongXe,
@@ -43,7 +42,6 @@ public interface RepairHistoryRepository extends Repository<Vehicle, Integer> {
             @Param("offset") Integer offset,
             @Param("limit") Integer limit);
 
-    /** Tổng số lượt (cùng điều kiện với findHistoryRows) để trả totalElements/totalPages. */
     @Query(value = """
             SELECT COUNT(1)
             FROM PhieuSuaChua ps
@@ -55,7 +53,6 @@ public interface RepairHistoryRepository extends Repository<Vehicle, Integer> {
             """, nativeQuery = true)
     long countHistory(@Param("customerId") Integer customerId, @Param("vehicleId") Integer vehicleId);
 
-    /** Cột: 0 MaXe, 1 BienSo, 2 HangXe, 3 DongXe, 4 số lượt hoàn tất. Toàn bộ xe có lịch sử của khách hàng (không phân trang). */
     @Query(value = """
             SELECT xe.MaXe, xe.BienSo, xe.HangXe, xe.DongXe, COUNT(ps.MaPhieuSuaChua)
             FROM Xe xe
@@ -77,7 +74,7 @@ public interface RepairHistoryRepository extends Repository<Vehicle, Integer> {
             """, nativeQuery = true)
     List<Object[]> findServiceLines(@Param("orderIds") Collection<Integer> orderIds);
 
-    /** Cột: 0 MaPhieuSuaChua, 1 MaPhuTung, 2 TenPhuTung, 3 SoLuong, 4 DonGia. SoLuong = tổng THỰC DÙNG đã xác nhận (Tuần 8). */
+    /** Cột: 0 MaPhieuSuaChua, 1 MaPhuTung, 2 TenPhuTung, 3 SoLuong, 4 DonGia. */
     @Query(value = """
             SELECT cp.MaPhieuSuaChua, cp.MaPhuTung, pt.TenPhuTung, cp.SoLuong, cp.DonGia
             FROM ChiTietPhuTung cp

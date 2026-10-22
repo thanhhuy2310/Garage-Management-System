@@ -24,7 +24,7 @@ public class TechnicianController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<List<TechnicianResponse>>> getTechnicians() {
         return ResponseEntity.ok(ApiResponse.success(
                 "Lấy danh sách kỹ thuật viên thành công.", assignmentService.getTechnicians()));

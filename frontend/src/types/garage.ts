@@ -1,4 +1,5 @@
 export interface GarageService {
+  active?: boolean
   id: number
   name: string
   type: string | null

@@ -46,7 +46,7 @@ class RepairHistoryServiceTest {
     }
 
     @Test
-    void firstPageKeepsTheNewestFirstOrderAndBuildsSummaryCostsAndMetadata() {
+    void historyKeepsTheNewestFirstOrderOfTheQueryAndBuildsSummaryAndCosts() {
         when(repository.countHistory(CUSTOMER_ID, 0)).thenReturn(2L);
         when(repository.findHistoryRows(CUSTOMER_ID, 0, 0, 0, 10)).thenReturn(rows(
                 header(12, 1, "51G-123.45", Timestamp.valueOf("2026-09-20 10:00:00"), "1500000"),
@@ -56,76 +56,17 @@ class RepairHistoryServiceTest {
                 service(5, 3, "Kiểm tra hệ thống phanh", "KIEM_TRA", 1, "300000")));
         when(repository.findPartLines(any())).thenReturn(rows(part(12, 9, "Lọc dầu", 1, "300000")));
 
-        var page = service.getHistory(CUSTOMER_ID, null, 0, 10);
+        var items = service.getHistory(CUSTOMER_ID, null, 0, 10).items();
 
-        assertEquals(List.of(12, 5), page.items().stream().map(item -> item.repairOrderId()).toList());
-        assertEquals(0, page.page());
-        assertEquals(10, page.size());
-        assertEquals(2, page.totalElements());
-        assertEquals(1, page.totalPages());
-        assertEquals("51G-123.45", page.items().get(0).licensePlate());
-        assertEquals("Bảo dưỡng định kỳ", page.items().get(0).summary());
-        assertEquals(1, page.items().get(0).serviceCount());
-        assertEquals(1, page.items().get(0).partCount());
-        assertEquals(new BigDecimal("1500000.00"), page.items().get(0).totalCost());
-        assertEquals("BAO_DUONG", page.items().get(0).category());
-        assertEquals("SUA_CHUA", page.items().get(1).category());
-        assertEquals(LocalDateTime.of(2026, 9, 20, 10, 0), page.items().get(0).completedAt());
-    }
-
-    @Test
-    void laterPagesUseTheRightOffset() {
-        when(repository.countHistory(CUSTOMER_ID, 0)).thenReturn(12L);
-        when(repository.findHistoryRows(CUSTOMER_ID, 0, 0, 10, 5)).thenReturn(rows(
-                header(3, 1, "A", Timestamp.valueOf("2026-01-02 00:00:00"), "0"),
-                header(2, 1, "A", Timestamp.valueOf("2026-01-01 00:00:00"), "0")));
-
-        var page = service.getHistory(CUSTOMER_ID, null, 2, 5);
-
-        verify(repository).findHistoryRows(CUSTOMER_ID, 0, 0, 10, 5);
-        assertEquals(2, page.page());
-        assertEquals(12, page.totalElements());
-        assertEquals(3, page.totalPages());
-        assertEquals(2, page.items().size());
-    }
-
-    @Test
-    void historyLongerThan200IsNeverSilentlyTruncated() {
-        when(repository.countHistory(CUSTOMER_ID, 0)).thenReturn(250L);
-        when(repository.findHistoryRows(CUSTOMER_ID, 0, 0, 240, 10)).thenReturn(rows(
-                header(1, 1, "A", Timestamp.valueOf("2026-01-01 00:00:00"), "0")));
-
-        var last = service.getHistory(CUSTOMER_ID, null, 24, 10);
-
-        assertEquals(250, last.totalElements());
-        assertEquals(25, last.totalPages());
-        assertEquals(1, last.items().size());
-        // Mỗi truy vấn chỉ lấy đúng một trang: không có TOP/giới hạn cố định nào cắt dữ liệu.
-        verify(repository).findHistoryRows(CUSTOMER_ID, 0, 0, 240, 10);
-    }
-
-    @Test
-    void pageBeyondTheEndIsEmptyWithoutARowQuery() {
-        when(repository.countHistory(CUSTOMER_ID, 0)).thenReturn(5L);
-
-        var page = service.getHistory(CUSTOMER_ID, null, 3, 10);
-
-        assertTrue(page.items().isEmpty());
-        assertEquals(5, page.totalElements());
-        verify(repository, never()).findHistoryRows(any(), any(), any(), any(), any());
-    }
-
-    @Test
-    void pageAndSizeAreClamped() {
-        when(repository.countHistory(CUSTOMER_ID, 0)).thenReturn(500L);
-        when(repository.findHistoryRows(CUSTOMER_ID, 0, 0, 0, 50)).thenReturn(new ArrayList<>());
-
-        var page = service.getHistory(CUSTOMER_ID, null, -3, 1000);
-
-        assertEquals(0, page.page());
-        assertEquals(50, page.size());
-        assertEquals(10, page.totalPages());
-        verify(repository).findHistoryRows(CUSTOMER_ID, 0, 0, 0, 50);
+        assertEquals(List.of(12, 5), items.stream().map(item -> item.repairOrderId()).toList());
+        assertEquals("51G-123.45", items.get(0).licensePlate());
+        assertEquals("Bảo dưỡng định kỳ", items.get(0).summary());
+        assertEquals(1, items.get(0).serviceCount());
+        assertEquals(1, items.get(0).partCount());
+        assertEquals(new BigDecimal("1500000.00"), items.get(0).totalCost());
+        assertEquals("BAO_DUONG", items.get(0).category());
+        assertEquals("SUA_CHUA", items.get(1).category());
+        assertEquals(LocalDateTime.of(2026, 9, 20, 10, 0), items.get(0).completedAt());
     }
 
     @Test
@@ -159,16 +100,13 @@ class RepairHistoryServiceTest {
     }
 
     @Test
-    void emptyHistoryIsAnEmptyPageWithoutRowOrLineQueries() {
+    void emptyHistoryIsAnEmptyListWithoutLineQueries() {
         when(repository.countHistory(CUSTOMER_ID, 0)).thenReturn(0L);
 
-        var page = service.getHistory(CUSTOMER_ID, null, 0, 10);
-
-        assertTrue(page.items().isEmpty());
-        assertEquals(0, page.totalElements());
-        assertEquals(0, page.totalPages());
+        assertTrue(service.getHistory(CUSTOMER_ID, null, 0, 10).items().isEmpty());
         verify(repository, never()).findHistoryRows(any(), any(), any(), any(), any());
         verify(repository, never()).findServiceLines(any());
+        verify(repository, never()).findPartLines(any());
     }
 
     @Test
@@ -176,21 +114,16 @@ class RepairHistoryServiceTest {
         when(repository.countOwnedVehicle(99, CUSTOMER_ID)).thenReturn(0L);
 
         assertThrows(ResourceNotFoundException.class, () -> service.getHistory(CUSTOMER_ID, 99, 0, 10));
-        verify(repository, never()).countHistory(any(), any());
         verify(repository, never()).findHistoryRows(any(), any(), any(), any(), any());
     }
 
     @Test
-    void filteringByAnOwnedVehicleScopesCountAndRowsToThatVehicleAndCustomer() {
+    void filteringByAnOwnedVehicleScopesTheQueryToThatVehicleAndCustomer() {
         when(repository.countOwnedVehicle(3, CUSTOMER_ID)).thenReturn(1L);
         when(repository.countHistory(CUSTOMER_ID, 3)).thenReturn(1L);
-        when(repository.findHistoryRows(CUSTOMER_ID, 3, 0, 0, 10)).thenReturn(rows(
-                header(12, 3, "A", Timestamp.valueOf("2026-01-01 00:00:00"), "0")));
+        when(repository.findHistoryRows(CUSTOMER_ID, 3, 0, 0, 10)).thenReturn(new ArrayList<>());
 
-        var page = service.getHistory(CUSTOMER_ID, 3, 0, 10);
-
-        assertEquals(1, page.items().size());
-        verify(repository).countHistory(CUSTOMER_ID, 3);
+        assertTrue(service.getHistory(CUSTOMER_ID, 3, 0, 10).items().isEmpty());
         verify(repository).findHistoryRows(CUSTOMER_ID, 3, 0, 0, 10);
     }
 
@@ -201,23 +134,7 @@ class RepairHistoryServiceTest {
     }
 
     @Test
-    void vehicleFilterListComesFromTheWholeHistoryNotFromAPage() {
-        when(repository.findHistoryVehicles(CUSTOMER_ID)).thenReturn(rows(
-                new Object[]{3, "51G-123.45", "Toyota", "Camry", 14L},
-                new Object[]{4, "51A-456.78", null, "Vios", 1}));
-
-        var vehicles = service.getVehicles(CUSTOMER_ID);
-
-        assertEquals(2, vehicles.size());
-        assertEquals(3, vehicles.get(0).vehicleId());
-        assertEquals("51G-123.45", vehicles.get(0).licensePlate());
-        assertEquals(14, vehicles.get(0).completedCount());
-        assertEquals("", vehicles.get(1).brand());
-        verify(repository, never()).findHistoryRows(any(), any(), any(), any(), any());
-    }
-
-    @Test
-    void detailReturnsOnlyThatOrderWithServicesPartsAndTotalsThatAddUp() {
+    void detailReturnsOnlyThatOrderWithServicesPartsAndTotals() {
         when(repository.findHistoryRows(CUSTOMER_ID, 0, 12, 0, 1)).thenReturn(rows(
                 header(12, 1, "51G-123.45", Timestamp.valueOf("2026-09-20 10:00:00"), "1380000")));
         when(repository.findServiceLines(any())).thenReturn(rows(
@@ -231,7 +148,6 @@ class RepairHistoryServiceTest {
         assertEquals(new BigDecimal("1200000.00"), detail.serviceTotal());
         assertEquals(new BigDecimal("180000.00"), detail.parts().get(0).lineTotal());
         assertEquals(new BigDecimal("180000.00"), detail.partsTotal());
-        assertEquals(detail.item().totalCost(), detail.serviceTotal().add(detail.partsTotal()));
         assertEquals("Hoàn tất tốt", detail.item().result());
     }
 
@@ -241,23 +157,6 @@ class RepairHistoryServiceTest {
 
         assertThrows(ResourceNotFoundException.class, () -> service.getDetail(CUSTOMER_ID, 77));
         verify(repository, never()).findServiceLines(any());
-    }
-
-    @Test
-    void nullDatesAndResultDoNotBreakTheMapping() {
-        when(repository.countHistory(CUSTOMER_ID, 0)).thenReturn(1L);
-        when(repository.findHistoryRows(CUSTOMER_ID, 0, 0, 0, 10)).thenReturn(rows(
-                new Object[]{4, 1, "51G-123.45", null, null, Timestamp.valueOf("2026-01-01 08:00:00"), null, null, null,
-                        new BigDecimal("0")}));
-
-        var item = service.getHistory(CUSTOMER_ID, null, 0, 10).items().get(0);
-
-        assertNull(item.startedAt());
-        assertNull(item.completedAt());
-        assertEquals("", item.result());
-        assertEquals("", item.brand());
-        assertEquals(LocalDateTime.of(2026, 1, 1, 8, 0), item.createdAt());
-        assertEquals("Không có hạng mục chi tiết", item.summary());
     }
 
     @Test

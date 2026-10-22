@@ -35,10 +35,10 @@ export type Page = AdminPage;
 const BASE_ROLE_NAV: Record<Role, AdminPage[]> = {
   customer: [],
   receptionist: ["customers", "vehicles", "appointments", "reception", "repair", "quotation", "invoice", "history"],
-  technician: ["technician"],
+  technician: ["technician", "inventory"],
   warehouse: ["inventory"],
   manager: ["dashboard", "staff", "services", "repair", "invoice", "reports"],
-  admin: ["settings", "services", "repair", "invoice"],
+  admin: ["settings"],
 };
 
 // Tuần 7: danh mục phụ tùng và chi tiết phiếu sửa chữa, gộp thêm vào menu theo vai trò.
@@ -97,6 +97,7 @@ export default function App() {
   const loggedIn = Boolean(session && role);
   const allowedPages = role ? ROLE_NAV[role] : [];
   const landingPage = role === "technician" ? "technician" : allowedPages[0];
+  const isPublicContent = route.area === "public" && route.page !== "login" && route.page !== "register";
 
   useEffect(() => {
     if (!session) return;
@@ -113,7 +114,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!loggedIn || !role) return;
+    if (!loggedIn || !role || isPublicContent) return;
     if (role === "customer") {
       if (route.area !== "customer") navigateTo(ROUTE_PATHS.customer(), true);
       return;
@@ -121,7 +122,7 @@ export default function App() {
     if (landingPage && (route.area !== "admin" || !allowedPages.includes(route.page))) {
       navigateTo(ROUTE_PATHS.admin(landingPage), true);
     }
-  }, [allowedPages, landingPage, loggedIn, role, route]);
+  }, [allowedPages, landingPage, loggedIn, role, route, isPublicContent]);
 
   const handleLogin = (response: LoginResponse, remember: boolean) => {
     const nextRole = accountRole(response.account.role);
@@ -142,24 +143,32 @@ export default function App() {
     } finally {
       clearSession();
       setSession(null);
-      navigateTo("/login", true);
+      navigateTo("/", true);
     }
   };
 
+  if (isPublicContent && route.area === "public") {
+    const publicPage = route.page as PublicPageKey;
+    const goPublic = (page: PublicPageKey) => navigateTo(ROUTE_PATHS.public(page));
+    const goLogin = () => {
+      if (loggedIn && role === "customer") navigateTo(ROUTE_PATHS.customer());
+      else if (loggedIn && landingPage) navigateTo(ROUTE_PATHS.admin(landingPage));
+      else navigateTo("/login");
+    };
+    const goBooking = () => {
+      if (loggedIn && role === "customer") navigateTo(ROUTE_PATHS.customer("appointments"));
+      else goLogin();
+    };
+    return (
+      <PublicLayout>
+        <Suspense fallback={<PageLoading />}>
+          <PublicHome page={publicPage} onNavigate={goPublic} onLogin={goLogin} onBook={goBooking}
+            accountLabel={loggedIn ? (role === "customer" ? "Tài khoản" : "Quản lý") : "Đăng nhập"} />
+        </Suspense>
+      </PublicLayout>
+    );
+  }
   if (!loggedIn) {
-    if (route.area === "public" && route.page !== "login" && route.page !== "register") {
-      const publicPage = route.page as PublicPageKey;
-      const goPublic = (page: PublicPageKey) => navigateTo(ROUTE_PATHS.public(page));
-      const goLogin = () => navigateTo("/login");
-      const goBooking = () => navigateTo("/login");
-      return (
-        <PublicLayout>
-          <Suspense fallback={<PageLoading />}>
-            <PublicHome page={publicPage} onNavigate={goPublic} onLogin={goLogin} onBook={goBooking} />
-          </Suspense>
-        </PublicLayout>
-      );
-    }
     if (route.area === "public" && route.page === "register") {
       return <Register onRegistered={handleLogin} onLogin={() => navigateTo("/login")} />;
     }
@@ -193,6 +202,7 @@ export default function App() {
       onNavigate={(next) => navigateTo(ROUTE_PATHS.admin(next))}
       onLogout={handleLogout}
     >
+      {["appointments", "reception", "quotation", "notifications", "staff"].includes(page) && <div role="note" className="mb-4 rounded-lg bg-warning-soft p-4 text-sm">MOCK_ONLY · Dữ liệu minh họa. Các thao tác ở màn này chưa được lưu vào hệ thống gara.</div>}
       <Suspense fallback={<PageLoading />}><PageContent page={page} /></Suspense>
     </AdminLayout>
   );

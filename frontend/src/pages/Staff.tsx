@@ -3,7 +3,7 @@ import { Card, Button, Badge, Modal, Input, Select, Icons } from "../components/
 import { mockStaff, ROLES } from "../data";
 
 const PERMISSIONS: Record<string, string[]> = {
-  admin: ["Tất cả quyền", "Quản lý tài khoản", "Xem báo cáo tài chính", "Cài đặt hệ thống"],
+  admin: ["Quản lý tài khoản", "Phân quyền tài khoản"],
   manager: ["Xem tổng quan", "Quản lý lịch hẹn", "Quản lý phiếu SC", "Duyệt báo giá", "Xem báo cáo", "Quản lý nhân viên"],
   technician: ["Xem công việc", "Cập nhật tiến độ", "Yêu cầu phụ tùng", "Ghi kết quả kiểm tra"],
   receptionist: ["Tiếp nhận xe", "Lập phiếu tiếp nhận", "Quản lý lịch hẹn", "Quản lý khách hàng", "Lập hóa đơn"],

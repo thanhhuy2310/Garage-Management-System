@@ -1,39 +1,38 @@
 package com.gara.quanlygara.config;
-import org.springframework.jdbc.core.JdbcTemplate;
 
-
+import com.gara.quanlygara.entity.Account;
+import com.gara.quanlygara.entity.AccountRole;
+import com.gara.quanlygara.entity.Customer;
 import com.gara.quanlygara.repository.AccountRepository;
+import com.gara.quanlygara.repository.CustomerNotificationRepository;
 import com.gara.quanlygara.repository.CustomerRepository;
 import com.gara.quanlygara.repository.EmployeeRepository;
 import com.gara.quanlygara.repository.GarageServiceRepository;
-import com.gara.quanlygara.repository.RepairOrderRepository;
-import com.gara.quanlygara.repository.TechnicianAssignmentRepository;
-import com.gara.quanlygara.repository.TechnicianRepository;
-import com.gara.quanlygara.repository.VehicleRepository;
-import com.gara.quanlygara.repository.RepairPartItemRepository;
-import com.gara.quanlygara.repository.RepairServiceItemRepository;
-import com.gara.quanlygara.repository.SparePartRepository;
 import com.gara.quanlygara.repository.InventoryCheckItemRepository;
 import com.gara.quanlygara.repository.InventoryCheckRepository;
+import com.gara.quanlygara.repository.InvoiceRepository;
+import com.gara.quanlygara.repository.MaintenanceReminderRepository;
+import com.gara.quanlygara.repository.PaymentRepository;
+import com.gara.quanlygara.repository.ReceivingBankAccountRepository;
+import com.gara.quanlygara.repository.RepairHistoryRepository;
+import com.gara.quanlygara.repository.RepairOrderRepository;
+import com.gara.quanlygara.repository.RepairPartItemRepository;
+import com.gara.quanlygara.repository.RepairProgressRepository;
+import com.gara.quanlygara.repository.RepairServiceItemRepository;
+import com.gara.quanlygara.repository.SparePartRepository;
 import com.gara.quanlygara.repository.StockIssueItemRepository;
 import com.gara.quanlygara.repository.StockIssueRepository;
 import com.gara.quanlygara.repository.StockMovementRepository;
 import com.gara.quanlygara.repository.StockReceiptItemRepository;
 import com.gara.quanlygara.repository.StockReceiptRepository;
-import com.gara.quanlygara.repository.RepairHistoryRepository;
-import com.gara.quanlygara.repository.CustomerNotificationRepository;
-import com.gara.quanlygara.repository.InvoiceRepository;
-import com.gara.quanlygara.repository.MaintenanceReminderRepository;
-import com.gara.quanlygara.repository.PaymentRepository;
-import com.gara.quanlygara.repository.ReceivingBankAccountRepository;
-import com.gara.quanlygara.repository.RepairProgressRepository;
-import com.gara.quanlygara.entity.Account;
-import com.gara.quanlygara.entity.AccountRole;
-import com.gara.quanlygara.entity.Customer;
+import com.gara.quanlygara.repository.TechnicianAssignmentRepository;
+import com.gara.quanlygara.repository.TechnicianRepository;
+import com.gara.quanlygara.repository.VehicleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -59,18 +58,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class SecurityConfigTest {
 
-    @MockitoBean
-    private JdbcTemplate jdbcTemplateTestMock;
-
-
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private JdbcTemplate jdbcTemplateTestMock;
 
     @MockitoBean
     private AccountRepository accountRepository;
 
     @MockitoBean
     private CustomerRepository customerRepository;
+
+    @MockitoBean
+    private CustomerNotificationRepository customerNotificationRepository;
 
     @MockitoBean
     private EmployeeRepository employeeRepository;
@@ -122,9 +123,6 @@ class SecurityConfigTest {
 
     @MockitoBean
     private RepairHistoryRepository repairHistoryRepository;
-
-    @MockitoBean
-    private CustomerNotificationRepository customerNotificationRepository;
 
     @MockitoBean
     private InvoiceRepository invoiceRepository;

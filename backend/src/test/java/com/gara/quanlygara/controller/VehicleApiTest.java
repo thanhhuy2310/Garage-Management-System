@@ -66,6 +66,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class VehicleApiTest {
 
+
     @MockitoBean
     private JdbcTemplate jdbcTemplateTestMock;
 
@@ -193,7 +194,7 @@ class VehicleApiTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(roles = "MANAGER")
     void getByIdReturnsVehicle() throws Exception {
         when(vehicleRepository.findById(2)).thenReturn(Optional.of(vehicle(2, 2, "59K-456.78")));
 
@@ -204,7 +205,7 @@ class VehicleApiTest {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(roles = "MANAGER")
     void getByIdReturns404WhenMissing() throws Exception {
         when(vehicleRepository.findById(404)).thenReturn(Optional.empty());
 

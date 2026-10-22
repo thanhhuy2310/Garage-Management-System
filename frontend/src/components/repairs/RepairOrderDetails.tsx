@@ -42,7 +42,7 @@ export default function RepairOrderDetails({
     ? ["HOAN_TAT", "HUY", "DA_HUY"].includes(detail.order.status)
     : false
   const canAddService =
-    role !== "TECHNICIAN" &&
+    (role === "MANAGER" || role === "RECEPTIONIST") &&
     !!detail &&
     ["MOI_TAO", "DANG_KIEM_TRA", "CHO_SUA"].includes(detail.order.status)
 

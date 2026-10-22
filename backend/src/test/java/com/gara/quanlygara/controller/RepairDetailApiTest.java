@@ -71,6 +71,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RepairDetailApiTest {
 
     @MockitoBean
+    private com.gara.quanlygara.service.RepairBusinessRules rules;
+
+
+    @MockitoBean
     private JdbcTemplate jdbcTemplateTestMock;
 
 
@@ -168,8 +172,12 @@ class RepairDetailApiTest {
     @Test
     @WithMockUser(roles = "TECHNICIAN")
     void technicianCanReadDetailsWithTotals() throws Exception {
-        stubOrder(1, "DANG_SUA");
-        when(repairServiceItemRepository.findDetailRows(1)).thenReturn(List.of(row(3, "Kiểm tra phanh", 1, "300000.00")));
+        var technician = new com.gara.quanlygara.entity.Account();
+        technician.setActive(true); technician.setRole(com.gara.quanlygara.entity.AccountRole.TECHNICIAN); technician.setEmployeeId(2);
+        when(accountRepository.findByUsername("user")).thenReturn(Optional.of(technician));
+        when(stockIssueItemRepository.countAssignment(1, 2)).thenReturn(1L);
+        stubOrder(1, "DANG_KIEM_TRA");
+        when(repairServiceItemRepository.findDetailRows(1)).thenReturn(List.of(row(3, "Kiá»ƒm tra phanh", 1, "300000.00")));
         when(repairPartItemRepository.findDetailRows(1)).thenReturn(List.of(row(5, "Bugi", 4, "180000.00")));
 
         mockMvc.perform(get("/api/repair-orders/1/details"))
@@ -193,7 +201,7 @@ class RepairDetailApiTest {
     @Test
     @WithMockUser(roles = "MANAGER")
     void getOneItemByTypeAndId() throws Exception {
-        stubOrder(1, "DANG_SUA");
+        stubOrder(1, "DANG_KIEM_TRA");
         when(repairServiceItemRepository.findDetailRows(1)).thenReturn(List.of());
         when(repairPartItemRepository.findDetailRows(1)).thenReturn(List.of(row(5, "Bugi", 4, "180000.00")));
 
@@ -209,7 +217,7 @@ class RepairDetailApiTest {
     @Test
     @WithMockUser(roles = "RECEPTIONIST")
     void createPartReturns201AndDoesNotWriteStock() throws Exception {
-        stubOrder(1, "DANG_SUA");
+        stubOrder(1, "DANG_KIEM_TRA");
         SparePart part = sparePart(5, 7);
         when(sparePartRepository.findById(5)).thenReturn(Optional.of(part));
         when(repairPartItemRepository.existsById(new RepairPartItem.Key(1, 5))).thenReturn(false);
@@ -228,7 +236,7 @@ class RepairDetailApiTest {
     @Test
     @WithMockUser(roles = "RECEPTIONIST")
     void createReturns409ForDuplicateLine() throws Exception {
-        stubOrder(1, "DANG_SUA");
+        stubOrder(1, "DANG_KIEM_TRA");
         when(sparePartRepository.findById(5)).thenReturn(Optional.of(sparePart(5, 7)));
         when(repairPartItemRepository.existsById(new RepairPartItem.Key(1, 5))).thenReturn(true);
 
@@ -252,7 +260,7 @@ class RepairDetailApiTest {
         mockMvc.perform(post("/api/repair-orders/99/details").contentType(APPLICATION_JSON).content(PART_BODY))
                 .andExpect(status().isNotFound());
 
-        stubOrder(1, "DANG_SUA");
+        stubOrder(1, "DANG_KIEM_TRA");
         when(repairServiceItemRepository.findServiceCatalogPrice(77)).thenReturn(Optional.empty());
         mockMvc.perform(post("/api/repair-orders/1/details").contentType(APPLICATION_JSON)
                         .content("{\"type\":\"SERVICE\",\"itemId\":77,\"quantity\":1}"))
@@ -276,14 +284,14 @@ class RepairDetailApiTest {
     @Test
     @WithMockUser(roles = "RECEPTIONIST")
     void updateReturns200() throws Exception {
-        stubOrder(1, "DANG_SUA");
+        stubOrder(1, "DANG_KIEM_TRA");
         RepairServiceItem item = new RepairServiceItem();
         item.setRepairOrderId(1);
         item.setServiceId(3);
         item.setQuantity(1);
         item.setUnitPrice(new BigDecimal("300000.00"));
         when(repairServiceItemRepository.findById(new RepairServiceItem.Key(1, 3))).thenReturn(Optional.of(item));
-        when(repairServiceItemRepository.findDetailRows(1)).thenReturn(List.of(row(3, "Kiểm tra phanh", 3, "300000.00")));
+        when(repairServiceItemRepository.findDetailRows(1)).thenReturn(List.of(row(3, "Kiá»ƒm tra phanh", 3, "300000.00")));
         when(repairPartItemRepository.findDetailRows(1)).thenReturn(List.of());
 
         mockMvc.perform(put("/api/repair-orders/1/details/service/3").contentType(APPLICATION_JSON)
@@ -295,7 +303,7 @@ class RepairDetailApiTest {
     @Test
     @WithMockUser(roles = "RECEPTIONIST")
     void deleteReturns200AndRemovesOnlyTheLine() throws Exception {
-        stubOrder(1, "DANG_SUA");
+        stubOrder(1, "DANG_KIEM_TRA");
         RepairPartItem item = new RepairPartItem();
         item.setRepairOrderId(1);
         item.setSparePartId(5);

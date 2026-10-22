@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/services")
-@PreAuthorize("isAuthenticated()")
+@PreAuthorize("isAuthenticated() and !hasRole('ADMIN')")
 public class ServiceController {
 
     private final ServiceCatalogService serviceCatalogService;
@@ -32,10 +32,13 @@ public class ServiceController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<ServiceResponse>>> getAll(
-            @RequestParam(required = false) String keyword
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "false") boolean includeInactive,
+            org.springframework.security.core.Authentication authentication
     ) {
         return ResponseEntity.ok(ApiResponse.success(
-                "Lấy danh sách dịch vụ thành công.", serviceCatalogService.getAll(keyword)));
+                "Lấy danh sách dịch vụ thành công.", serviceCatalogService.getAll(keyword,
+                        includeInactive && authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER")))));
     }
 
     @GetMapping("/{id}")
@@ -45,14 +48,14 @@ public class ServiceController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<ServiceResponse>> create(@Valid @RequestBody ServiceRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
                 "Thêm dịch vụ thành công.", serviceCatalogService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<ServiceResponse>> update(
             @PathVariable Integer id, @Valid @RequestBody ServiceRequest request
     ) {

@@ -1,5 +1,7 @@
 # Frontend
 
+Mở địa chỉ gốc `http://localhost:5173/` sẽ luôn vào trang chủ, kể cả khi đã ghi nhớ đăng nhập. Nhấn **Quản lý** hoặc **Tài khoản** để vào khu làm việc. Các đường dẫn chức năng vẫn mở trực tiếp và kiểm tra quyền như trước.
+
 Thư mục này chứa website của hệ thống gara.
 
 Website có 3 khu vực chính:

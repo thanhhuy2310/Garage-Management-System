@@ -24,10 +24,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/spare-parts")
-@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'WAREHOUSE', 'RECEPTIONIST', 'TECHNICIAN')")
+@PreAuthorize("hasAnyRole('MANAGER', 'WAREHOUSE', 'RECEPTIONIST', 'TECHNICIAN')")
 public class SparePartController {
 
-    private static final String CAN_WRITE = "hasAnyRole('ADMIN', 'MANAGER', 'WAREHOUSE')";
+    private static final String CAN_WRITE = "hasAnyRole('MANAGER', 'WAREHOUSE')";
 
     private final SparePartService sparePartService;
 

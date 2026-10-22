@@ -19,9 +19,10 @@ interface PublicHeaderProps {
   onNavigate: (page: PublicPageKey) => void;
   onLogin: () => void;
   onBook: () => void;
+  accountLabel?: string;
 }
 
-export default function PublicHeader({ active, onNavigate, onLogin, onBook }: PublicHeaderProps) {
+export default function PublicHeader({ active, onNavigate, onLogin, onBook, accountLabel = "Đăng nhập" }: PublicHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const go = (page: PublicPageKey) => {
@@ -64,7 +65,7 @@ export default function PublicHeader({ active, onNavigate, onLogin, onBook }: Pu
           </nav>
 
           <div className="flex flex-shrink-0 items-center gap-2">
-            <button type="button" onClick={onLogin} className="hidden min-h-11 items-center px-3 text-sm font-extrabold uppercase tracking-wider text-white/70 transition-all hover:text-white sm:inline-flex">Đăng nhập</button>
+            <button type="button" onClick={onLogin} className="hidden min-h-11 items-center px-3 text-sm font-extrabold uppercase tracking-wider text-white/70 transition-all hover:text-white sm:inline-flex">{accountLabel}</button>
             <button type="button" onClick={onBook} className="inline-flex min-h-11 items-center bg-accent px-3 text-xs font-extrabold uppercase tracking-wider text-white transition-all hover:brightness-110 sm:px-5 sm:text-sm">Đặt lịch</button>
             <button type="button" onClick={() => setMenuOpen((open) => !open)} aria-label={menuOpen ? "Đóng menu" : "Mở menu"} aria-expanded={menuOpen} className="flex h-11 w-11 items-center justify-center border border-white/15 text-white transition-all hover:border-white/40 xl:hidden">
               <span aria-hidden="true">{menuOpen ? Icons.close : Icons.menu}</span>
@@ -79,7 +80,7 @@ export default function PublicHeader({ active, onNavigate, onLogin, onBook }: Pu
                 {item.label}<span aria-hidden="true">{Icons.arrowRight}</span>
               </button>
             ))}
-            <button type="button" onClick={() => { setMenuOpen(false); onLogin(); }} className="mt-3 flex min-h-11 w-full items-center justify-center border border-white/20 text-sm font-extrabold uppercase tracking-wider text-white sm:hidden">Đăng nhập</button>
+            <button type="button" onClick={() => { setMenuOpen(false); onLogin(); }} className="mt-3 flex min-h-11 w-full items-center justify-center border border-white/20 text-sm font-extrabold uppercase tracking-wider text-white sm:hidden">{accountLabel}</button>
           </nav>
         )}
       </header>

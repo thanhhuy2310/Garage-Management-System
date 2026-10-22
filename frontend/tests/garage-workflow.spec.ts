@@ -53,6 +53,8 @@ async function setup(page: Page, role = "MANAGER") {
           json: { success: status < 400, message, data },
         })
       if (path === "/api/auth/me") return reply(account)
+      if (path === "/api/accounts" && method === "GET") return reply([account])
+      if (path === "/api/accounts/staff-options") return reply([])
       if (path === "/api/services" && method === "GET")
         return failList
           ? reply(null, 500, "Không tải được dịch vụ.")
@@ -212,7 +214,42 @@ test("assignment conflict stays in the form without a false success", async ({
   await expect(page.getByRole("dialog")).toBeVisible()
 })
 
-for (const role of ["TECHNICIAN", "RECEPTIONIST", "ADMIN"]) {
+test("admin can only open account management, including via direct URLs", async ({ page }) => {
+  await setup(page, "ADMIN")
+  const businessRequests: string[] = []
+  page.on("request", (request) => {
+    const path = new URL(request.url()).pathname
+    if (path.startsWith("/api/") && !path.startsWith("/api/auth/") && !path.startsWith("/api/accounts")) {
+      businessRequests.push(path)
+    }
+  })
+
+  for (const path of [
+    "/admin/repair", "/admin/services", "/admin/invoice", "/admin/customers",
+    "/admin/dashboard", "/admin/staff", "/admin/reception", "/admin/appointments",
+    "/admin/technician", "/admin/inventory", "/admin/reports", "/customer/appointments",
+  ]) {
+    await page.goto(path)
+    await expect(page).toHaveURL(/\/admin\/settings$/)
+    await expect(page.getByRole("heading", { name: "Tài khoản & Phân quyền" })).toBeVisible()
+  }
+
+  const menuButton = page.getByRole("button", { name: "Mở thanh điều hướng" })
+  if (await menuButton.isVisible()) await menuButton.click()
+  const navigation = page.getByRole("navigation", { name: "Điều hướng chính" })
+  await expect(navigation.getByRole("button")).toHaveCount(1)
+  await navigation.getByRole("button", { name: "Tài khoản & Phân quyền" }).click()
+  await page.getByRole("tab", { name: "Tài khoản", exact: true }).click()
+  await expect(page.getByRole("button", { name: "Tạo tài khoản nhân viên" })).toBeVisible()
+  await expect(page.getByRole("alert")).toHaveCount(0)
+  await expectNoOverflow(page)
+  await page.reload()
+  await expect(page).toHaveURL(/\/admin\/settings$/)
+  await expect(page.getByRole("heading", { name: "Tài khoản & Phân quyền" })).toBeVisible()
+  expect(businessRequests).toEqual([])
+})
+
+for (const role of ["TECHNICIAN", "RECEPTIONIST", "MANAGER"]) {
   test(`${role} has the correct repair-order controls`, async ({ page }) => {
     await setup(page, role)
     await page.goto(
@@ -223,7 +260,7 @@ for (const role of ["TECHNICIAN", "RECEPTIONIST", "ADMIN"]) {
       page.getByRole("heading", { name: order.licensePlate }),
     ).toBeVisible()
     await expectNoOverflow(page)
-    if (role === "ADMIN")
+    if (role === "MANAGER")
       await expect(
         page.getByRole("button", { name: "Phân công KTV", exact: true }),
       ).toBeVisible()

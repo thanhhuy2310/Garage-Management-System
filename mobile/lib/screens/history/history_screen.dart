@@ -28,8 +28,6 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   static const _pageSize = 10;
-
-  // Mỗi lần tải lại (đổi bộ lọc, làm mới) tăng số này; phản hồi của yêu cầu cũ bị bỏ qua.
   int _requestId = 0;
   bool _loading = true;
   bool _loadingMore = false;
@@ -49,15 +47,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     _loadVehicles();
   }
 
-  /// Danh sách xe để lọc lấy riêng từ toàn bộ lịch sử của khách hàng, không phải từ trang đầu.
   Future<void> _loadVehicles() async {
     try {
       final vehicles = await widget.service.getHistoryVehicles();
       if (mounted) setState(() => _vehicles = vehicles);
-    } on HistoryException catch (_) {
-      // Bộ lọc xe không bắt buộc: lịch sử vẫn hiển thị khi chưa tải được danh sách xe.
     } catch (_) {
-      // Như trên.
+      // Bộ lọc là phần bổ trợ; lịch sử vẫn dùng được khi request này lỗi.
     }
   }
 
@@ -119,7 +114,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       );
       if (!mounted || requestId != _requestId) return;
       setState(() {
-        // Loại trùng phòng khi dữ liệu mới phát sinh làm lệch ranh giới giữa các trang.
         final known = _items.map((item) => item.repairOrderId).toSet();
         _items = [
           ..._items,
@@ -238,7 +232,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
-        // 0: dòng tổng số; 1..n: các lượt; cuối: nút/trạng thái tải thêm.
         itemCount: _items.length + 2,
         itemBuilder: (_, index) {
           if (index == 0) {
@@ -273,11 +266,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Column(
           children: [
-            Text(
-              _moreError!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.muted),
-            ),
+            Text(_moreError!, textAlign: TextAlign.center),
             TextButton(onPressed: _loadMore, child: const Text('Thử lại')),
           ],
         ),
@@ -286,10 +275,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (_hasMore) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
-        child: OutlinedButton(
-          onPressed: _loadMore,
-          child: const Text('Tải thêm'),
-        ),
+        child: OutlinedButton(onPressed: _loadMore, child: const Text('Tải thêm')),
       );
     }
     return const SizedBox(height: 8);

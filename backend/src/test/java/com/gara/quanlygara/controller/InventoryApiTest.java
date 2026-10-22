@@ -80,6 +80,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class InventoryApiTest {
 
+
     @MockitoBean
     private JdbcTemplate jdbcTemplateTestMock;
 
@@ -230,7 +231,7 @@ class InventoryApiTest {
     @WithMockUser(roles = "WAREHOUSE")
     void movementsAreReadFromBienDongKho() throws Exception {
         StockMovementResponse row = new StockMovementResponse(
-                9L, 5, "Bugi", null, 1, LocalDateTime.of(2026, 10, 7, 9, 30), "XUAT", 3, 12, 9, "KTV xác nhận");
+                9L, 5, "Bugi", null, 1, LocalDateTime.of(2026, 10, 7, 9, 30), "XUAT", 3, 12, 9, "KTV xÃ¡c nháº­n");
         when(stockMovementRepository.search(eq(5), eq("XUAT"), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(row), PageRequest.of(0, 20), 1));
 

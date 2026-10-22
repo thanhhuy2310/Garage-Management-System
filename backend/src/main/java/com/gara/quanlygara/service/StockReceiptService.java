@@ -74,7 +74,7 @@ public class StockReceiptService {
         }
 
         StockReceipt receipt = new StockReceipt();
-        receipt.setReceiptDate(request.importDate() != null ? request.importDate() : LocalDateTime.now());
+        receipt.setReceiptDate(request.importDate() != null ? request.importDate() : LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).withNano(0));
         receipt.setSupplier(request.supplier().trim());
         receipt.setWarehouseStaffId(warehouseStaffId);
         receipt.setNote(normalizeOptional(request.note()));

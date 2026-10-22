@@ -1,3 +1,6 @@
+import { garageApi } from "../../api/garage";
+import { useGarageQuery } from "../../hooks/useGarageQuery";
+import { QueryState } from "../../components/garage/QueryState";
 import { useMemo, useState } from "react";
 import BookingCalendar from "../../components/booking/BookingCalendar";
 import TimeSlotPicker from "../../components/booking/TimeSlotPicker";
@@ -9,7 +12,7 @@ import {
   formatBookingDate,
   getSuggestedBookingSlots,
 } from "../../mock/bookingAvailability";
-import { dichVu, formatCurrency, lichHen, xe as mockVehicles, type AppointmentStatus } from "../../mock/data";
+import { dichVu as demoServices, formatCurrency, lichHen, xe as mockVehicles, type AppointmentStatus } from "../../mock/data";
 
 const STATUS_VARIANT: Record<AppointmentStatus, "pending" | "confirmed" | "arrived" | "cancelled" | "completed"> = {
   pending: "pending",
@@ -28,6 +31,8 @@ const STATUS_LABEL: Record<AppointmentStatus, string> = {
 };
 
 export default function CustomerAppointments({ customerKey, customerId, onBooked }: { customerKey: string; customerId: number; onBooked?: () => void }) {
+  const catalog = useGarageQuery(garageApi.services);
+  const dichVu = (catalog.data ?? []).map(s => ({MaDichVu: String(s.id), TenDichVu: s.name, LoaiDichVu: s.type, DonGia: s.unitPrice}));
   const { vehicles: myVehicles, addVehicle } = useCustomerVehicles(customerId);
   const [showBook, setShowBook] = useState(false);
   const [showAddVehicle, setShowAddVehicle] = useState(false);
@@ -50,7 +55,7 @@ export default function CustomerAppointments({ customerKey, customerId, onBooked
   const vehiclePlate = (id: string) => myVehicles.find((vehicle) => String(vehicle.id) === id)?.licensePlate
     ?? mockVehicles.find((vehicle) => vehicle.MaXe === id)?.BienSo
     ?? id;
-  const serviceName = (id: string | null) => dichVu.find((s) => s.MaDichVu === id)?.TenDichVu ?? "Tư vấn chung";
+  const serviceName = (id: string | null) => demoServices.find((s) => s.MaDichVu === id)?.TenDichVu ?? "Tư vấn chung";
 
   const openBooking = () => {
     setBookingStep(1);
@@ -103,6 +108,7 @@ export default function CustomerAppointments({ customerKey, customerId, onBooked
 
   return (
     <div className="space-y-6">
+      <QueryState {...catalog} onRetry={catalog.reload}/>
       <div className="page-toolbar">
         <div>
           <h2 className="ui-section-title">Lịch hẹn của tôi</h2>

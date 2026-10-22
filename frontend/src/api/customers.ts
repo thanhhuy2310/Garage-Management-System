@@ -18,6 +18,10 @@ export interface CustomerPayload {
 }
 
 export const customersApi = {
+  async me(signal?: AbortSignal): Promise<Customer> {
+    return unwrap(await api.get<ApiResponse<Customer>>("/api/customer/profile", { signal }));
+  },
+
   async list(): Promise<Customer[]> {
     return unwrap(await api.get<ApiResponse<Customer[]>>("/api/customers"));
   },

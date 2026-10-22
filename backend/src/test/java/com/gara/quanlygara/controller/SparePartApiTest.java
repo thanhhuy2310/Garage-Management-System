@@ -68,6 +68,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class SparePartApiTest {
 
+
     @MockitoBean
     private JdbcTemplate jdbcTemplateTestMock;
 
@@ -238,14 +239,14 @@ class SparePartApiTest {
 
             @Override
             public String getName() {
-                return "Kho phụ tùng chính";
+                return "Kho phá»¥ tÃ¹ng chÃ­nh";
             }
         };
         when(sparePartRepository.findWarehouses()).thenReturn(List.of(view));
 
         mockMvc.perform(get("/api/spare-parts/warehouses"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].name").value("Kho phụ tùng chính"));
+                .andExpect(jsonPath("$.data[0].name").value("Kho phá»¥ tÃ¹ng chÃ­nh"));
     }
 
     @Test

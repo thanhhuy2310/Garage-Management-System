@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/repair-orders/{repairOrderId}/technicians")
-@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+@PreAuthorize("hasRole('MANAGER')")
 public class TechnicianAssignmentController {
 
     private final TechnicianAssignmentService assignmentService;

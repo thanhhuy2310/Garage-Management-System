@@ -95,6 +95,7 @@ class AppController extends ChangeNotifier {
         _homeService.getProfile(current.customerId),
         _homeService.getSummary(current.customerId),
       ]);
+      if (!identical(session, current)) return;
       profile = values[0] as CustomerProfile;
       summary = values[1] as HomeSummary;
     } catch (_) {
@@ -113,6 +114,7 @@ class AppController extends ChangeNotifier {
       appointmentService.getServices(),
       appointmentService.getAppointments(current.customerId),
     ]);
+    if (!identical(session, current)) return;
     vehicles = values[0] as List<Vehicle>;
     services = values[1] as List<GarageServiceItem>;
     appointments = values[2] as List<Appointment>;
@@ -142,6 +144,7 @@ class AppController extends ChangeNotifier {
       quotationService.getQuotations(current.customerId),
       notificationService.getNotifications(current.customerId),
     ]);
+    if (!identical(session, current)) return;
     quotations = values[0] as List<Quotation>;
     notifications = values[1] as List<CustomerNotification>;
     notifyListeners();

@@ -1,153 +1,347 @@
-﻿import React, { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, Tooltip, ResponsiveContainer, Legend
-} from "recharts";
-import { Card, StatCard, Button, Tabs, Icons, TableContainer } from "../components/ui";
-import { chartMonthly, chartServices, formatCurrency } from "../data";
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
+import { errorMessage } from "../api/client"
+import { reportsApi } from "../api/reports"
+import {
+  Button,
+  Card,
+  EmptyState,
+  Icons,
+  StatCard,
+  TableContainer,
+} from "../components/ui"
+import type { ReportOverview } from "../types/reports"
+import { formatMoney } from "../utils/garageFormat"
 
-const PIE_COLORS = ["#153A5B", "#1B4D7A", "#E67817", "#047857", "#B45309", "#687585"];
+const COLORS = ["#153A5B", "#E67817", "#047857", "#7C3AED", "#B45309", "#64748B"]
+const STATUS_LABELS: Record<string, string> = {
+  MOI_TAO: "Mới tạo",
+  DANG_KIEM_TRA: "Đang kiểm tra",
+  CHO_SUA: "Chờ sửa",
+  DANG_SUA: "Đang sửa",
+  CHO_PHU_TUNG: "Chờ phụ tùng",
+  HOAN_TAT: "Hoàn tất",
+  HUY: "Đã hủy",
+  DA_HUY: "Đã hủy",
+}
 
-const techStats = [
-  { name: "Trần Văn Khoa", completed: 42, hours: 168, revenue: 28500000, rating: 4.8 },
-  { name: "Nguyễn Thành Long", completed: 38, hours: 152, revenue: 24200000, rating: 4.7 },
-  { name: "Lê Quang Hưng", completed: 35, hours: 145, revenue: 22100000, rating: 4.6 },
-];
+type Preset = "month" | "quarter" | "year"
 
-const inventoryChart = [
-  { name: "T7", nhap: 45, xuat: 38, ton: 340 },
-  { name: "T8", nhap: 62, xuat: 55, ton: 347 },
-  { name: "T9", nhap: 28, xuat: 22, ton: 353 },
-];
+function dateValue(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
+function presetRange(preset: Preset) {
+  const now = new Date()
+  const firstMonth = preset === "month"
+    ? now.getMonth()
+    : preset === "quarter"
+      ? Math.floor(now.getMonth() / 3) * 3
+      : 0
+  return {
+    from: dateValue(new Date(now.getFullYear(), firstMonth, 1)),
+    to: dateValue(now),
+  }
+}
+
+function number(value: number) {
+  return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(value)
+}
+
+function monthLabel(value: string) {
+  const [year, month] = value.split("-")
+  return `T${Number(month)}/${year}`
+}
 
 export default function Reports() {
-  const [period, setPeriod] = useState("month");
+  const initial = presetRange("year")
+  const [preset, setPreset] = useState<Preset | null>("year")
+  const [from, setFrom] = useState(initial.from)
+  const [to, setTo] = useState(initial.to)
+  const [data, setData] = useState<ReportOverview | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
+  const load = useCallback((signal?: AbortSignal) => {
+    setLoading(true)
+    setError("")
+    reportsApi.overview(from, to, signal)
+      .then((result) => {
+        if (!signal?.aborted) setData(result)
+      })
+      .catch((reason) => {
+        if (signal?.aborted || (reason instanceof DOMException && reason.name === "AbortError")) return
+        setError(errorMessage(reason, "Không thể tải số liệu báo cáo."))
+      })
+      .finally(() => {
+        if (!signal?.aborted) setLoading(false)
+      })
+  }, [from, to])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    load(controller.signal)
+    return () => controller.abort()
+  }, [load])
+
+  const choosePreset = (next: Preset) => {
+    const range = presetRange(next)
+    setPreset(next)
+    setFrom(range.from)
+    setTo(range.to)
+  }
+
+  const statusData = useMemo(() => data?.vehicleStatuses.map((item) => ({
+    ...item,
+    name: STATUS_LABELS[item.status] ?? item.status,
+  })) ?? [], [data])
+
+  const exportCsv = () => {
+    if (!data) return
+    const rows: (string | number)[][] = [
+      ["BÁO CÁO GARA", `${data.from} - ${data.to}`],
+      ["Chỉ tiêu", "Giá trị"],
+      ["Doanh thu đã thu", data.billing.collected],
+      ["Giá trị hóa đơn", data.billing.invoiced],
+      ["Công nợ đến cuối kỳ", data.billing.outstanding],
+      ["Lượt sửa chữa tiếp nhận", data.repairs.opened],
+      ["Lượt sửa chữa hoàn tất", data.repairs.completed],
+      ["Thời gian xử lý trung bình (giờ)", data.repairs.averageHandlingHours],
+      ["Phụ tùng nhập", data.inventory.imported],
+      ["Phụ tùng xuất", data.inventory.exported],
+      ["Tồn kho hiện tại", data.inventory.currentStock],
+      [],
+      ["Phụ tùng", "Nhập", "Xuất", "Tồn"],
+      ...data.partMovements.map((item) => [
+        item.partName,
+        item.imported,
+        item.exported,
+        item.currentStock,
+      ]),
+    ]
+    const csv = rows
+      .map((row) => row.map((cell) => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(","))
+      .join("\r\n")
+    const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }))
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `bao-cao-gara-${data.from}-${data.to}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <div className="space-y-6">
-      {/* Toolbar */}
-      <div className="page-toolbar">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <Tabs tabs={[{ key: "week", label: "Tuần" }, { key: "month", label: "Tháng" }, { key: "quarter", label: "Quý" }, { key: "year", label: "Năm" }]}
-            active={period} onChange={setPeriod} />
-          <input type="month" aria-label="Chọn tháng báo cáo" defaultValue="2026-09" className="min-h-11 rounded-md border border-border bg-white px-3 text-base shadow-sm sm:text-sm" />
-        </div>
-        <Button variant="outline" icon={Icons.download}>Xuất báo cáo</Button>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Tổng doanh thu tháng 9" value="48.2M" icon={Icons.creditCard} color="green" trend="+15% so T8" trendUp />
-        <StatCard label="Lượt sửa chữa" value="55" icon={Icons.wrench} color="blue" trend="+8% so T8" trendUp />
-        <StatCard label="Xe đã hoàn tất" value="51" icon={Icons.checkCircle} color="navy" />
-        <StatCard label="Khách hàng mới" value="12" icon={Icons.users} color="amber" trend="+3 so T8" trendUp />
-      </div>
-
-      {/* Revenue chart */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Card className="p-4 sm:p-5 xl:col-span-2">
-          <h3 className="mb-4 text-base font-semibold text-slate-900">Doanh thu theo tháng</h3>
-          <div role="img" aria-label="Biểu đồ doanh thu theo tháng">
-            <ResponsiveContainer width="100%" height={220}>
-              <AreaChart data={chartMonthly} margin={{ left: -20 }}>
-              <defs>
-                <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#1B4D7A" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#1B4D7A" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false}
-                tickFormatter={v => `${(v / 1000000).toFixed(0)}M`} />
-              <Tooltip formatter={(v: any) => [formatCurrency(Number(v)), "Doanh thu"]}
-                contentStyle={{ borderRadius: 8, border: "1px solid #dde3ec", fontSize: 12 }} />
-              <Area type="monotone" dataKey="revenue" stroke="#1B4D7A" strokeWidth={2.5} fill="url(#grad1)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
-        <Card className="p-4 sm:p-5">
-          <h3 className="mb-4 text-base font-semibold text-slate-900">Tỷ lệ dịch vụ</h3>
-          <div role="img" aria-label="Biểu đồ tỷ lệ dịch vụ">
-            <ResponsiveContainer width="100%" height={180}>
-              <PieChart>
-              <Pie data={chartServices} dataKey="value" cx="50%" cy="50%" outerRadius={70} innerRadius={40} paddingAngle={3}>
-                {chartServices.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
-              </Pie>
-              <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #dde3ec", fontSize: 12 }} formatter={(v, n) => [`${v}%`, n]} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="space-y-1.5 mt-1">
-            {chartServices.map((s, i) => (
-              <div key={s.name} className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full" style={{ background: PIE_COLORS[i] }} />
-                  <span className="text-slate-600">{s.name}</span>
-                </div>
-                <span className="font-semibold">{s.value}%</span>
-              </div>
+      <div className="page-toolbar gap-4">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="flex rounded-lg border border-border bg-surface p-1" aria-label="Khoảng báo cáo nhanh">
+            {(["month", "quarter", "year"] as Preset[]).map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => choosePreset(item)}
+                aria-pressed={preset === item}
+                className={`min-h-10 rounded-md px-3 text-sm font-semibold ${preset === item ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted"}`}
+              >
+                {item === "month" ? "Tháng" : item === "quarter" ? "Quý" : "Năm"}
+              </button>
             ))}
           </div>
-        </Card>
+          <label className="text-sm font-semibold text-slate-700">
+            Từ ngày
+            <input
+              type="date"
+              value={from}
+              max={to}
+              onChange={(event) => { setPreset(null); setFrom(event.target.value) }}
+              className="mt-1 block min-h-11 rounded-md border border-border bg-white px-3 text-sm shadow-sm"
+            />
+          </label>
+          <label className="text-sm font-semibold text-slate-700">
+            Đến ngày
+            <input
+              type="date"
+              value={to}
+              min={from}
+              onChange={(event) => { setPreset(null); setTo(event.target.value) }}
+              className="mt-1 block min-h-11 rounded-md border border-border bg-white px-3 text-sm shadow-sm"
+            />
+          </label>
+        </div>
+        <Button variant="outline" icon={Icons.download} onClick={exportCsv} disabled={!data || loading}>
+          Xuất CSV
+        </Button>
       </div>
 
-      {/* Inventory & Technicians */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <Card className="p-4 sm:p-5">
-          <h3 className="mb-4 text-base font-semibold text-slate-900">Nhập / Xuất / Tồn phụ tùng</h3>
-          <div role="img" aria-label="Biểu đồ nhập và xuất phụ tùng theo tháng">
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={inventoryChart} margin={{ left: -20 }}>
-              <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#64748b" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #dde3ec", fontSize: 12 }} />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Bar dataKey="nhap" name="Nhập" fill="#047857" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="xuat" name="Xuất" fill="#E67817" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+      {loading && (
+        <Card className="p-8 text-center text-sm text-muted-foreground">
+          Đang tổng hợp số liệu từ database…
+        </Card>
+      )}
+      {error && (
+        <Card className="border-danger/30 bg-danger-soft p-5 text-sm text-danger">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span>{error}</span>
+            <Button variant="outline" onClick={() => load()}>Thử lại</Button>
           </div>
         </Card>
+      )}
 
-        <Card className="p-4 sm:p-5">
-          <h3 className="mb-4 text-base font-semibold text-slate-900">Hiệu suất kỹ thuật viên</h3>
-          <TableContainer>
-            <table className="w-full data-table">
-            <thead>
-              <tr>
-                <th>Kỹ thuật viên</th>
-                <th className="text-right">Hoàn tất</th>
-                <th className="text-right">Giờ làm</th>
-                <th className="text-right">Doanh thu</th>
-                <th className="text-center">Đánh giá</th>
-              </tr>
-            </thead>
-            <tbody>
-              {techStats.map((t, i) => (
-                <tr key={i}>
-                  <td>
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-soft text-xs font-bold text-primary">
-                        {t.name.charAt(0)}
+      {!loading && !error && data && (
+        <>
+          <p className="text-sm text-muted-foreground">
+            Số liệu từ {data.from.split("-").reverse().join("/")} đến {data.to.split("-").reverse().join("/")}.
+            Công nợ được tính đến cuối kỳ; tồn kho hiển thị số lượng hiện tại.
+          </p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard label="Doanh thu đã thu" value={formatMoney(data.billing.collected)} icon={Icons.creditCard} color="green" />
+            <StatCard label="Lượt sửa chữa tiếp nhận" value={number(data.repairs.opened)} icon={Icons.wrench} color="blue" />
+            <StatCard label="Lượt sửa chữa hoàn tất" value={number(data.repairs.completed)} icon={Icons.checkCircle} color="navy" />
+            <StatCard label="Thời gian xử lý trung bình" value={`${number(data.repairs.averageHandlingHours)} giờ`} icon={Icons.history} color="amber" />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+            <Card className="p-4 sm:p-5 xl:col-span-2">
+              <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <h3 className="text-base font-semibold">Hóa đơn và doanh thu</h3>
+                  <p className="text-xs text-muted-foreground">Doanh thu ghi nhận theo ngày thanh toán thực tế</p>
+                </div>
+                <div className="text-right text-xs text-muted-foreground">
+                  Giá trị hóa đơn: <strong className="text-foreground">{formatMoney(data.billing.invoiced)}</strong><br />
+                  Công nợ: <strong className="text-warning">{formatMoney(data.billing.outstanding)}</strong>
+                </div>
+              </div>
+              <ResponsiveContainer width="100%" height={280}>
+                <AreaChart data={data.trends} margin={{ left: 8, right: 8 }}>
+                  <defs>
+                    <linearGradient id="collected-gradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#047857" stopOpacity={0.28} />
+                      <stop offset="95%" stopColor="#047857" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="period" tickFormatter={monthLabel} tick={{ fontSize: 12 }} />
+                  <YAxis tickFormatter={(value) => `${Math.round(value / 1_000_000)}tr`} tick={{ fontSize: 11 }} width={48} />
+                  <Tooltip
+                    labelFormatter={monthLabel}
+                    formatter={(value, name) => [formatMoney(Number(value)), name === "collected" ? "Đã thu" : "Hóa đơn"]}
+                  />
+                  <Legend formatter={(value) => value === "collected" ? "Đã thu" : "Hóa đơn"} />
+                  <Area type="monotone" dataKey="invoiced" stroke="#153A5B" fill="transparent" strokeWidth={2} />
+                  <Area type="monotone" dataKey="collected" stroke="#047857" fill="url(#collected-gradient)" strokeWidth={2.5} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </Card>
+
+            <Card className="p-4 sm:p-5">
+              <h3 className="text-base font-semibold">Tình trạng xe cuối kỳ</h3>
+              <p className="mb-3 text-xs text-muted-foreground">Theo phiếu sửa gần nhất của từng xe đến ngày kết thúc</p>
+              {statusData.length ? (
+                <>
+                  <ResponsiveContainer width="100%" height={190}>
+                    <PieChart>
+                      <Pie data={statusData} dataKey="count" nameKey="name" innerRadius={48} outerRadius={75} paddingAngle={2}>
+                        {statusData.map((item, index) => <Cell key={item.status} fill={COLORS[index % COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip formatter={(value) => [`${value} xe`, "Số lượng"]} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="space-y-2">
+                    {statusData.map((item, index) => (
+                      <div key={item.status} className="flex items-center justify-between text-sm">
+                        <span className="flex items-center gap-2">
+                          <span className="h-2.5 w-2.5 rounded-full" style={{ background: COLORS[index % COLORS.length] }} />
+                          {item.name}
+                        </span>
+                        <strong>{item.count}</strong>
                       </div>
-                      <span className="font-medium text-slate-700 text-sm">{t.name}</span>
-                    </div>
-                  </td>
-                  <td className="text-right font-semibold">{t.completed}</td>
-                  <td className="text-right text-slate-600">{t.hours}h</td>
-                  <td className="text-right font-mono text-sm">{(t.revenue / 1000000).toFixed(1)}M</td>
-                  <td className="text-center">
-                    <span className="flex items-center gap-1 text-sm font-bold text-amber-500"><span aria-hidden="true">{Icons.star}</span>{t.rating}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            </table>
-          </TableContainer>
-        </Card>
-      </div>
+                    ))}
+                  </div>
+                </>
+              ) : <EmptyState message="Chưa có xe phát sinh sửa chữa." />}
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+            <StatCard label="Phụ tùng nhập trong kỳ" value={number(data.inventory.imported)} icon={Icons.download} color="green" />
+            <StatCard label="Phụ tùng xuất trong kỳ" value={number(data.inventory.exported)} icon={Icons.send} color="amber" />
+            <StatCard
+              label="Tồn kho hiện tại"
+              value={number(data.inventory.currentStock)}
+              icon={Icons.package}
+              color={data.inventory.outOfStockParts ? "red" : "navy"}
+              trend={`${data.inventory.lowStockParts} sắp hết · ${data.inventory.outOfStockParts} hết hàng`}
+            />
+          </div>
+
+          <Card className="p-4 sm:p-5">
+            <h3 className="text-base font-semibold">Nhập / xuất / tồn phụ tùng</h3>
+            <p className="mb-4 text-xs text-muted-foreground">10 phụ tùng có biến động lớn nhất trong kỳ</p>
+            {data.partMovements.length ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={data.partMovements} margin={{ left: 0, right: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="partName" tick={{ fontSize: 11 }} interval={0} angle={-18} textAnchor="end" height={72} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="imported" name="Nhập" fill="#047857" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="exported" name="Xuất" fill="#E67817" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="currentStock" name="Tồn" fill="#153A5B" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : <EmptyState message="Chưa có danh mục phụ tùng." />}
+          </Card>
+
+          <Card className="p-4 sm:p-5">
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
+              <div>
+                <h3 className="text-base font-semibold">Hiệu suất xử lý của kỹ thuật viên</h3>
+                <p className="text-xs text-muted-foreground">Theo các phân công phát sinh trong kỳ</p>
+              </div>
+              <span className="text-sm text-muted-foreground">
+                Tỷ lệ hoàn tất chung: <strong className="text-foreground">{number(data.repairs.completionRate)}%</strong>
+              </span>
+            </div>
+            {data.technicianPerformance.length ? (
+              <TableContainer>
+                <table className="w-full data-table">
+                  <thead><tr><th>Kỹ thuật viên</th><th className="text-right">Được giao</th><th className="text-right">Hoàn tất</th><th className="text-right">Tỷ lệ</th><th className="text-right">Giờ xử lý TB</th></tr></thead>
+                  <tbody>
+                    {data.technicianPerformance.map((item) => (
+                      <tr key={item.employeeId}>
+                        <td className="font-medium">{item.employeeName}</td>
+                        <td className="text-right">{number(item.assigned)}</td>
+                        <td className="text-right font-semibold">{number(item.completed)}</td>
+                        <td className="text-right">{number(item.completionRate)}%</td>
+                        <td className="text-right">{number(item.averageHandlingHours)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </TableContainer>
+            ) : <EmptyState message="Chưa có phân công kỹ thuật viên trong kỳ." />}
+          </Card>
+        </>
+      )}
     </div>
-  );
+  )
 }

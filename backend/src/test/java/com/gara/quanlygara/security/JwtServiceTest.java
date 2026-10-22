@@ -20,6 +20,20 @@ class JwtServiceTest {
         String token = jwtService.generateToken(account);
 
         assertEquals("admin", jwtService.extractUsername(token));
-        assertTrue(jwtService.isValid(token, "admin"));
+        assertTrue(jwtService.isValid(token, account));
+    }
+
+    @Test
+    void tokenCannotFollowAReusedUsernameOrChangedCredentials() {
+        JwtService jwt = new JwtService("a-test-secret-that-is-at-least-32-characters", 60_000);
+        Account first = new Account();
+        first.setId(1); first.setUsername("technician"); first.setRole(AccountRole.TECHNICIAN);
+        first.setPasswordHash("first-hash"); first.setEmployeeId(5); first.setActive(true);
+        String token = jwt.generateToken(first);
+        assertTrue(jwt.isValid(token, first));
+        first.setId(2);
+        org.junit.jupiter.api.Assertions.assertFalse(jwt.isValid(token, first));
+        first.setId(1); first.setPasswordHash("new-hash");
+        org.junit.jupiter.api.Assertions.assertFalse(jwt.isValid(token, first));
     }
 }

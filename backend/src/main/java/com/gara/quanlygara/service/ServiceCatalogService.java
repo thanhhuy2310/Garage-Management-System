@@ -21,12 +21,19 @@ public class ServiceCatalogService {
     }
 
     @Transactional(readOnly = true)
-    public List<ServiceResponse> getAll(String keyword) {
+    public List<ServiceResponse> getAll(String keyword) { return getAll(keyword, false); }
+
+    @Transactional(readOnly = true)
+    public List<ServiceResponse> getAll(String keyword, boolean includeInactive) {
         Sort sort = Sort.by(Sort.Direction.ASC, "id");
         String search = keyword == null ? "" : keyword.strip();
+        if (includeInactive) return serviceRepository.findAll(sort).stream()
+                .filter(s -> search.isEmpty() || s.getName().toLowerCase(java.util.Locale.ROOT).contains(search.toLowerCase(java.util.Locale.ROOT))
+                        || (s.getType() != null && s.getType().toLowerCase(java.util.Locale.ROOT).contains(search.toLowerCase(java.util.Locale.ROOT))))
+                .map(ServiceResponse::from).toList();
         List<GarageService> services = search.isEmpty()
-                ? serviceRepository.findAll(sort)
-                : serviceRepository.findByNameContainingIgnoreCaseOrTypeContainingIgnoreCase(search, search, sort);
+                ? serviceRepository.findByActiveTrue(sort)
+                : serviceRepository.findByActiveTrueAndNameContainingIgnoreCaseOrActiveTrueAndTypeContainingIgnoreCase(search, search, sort);
         return services.stream().map(ServiceResponse::from).toList();
     }
 
@@ -59,5 +66,6 @@ public class ServiceCatalogService {
         service.setType(request.type());
         service.setUnitPrice(request.unitPrice());
         service.setDescription(request.description());
+        if (request.active() != null) service.setActive(request.active());
     }
 }

@@ -27,7 +27,7 @@ public class CustomerVehicleController {
     }
 
     @GetMapping("/{id}/vehicles")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST')"
+    @PreAuthorize("hasAnyRole('MANAGER', 'RECEPTIONIST')"
             + " or (hasRole('CUSTOMER') and @vehicleAccess.ownsCustomer(authentication, #id))")
     public ResponseEntity<ApiResponse<List<VehicleResponse>>> getByCustomer(@PathVariable Integer id) {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách xe của khách hàng thành công.",

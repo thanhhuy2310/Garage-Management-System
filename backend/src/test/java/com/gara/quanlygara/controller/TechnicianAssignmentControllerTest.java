@@ -43,6 +43,7 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     @Autowired private AccountRepository accountRepository;
     @Autowired private JwtService jwtService;
     @Autowired private EntityManager entityManager;
+    @Autowired private org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     private Employee firstTechnician;
     private Employee secondTechnician;
@@ -52,15 +53,17 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
 
     @BeforeEach
     void setUp() {
-        firstTechnician = saveEmployee("Kỹ thuật viên A", true);
-        secondTechnician = saveEmployee("Kỹ thuật viên B", true);
-        receptionist = saveEmployee("Lễ tân", false);
+        jdbc.execute("CREATE TABLE IF NOT EXISTS BaoGia (MaBaoGia INT PRIMARY KEY,MaPhieuSuaChua INT,TrangThai NVARCHAR(50))");
+        firstTechnician = saveEmployee("KÃƒÂ¡Ã‚Â»Ã‚Â¹ thuÃƒÂ¡Ã‚ÂºÃ‚Â­t viÃƒÆ’Ã‚Âªn A", true);
+        secondTechnician = saveEmployee("KÃƒÂ¡Ã‚Â»Ã‚Â¹ thuÃƒÂ¡Ã‚ÂºÃ‚Â­t viÃƒÆ’Ã‚Âªn B", true);
+        receptionist = saveEmployee("LÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¦ tÃƒÆ’Ã‚Â¢n", false);
         firstOrder = saveOrder(1);
         secondOrder = saveOrder(2);
+        jdbc.update("INSERT INTO BaoGia (MaBaoGia, MaPhieuSuaChua, TrangThai, NgayLap) VALUES (?,?,'DA_XAC_NHAN',CURRENT_TIMESTAMP),(?,?,'DA_XAC_NHAN',CURRENT_TIMESTAMP)", firstOrder.getId(), firstOrder.getId(), secondOrder.getId(), secondOrder.getId());
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"ADMIN", "MANAGER"})
+    @ValueSource(strings = {"MANAGER"})
     void managerRolesCanListAndAssignMultipleTechnicians(String role) throws Exception {
         mockMvc.perform(get("/api/technicians").with(user("manager").roles(role)))
                 .andExpect(status().isOk())
@@ -71,12 +74,12 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
                 .andExpect(jsonPath("$.data.length()").value(0));
         mockMvc.perform(post(assignmentsUrl(firstOrder)).with(user("manager").roles(role))
                         .contentType(APPLICATION_JSON).content(objectMapper.writeValueAsString(Map.of(
-                                "technicianId", firstTechnician.getId(), "notes", "  Kiểm tra phanh  "))))
+                                "technicianId", firstTechnician.getId(), "notes", "  KiÃƒÂ¡Ã‚Â»Ã†â€™m tra phanh  "))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.repairOrderId").value(firstOrder.getId()))
                 .andExpect(jsonPath("$.data.technician.fullName").value(firstTechnician.getFullName()))
                 .andExpect(jsonPath("$.data.assignedAt").isString())
-                .andExpect(jsonPath("$.data.notes").value("Kiểm tra phanh"));
+                .andExpect(jsonPath("$.data.notes").value("KiÃƒÂ¡Ã‚Â»Ã†â€™m tra phanh"));
         mockMvc.perform(post(assignmentsUrl(firstOrder)).with(user("manager").roles(role))
                         .contentType(APPLICATION_JSON).content(request(secondTechnician.getId())))
                 .andExpect(status().isCreated());
@@ -93,25 +96,25 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     @Test
     @WithMockUser(roles = "MANAGER")
     void duplicateAssignmentReturnsConflictWithoutOverwriting() throws Exception {
-        TechnicianAssignment original = saveAssignment(firstOrder, firstTechnician, "Ghi chú ban đầu");
+        TechnicianAssignment original = saveAssignment(firstOrder, firstTechnician, "Ghi chÃƒÆ’Ã‚Âº ban Ãƒâ€žÃ¢â‚¬ËœÃƒÂ¡Ã‚ÂºÃ‚Â§u");
         mockMvc.perform(post(assignmentsUrl(firstOrder)).contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
-                                "technicianId", firstTechnician.getId(), "notes", "Không được ghi đè"))))
+                                "technicianId", firstTechnician.getId(), "notes", "KhÃƒÆ’Ã‚Â´ng Ãƒâ€žÃ¢â‚¬ËœÃƒâ€ Ã‚Â°ÃƒÂ¡Ã‚Â»Ã‚Â£c ghi Ãƒâ€žÃ¢â‚¬ËœÃƒÆ’Ã‚Â¨"))))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Kỹ thuật viên đã được phân công cho phiếu sửa chữa này."));
+                .andExpect(jsonPath("$.message").value("K\u1ef9 thu\u1eadt vi\u00ean \u0111\u00e3 \u0111\u01b0\u1ee3c ph\u00e2n c\u00f4ng cho phi\u1ebfu s\u1eeda ch\u1eefa n\u00e0y."));
         entityManager.clear();
         TechnicianAssignment saved = assignmentRepository.findById(original.getId()).orElseThrow();
-        assertEquals("Ghi chú ban đầu", saved.getNotes());
+        assertEquals("Ghi chÃƒÆ’Ã‚Âº ban Ãƒâ€žÃ¢â‚¬ËœÃƒÂ¡Ã‚ÂºÃ‚Â§u", saved.getNotes());
         assertEquals(original.getAssignedAt(), saved.getAssignedAt());
         assertEquals(1, assignmentRepository.count());
     }
 
     @Test
     void newAssignmentWithAnExistingKeyInsertsInsteadOfMerging() {
-        saveAssignment(firstOrder, firstTechnician, "Ghi chú ban đầu");
+        saveAssignment(firstOrder, firstTechnician, "Ghi chÃƒÆ’Ã‚Âº ban Ãƒâ€žÃ¢â‚¬ËœÃƒÂ¡Ã‚ÂºÃ‚Â§u");
         entityManager.clear();
         assertThrows(DataIntegrityViolationException.class,
-                () -> saveAssignment(firstOrder, firstTechnician, "Không được ghi đè"));
+                () -> saveAssignment(firstOrder, firstTechnician, "KhÃƒÆ’Ã‚Â´ng Ãƒâ€žÃ¢â‚¬ËœÃƒâ€ Ã‚Â°ÃƒÂ¡Ã‚Â»Ã‚Â£c ghi Ãƒâ€žÃ¢â‚¬ËœÃƒÆ’Ã‚Â¨"));
     }
 
     @Test
@@ -119,7 +122,7 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     void missingRepairOrderReturnsNotFound() throws Exception {
         mockMvc.perform(get("/api/repair-orders/2147483647/technicians"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Không tìm thấy phiếu sửa chữa."));
+                .andExpect(jsonPath("$.message").value("Kh\u00f4ng t\u00ecm th\u1ea5y phi\u1ebfu s\u1eeda ch\u1eefa."));
         mockMvc.perform(post("/api/repair-orders/2147483647/technicians")
                         .contentType(APPLICATION_JSON).content(request(firstTechnician.getId())))
                 .andExpect(status().isNotFound());
@@ -132,13 +135,13 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
         for (int id : new int[]{2147483647, receptionist.getId()}) {
             mockMvc.perform(post(assignmentsUrl(firstOrder)).contentType(APPLICATION_JSON).content(request(id)))
                     .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.message").value("Không tìm thấy kỹ thuật viên."));
+                    .andExpect(jsonPath("$.message").value("Kh\u00f4ng t\u00ecm th\u1ea5y k\u1ef9 thu\u1eadt vi\u00ean."));
         }
         assertEquals(0, assignmentRepository.count());
     }
 
     @ParameterizedTest
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(roles = "MANAGER")
     @ValueSource(strings = {"{}", "{\"technicianId\":0}", "{\"technicianId\":-1}",
             "{\"technicianId\":\"abc\"}", "{invalid"})
     void invalidAssignmentReturnsBadRequest(String request) throws Exception {
@@ -149,7 +152,7 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(roles = "MANAGER")
     void notesMustFitSqlColumn() throws Exception {
         mockMvc.perform(post(assignmentsUrl(firstOrder)).contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of(
@@ -160,7 +163,7 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"CUSTOMER", "TECHNICIAN", "RECEPTIONIST", "WAREHOUSE"})
+    @ValueSource(strings = {"ADMIN", "CUSTOMER", "TECHNICIAN", "RECEPTIONIST", "WAREHOUSE"})
     void nonManagersCannotAssignOrSeeAllAssignments(String role) throws Exception {
         mockMvc.perform(get("/api/technicians").with(user("reader").roles(role)))
                 .andExpect(status().isForbidden());
@@ -186,8 +189,8 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     void jwtIdentifiesTechnicianAndCannotBeOverriddenByQueryParameter() throws Exception {
         Account firstAccount = saveAccount(firstTechnician, "technician-a");
         Account secondAccount = saveAccount(secondTechnician, "technician-b");
-        saveAssignment(firstOrder, firstTechnician, "Công việc A");
-        saveAssignment(secondOrder, secondTechnician, "Công việc B");
+        saveAssignment(firstOrder, firstTechnician, "CÃƒÆ’Ã‚Â´ng viÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¡c A");
+        saveAssignment(secondOrder, secondTechnician, "CÃƒÆ’Ã‚Â´ng viÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¡c B");
         mockMvc.perform(get("/api/technicians/me/repair-orders")
                         .header("Authorization", "Bearer " + jwtService.generateToken(firstAccount))
                         .param("technicianId", secondTechnician.getId().toString()))
@@ -195,7 +198,7 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
                 .andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].repairOrderId").value(firstOrder.getId()))
                 .andExpect(jsonPath("$.data[0].receptionId").value(firstOrder.getReceptionId()))
-                .andExpect(jsonPath("$.data[0].notes").value("Công việc A"))
+                .andExpect(jsonPath("$.data[0].notes").value("CÃƒÆ’Ã‚Â´ng viÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¡c A"))
                 .andExpect(jsonPath("$.data[0].status").value("DANG_SUA"));
         mockMvc.perform(get("/api/technicians/me/repair-orders")
                         .header("Authorization", "Bearer " + jwtService.generateToken(secondAccount)))
@@ -249,7 +252,7 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     private Employee saveEmployee(String name, boolean technician) {
         Employee employee = new Employee();
         employee.setFullName(name);
-        employee.setPosition(technician ? "Kỹ thuật viên" : "Lễ tân");
+        employee.setPosition(technician ? "KÃƒÂ¡Ã‚Â»Ã‚Â¹ thuÃƒÂ¡Ã‚ÂºÃ‚Â­t viÃƒÆ’Ã‚Âªn" : "LÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¦ tÃƒÆ’Ã‚Â¢n");
         employee = employeeRepository.saveAndFlush(employee);
         if (technician) {
             Technician record = new Technician();

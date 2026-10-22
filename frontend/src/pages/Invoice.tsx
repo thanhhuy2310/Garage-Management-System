@@ -17,7 +17,7 @@ export default function Invoice() {
   const [modal, setModal] = useState<"create" | "banks" | null>(null)
   const [busy, setBusy] = useState(false)
   const role = readSession()?.account.role
-  const canManageBanks = role === "ADMIN" || role === "MANAGER"
+  const canManageBanks = role === "MANAGER"
   const invoices = query.data ?? []
   const visible = invoices.filter((i) =>
     `${i.id} ${i.licensePlate} ${i.customerName}`

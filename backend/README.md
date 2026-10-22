@@ -4,9 +4,10 @@ Thư mục này chứa API của hệ thống gara. Backend dùng Java 21, Sprin
 
 ## Cách chạy
 
-1. Chạy file `database/QuanLyGaraOTo.sql` trong SQL Server Management Studio.
-2. Sao chép `.env.example` thành `.env` và điền thông tin kết nối SQL Server.
-3. Chạy lệnh:
+1. Nếu chưa có database, chạy `database/QuanLyGaraOTo.sql` trong SQL Server Management Studio. Database đang có dữ liệu thì không chạy lại file này.
+2. Chọn database `QuanLyGaraOTo`, chạy các file theo thứ tự chính xác trong [`database/migrations/README.md`](database/migrations/README.md). Hai nhánh lịch sử có tên V002/V003 trùng nhau nên không chạy theo thứ tự tên file.
+3. Sao chép `.env.example` thành `.env` và điền thông tin kết nối SQL Server.
+4. Chạy lệnh:
 
 ```powershell
 .\run-dev.ps1
@@ -42,20 +43,43 @@ Kho phụ tùng (tồn kho, nhập kho, xuất/cấp phát, xác nhận thực d
 - `/api/customers`: quản lý khách hàng.
 - `/api/services`: xem, tìm kiếm, thêm và cập nhật dịch vụ.
 - `/api/technicians`: danh sách kỹ thuật viên để quản lý phân công.
+- `/api/repair-orders` và `/api/repair-orders/{id}`: danh sách và chi tiết phiếu, xe, khách hàng, dịch vụ, người được phân công. Quản lý/lễ tân được xem; KTV chỉ xem phiếu của mình.
 - `/api/repair-orders/{id}/technicians`: xem và thêm phân công cho phiếu sửa chữa.
 - `/api/technicians/me/repair-orders`: kỹ thuật viên xem công việc của mình.
+- `/api/repair-orders/receptions`: các phiếu tiếp nhận chưa có phiếu sửa chữa.
+- `POST /api/repair-orders`: lập phiếu từ tiếp nhận và danh mục dịch vụ thật.
+- `PUT /api/repair-orders/{id}/progress`: cập nhật trạng thái và ghi nhật ký.
+- `PUT /api/repair-orders/{id}/services/{serviceId}/progress`: cập nhật từng dịch vụ.
+- `/api/invoices`: lập và xem hóa đơn. `/api/invoices/{id}/payments`: ghi nhận tiền đã thu.
+- `/api/bank-accounts`: tài khoản ngân hàng nhận tiền của gara; chỉ quản lý được sửa.
+- `/api/customer/repairs`: khách xem tiến độ xe của mình, xác định theo tài khoản đăng nhập.
+- `/api/customer/profile`, `/api/customers/{id}/vehicles`: hồ sơ và xe của khách đăng nhập.
+- `/api/customers/me/history`: lịch sử sửa chữa hoàn tất và chi phí thực tế của chính khách hàng.
+- `/api/vehicles`, `/api/spare-parts`, `/api/repair-orders/{id}/details`: xe, phụ tùng và hạng mục phiếu sửa chữa.
+- `/api/inventory`, `/api/inventory/movements`: tồn kho và biến động thực tế.
+- `/api/warehouse/imports`: nhập kho; mỗi chi tiết nhập tăng tồn đúng một lần.
+- `/api/warehouse/exports`: cấp phát phụ tùng, chưa trừ tồn. Chỉ KTV liên quan được xác nhận thực dùng; tồn giảm tại thời điểm xác nhận.
+- `/api/warehouse/checks`: kiểm kê do kho ghi nhận và quản lý duyệt/từ chối.
 
 Ví dụ request và quyền truy cập: [Test API dịch vụ và phân công](docs/API_SERVICE_TECHNICIAN_ASSIGNMENT.md).
 
-<!-- TV3-TUAN9-AUDIT:unlisted-api BEGIN -->
-Các nghiệp vụ chưa được liệt kê trong mục này chưa có tài liệu API đầy đủ.
-<!-- TV3-TUAN9-AUDIT:unlisted-api END -->
+Luồng sửa chữa và thu tiền: [Cách dùng và test](docs/REPAIR_BILLING.md). Lịch hẹn, thao tác báo giá phía khách hàng, thông báo và báo cáo chưa có API đầy đủ; giao diện ghi rõ các phần này là `MOCK_ONLY`.
 
 ## Chạy test
+
+Để có nhiều phiếu tiếp nhận, sửa chữa và hóa đơn phục vụ thử trên giao diện, xem [bộ dữ liệu test của Huy](database/seeds/README.md). File seed chạy riêng trên database local, không xóa dữ liệu đang có.
 
 ```powershell
 .\mvnw.cmd test
 ```
+
+Kiểm tra thêm với SQL Server trong `.env` (chỉ dùng database phát triển):
+
+```powershell
+.\mvnw.cmd "-Dtest=CustomerAccountSqlServerIT,RepairBillingSqlServerIT,StockUsageSqlServerIT" test
+```
+
+Test thêm dữ liệu trong transaction rồi rollback, không sửa schema hay xóa dữ liệu sẵn có. Số identity có thể tăng sau khi chạy test.
 
 Xem hướng dẫn chạy toàn bộ project tại [`../README.md`](../README.md).
 

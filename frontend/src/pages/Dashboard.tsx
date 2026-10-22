@@ -1,3 +1,11 @@
+import { garageApi } from "../api/garage";
+import { inventoryApi } from "../api/warehouse";
+import { useGarageQuery } from "../hooks/useGarageQuery";
+import { QueryState } from "../components/garage/QueryState";
+const loadLowStock = async () => {
+ const [low, out] = await Promise.all([inventoryApi.stock({status: "SAP_HET", size: 100}), inventoryApi.stock({status: "HET_HANG", size: 100})]);
+ return {items: [...out.items, ...low.items], count: low.totalElements + out.totalElements};
+};
 import React, { useState } from "react";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -5,18 +13,26 @@ import {
 } from "recharts";
 import { Card, StatCard, Badge, Icons } from "../components/ui";
 import {
-  mockAppointments, mockRepairOrders, mockInventory,
+  mockAppointments,
   mockQuotations, chartRevenue, chartMonthly, chartServices,
   DEMO_TODAY, formatCurrency
 } from "../mock/data";
 
 const PIE_COLORS = ["#2563eb", "#b45309", "#047857", "#f97316", "#7c3aed", "#526176"];
 
+type ChartPeriod = "week" | "month";
+
+export default function Dashboard() {
+  const repairs = useGarageQuery(garageApi.repairOrders);
+  const stock = useGarageQuery(loadLowStock);
+  const statusMap: Record<string, string> = {MOI_TAO: "pending", CHO_SUA: "pending", DANG_KIEM_TRA: "pending", DANG_SUA: "in_progress", CHO_PHU_TUNG: "waiting_parts", HOAN_TAT: "completed", HUY: "cancelled", DA_HUY: "cancelled"};
+  const repairRows = (repairs.data ?? []).map(r => ({id: r.id, vehicle: r.licensePlate, customer: r.customerName, status: statusMap[r.status] ?? "pending"}));
+  const inventoryRows = (stock.data?.items ?? []).map(p => ({id: p.id, name: p.name, stock: p.stockQuantity, minStock: p.minStockLevel, status: p.stockStatus === "HET_HANG" ? "out" : "low"}));
 const repairStatusCount = {
-  pending: mockRepairOrders.filter(r => r.status === "pending").length,
-  in_progress: mockRepairOrders.filter(r => r.status === "in_progress").length,
-  waiting_parts: mockRepairOrders.filter(r => r.status === "waiting_parts").length,
-  completed: mockRepairOrders.filter(r => r.status === "completed").length,
+  pending: repairRows.filter(r => r.status === "pending").length,
+  in_progress: repairRows.filter(r => r.status === "in_progress").length,
+  waiting_parts: repairRows.filter(r => r.status === "waiting_parts").length,
+  completed: repairRows.filter(r => r.status === "completed").length,
 };
 
 const pieData = [
@@ -26,7 +42,7 @@ const pieData = [
   { name: "Hoàn tất", value: repairStatusCount.completed, color: "#047857" },
 ];
 
-const lowStock = mockInventory.filter(i => i.status === "low" || i.status === "out");
+const lowStock = inventoryRows.filter(i => i.status === "low" || i.status === "out");
 const todayAppointments = mockAppointments.filter(a => a.date === DEMO_TODAY);
 const pendingQuotations = mockQuotations
   .filter((quotation) => quotation.status === "pending")
@@ -36,32 +52,32 @@ const pendingQuotations = mockQuotations
       .reduce((sum, item) => sum + item.qty * item.price, 0),
   }));
 
-type ChartPeriod = "week" | "month";
 
-export default function Dashboard() {
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>("week");
   const data = (chartPeriod === "week" ? chartRevenue : chartMonthly) as any[];
   const xKey = chartPeriod === "week" ? "date" : "month";
 
   return (
     <div className="space-y-6">
+      <p className="rounded-lg bg-warning-soft p-4 text-sm">Phiếu sửa chữa và cảnh báo kho lấy từ hệ thống. Lịch hẹn, báo giá và biểu đồ báo cáo bên dưới là dữ liệu minh họa (MOCK_ONLY).</p>
+      <QueryState {...repairs} onRetry={repairs.reload}/><QueryState {...stock} onRetry={stock.reload}/>
       {/* Page heading */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="ui-page-title">Tổng quan gara</h2>
-          <p className="ui-secondary-text text-sm">Số liệu vận hành trong ngày {DEMO_TODAY}</p>
+          <p className="ui-secondary-text text-sm">Phiếu sửa chữa và tồn kho hiện tại · Biểu đồ minh họa ngày {DEMO_TODAY}</p>
         </div>
         <span className="mono w-fit rounded-md bg-surface-subtle px-2 py-1 text-xs text-muted-foreground">{DEMO_TODAY}</span>
       </div>
 
       {/* Primary KPI group */}
       <div>
-        <h3 className="ui-section-title mb-3 text-sm">Chỉ số chính hôm nay</h3>
+        <h3 className="ui-section-title mb-3 text-sm">Chỉ số tổng quan</h3>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Tiếp nhận hôm nay" value="4" icon={Icons.truck} color="navy" trend="+1 so với hôm qua" trendUp />
-        <StatCard label="Đang sửa chữa" value={repairStatusCount.in_progress + repairStatusCount.waiting_parts} icon={Icons.wrench} color="blue" />
-        <StatCard label="Lịch hẹn hôm nay" value={todayAppointments.length} icon={Icons.calendar} color="navy" />
-          <StatCard label="Doanh thu hôm nay" value={formatCurrency(chartRevenue.at(-1)?.revenue ?? 0)} icon={Icons.creditCard} color="green" trend="+12% so hôm qua" trendUp />
+        <StatCard label="Tiếp nhận hôm nay (mẫu)" value="4" icon={Icons.truck} color="navy" trend="+1 so với hôm qua" trendUp />
+        <StatCard label="Đang sửa chữa" value={repairs.data ? repairStatusCount.in_progress + repairStatusCount.waiting_parts : "—"} icon={Icons.wrench} color="blue" />
+        <StatCard label="Lịch hẹn hôm nay (mẫu)" value={todayAppointments.length} icon={Icons.calendar} color="navy" />
+          <StatCard label="Doanh thu hôm nay (mẫu)" value={formatCurrency(chartRevenue.at(-1)?.revenue ?? 0)} icon={Icons.creditCard} color="green" trend="+12% so hôm qua" trendUp />
         </div>
       </div>
 
@@ -69,9 +85,9 @@ export default function Dashboard() {
       <div>
         <h3 className="ui-section-title mb-3 text-sm">Cần xử lý</h3>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard label="Đã hoàn tất" value={repairStatusCount.completed} icon={Icons.checkCircle} color="green" />
-        <StatCard label="Báo giá chờ xác nhận" value={pendingQuotations.length} icon={Icons.fileText} color="amber" />
-          <StatCard label="Phụ tùng sắp hết" value={lowStock.length} icon={Icons.alertTriangle} color="red" />
+        <StatCard label="Đã hoàn tất" value={repairs.data ? repairStatusCount.completed : "—"} icon={Icons.checkCircle} color="green" />
+        <StatCard label="Báo giá chờ xác nhận (mẫu)" value={pendingQuotations.length} icon={Icons.fileText} color="amber" />
+          <StatCard label="Phụ tùng sắp hết" value={stock.data?.count ?? "—"} icon={Icons.alertTriangle} color="red" />
         </div>
       </div>
 
@@ -172,7 +188,7 @@ export default function Dashboard() {
             <h3 className="text-base font-semibold text-foreground">Xe đang sửa chữa</h3>
           </div>
           <div className="divide-y divide-border">
-            {mockRepairOrders.filter(r => r.status !== "completed").map(r => (
+            {repairRows.filter(r => !["completed", "cancelled"].includes(r.status)).map(r => (
               <div key={r.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
                 <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary-soft">
                   <span className="text-primary">{Icons.car}</span>

@@ -14,14 +14,15 @@ interface PublicContactPageProps {
   onNavigate: (page: PublicPageKey) => void;
   onLogin: () => void;
   onBook: () => void;
+  accountLabel?: string;
 }
 
-export default function PublicContactPage({ onNavigate, onLogin, onBook }: PublicContactPageProps) {
+export default function PublicContactPage({ onNavigate, onLogin, onBook, accountLabel }: PublicContactPageProps) {
   const [sent, setSent] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
-      <PublicHeader active="contact" onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} />
+      <PublicHeader active="contact" onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} accountLabel={accountLabel} />
       <main>
         <div className="border-b border-border bg-surface-subtle">
           <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14">

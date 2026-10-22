@@ -36,10 +36,12 @@ public class RepairWorkflowService {
     private final GarageServiceRepository services;
     private final RepairOrderQueryService queries;
     private final JdbcTemplate jdbc;
+    private final RepairBusinessRules rules;
 
     public RepairWorkflowService(RepairOrderRepository orders, RepairProgressRepository progress,
                                  GarageServiceRepository services, RepairOrderQueryService queries,
-                                 JdbcTemplate jdbc) {
+                                 JdbcTemplate jdbc, RepairBusinessRules rules) {
+        this.rules = rules;
         this.orders = orders;
         this.progress = progress;
         this.services = services;
@@ -92,6 +94,7 @@ public class RepairWorkflowService {
                 Integer.class, id, line.serviceId()) > 0) {
             throw new ConflictException("Dịch vụ đã có trên phiếu.");
         }
+        rules.requireEditableDetails(id);
         addLine(id, line);
         log(order, line.serviceId(), "CHO_SUA", "Bổ sung dịch vụ vào phiếu.", auth);
     }
@@ -105,11 +108,13 @@ public class RepairWorkflowService {
         if (!TRANSITIONS.getOrDefault(order.getStatus(), Set.of()).contains(request.status())) {
             throw new ConflictException("Không thể chuyển sang trạng thái này từ trạng thái hiện tại.");
         }
-        if (jdbc.queryForObject("SELECT COUNT(*) FROM PhanCongKyThuatVien WHERE MaPhieuSuaChua = ?",
+        if (Set.of("DANG_SUA", "CHO_PHU_TUNG", "HOAN_TAT").contains(request.status())) rules.requireAcceptedQuote(id);
+        if (Set.of("DANG_SUA", "CHO_PHU_TUNG", "HOAN_TAT").contains(request.status()) && jdbc.queryForObject("SELECT COUNT(*) FROM PhanCongKyThuatVien WHERE MaPhieuSuaChua = ?",
                 Integer.class, id) == 0) {
             throw new ConflictException("Cần phân công kỹ thuật viên trước khi cập nhật tiến độ.");
         }
         if ("HOAN_TAT".equals(request.status())) {
+            rules.requireSettledParts(id);
             List<String> states = jdbc.queryForList("SELECT TrangThai FROM ChiTietDichVu WHERE MaPhieuSuaChua = ?",
                     String.class, id);
             if (states.isEmpty() || states.stream().anyMatch(s -> !"HOAN_TAT".equals(s))) {
@@ -164,6 +169,9 @@ public class RepairWorkflowService {
     private void addLine(Integer orderId, RepairRequests.ServiceLine line) {
         var service = services.findById(line.serviceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dịch vụ."));
+        if (!service.isActive()) {
+            throw new ConflictException("Dịch vụ đã ngừng sử dụng. Vui lòng chọn dịch vụ khác.");
+        }
         jdbc.update("""
                 INSERT INTO ChiTietDichVu (MaPhieuSuaChua, MaDichVu, SoLuong, DonGia, TrangThai)
                 VALUES (?, ?, ?, ?, N'CHO_SUA')

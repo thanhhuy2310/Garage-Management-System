@@ -23,14 +23,25 @@ class RepairBillingWorkflowTest extends ApiTestSupport {
         jdbc.execute("CREATE TABLE IF NOT EXISTS Xe (MaXe INT PRIMARY KEY, MaKhachHang INT, BienSo VARCHAR(20), HangXe NVARCHAR(100), DongXe NVARCHAR(100))");
         jdbc.execute("CREATE TABLE IF NOT EXISTS PhieuTiepNhan (MaTiepNhan INT PRIMARY KEY, MaXe INT, YeuCauKhachHang NVARCHAR(1000), TinhTrangBanDau NVARCHAR(1000))");
         jdbc.execute("CREATE TABLE IF NOT EXISTS ChiTietDichVu (MaPhieuSuaChua INT, MaDichVu INT, SoLuong INT, DonGia DECIMAL(18,2), TrangThai NVARCHAR(50))");
-        jdbc.execute("CREATE TABLE IF NOT EXISTS PhuTung (MaPhuTung INT PRIMARY KEY, TenPhuTung NVARCHAR(150))");
-        jdbc.execute("CREATE TABLE IF NOT EXISTS Kho (MaKho INT PRIMARY KEY, TenKho VARCHAR(150) NOT NULL, DiaChi VARCHAR(255))");
+        jdbc.execute("CREATE TABLE IF NOT EXISTS Kho (MaKho INT PRIMARY KEY, TenKho NVARCHAR(150), DiaChi NVARCHAR(255))");
+        jdbc.execute("CREATE TABLE IF NOT EXISTS PhuTung (MaPhuTung INT PRIMARY KEY, MaKho INT, TenPhuTung NVARCHAR(150), HangSanXuat NVARCHAR(100), DonGia DECIMAL(18,2), SoLuongTon INT, MucTonToiThieu INT)");
         jdbc.execute("CREATE TABLE IF NOT EXISTS ChiTietPhuTung (MaPhieuSuaChua INT, MaPhuTung INT, SoLuong INT, DonGia DECIMAL(18,2))");
+        jdbc.execute("""
+            CREATE TABLE IF NOT EXISTS BaoGia (
+                MaBaoGia INT PRIMARY KEY,
+                MaPhieuSuaChua INT NOT NULL,
+                NgayLap TIMESTAMP NOT NULL,
+                TongTien DECIMAL(18,2) NOT NULL DEFAULT 0,
+                TrangThai NVARCHAR(50) NOT NULL,
+                NgayXacNhan TIMESTAMP
+            )
+            """);
+
         jdbc.update("INSERT INTO KhachHang (MaKhachHang,HoTen,SoDienThoai,TrangThai) VALUES (9201,'Khach A','0920000001',1),(9202,'Khach B','0920000002',1)");
-        jdbc.update("INSERT INTO Xe (MaXe, MaKhachHang, BienSo, HangXe, DongXe) VALUES (9201,9201,'51A-92001','Toyota','Vios'),(9202,9202,'51A-92002','Honda','City')");
+        jdbc.update("INSERT INTO Xe (MaXe, MakhachHang, BienSo, HangXe, DongXe) VALUES (9201,9201,'51A-92001','Toyota','Vios'),(9202,9202,'51A-92002','Honda','City')");
         jdbc.update("INSERT INTO PhieuTiepNhan (MaTiepNhan, MaXe, YeuCauKhachHang, TinhTrangBanDau) VALUES (9201,9201,'Kiem tra phanh','Phanh keu'),(9202,9202,NULL,NULL),(9203,9201,NULL,NULL)");
         jdbc.update("INSERT INTO PhieuSuaChua (MaPhieuSuaChua,MaTiepNhan,NgayLap,TrangThai) VALUES (9201,9201,'2026-10-06 08:00:00','MOI_TAO'),(9202,9202,'2026-10-06 08:00:00','HOAN_TAT')");
-        jdbc.update("INSERT INTO DichVu (MaDichVu,TenDichVu,DonGia) VALUES (9201,'Phanh',999999),(9202,'Dau',100000)");
+        jdbc.update("INSERT INTO DichVu (MaDichVu,TendichVu,DonGia) VALUES (9201,'Phanh',999999),(9202,'Dau',100000)");
         jdbc.update("INSERT INTO ChiTietDichVu (MaPhieuSuaChua, MaDichVu, SoLuong, DonGia, TrangThai) VALUES (9201,9201,2,200000,'CHO_SUA'),(9202,9201,1,100000,'HOAN_TAT')");
 
         if (jdbc.queryForObject("SELECT COUNT(*) FROM Kho WHERE MaKho = ?", Integer.class, 9201) == 0) {
@@ -40,11 +51,22 @@ class RepairBillingWorkflowTest extends ApiTestSupport {
             jdbc.update("INSERT INTO PhuTung (MaPhuTung, MaKho, TenPhuTung, HangSanXuat, DonGia, SoLuongTon, MucTonToiThieu) VALUES (9201, 9201, 'Ma phanh', NULL, 100000, 10, 0)");
         }
         jdbc.update("INSERT INTO ChiTietPhuTung (MaPhieuSuaChua, MaPhuTung, SoLuong, DonGia) VALUES (9202,9201,2,50000)");
-        jdbc.update("INSERT INTO NhanVien (MaNhanVien,HoTen,ChucVu) VALUES (9201,'Tech A','KTV'),(9202,'Tech B','KTV')");
+
+        jdbc.update("INSERT INTO NhanVien (MaNhanVien, HoTen, ChucVu) VALUES (9201,'Tech A','KTV'),(9202,'Tech B','KTV')");
         jdbc.update("INSERT INTO KyThuatVien (MaNhanVien) VALUES (9201),(9202)");
         jdbc.update("INSERT INTO TaiKhoan (TenDangNhap,MatKhauHash,VaiTro,TrangThai,MaNhanVien) VALUES ('flow-tech','unused','TECHNICIAN',1,9201),('flow-other','unused','TECHNICIAN',1,9202)");
         jdbc.update("INSERT INTO TaiKhoan (TenDangNhap,MatKhauHash,VaiTro,TrangThai,MaKhachHang) VALUES ('flow-customer','unused','CUSTOMER',1,9201),('flow-customer-b','unused','CUSTOMER',1,9202)");
+
         jdbc.update("INSERT INTO PhanCongKyThuatVien (MaPhieuSuaChua, MaKyThuatVien, NgayPhanCong, GhiChu) VALUES (9201,9201,'2026-10-06 08:00:00','Kiem tra')");
+        jdbc.update("""
+            INSERT INTO BaoGia
+                (MaBaoGia, MaPhieuSuaChua, NgayLap, TongTien, TrangThai, NgayXacNhan)
+            VALUES
+                (9201, 9201, '2026-10-06 08:00:00', 0, 'DA_XAC_NHAN', '2026-10-06 08:00:00'),
+                (9202, 9202, '2026-10-06 08:00:00', 0, 'DA_XAC_NHAN', '2026-10-06 08:00:00')
+            """);
+        jdbc.update("INSERT INTO PhieuXuatKho (MaPhieuXuat,MaPhieuSuaChua,MaNhanVienKho,NgayXuat,LyDo) VALUES (9202,9202,9201,'2026-10-06 08:00:00','Thay ma phanh')");
+        jdbc.update("INSERT INTO ChiTietPhieuXuat (MaPhieuXuat,MaPhuTung,SoLuong,DonGia,DaXacNhanSuDung,SoLuongThucDung,SoLuongHoanTra,MaKyThuatVienXacNhan,NgayXacNhan) VALUES (9202,9201,2,50000,1,2,0,9201,'2026-10-06 08:30:00')");
     }
 
     @Test @WithMockUser(username = "flow-tech", roles = "TECHNICIAN")
@@ -154,7 +176,7 @@ class RepairBillingWorkflowTest extends ApiTestSupport {
         mockMvc.perform(get("/api/bank-accounts").with(user("reception").roles("RECEPTIONIST")))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].account").value("1234567890"));
         mockMvc.perform(post("/api/bank-accounts").with(user("reception").roles("RECEPTIONIST"))
-                        .contentType(APPLICATION_JSON).content(request)).andExpect(status().isForbidden());
+                .contentType(APPLICATION_JSON).content(request)).andExpect(status().isForbidden());
         int id = objectMapper.readTree(createInvoice().andReturn().getResponse().getContentAsString())
                 .path("data").path("invoice").path("id").asInt();
         String payment = objectMapper.writeValueAsString(Map.of("amount", 50000, "method", "CHUYEN_KHOAN",
@@ -162,7 +184,7 @@ class RepairBillingWorkflowTest extends ApiTestSupport {
         mockMvc.perform(post("/api/invoices/{id}/payments", id).contentType(APPLICATION_JSON).content(payment))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.payments[0].bankAccountId").value(bankId));
         mockMvc.perform(put("/api/bank-accounts/{id}", bankId).contentType(APPLICATION_JSON)
-                        .content(request.replace("true", "false"))).andExpect(status().isOk());
+                .content(request.replace("true", "false"))).andExpect(status().isOk());
         mockMvc.perform(post("/api/invoices/{id}/payments", id).contentType(APPLICATION_JSON).content(payment))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.payments.length()").value(1));
         mockMvc.perform(post("/api/invoices/{id}/payments", id).contentType(APPLICATION_JSON)

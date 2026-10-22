@@ -1,9 +1,11 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useCallback, useState } from "react";
 import { authApi } from "../../api/auth";
+import { customersApi, type Customer } from "../../api/customers";
 import { errorMessage } from "../../api/client";
+import { QueryState } from "../../components/garage/QueryState";
 import { Button, Card, Icons, Input } from "../../components/ui";
 import CustomerLayout from "../../layouts/CustomerLayout";
-import { khachHang } from "../../mock/data";
+import { useGarageQuery } from "../../hooks/useGarageQuery";
 import { toCustomerKey } from "../../features/vehicles/customerVehicleRepository";
 import type { CustomerPage } from "../../router";
 import CustomerAppointments from "./CustomerAppointments";
@@ -34,8 +36,7 @@ interface CustomerPortalProps {
   onNavigate: (page: CustomerPage) => void;
 }
 
-function ProfileTab({ customerKey }: { customerKey: string }) {
-  const customer = khachHang.find((c) => c.MaKhachHang === customerKey);
+function ProfileTab({ customer }: { customer: Customer }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -84,9 +85,9 @@ function ProfileTab({ customerKey }: { customerKey: string }) {
       <Card className="space-y-4 p-4 sm:p-5">
         <h3 className="ui-card-title">Thông tin cá nhân</h3>
         <div className="rounded-lg bg-surface-subtle p-3 text-sm">
-          <p className="font-semibold text-foreground">{customer?.HoTen}</p>
-          <p className="mt-1 text-muted-foreground">{customer?.SoDienThoai} · {customer?.Email}</p>
-          <p className="mt-0.5 text-muted-foreground">{customer?.DiaChi}</p>
+          <p className="font-semibold text-foreground">{customer.fullName}</p>
+          <p className="mt-1 text-muted-foreground">{[customer.phone, customer.email].filter(Boolean).join(" · ")}</p>
+          {customer.address && <p className="mt-0.5 text-muted-foreground">{customer.address}</p>}
         </div>
         <p className="text-xs text-muted-foreground">Muốn cập nhật thông tin, liên hệ lễ tân gara để được hỗ trợ.</p>
       </Card>
@@ -135,12 +136,13 @@ function ProfileTab({ customerKey }: { customerKey: string }) {
 
 export default function CustomerPortal({ onLogout, page, customerId, onNavigate }: CustomerPortalProps) {
   const customerKey = toCustomerKey(customerId);
-  const customer = khachHang.find((c) => c.MaKhachHang === customerKey);
+  const loadProfile = useCallback((signal: AbortSignal) => customersApi.me(signal), [customerId]);
+  const profile = useGarageQuery(loadProfile);
 
   return (
     <CustomerLayout
       onLogout={onLogout}
-      customerName={customer?.HoTen}
+      customerName={profile.data?.fullName}
       navigation={
         <nav aria-label="Khu vực khách hàng" className="mx-auto w-full max-w-6xl px-4">
           <div className="flex gap-2 overflow-x-auto pb-3" role="tablist">
@@ -164,14 +166,16 @@ export default function CustomerPortal({ onLogout, page, customerId, onNavigate 
       }
     >
       <div key={page} className="customer-page-enter space-y-6">
+        {["appointments", "quotations", "notifications"].includes(page) && <Card className="border-warning/30 bg-warning-soft p-4" ><p className="font-semibold">Dữ liệu minh họa — MOCK_ONLY</p><p className="text-sm">Chức năng này chưa kết nối hệ thống gara. Thao tác tại đây chỉ dùng để xem thử, không tạo lịch hẹn hoặc xác nhận báo giá thật.</p></Card>}
+        <QueryState loading={page === "profile" && profile.loading} error={profile.error} onRetry={profile.reload} />
         {page === "overview" && <CustomerOverview onNavigate={onNavigate} customerId={customerId} />}
         {page === "vehicles" && <CustomerVehicles customerId={customerId} />}
-        {page === "appointments" && <CustomerAppointments customerKey={customerKey} customerId={customerId} />}
-        {page === "quotations" && <CustomerQuotations />}
+        {page === "appointments" && <CustomerAppointments customerId={customerId} customerKey={customerKey} />}
+        {page === "quotations" && <CustomerQuotations customerKey={customerKey} />}
         {page === "tracking" && <CustomerTracking />}
         {page === "history" && <CustomerHistory />}
-        {page === "notifications" && <CustomerNotifications />}
-        {page === "profile" && <ProfileTab customerKey={customerKey} />}
+        {page === "notifications" && <CustomerNotifications customerKey={customerKey} />}
+        {page === "profile" && profile.data && <ProfileTab customer={profile.data} />}
       </div>
     </CustomerLayout>
   );

@@ -73,7 +73,7 @@ public class InventoryCheckService {
         }
 
         InventoryCheck check = new InventoryCheck();
-        check.setCheckDate(LocalDateTime.now());
+        check.setCheckDate(LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).withNano(0));
         check.setCreatedBy(staffId);
         check.setStatus(InventoryCheck.COUNTING);
         check.setNote(request.note() == null || request.note().isBlank() ? null : request.note().trim());
@@ -93,7 +93,8 @@ public class InventoryCheckService {
     /** Nhập tồn thực tế cho một phụ tùng; khi đã nhập đủ thì phiên tự chuyển trạng thái. Không đổi tồn. */
     @Transactional
     public CheckResponse setActual(Integer checkId, Integer partId, CheckActualRequest request) {
-        InventoryCheck check = findCheck(checkId);
+        InventoryCheck check = checkRepository.findForUpdate(checkId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiên kiểm kê."));
         if (!InventoryCheck.COUNTING.equals(check.getStatus())) {
             throw new ConflictException("Phiên kiểm kê không còn ở trạng thái đang kiểm kê.");
         }
@@ -118,7 +119,8 @@ public class InventoryCheckService {
     /** Chỉ MANAGER (kiểm tra ở controller): mới đặt tồn = thực tế và ghi biến động KIEM_KE. */
     @Transactional
     public CheckResponse approve(Integer checkId, String reason, Integer approverId) {
-        InventoryCheck check = findCheck(checkId);
+        InventoryCheck check = checkRepository.findForUpdate(checkId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiên kiểm kê."));
         requirePendingApproval(check);
         List<InventoryCheckItem> items = itemRepository.findByCheckIdOrderByPartId(checkId);
         Map<Integer, String> names = partNames(items);
@@ -141,7 +143,7 @@ public class InventoryCheckService {
 
         check.setStatus(InventoryCheck.COMPLETED);
         check.setApprovedBy(approverId);
-        check.setApprovedAt(LocalDateTime.now());
+        check.setApprovedAt(LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).withNano(0));
         check.setDecisionReason(normalize(reason));
         checkRepository.saveAndFlush(check);
         return get(checkId);
@@ -150,7 +152,8 @@ public class InventoryCheckService {
     /** Từ chối: tồn không đổi; giữ lý do và trạng thái DA_TU_CHOI. */
     @Transactional
     public CheckResponse reject(Integer checkId, String reason, Integer approverId) {
-        InventoryCheck check = findCheck(checkId);
+        InventoryCheck check = checkRepository.findForUpdate(checkId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiên kiểm kê."));
         requirePendingApproval(check);
         String normalized = normalize(reason);
         if (normalized == null) {
@@ -158,7 +161,7 @@ public class InventoryCheckService {
         }
         check.setStatus(InventoryCheck.REJECTED);
         check.setApprovedBy(approverId);
-        check.setApprovedAt(LocalDateTime.now());
+        check.setApprovedAt(LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).withNano(0));
         check.setDecisionReason(normalized);
         checkRepository.saveAndFlush(check);
         return get(checkId);

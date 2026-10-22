@@ -8,6 +8,8 @@
 --   3) Bo sung xac nhan su dung phu tung truoc khi tru ton kho.
 --   4) Bo sung FUNCTION / PROCEDURE / TRIGGER phuc vu nghiep vu thuc te.
 --   5) Bo sung du lieu mau lien ket xuyen suot cac nghiep vu.
+-- Test rieng dich vu / sua chua / thanh toan / Flutter:
+-- sau khi chay migrations, chay seeds/Seed_Huy_Repair_Billing.sql.
 -- ============================================================
 
 IF DB_ID(N'QuanLyGaraOTo') IS NULL
@@ -108,6 +110,7 @@ CREATE TABLE DichVu (
     LoaiDichVu         NVARCHAR(100) NULL,
     DonGia             DECIMAL(18,2) NOT NULL,
     MoTa               NVARCHAR(500) NULL,
+    TrangThai          BIT NOT NULL CONSTRAINT DF_DichVu_TrangThai DEFAULT 1,
 
     CONSTRAINT CK_DichVu_DonGia CHECK (DonGia >= 0)
 );
@@ -972,11 +975,14 @@ BEGIN
     IF @SoTien <= 0
         THROW 50040, N'So tien thanh toan phai lon hon 0.', 1;
 
+    BEGIN TRY
+        BEGIN TRAN;
+
     DECLARE @TongHoaDon DECIMAL(18,2);
     DECLARE @DaThanhToan DECIMAL(18,2);
 
     SELECT @TongHoaDon = TongTien
-    FROM HoaDon
+    FROM HoaDon WITH (UPDLOCK, HOLDLOCK)
     WHERE MaHoaDon = @MaHoaDon;
 
     IF @TongHoaDon IS NULL
@@ -987,8 +993,7 @@ BEGIN
     IF @DaThanhToan + @SoTien > @TongHoaDon
         THROW 50042, N'So tien thanh toan vuot qua so tien con lai cua hoa don.', 1;
 
-    BEGIN TRY
-        BEGIN TRAN;
+
 
         INSERT INTO ThanhToan (MaHoaDon, NgayThanhToan, SoTien, PhuongThuc)
         VALUES (
@@ -1130,14 +1135,16 @@ VALUES
 ('admin',     '$2a$10$cmQuil5sXrlLUZ540DVtcuEAIKD4PNfBsj9F0Z2iCby2wUQmaWppK', N'ADMIN',        1, NULL, 6);
 GO
 
-INSERT INTO DichVu (TenDichVu, LoaiDichVu, DonGia, MoTa)
+-- Dịch vụ đời đầu chỉ giữ cho các lịch hẹn/phiếu cũ bên dưới.
+-- Danh mục đang dùng được thêm từ seeds/Seed_Huy_Repair_Billing.sql.
+INSERT INTO DichVu (TenDichVu, LoaiDichVu, DonGia, MoTa, TrangThai)
 VALUES
-(N'Thay dau dong co', N'BAO_DUONG', 450000, N'Thay dau dong co theo dung cap dau khuyen nghi.'),
-(N'Bao duong dinh ky', N'BAO_DUONG', 1200000, N'Kiem tra tong quat cac hang muc bao duong dinh ky.'),
-(N'Kiem tra he thong phanh', N'KIEM_TRA', 300000, N'Kiem tra dia phanh, ma phanh, dau phanh va he thong lien quan.'),
-(N'Thay ma phanh truoc', N'SUA_CHUA', 500000, N'Cong thay ma phanh truoc.'),
-(N'Ve sinh kim phun', N'BAO_DUONG', 700000, N'Ve sinh kim phun nhien lieu.'),
-(N'Kiem tra dieu hoa', N'KIEM_TRA', 250000, N'Kiem tra kha nang lam lanh va cac thanh phan co ban cua he thong dieu hoa.');
+(N'Thay dau dong co', N'BAO_DUONG', 450000, N'Thay dau dong co theo dung cap dau khuyen nghi.', 0),
+(N'Bao duong dinh ky', N'BAO_DUONG', 1200000, N'Kiem tra tong quat cac hang muc bao duong dinh ky.', 0),
+(N'Kiem tra he thong phanh', N'KIEM_TRA', 300000, N'Kiem tra dia phanh, ma phanh, dau phanh va he thong lien quan.', 0),
+(N'Thay ma phanh truoc', N'SUA_CHUA', 500000, N'Cong thay ma phanh truoc.', 0),
+(N'Ve sinh kim phun', N'BAO_DUONG', 700000, N'Ve sinh kim phun nhien lieu.', 0),
+(N'Kiem tra dieu hoa', N'KIEM_TRA', 250000, N'Kiem tra kha nang lam lanh va cac thanh phan co ban cua he thong dieu hoa.', 0);
 GO
 
 INSERT INTO Kho (TenKho, DiaChi)
@@ -1197,7 +1204,7 @@ INSERT INTO ChiTietDichVu (MaPhieuSuaChua, MaDichVu, SoLuong, DonGia, TrangThai)
 VALUES
 (1, 3, 1, 300000, N'HOAN_TAT'),
 (1, 4, 1, 500000, N'HOAN_TAT'),
-(2, 2, 1, 1200000, N'DANG_THUC_HIEN'),
+(2, 2, 1, 1200000, N'DANG_SUA'),
 (3, 6, 1, 250000, N'HOAN_TAT');
 GO
 

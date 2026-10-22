@@ -47,7 +47,6 @@ public class CustomerHistoryController {
                 historyService.getHistory(customerId(authentication), vehicleId, page, size)));
     }
 
-    // Danh sách xe để lọc: lấy riêng từ toàn bộ lịch sử của khách hàng, không phụ thuộc trang đang xem.
     @GetMapping("/vehicles")
     public ResponseEntity<ApiResponse<List<HistoryVehicleResponse>>> getVehicles(Authentication authentication) {
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách xe có lịch sử thành công.",

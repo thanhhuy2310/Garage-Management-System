@@ -14,7 +14,7 @@ class GarageServiceItem {
   final int id;
   final String name;
   final String category;
-  final int price;
+  final num price;
   final String description;
 }
 

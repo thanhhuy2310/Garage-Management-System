@@ -12,6 +12,9 @@
 -- ============================================================
 USE QuanLyGaraOTo;
 GO
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
 
 -- ------------------------------------------------------------
 -- 1. ChiTietPhieuXuat: thuc dung / hoan tra
@@ -112,12 +115,20 @@ BEGIN
     DECLARE @DonGia DECIMAL(18,2);
     DECLARE @DaXacNhan BIT;
 
+    BEGIN TRY
+        BEGIN TRAN;
+        -- Same lock order as the API: repair order, issue item, then part.
+        SELECT @MaPhieuSuaChua = MaPhieuSuaChua FROM PhieuXuatKho WHERE MaPhieuXuat = @MaPhieuXuat;
+        DECLARE @LockedOrder INT;
+        SELECT @LockedOrder = MaPhieuSuaChua FROM PhieuSuaChua WITH (UPDLOCK, HOLDLOCK)
+        WHERE MaPhieuSuaChua = @MaPhieuSuaChua;
+
     SELECT
         @MaPhieuSuaChua = px.MaPhieuSuaChua,
         @SoLuong = ct.SoLuong,
         @DonGia = COALESCE(ct.DonGia, pt.DonGia),
         @DaXacNhan = ct.DaXacNhanSuDung
-    FROM ChiTietPhieuXuat ct
+    FROM ChiTietPhieuXuat ct WITH (UPDLOCK, HOLDLOCK)
     INNER JOIN PhieuXuatKho px ON px.MaPhieuXuat = ct.MaPhieuXuat
     INNER JOIN PhuTung pt ON pt.MaPhuTung = ct.MaPhuTung
     WHERE ct.MaPhieuXuat = @MaPhieuXuat
@@ -162,8 +173,7 @@ BEGIN
     IF @SoLuongThucDung < 0 OR @SoLuongThucDung > @SoLuong
         THROW 50017, N'So luong thuc dung phai tu 0 den so luong cap phat.', 1;
 
-    BEGIN TRY
-        BEGIN TRAN;
+
 
         DECLARE @TonTruoc INT;
         DECLARE @TonSau INT;
@@ -195,13 +205,21 @@ BEGIN
           AND MaPhuTung = @MaPhuTung;
 
         -- ChiTietPhuTung.SoLuong = tong THUC DUNG da xac nhan cua (phieu sua chua, phu tung).
-        -- Neu tong = 0 thi khong dong vao dong san co (rang buoc SoLuong > 0).
+        -- Tong = 0: bo dong du kien, khong tinh tien phu tung hoan tra toan bo.
         SELECT @TongThucDung = COALESCE(SUM(ct.SoLuongThucDung), 0)
         FROM ChiTietPhieuXuat ct
         INNER JOIN PhieuXuatKho px ON px.MaPhieuXuat = ct.MaPhieuXuat
         WHERE px.MaPhieuSuaChua = @MaPhieuSuaChua
           AND ct.MaPhuTung = @MaPhuTung
           AND ct.DaXacNhanSuDung = 1;
+
+        IF @TongThucDung = 0
+            DELETE FROM ChiTietPhuTung WHERE MaPhieuSuaChua = @MaPhieuSuaChua AND MaPhuTung = @MaPhuTung;
+
+        IF @TongThucDung > @SoLuongThucDung AND EXISTS (
+            SELECT 1 FROM ChiTietPhuTung WHERE MaPhieuSuaChua = @MaPhieuSuaChua
+            AND MaPhuTung = @MaPhuTung AND DonGia <> @DonGia)
+            THROW 50018, N'Don gia khac lan su dung truoc. Can thong nhat gia truoc khi xac nhan.', 1;
 
         IF @TongThucDung > 0
         BEGIN

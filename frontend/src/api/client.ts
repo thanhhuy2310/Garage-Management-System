@@ -1,6 +1,7 @@
 import axios from "axios";
 import { clearSession, getAccessToken } from "./session";
 import type { ApiResponse } from "./types";
+import { readRoute } from "../router";
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? "",
@@ -19,7 +20,8 @@ api.interceptors.response.use(
     const requestUrl = error.config?.url as string | undefined;
     if (error.response?.status === 401 && !requestUrl?.endsWith("/api/auth/login")) {
       clearSession();
-      if (window.location.pathname !== "/login") window.location.assign("/login");
+      // Public pages remain usable when a remembered session expires.
+      if (readRoute().area !== "public") window.location.assign("/login");
     }
     return Promise.reject(error);
   },

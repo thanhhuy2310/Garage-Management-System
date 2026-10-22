@@ -15,7 +15,6 @@ import com.gara.quanlygara.repository.RepairDetailRow;
 import com.gara.quanlygara.repository.RepairPartItemRepository;
 import com.gara.quanlygara.repository.RepairServiceItemRepository;
 import com.gara.quanlygara.repository.SparePartRepository;
-import com.gara.quanlygara.repository.StockIssueItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,25 +31,23 @@ import java.util.Set;
  */
 @Service
 public class RepairDetailService {
+    private final RepairBusinessRules rules;
 
     // Không sửa hạng mục khi phiếu đã đóng. Các trạng thái khác do module Phiếu sửa chữa quản lý.
-    private static final Set<String> LOCKED_STATUSES = Set.of("HOAN_TAT", "DA_HUY");
+    private static final Set<String> LOCKED_STATUSES = Set.of("HOAN_TAT", "HUY", "DA_HUY");
 
     private final RepairServiceItemRepository serviceItemRepository;
     private final RepairPartItemRepository partItemRepository;
     private final SparePartRepository sparePartRepository;
-    private final StockIssueItemRepository stockIssueItemRepository;
 
     public RepairDetailService(
             RepairServiceItemRepository serviceItemRepository,
             RepairPartItemRepository partItemRepository,
-            SparePartRepository sparePartRepository,
-            StockIssueItemRepository stockIssueItemRepository
-    ) {
+            SparePartRepository sparePartRepository, RepairBusinessRules rules) {
+        this.rules = rules;
         this.serviceItemRepository = serviceItemRepository;
         this.partItemRepository = partItemRepository;
         this.sparePartRepository = sparePartRepository;
-        this.stockIssueItemRepository = stockIssueItemRepository;
     }
 
     @Transactional(readOnly = true)
@@ -68,7 +65,7 @@ public class RepairDetailService {
         BigDecimal serviceTotal = sum(items, RepairDetailType.SERVICE);
         BigDecimal partsTotal = sum(items, RepairDetailType.SPARE_PART);
         return new RepairDetailsResponse(
-                repairOrderId, status, isEditable(status), items,
+                repairOrderId, status, isEditable(status) && !rules.hasAcceptedQuote(repairOrderId), items,
                 serviceTotal, partsTotal, serviceTotal.add(partsTotal));
     }
 
@@ -82,6 +79,7 @@ public class RepairDetailService {
 
     @Transactional
     public RepairDetailResponse create(Integer repairOrderId, RepairDetailCreateRequest request) {
+        rules.requireEditableDetails(repairOrderId);
         ensureEditable(requireOrderStatus(repairOrderId));
 
         switch (request.type()) {
@@ -95,6 +93,7 @@ public class RepairDetailService {
     public RepairDetailResponse update(
             Integer repairOrderId, RepairDetailType type, Integer itemId, RepairDetailUpdateRequest request
     ) {
+        rules.requireEditableDetails(repairOrderId);
         ensureEditable(requireOrderStatus(repairOrderId));
 
         switch (type) {
@@ -107,7 +106,6 @@ public class RepairDetailService {
                 serviceItemRepository.saveAndFlush(item);
             }
             case SPARE_PART -> {
-                requireNoConfirmedUsage(repairOrderId, itemId);
                 RepairPartItem item = partItemRepository
                         .findById(new RepairPartItem.Key(repairOrderId, itemId))
                         .orElseThrow(this::itemNotFound);
@@ -121,6 +119,7 @@ public class RepairDetailService {
 
     @Transactional
     public void delete(Integer repairOrderId, RepairDetailType type, Integer itemId) {
+        rules.requireEditableDetails(repairOrderId);
         ensureEditable(requireOrderStatus(repairOrderId));
 
         switch (type) {
@@ -131,7 +130,6 @@ public class RepairDetailService {
                 serviceItemRepository.delete(item);
             }
             case SPARE_PART -> {
-                requireNoConfirmedUsage(repairOrderId, itemId);
                 RepairPartItem item = partItemRepository
                         .findById(new RepairPartItem.Key(repairOrderId, itemId))
                         .orElseThrow(this::itemNotFound);
@@ -150,6 +148,7 @@ public class RepairDetailService {
         RepairServiceItem item = new RepairServiceItem();
         item.setRepairOrderId(repairOrderId);
         item.setServiceId(request.itemId());
+        item.setStatus("CHO_SUA");
         item.setQuantity(request.quantity());
         item.setUnitPrice(scale(request.unitPrice() != null ? request.unitPrice() : catalogPrice));
         serviceItemRepository.saveAndFlush(item);
@@ -171,21 +170,13 @@ public class RepairDetailService {
         partItemRepository.saveAndFlush(item);
     }
 
-    // Tuần 8: ChiTietPhuTung.SoLuong = tổng số lượng THỰC DÙNG đã được KTV xác nhận. Không cho sửa/xóa tay dòng đó,
-    // nếu không số lượng dự kiến sẽ ghi đè số thực dùng (và làm lệch chi phí so với tồn kho đã trừ).
-    private void requireNoConfirmedUsage(Integer repairOrderId, Integer sparePartId) {
-        if (stockIssueItemRepository.sumConfirmedActual(repairOrderId, sparePartId) > 0) {
-            throw new ConflictException("Phụ tùng đã được kỹ thuật viên xác nhận thực dùng, không thể sửa hoặc xóa hạng mục này.");
-        }
-    }
-
     private String requireOrderStatus(Integer repairOrderId) {
         return serviceItemRepository.findRepairOrderStatus(repairOrderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu sửa chữa."));
     }
 
     private boolean isEditable(String status) {
-        return status == null || !LOCKED_STATUSES.contains(status.trim().toUpperCase(Locale.ROOT));
+        return status != null && Set.of("MOI_TAO", "DANG_KIEM_TRA", "CHO_SUA").contains(status.trim().toUpperCase(Locale.ROOT));
     }
 
     private void ensureEditable(String status) {

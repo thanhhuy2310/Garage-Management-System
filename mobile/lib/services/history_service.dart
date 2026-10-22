@@ -18,10 +18,8 @@ class HistoryException implements Exception {
 /// Tra cứu lịch sử sửa chữa, bảo dưỡng của khách hàng đang đăng nhập.
 /// Backend lấy khách hàng từ JWT nên client không (và không thể) chọn customerId.
 abstract interface class HistoryService {
-  /// Một trang lịch sử, mới nhất trước. page bắt đầu từ 0.
   Future<HistoryPage> getHistory({int? vehicleId, int page = 0, int size = 10});
 
-  /// Toàn bộ xe có lịch sử hoàn tất của khách hàng (để lọc), không phụ thuộc trang.
   Future<List<HistoryVehicle>> getHistoryVehicles();
 
   Future<HistoryDetail> getHistoryDetail(int repairOrderId);

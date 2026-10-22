@@ -155,7 +155,7 @@ class HomeScreen extends StatelessWidget {
                                       icon: Icons.request_quote_outlined,
                                       label: 'Báo giá chờ xác nhận',
                                       value:
-                                          '${summary?.pendingQuotationCount ?? 0}',
+                                          summary?.hasConnectedCustomerExperience == false ? 'Chưa kết nối' : '${summary?.pendingQuotationCount ?? 0}',
                                       onTap: () =>
                                           onOpenRoute(AppRoutes.quotations),
                                     ),
@@ -166,7 +166,7 @@ class HomeScreen extends StatelessWidget {
                                       icon: Icons.notifications_none,
                                       label: 'Thông báo mới',
                                       value:
-                                          '${summary?.unreadNotificationCount ?? 0}',
+                                          summary?.hasConnectedCustomerExperience == false ? 'Chưa kết nối' : '${summary?.unreadNotificationCount ?? 0}',
                                       onTap: () => onSelectTab(3),
                                     ),
                                   ),
