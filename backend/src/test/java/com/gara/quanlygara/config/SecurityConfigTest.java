@@ -1,4 +1,6 @@
 package com.gara.quanlygara.config;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 
 import com.gara.quanlygara.repository.AccountRepository;
 import com.gara.quanlygara.repository.CustomerRepository;
@@ -19,6 +21,12 @@ import com.gara.quanlygara.repository.StockMovementRepository;
 import com.gara.quanlygara.repository.StockReceiptItemRepository;
 import com.gara.quanlygara.repository.StockReceiptRepository;
 import com.gara.quanlygara.repository.RepairHistoryRepository;
+import com.gara.quanlygara.repository.CustomerNotificationRepository;
+import com.gara.quanlygara.repository.InvoiceRepository;
+import com.gara.quanlygara.repository.MaintenanceReminderRepository;
+import com.gara.quanlygara.repository.PaymentRepository;
+import com.gara.quanlygara.repository.ReceivingBankAccountRepository;
+import com.gara.quanlygara.repository.RepairProgressRepository;
 import com.gara.quanlygara.entity.Account;
 import com.gara.quanlygara.entity.AccountRole;
 import com.gara.quanlygara.entity.Customer;
@@ -50,6 +58,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class SecurityConfigTest {
+
+    @MockitoBean
+    private JdbcTemplate jdbcTemplateTestMock;
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -110,6 +122,24 @@ class SecurityConfigTest {
 
     @MockitoBean
     private RepairHistoryRepository repairHistoryRepository;
+
+    @MockitoBean
+    private CustomerNotificationRepository customerNotificationRepository;
+
+    @MockitoBean
+    private InvoiceRepository invoiceRepository;
+
+    @MockitoBean
+    private MaintenanceReminderRepository maintenanceReminderRepository;
+
+    @MockitoBean
+    private PaymentRepository paymentRepository;
+
+    @MockitoBean
+    private ReceivingBankAccountRepository receivingBankAccountRepository;
+
+    @MockitoBean
+    private RepairProgressRepository repairProgressRepository;
 
     @Test
     void accountApiRejectsRequestWithoutJwt() throws Exception {

@@ -160,3 +160,9 @@ flutter test
 - Không kết nối được SQL Server: kiểm tra dịch vụ SQL Server, port `1433`, tài khoản và mật khẩu.
 - Port `8080` đang bận: có thể backend đã chạy ở một cửa sổ khác. Dừng tiến trình cũ rồi chạy lại.
 - Mobile trên điện thoại thật không đăng nhập được: kiểm tra IP máy tính, Windows Firewall và mạng Wi-Fi.
+
+<!-- TV3-TUAN10-AUDIT:notifications-status BEGIN -->
+## Thông báo và nhắc bảo dưỡng (Tuần 10)
+
+Backend đã có API thông báo cho khách hàng và nhắc lịch bảo dưỡng đến hạn (xem `backend/docs/API_NOTIFICATIONS.md`; cần chạy migration `V004`). **Ứng dụng Mobile hiện vẫn dùng dữ liệu mẫu cho màn hình thông báo** cho đến khi được tích hợp với API này.
+<!-- TV3-TUAN10-AUDIT:notifications-status END -->

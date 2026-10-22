@@ -1,5 +1,7 @@
 // TV3-TUAN9
 package com.gara.quanlygara.controller;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 
 import com.gara.quanlygara.entity.Account;
 import com.gara.quanlygara.entity.AccountRole;
@@ -22,6 +24,12 @@ import com.gara.quanlygara.repository.StockReceiptRepository;
 import com.gara.quanlygara.repository.TechnicianAssignmentRepository;
 import com.gara.quanlygara.repository.TechnicianRepository;
 import com.gara.quanlygara.repository.VehicleRepository;
+import com.gara.quanlygara.repository.CustomerNotificationRepository;
+import com.gara.quanlygara.repository.InvoiceRepository;
+import com.gara.quanlygara.repository.MaintenanceReminderRepository;
+import com.gara.quanlygara.repository.PaymentRepository;
+import com.gara.quanlygara.repository.ReceivingBankAccountRepository;
+import com.gara.quanlygara.repository.RepairProgressRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -57,6 +65,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class CustomerHistoryApiTest {
+
+    @MockitoBean
+    private JdbcTemplate jdbcTemplateTestMock;
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -117,6 +129,24 @@ class CustomerHistoryApiTest {
 
     @MockitoBean
     private VehicleRepository vehicleRepository;
+
+    @MockitoBean
+    private CustomerNotificationRepository customerNotificationRepository;
+
+    @MockitoBean
+    private InvoiceRepository invoiceRepository;
+
+    @MockitoBean
+    private MaintenanceReminderRepository maintenanceReminderRepository;
+
+    @MockitoBean
+    private PaymentRepository paymentRepository;
+
+    @MockitoBean
+    private ReceivingBankAccountRepository receivingBankAccountRepository;
+
+    @MockitoBean
+    private RepairProgressRepository repairProgressRepository;
 
     private void account(String username, AccountRole role, Integer customerId) {
         Account account = new Account();

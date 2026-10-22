@@ -25,3 +25,16 @@ Việc hai request thực sự chạy song song cần SQL Server thật:
 2. Cửa sổ A: `BEGIN TRAN; EXEC dbo.sp_XacNhanSuDungPhuTung @MaPhieuXuat, @MaPhuTung, @MaKyThuatVien, 3;` — **chưa COMMIT**.
 3. Cửa sổ B: chạy đúng lệnh trên. B phải chờ A.
 4. COMMIT ở A. B phải kết thúc với lỗi 50012 ("đã được xác nhận sử dụng"); tồn kho chỉ giảm 3 một lần và chỉ có một dòng `BienDongKho` loại `XUAT`.
+
+<!-- TV3-TUAN10-AUDIT:v004 BEGIN -->
+## V004 — Thông báo khách hàng và nhắc lịch bảo dưỡng (Tuần 10)
+
+Chạy sau V003 (bắt buộc cho `/api/customers/me/notifications` và `/api/maintenance-reminders`). Idempotent. Chạy bằng SSMS hoặc `sqlcmd -I` (cần `QUOTED_IDENTIFIER ON` vì `ThongBao` có chỉ mục có điều kiện).
+
+| File | Mục đích |
+|---|---|
+| `V004__customer_notifications_and_maintenance_reminders.sql` | Tạo `LichNhacBaoDuong` (nguồn lịch bảo dưỡng đến hạn do nhân viên khai báo); thêm `ThongBao.MaLichNhac` + chỉ mục duy nhất có điều kiện (mỗi lịch nhắc chỉ một thông báo); trigger mới `TRG_LichHen_ThongBao`; mở rộng `TRG_PhieuSuaChua_ThongBaoHoanTat` (giữ logic hoàn tất và chống trùng, thêm thông báo tiến độ) |
+| `../Test_Notifications.sql` (tùy chọn) | Kiểm thử trigger, ràng buộc lịch nhắc và chỉ mục duy nhất; chạy trong transaction và ROLLBACK |
+
+Thứ tự đầy đủ: `QuanLyGaraOTo.sql` → V001 → V002 → V003 → V004. Chi tiết API: `backend/docs/API_NOTIFICATIONS.md`.
+<!-- TV3-TUAN10-AUDIT:v004 END -->

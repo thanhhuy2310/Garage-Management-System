@@ -1,5 +1,7 @@
 // TV3-TUAN7
 package com.gara.quanlygara.controller;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 
 import com.gara.quanlygara.entity.SparePart;
 import com.gara.quanlygara.repository.SparePartRepository;
@@ -22,6 +24,12 @@ import com.gara.quanlygara.repository.StockMovementRepository;
 import com.gara.quanlygara.repository.StockReceiptItemRepository;
 import com.gara.quanlygara.repository.StockReceiptRepository;
 import com.gara.quanlygara.repository.RepairHistoryRepository;
+import com.gara.quanlygara.repository.CustomerNotificationRepository;
+import com.gara.quanlygara.repository.InvoiceRepository;
+import com.gara.quanlygara.repository.MaintenanceReminderRepository;
+import com.gara.quanlygara.repository.PaymentRepository;
+import com.gara.quanlygara.repository.ReceivingBankAccountRepository;
+import com.gara.quanlygara.repository.RepairProgressRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -59,6 +67,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class SparePartApiTest {
+
+    @MockitoBean
+    private JdbcTemplate jdbcTemplateTestMock;
+
 
     private static final String PART_JSON = """
             {"warehouseId":1,"name":"Bugi Iridium","manufacturer":"NGK","unitPrice":210000,"minStockLevel":6}
@@ -123,6 +135,24 @@ class SparePartApiTest {
 
     @MockitoBean
     private RepairHistoryRepository repairHistoryRepository;
+
+    @MockitoBean
+    private CustomerNotificationRepository customerNotificationRepository;
+
+    @MockitoBean
+    private InvoiceRepository invoiceRepository;
+
+    @MockitoBean
+    private MaintenanceReminderRepository maintenanceReminderRepository;
+
+    @MockitoBean
+    private PaymentRepository paymentRepository;
+
+    @MockitoBean
+    private ReceivingBankAccountRepository receivingBankAccountRepository;
+
+    @MockitoBean
+    private RepairProgressRepository repairProgressRepository;
 
     @Test
     void listRejectsRequestWithoutJwt() throws Exception {

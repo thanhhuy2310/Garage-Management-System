@@ -82,3 +82,14 @@ Xe không thuộc khách hàng, phiếu chưa hoàn tất hoặc phiếu của k
 
 Integration test trên SQL Server thật (không chạy trong `mvnw test`): đặt `RUN_SQLSERVER_IT=true` cùng `DB_URL`/`DB_USERNAME`/`DB_PASSWORD`, rồi chạy `.\mvnw.cmd -Dtest=RepairHistorySqlServerIT test`. Dữ liệu test được rollback.
 <!-- TV3-TUAN9-AUDIT:history-api END -->
+
+<!-- TV3-TUAN10-AUDIT:notifications-api BEGIN -->
+## API thông báo và nhắc bảo dưỡng (Tuần 10)
+
+Đã triển khai ở backend (Mobile vẫn nối mock cho đến khi được tích hợp). Chi tiết, JSON mẫu và mã lỗi: `backend/docs/API_NOTIFICATIONS.md`. Cần chạy migration `V004`.
+
+- `GET /api/customers/me/notifications` (`page`, `size`), `GET /api/customers/me/notifications/unread-count`, `PATCH /api/customers/me/notifications/{notificationId}/read`, `PATCH /api/customers/me/notifications/read-all`: role `CUSTOMER`, khách hàng lấy từ JWT (không có `customerId` từ client).
+- `POST|GET /api/maintenance-reminders`, `POST /api/maintenance-reminders/{id}/cancel`: role `ADMIN`, `MANAGER`, `RECEPTIONIST`.
+- Thông báo lịch hẹn và tiến độ sửa chữa do trigger SQL Server tạo (V004); nhắc bảo dưỡng do scheduler (`app.reminders.enabled`, `app.reminders.cron`, múi giờ `Asia/Ho_Chi_Minh`).
+- Integration test SQL Server thật (không chạy trong `mvnw test`): `RUN_SQLSERVER_IT=true` rồi `.\mvnw.cmd -Dtest=NotificationsSqlServerIT test`; kiểm thử SQL: `backend/database/Test_Notifications.sql`.
+<!-- TV3-TUAN10-AUDIT:notifications-api END -->

@@ -1,4 +1,6 @@
 package com.gara.quanlygara.controller;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 
 import com.gara.quanlygara.entity.Account;
 import com.gara.quanlygara.entity.AccountRole;
@@ -22,6 +24,12 @@ import com.gara.quanlygara.repository.StockMovementRepository;
 import com.gara.quanlygara.repository.StockReceiptItemRepository;
 import com.gara.quanlygara.repository.StockReceiptRepository;
 import com.gara.quanlygara.repository.RepairHistoryRepository;
+import com.gara.quanlygara.repository.CustomerNotificationRepository;
+import com.gara.quanlygara.repository.InvoiceRepository;
+import com.gara.quanlygara.repository.MaintenanceReminderRepository;
+import com.gara.quanlygara.repository.PaymentRepository;
+import com.gara.quanlygara.repository.ReceivingBankAccountRepository;
+import com.gara.quanlygara.repository.RepairProgressRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -57,6 +65,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class VehicleApiTest {
+
+    @MockitoBean
+    private JdbcTemplate jdbcTemplateTestMock;
+
 
     private static final String VEHICLE_JSON = """
             {"customerId":1,"licensePlate":"51a-999.99","brand":"Toyota","model":"Vios","year":2021,"mileage":1000}
@@ -121,6 +133,24 @@ class VehicleApiTest {
 
         @MockitoBean
         private RepairHistoryRepository repairHistoryRepository;
+
+        @MockitoBean
+        private CustomerNotificationRepository customerNotificationRepository;
+
+        @MockitoBean
+        private InvoiceRepository invoiceRepository;
+
+        @MockitoBean
+        private MaintenanceReminderRepository maintenanceReminderRepository;
+
+        @MockitoBean
+        private PaymentRepository paymentRepository;
+
+        @MockitoBean
+        private ReceivingBankAccountRepository receivingBankAccountRepository;
+
+        @MockitoBean
+        private RepairProgressRepository repairProgressRepository;
 
     @Test
     void listRejectsRequestWithoutJwt() throws Exception {

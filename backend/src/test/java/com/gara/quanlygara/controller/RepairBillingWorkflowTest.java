@@ -24,20 +24,27 @@ class RepairBillingWorkflowTest extends ApiTestSupport {
         jdbc.execute("CREATE TABLE IF NOT EXISTS PhieuTiepNhan (MaTiepNhan INT PRIMARY KEY, MaXe INT, YeuCauKhachHang NVARCHAR(1000), TinhTrangBanDau NVARCHAR(1000))");
         jdbc.execute("CREATE TABLE IF NOT EXISTS ChiTietDichVu (MaPhieuSuaChua INT, MaDichVu INT, SoLuong INT, DonGia DECIMAL(18,2), TrangThai NVARCHAR(50))");
         jdbc.execute("CREATE TABLE IF NOT EXISTS PhuTung (MaPhuTung INT PRIMARY KEY, TenPhuTung NVARCHAR(150))");
+        jdbc.execute("CREATE TABLE IF NOT EXISTS Kho (MaKho INT PRIMARY KEY, TenKho VARCHAR(150) NOT NULL, DiaChi VARCHAR(255))");
         jdbc.execute("CREATE TABLE IF NOT EXISTS ChiTietPhuTung (MaPhieuSuaChua INT, MaPhuTung INT, SoLuong INT, DonGia DECIMAL(18,2))");
         jdbc.update("INSERT INTO KhachHang (MaKhachHang,HoTen,SoDienThoai,TrangThai) VALUES (9201,'Khach A','0920000001',1),(9202,'Khach B','0920000002',1)");
-        jdbc.update("INSERT INTO Xe VALUES (9201,9201,'51A-92001','Toyota','Vios'),(9202,9202,'51A-92002','Honda','City')");
-        jdbc.update("INSERT INTO PhieuTiepNhan VALUES (9201,9201,'Kiem tra phanh','Phanh keu'),(9202,9202,NULL,NULL),(9203,9201,NULL,NULL)");
+        jdbc.update("INSERT INTO Xe (MaXe, MaKhachHang, BienSo, HangXe, DongXe) VALUES (9201,9201,'51A-92001','Toyota','Vios'),(9202,9202,'51A-92002','Honda','City')");
+        jdbc.update("INSERT INTO PhieuTiepNhan (MaTiepNhan, MaXe, YeuCauKhachHang, TinhTrangBanDau) VALUES (9201,9201,'Kiem tra phanh','Phanh keu'),(9202,9202,NULL,NULL),(9203,9201,NULL,NULL)");
         jdbc.update("INSERT INTO PhieuSuaChua (MaPhieuSuaChua,MaTiepNhan,NgayLap,TrangThai) VALUES (9201,9201,'2026-10-06 08:00:00','MOI_TAO'),(9202,9202,'2026-10-06 08:00:00','HOAN_TAT')");
         jdbc.update("INSERT INTO DichVu (MaDichVu,TenDichVu,DonGia) VALUES (9201,'Phanh',999999),(9202,'Dau',100000)");
-        jdbc.update("INSERT INTO ChiTietDichVu VALUES (9201,9201,2,200000,'CHO_SUA'),(9202,9201,1,100000,'HOAN_TAT')");
-        jdbc.update("INSERT INTO PhuTung VALUES (9201,'Ma phanh')");
-        jdbc.update("INSERT INTO ChiTietPhuTung VALUES (9202,9201,2,50000)");
+        jdbc.update("INSERT INTO ChiTietDichVu (MaPhieuSuaChua, MaDichVu, SoLuong, DonGia, TrangThai) VALUES (9201,9201,2,200000,'CHO_SUA'),(9202,9201,1,100000,'HOAN_TAT')");
+
+        if (jdbc.queryForObject("SELECT COUNT(*) FROM Kho WHERE MaKho = ?", Integer.class, 9201) == 0) {
+            jdbc.update("INSERT INTO Kho (MaKho, TenKho, DiaChi) VALUES (9201, 'Kho test', NULL)");
+        }
+        if (jdbc.queryForObject("SELECT COUNT(*) FROM PhuTung WHERE MaPhuTung = ?", Integer.class, 9201) == 0) {
+            jdbc.update("INSERT INTO PhuTung (MaPhuTung, MaKho, TenPhuTung, HangSanXuat, DonGia, SoLuongTon, MucTonToiThieu) VALUES (9201, 9201, 'Ma phanh', NULL, 100000, 10, 0)");
+        }
+        jdbc.update("INSERT INTO ChiTietPhuTung (MaPhieuSuaChua, MaPhuTung, SoLuong, DonGia) VALUES (9202,9201,2,50000)");
         jdbc.update("INSERT INTO NhanVien (MaNhanVien,HoTen,ChucVu) VALUES (9201,'Tech A','KTV'),(9202,'Tech B','KTV')");
-        jdbc.update("INSERT INTO KyThuatVien VALUES (9201),(9202)");
+        jdbc.update("INSERT INTO KyThuatVien (MaNhanVien) VALUES (9201),(9202)");
         jdbc.update("INSERT INTO TaiKhoan (TenDangNhap,MatKhauHash,VaiTro,TrangThai,MaNhanVien) VALUES ('flow-tech','unused','TECHNICIAN',1,9201),('flow-other','unused','TECHNICIAN',1,9202)");
         jdbc.update("INSERT INTO TaiKhoan (TenDangNhap,MatKhauHash,VaiTro,TrangThai,MaKhachHang) VALUES ('flow-customer','unused','CUSTOMER',1,9201),('flow-customer-b','unused','CUSTOMER',1,9202)");
-        jdbc.update("INSERT INTO PhanCongKyThuatVien VALUES (9201,9201,'2026-10-06 08:00:00','Kiem tra')");
+        jdbc.update("INSERT INTO PhanCongKyThuatVien (MaPhieuSuaChua, MaKyThuatVien, NgayPhanCong, GhiChu) VALUES (9201,9201,'2026-10-06 08:00:00','Kiem tra')");
     }
 
     @Test @WithMockUser(username = "flow-tech", roles = "TECHNICIAN")
