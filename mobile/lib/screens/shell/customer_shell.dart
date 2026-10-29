@@ -1,4 +1,3 @@
-import '../../core/widgets/demo_notice.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/app_controller.dart';
@@ -57,7 +56,7 @@ class _CustomerShellState extends State<CustomerShell> {
     return Scaffold(
       appBar: AppBar(
         title: Text(titles[_index]),
-        bottom: [1, 3].contains(_index) ? const DemoNotice() : null,
+        bottom: null,
         actions: _index == 0
             ? [
                 IconButton(

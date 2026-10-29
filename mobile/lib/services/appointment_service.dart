@@ -10,3 +10,14 @@ abstract interface class AppointmentService {
 
   Future<Appointment> createAppointment(AppointmentInput input);
 }
+
+/// Separate capability keeps existing booking fixtures compatible.
+abstract interface class AppointmentChanges {
+  Future<Appointment> cancel(Appointment item, String reason);
+  Future<Appointment> reschedule(
+    Appointment item,
+    DateTime date,
+    String time,
+    String reason,
+  );
+}

@@ -14,6 +14,7 @@ import '../screens/shell/customer_shell.dart';
 import '../screens/vehicles/vehicles_screen.dart';
 import '../services/auth_service.dart';
 import '../services/appointment_service.dart';
+import '../services/api_appointment_service.dart';
 import '../services/history_service.dart';
 import '../services/home_service.dart';
 import '../services/notification_service.dart';
@@ -51,7 +52,7 @@ class _GarageCustomerAppState extends State<GarageCustomerApp> {
     widget.authService ?? ApiAuthService(),
     widget.homeService ?? ApiHomeService(_api),
     widget.vehicleService ?? ApiVehicleService(_api),
-    widget.appointmentService ?? MockAppointmentService(api: _api),
+    widget.appointmentService ?? ApiAppointmentService(_api),
     MockQuotationService(),
     ApiRepairService(),
     ApiNotificationService(_api),

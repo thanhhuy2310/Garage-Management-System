@@ -74,3 +74,22 @@ test("reload Web after Flutter reschedule and cancellation",async({page},info)=>
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   }
 });
+
+test("staff Web reads the appointment created through Android UI",async({page},info)=>{
+  await login(page,fixture.manager);
+  const loaded=page.waitForResponse(r=>r.request().method()==="GET" && r.url().endsWith("/api/appointments"));
+  await page.goto("/admin/appointments");
+  const response=await loaded;expect(response.ok()).toBe(true);
+  const matches=(await response.json()).data.filter((a:{vehicleId:number;date:string;time:string;status:string})=>
+    a.vehicleId===fixture.vehicleId && a.date===fixture.date && a.time.startsWith(fixture.time) && a.status==="CHO_XAC_NHAN");
+  expect(matches).toHaveLength(1);
+  const item=matches[0];expect(item.id).not.toBe(fixture.bookingId);
+  const row=page.getByRole("row").filter({hasText:"LH"+item.id});
+  await expect(row).toContainText(fixture.plate);
+  await expect(row).toContainText("Chờ xác nhận");
+  expect(sql("SELECT COUNT(*) FROM LichHen WHERE MaLichHen="+Number(item.id)+
+    " AND MaXe="+Number(fixture.vehicleId)+" AND MaDichVu="+Number(fixture.serviceId)+
+    " AND PhienBan=0 AND TrangThai=N'CHO_XAC_NHAN'" )).toBe("1");
+  await page.reload();await expect(row).toContainText(fixture.plate);
+  await page.screenshot({path:info.outputPath("android-booking-on-staff-web.png"),fullPage:true});
+});

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../app/app_theme.dart';
-import '../../services/appointment_service.dart';
 
 class TimeSlotPicker extends StatelessWidget {
   const TimeSlotPicker({
@@ -17,10 +16,10 @@ class TimeSlotPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final morning = MockAppointmentService.allSlots
+    final morning = availableSlots
         .where((slot) => int.parse(slot.substring(0, 2)) < 12)
         .toList();
-    final afternoon = MockAppointmentService.allSlots
+    final afternoon = availableSlots
         .where((slot) => int.parse(slot.substring(0, 2)) >= 12)
         .toList();
     return AnimatedSwitcher(
@@ -51,7 +50,7 @@ class TimeSlotPicker extends StatelessWidget {
               SizedBox(width: 7),
               Expanded(
                 child: Text(
-                  'Khung giờ mờ hiện không còn chỗ.',
+                  'Chỉ hiển thị khung giờ còn chỗ do gara cung cấp.',
                   style: TextStyle(fontSize: 12, color: AppColors.muted),
                 ),
               ),

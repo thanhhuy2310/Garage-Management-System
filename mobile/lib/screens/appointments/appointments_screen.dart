@@ -7,6 +7,7 @@ import '../../core/utils/formatters.dart';
 import '../../core/widgets/feedback_states.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../models/appointment.dart';
+import '../../services/appointment_service.dart';
 
 enum _AppointmentFilter { upcoming, completed, cancelled }
 
@@ -28,6 +29,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   _AppointmentFilter _filter = _AppointmentFilter.upcoming;
   bool _loading = true;
   String? _error;
+  bool _changing = false;
 
   @override
   void initState() {
@@ -66,6 +68,106 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   Future<void> _book() async {
     await Navigator.pushNamed(context, AppRoutes.booking);
     if (mounted) await _load();
+  }
+
+  Future<void> _change(Appointment item, bool move) async {
+    final changes = widget.controller.appointmentService;
+    if (changes is! AppointmentChanges || _changing) return;
+    DateTime? date;
+    String? time;
+    if (move) {
+      final now = DateUtils.dateOnly(DateTime.now());
+      date = await showDatePicker(
+        context: context,
+        firstDate: now,
+        lastDate: now.add(const Duration(days: 90)),
+        initialDate: item.date.isBefore(now) ? now : item.date,
+      );
+      if (date == null || !mounted) return;
+      try {
+        final availability = await widget.controller.appointmentService
+            .getAvailability(date);
+        if (!mounted) return;
+        time = await showDialog<String>(
+          context: context,
+          builder: (context) => SimpleDialog(
+            title: const Text('Chọn giờ mới'),
+            children: availability.availableSlots.isEmpty
+                ? [
+                    const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Text('Ngày này chưa mở lịch hoặc đã hết chỗ.'),
+                    ),
+                  ]
+                : availability.availableSlots
+                      .map(
+                        (slot) => SimpleDialogOption(
+                          onPressed: () => Navigator.pop(context, slot),
+                          child: Text(slot),
+                        ),
+                      )
+                      .toList(),
+          ),
+        );
+        if (time == null || !mounted) return;
+      } catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(error.toString())));
+        }
+        return;
+      }
+    }
+    if (!mounted) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(move ? 'Dời lịch hẹn?' : 'Hủy lịch hẹn?'),
+        content: Text(
+          move
+              ? 'Lịch mới cần được gara xác nhận lại.'
+              : 'Hủy lịch của xe ${item.vehicle.plate}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Quay lại'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Xác nhận'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _changing = true);
+    try {
+      if (move) {
+        await (changes as AppointmentChanges).reschedule(
+          item,
+          date!,
+          time!,
+          'Khách hàng dời lịch',
+        );
+      } else {
+        await (changes as AppointmentChanges).cancel(
+          item,
+          'Khách hàng hủy lịch',
+        );
+      }
+      if (mounted) await _load();
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error.toString().replaceFirst('Bad state: ', '')),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _changing = false);
+    }
   }
 
   @override
@@ -116,6 +218,27 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 else
                   for (final item in _items) ...[
                     _AppointmentCard(appointment: item),
+                    if ((item.status == AppointmentStatus.pending ||
+                            item.status == AppointmentStatus.confirmed) &&
+                        widget.controller.appointmentService
+                            is AppointmentChanges)
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          OutlinedButton(
+                            onPressed: _changing
+                                ? null
+                                : () => _change(item, true),
+                            child: const Text('Dời lịch'),
+                          ),
+                          TextButton(
+                            onPressed: _changing
+                                ? null
+                                : () => _change(item, false),
+                            child: const Text('Hủy lịch'),
+                          ),
+                        ],
+                      ),
                     const SizedBox(height: 12),
                   ],
               ],

@@ -26,8 +26,11 @@ ADMIN chỉ quản trị tài khoản theo policy hiện có, không tham gia l�
 - Database mới: `backend/database/Initialize_VerificationDatabase.ps1` (từ chối nếu database đã tồn tại).
 - Web/Flutter: chạy backend trên 8088 với database Verify, rồi `Prepare_VerificationAccounts.ps1`. File credentials ở TEMP, không commit.
 - `GARAGE_VERIFY_CREDENTIALS=<file TEMP>`; Web chạy `npx playwright test --config=playwright.live.config.ts --grep 'create on customer'`.
-- Android: `integration_test/appointment_flow_test.dart`, dùng `--dart-define-from-file` trỏ file ngoài repo gồm API_BASE_URL, VERIFY_USERNAME, VERIFY_PASSWORD, VERIFY_BOOKING_ID, VERIFY_NEW_TIME. Emulator gọi `http://10.0.2.2:8088/api`. Test đăng nhập và thao tác UI thật.
-- Sau Android, chạy Web `--grep 'reload Web'` để kiểm tra đồng bộ và SQL.
+- Android: `integration_test/appointment_flow_test.dart`, dùng `--dart-define-from-file` trỏ file ngoài repo gồm API_BASE_URL, VERIFY_USERNAME, VERIFY_PASSWORD, VERIFY_BOOKING_ID, VERIFY_NEW_TIME, VERIFY_DATE, VERIFY_PLATE. Emulator gọi `http://10.0.2.2:8088/api`. Test đăng nhập và thao tác UI thật.
+- Chạy ca Android `--name 'reads the Web booking'` sau Web tạo/xác nhận. Tiếp theo chạy `--name 'creates a booking'`; slot cũ đã được giải phóng bởi thao tác hủy. Mỗi ca phải kết thúc thành công trước bước tiếp theo.
+- Sau Android, chạy Web `--grep 'reload Web after|staff Web reads'` để kiểm tra hai chiều và SQL. Không chạy toàn bộ các test Web liền nhau vì cần thao tác Android xen giữa. Khi chạy lại chuỗi, tạo fixture mới hoặc kết thúc lịch do đúng lần kiểm thử trước tạo.
 - `mobile/test/appointment_sql_live_test.dart` là kiểm tra adapter HTTP thật thay thế khi không có thiết bị, không phải bằng chứng UI Android. Không chạy cùng Android trên một booking đã bị hủy.
 
 Tiếp nhận và quan hệ lịch hẹn → phiếu tiếp nhận được tích hợp ở phase D; không cho client đổi tùy ý thành đã đến/hoàn tất.
+
+Lịch Flutter dùng ngày mở cửa/khung giờ từ API, kể cả Chủ nhật nếu quản lý cấu hình. Unit test có kiểm tra chọn Chủ nhật chưa kín lịch; không áp lịch đóng cửa cố định ở client.

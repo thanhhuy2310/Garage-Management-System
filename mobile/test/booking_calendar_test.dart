@@ -32,5 +32,11 @@ void main() {
 
     await tester.tap(find.text('11'));
     expect(selected, isNull);
+    // Opening days come from the API, including Sunday when configured.
+    final sunday = visible.add(
+      Duration(days: (DateTime.sunday - visible.weekday) % 7),
+    );
+    await tester.tap(find.text('${sunday.day}'));
+    expect(selected, sunday);
   });
 }

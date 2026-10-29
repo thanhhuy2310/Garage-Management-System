@@ -1,4 +1,3 @@
-import '../../core/widgets/demo_notice.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/app_controller.dart';
@@ -38,6 +37,7 @@ class _BookingScreenState extends State<BookingScreen> {
   late DateTime _visibleMonth;
   List<String> _availableSlots = const [];
   Set<DateTime> _fullyBookedDates = const {};
+  int _availabilityRequest = 0;
 
   DateTime get _today {
     final now = DateTime.now();
@@ -83,7 +83,7 @@ class _BookingScreenState extends State<BookingScreen> {
           DateTime(month.year, month.month, day),
         ),
     ]);
-    if (!mounted) return;
+    if (!mounted || _visibleMonth != month) return;
     setState(() {
       _fullyBookedDates = {
         for (var day = 1; day <= days; day++)
@@ -98,18 +98,42 @@ class _BookingScreenState extends State<BookingScreen> {
       _visibleMonth = month;
       _fullyBookedDates = const {};
     });
-    await _loadMonthAvailability(month);
+    try {
+      await _loadMonthAvailability(month);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.toString())));
+      }
+    }
   }
 
   Future<void> _selectDate(DateTime date) async {
-    final availability = await widget.controller.appointmentService
-        .getAvailability(date);
-    if (!mounted) return;
+    final request = ++_availabilityRequest;
     setState(() {
       _date = date;
       _time = null;
-      _availableSlots = availability.availableSlots;
+      _availableSlots = const [];
     });
+    try {
+      final availability = await widget.controller.appointmentService
+          .getAvailability(date);
+      if (!mounted || request != _availabilityRequest) return;
+      setState(() => _availableSlots = availability.availableSlots);
+      if (!availability.configured) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gara chưa mở khung giờ cho ngày này.')),
+        );
+      }
+    } catch (error) {
+      if (mounted && request == _availabilityRequest) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error.toString().replaceFirst('Bad state: ', '')),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _addVehicle() async {
@@ -156,50 +180,7 @@ class _BookingScreenState extends State<BookingScreen> {
   }
 
   Future<void> _submit() async {
-    if (_time == '09:30') {
-      final alternatives = _availableSlots
-          .where((slot) => slot != _time)
-          .take(3)
-          .toList();
-      final replacement = await showDialog<String>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Khung giờ vừa hết chỗ'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Khung giờ 09:30 hiện không còn trống. Bạn có thể chọn:',
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final slot in alternatives)
-                    ActionChip(
-                      label: Text(slot),
-                      onPressed: () => Navigator.pop(context, slot),
-                    ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Chọn lại'),
-            ),
-          ],
-        ),
-      );
-      if (replacement == null) {
-        _goTo(2);
-        return;
-      }
-      setState(() => _time = replacement);
-    }
+    if (_saving) return;
     if (!mounted) return;
     final session = widget.controller.session;
     final vehicle = _vehicle;
@@ -238,13 +219,19 @@ class _BookingScreenState extends State<BookingScreen> {
           builder: (_) => BookingSuccessScreen(appointment: appointment),
         ),
       );
-    } catch (_) {
+    } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Không thể tạo lịch hẹn. Vui lòng thử lại.'),
+          SnackBar(
+            content: Text(error.toString().replaceFirst('Bad state: ', '')),
           ),
         );
+        _goTo(2);
+        try {
+          await _selectDate(date);
+        } catch (_) {
+          /* Keep the original error visible. */
+        }
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -254,7 +241,7 @@ class _BookingScreenState extends State<BookingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Đặt lịch mới'), bottom: const DemoNotice()),
+      appBar: AppBar(title: const Text('Đặt lịch mới')),
       body: SafeArea(
         top: false,
         child: _loading

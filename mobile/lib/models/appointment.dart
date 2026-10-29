@@ -27,6 +27,7 @@ class Appointment {
     required this.time,
     required this.status,
     required this.note,
+    this.version = 0,
   });
 
   final String id;
@@ -36,6 +37,7 @@ class Appointment {
   final String time;
   final AppointmentStatus status;
   final String note;
+  final int version;
 }
 
 class AppointmentInput {
@@ -60,8 +62,10 @@ class BookingAvailability {
   const BookingAvailability({
     required this.availableSlots,
     required this.fullyBooked,
+    this.configured = true,
   });
 
   final List<String> availableSlots;
   final bool fullyBooked;
+  final bool configured;
 }

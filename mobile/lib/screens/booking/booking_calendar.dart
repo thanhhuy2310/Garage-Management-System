@@ -132,9 +132,7 @@ class BookingCalendar extends StatelessWidget {
                     );
                     final past = date.isBefore(_today);
                     final beyondLimit = date.isAfter(maxDate);
-                    final closed = date.weekday == DateTime.sunday;
-                    final fullyBooked =
-                        _containsDay(fullyBookedDates, date) || closed;
+                    final fullyBooked = _containsDay(fullyBookedDates, date);
                     final disabled = past || fullyBooked || beyondLimit;
                     final selected = _sameDay(selectedDate, date);
                     final today = _sameDay(_today, date);
