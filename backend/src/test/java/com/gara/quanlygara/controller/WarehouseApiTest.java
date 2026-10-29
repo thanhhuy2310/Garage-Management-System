@@ -88,6 +88,15 @@ class WarehouseApiTest {
     private com.gara.quanlygara.repository.InsurancePolicyRepository insurancePolicyRepository;
 
     @MockitoBean
+    private com.gara.quanlygara.repository.InsuranceClaimRepository insuranceClaimRepository;
+
+    @MockitoBean
+    private com.gara.quanlygara.repository.InsuranceClaimEventRepository insuranceClaimEventRepository;
+
+    @MockitoBean
+    private com.gara.quanlygara.repository.InsuranceReceptionRepository insuranceReceptionRepository;
+
+    @MockitoBean
     private com.gara.quanlygara.service.RepairBusinessRules rules;
 
 

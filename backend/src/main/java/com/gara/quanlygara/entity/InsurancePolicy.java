@@ -41,6 +41,10 @@ public class InsurancePolicy {
     private String partsTerms;
     @Column(name = "ThamChieuChungNhan", length = 500)
     private String certificateReference;
+    @Column(name = "TenChuXeTrenDangKy", length = 200)
+    private String registeredOwnerName;
+    @Column(name = "TenChuXeTrenChungNhan", length = 200)
+    private String certificateOwnerName;
     @Column(name = "TrangThaiXacMinh", nullable = false, length = 20)
     private String verificationStatus = "CHUA_XAC_MINH";
     @Column(name = "GhiChuXacMinh", length = 1000)
@@ -57,7 +61,8 @@ public class InsurancePolicy {
     public InsurancePolicy(Integer companyId, Integer vehicleId, Integer customerId, String policyNumber,
                            String insuranceType, LocalDate startDate, LocalDate endDate,
                            BigDecimal insuredAmount, BigDecimal deductible, String repairShopTerms,
-                           String partsTerms, String certificateReference) {
+                           String partsTerms, String certificateReference,
+                           String registeredOwnerName, String certificateOwnerName) {
         this.companyId = companyId;
         this.vehicleId = vehicleId;
         this.customerId = customerId;
@@ -70,6 +75,8 @@ public class InsurancePolicy {
         this.repairShopTerms = repairShopTerms;
         this.partsTerms = partsTerms;
         this.certificateReference = certificateReference;
+        this.registeredOwnerName = registeredOwnerName;
+        this.certificateOwnerName = certificateOwnerName;
     }
 
     public void verify(String status, String note, Integer employeeId, LocalDateTime time) {
@@ -92,6 +99,8 @@ public class InsurancePolicy {
     public String getRepairShopTerms() { return repairShopTerms; }
     public String getPartsTerms() { return partsTerms; }
     public String getCertificateReference() { return certificateReference; }
+    public String getRegisteredOwnerName() { return registeredOwnerName; }
+    public String getCertificateOwnerName() { return certificateOwnerName; }
     public String getVerificationStatus() { return verificationStatus; }
     public String getVerificationNote() { return verificationNote; }
     public Integer getVerifiedByEmployeeId() { return verifiedByEmployeeId; }

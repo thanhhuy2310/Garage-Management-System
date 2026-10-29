@@ -64,6 +64,15 @@ class SecurityConfigTest {
     @MockitoBean
     private com.gara.quanlygara.repository.InsurancePolicyRepository insurancePolicyRepository;
 
+    @MockitoBean
+    private com.gara.quanlygara.repository.InsuranceClaimRepository insuranceClaimRepository;
+
+    @MockitoBean
+    private com.gara.quanlygara.repository.InsuranceClaimEventRepository insuranceClaimEventRepository;
+
+    @MockitoBean
+    private com.gara.quanlygara.repository.InsuranceReceptionRepository insuranceReceptionRepository;
+
     @Autowired
     private MockMvc mockMvc;
 

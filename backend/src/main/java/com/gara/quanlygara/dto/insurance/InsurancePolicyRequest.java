@@ -13,6 +13,7 @@ import java.time.LocalDate;
 public record InsurancePolicyRequest(
         @NotNull @Positive Integer companyId,
         @NotNull @Positive Integer vehicleId,
+        @NotNull @Positive Integer policyholderCustomerId,
         @NotBlank @Size(max = 100) String policyNumber,
         @NotBlank @Pattern(regexp = "VAT_CHAT_XE|TNDS|KHAC") String insuranceType,
         @NotNull LocalDate startDate,
@@ -21,5 +22,7 @@ public record InsurancePolicyRequest(
         @DecimalMin("0.00") @Digits(integer = 16, fraction = 2) BigDecimal deductible,
         @Size(max = 500) String repairShopTerms,
         @Size(max = 1000) String partsTerms,
-        @Size(max = 500) String certificateReference
+        @Size(max = 500) String certificateReference,
+        @NotBlank @Size(max = 200) String registeredOwnerName,
+        @NotBlank @Size(max = 200) String certificateOwnerName
 ) {}

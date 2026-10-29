@@ -9,6 +9,7 @@ public record InsurancePolicyResponse(
         Integer id, Integer companyId, Integer vehicleId, Integer customerId, String policyNumber,
         String insuranceType, LocalDate startDate, LocalDate endDate, BigDecimal insuredAmount,
         BigDecimal deductible, String repairShopTerms, String partsTerms, String certificateReference,
+        String registeredOwnerName, String certificateOwnerName,
         String verificationStatus, String verificationNote, Integer verifiedByEmployeeId,
         LocalDateTime verifiedAt
 ) {
@@ -17,6 +18,7 @@ public record InsurancePolicyResponse(
                 policy.getCustomerId(), policy.getPolicyNumber(), policy.getInsuranceType(),
                 policy.getStartDate(), policy.getEndDate(), policy.getInsuredAmount(), policy.getDeductible(),
                 policy.getRepairShopTerms(), policy.getPartsTerms(), policy.getCertificateReference(),
+                policy.getRegisteredOwnerName(), policy.getCertificateOwnerName(),
                 policy.getVerificationStatus(), policy.getVerificationNote(),
                 policy.getVerifiedByEmployeeId(), policy.getVerifiedAt());
     }

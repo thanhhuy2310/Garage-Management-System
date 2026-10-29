@@ -4,6 +4,8 @@
 
 Hợp đồng bảo hiểm vật chất xe được ghi nhận độc lập với bảo hiểm trách nhiệm dân sự và bảo hành sửa chữa. Ngày hiệu lực chỉ là một điều kiện; nhân viên phải đối chiếu chứng nhận và các điều khoản rồi ghi trạng thái xác minh. Mức miễn thường, khấu hao, quyền chọn gara và phạm vi phụ tùng lấy từ từng hợp đồng/hồ sơ, không dùng tỷ lệ chung.
 
+Theo quy tắc nghiệp vụ của dự án, người đứng tên hợp đồng phải là chủ xe gắn với `Xe.MaKhachHang`. Nhân viên nhập tên chủ xe trên giấy đăng ký và trên giấy chứng nhận bảo hiểm; hệ thống so khớp hai tên với tên khách hàng sau khi chuẩn hóa khoảng trắng/chữ hoa. Tên khớp chỉ cho phép tiếp tục xác minh, không tự chuyển hợp đồng sang `DA_XAC_MINH`. Hợp đồng cũ thiếu hai tên không thể được xác minh cho đến khi có quy trình bổ sung thông tin. Giấy chứng nhận TNDS bắt buộc phải có tên chủ xe theo Điều 10 Nghị định 67/2023/NĐ-CP; [giải thích của Bộ Tài chính](https://baochinhphu.vn/sang-ten-xe-bao-hiem-trach-nhiem-dan-su-cu-co-con-hieu-luc-102251010102858317.htm) cũng lưu ý xử lý khi chuyển quyền sở hữu xe.
+
 ## Luồng dự kiến
 
 1. Nhân viên tiếp nhận xe, tạo phiếu tiếp nhận và gắn hợp đồng đã khai báo. Kiểm tra chủ xe, công ty, loại bảo hiểm, thời hạn, tình trạng xác minh và chứng từ.
@@ -16,6 +18,8 @@ Hợp đồng bảo hiểm vật chất xe được ghi nhận độc lập vớ
 
 ## Trạng thái triển khai
 
-Hiện chỉ có bước nền về danh mục công ty và hợp đồng. API xác minh hợp đồng yêu cầu người ghi nhận và ghi chú, và không cho ghi đè kết quả cũ. Hồ sơ bồi thường, giám định, báo giá phiên bản, kho, thanh toán và màn hình chưa được triển khai; không sử dụng danh mục mới để suy ra bảo hiểm đã duyệt hay đã thanh toán.
+Đã có danh mục công ty, hợp đồng và bước tạo/đọc hồ sơ tổn thất. API xác minh hợp đồng yêu cầu nhân viên và ghi chú, không cho ghi đè kết quả cũ. Hồ sơ gắn với phiếu tiếp nhận, chặn trùng cùng phiếu hoặc cùng xe/thời điểm/địa điểm, và ghi sự kiện tạo hồ sơ trong cùng transaction. Chặn trùng tự động không thay thế việc nhân viên đối chiếu sự cố gần giống nhau.
+
+Giám định, tài liệu chứng minh, thay đổi trạng thái hồ sơ, báo giá phiên bản, kho, thanh toán và màn hình chưa được triển khai. Trạng thái `MOI_TAO` không có nghĩa bảo hiểm đã chấp thuận hoặc đã chuyển tiền.
 
 Tài liệu tham khảo quy tắc bảo hiểm: [BSH](https://bshc.com.vn/doanh-nghiep/bao-hiem-vat-chat-xe-o-to), [PVI](https://online.pvi.com.vn/tai-lieu-va-quy-tac).

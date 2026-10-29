@@ -14,5 +14,8 @@
 - Phát hiện hai lỗi TypeScript ở `Reports.tsx` trước thay đổi thông báo; sửa tương thích ES2020 và kiểu formatter. `npx tsc --noEmit` và `npm run build` đều qua. Commit `3da8d9b` đã push.
 - Áp dụng V004 thông báo trên SQL Server cục bộ sau khi thấy schema còn thiếu; truy vấn lại có 16 bản ghi `ThongBao` thật. Không tạo tài khoản hay thông báo mẫu mới.
 - Bỏ giá trị mặc định `DB_USERNAME` và `DB_PASSWORD` khỏi cấu hình Backend. `backend/.env.example` đã hướng dẫn khai báo cho local; 398 test Backend vẫn qua.
+- Thêm hồ sơ tổn thất bảo hiểm gắn hợp đồng, phiếu tiếp nhận và xe; chặn trùng theo phiếu, sự cố cùng xe/thời điểm/địa điểm và mã hồ sơ công ty. Sự kiện tạo hồ sơ ghi cùng transaction, chưa có phê duyệt bồi thường.
+- Theo yêu cầu đối chiếu chủ xe, bổ sung tên trên đăng ký và trên giấy chứng nhận; tên và người đứng tên hợp đồng phải khớp chủ xe trong hệ thống trước khi tạo/xác minh. Tên khớp không tự xác minh hợp đồng.
+- V006/V007 chạy hai lần trên SQL Server cục bộ. Thử ghi/đọc hồ sơ và nhật ký rồi rollback, không còn dữ liệu kiểm tra. 405 test Backend qua.
 
 Các bước tiếp theo: hồ sơ bồi thường, nhật ký và tài liệu bảo mật; hạng mục giám định/báo giá phiên bản; kho và đối soát tiền; Web/Mobile; kiểm thử đầu cuối.

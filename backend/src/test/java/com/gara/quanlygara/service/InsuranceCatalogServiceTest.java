@@ -3,11 +3,13 @@ package com.gara.quanlygara.service;
 import com.gara.quanlygara.dto.insurance.InsurancePolicyRequest;
 import com.gara.quanlygara.dto.insurance.InsurancePolicyVerificationRequest;
 import com.gara.quanlygara.entity.InsurancePolicy;
+import com.gara.quanlygara.entity.Customer;
 import com.gara.quanlygara.entity.Vehicle;
 import com.gara.quanlygara.exception.BadRequestException;
 import com.gara.quanlygara.exception.ConflictException;
 import com.gara.quanlygara.repository.InsuranceCompanyRepository;
 import com.gara.quanlygara.repository.InsurancePolicyRepository;
+import com.gara.quanlygara.repository.CustomerRepository;
 import com.gara.quanlygara.repository.VehicleRepository;
 import com.gara.quanlygara.security.StaffContext;
 import java.math.BigDecimal;
@@ -33,6 +35,7 @@ class InsuranceCatalogServiceTest {
     @Mock InsuranceCompanyRepository companyRepository;
     @Mock InsurancePolicyRepository policyRepository;
     @Mock VehicleRepository vehicleRepository;
+    @Mock CustomerRepository customerRepository;
     @Mock StaffContext staffContext;
     @Mock Authentication authentication;
 
@@ -40,22 +43,25 @@ class InsuranceCatalogServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new InsuranceCatalogService(companyRepository, policyRepository, vehicleRepository, staffContext);
+        service = new InsuranceCatalogService(companyRepository, policyRepository, vehicleRepository,
+                customerRepository, staffContext);
     }
 
     @Test
-    void createPolicyKeepsVerificationPendingAndDerivesCustomerFromVehicle() {
+    void createPolicyKeepsVerificationPendingAndMatchesRegisteredOwner() {
         Vehicle vehicle = new Vehicle();
         vehicle.setId(8);
         vehicle.setCustomerId(12);
         when(companyRepository.existsById(3)).thenReturn(true);
         when(vehicleRepository.findById(8)).thenReturn(Optional.of(vehicle));
+        when(customerRepository.findById(12)).thenReturn(Optional.of(owner()));
         when(policyRepository.saveAndFlush(any(InsurancePolicy.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = service.createPolicy(request(LocalDate.of(2026, 1, 1), LocalDate.of(2027, 1, 1)));
 
         assertEquals(12, result.customerId());
+        assertEquals("Nguyễn Văn An", result.certificateOwnerName());
         assertEquals("CHUA_XAC_MINH", result.verificationStatus());
         assertEquals(new BigDecimal("500000.00"), result.deductible());
         assertTrue(result.verifiedAt() == null);
@@ -75,6 +81,7 @@ class InsuranceCatalogServiceTest {
         vehicle.setCustomerId(12);
         when(companyRepository.existsById(3)).thenReturn(true);
         when(vehicleRepository.findById(8)).thenReturn(Optional.of(vehicle));
+        when(customerRepository.findById(12)).thenReturn(Optional.of(owner()));
         when(policyRepository.existsByCompanyIdAndPolicyNumber(3, "HD-123")).thenReturn(true);
 
         assertThrows(ConflictException.class, () -> service.createPolicy(
@@ -83,10 +90,52 @@ class InsuranceCatalogServiceTest {
     }
 
     @Test
+    void createPolicyRejectsDifferentNameOnInsuranceCertificate() {
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(8);
+        vehicle.setCustomerId(12);
+        when(companyRepository.existsById(3)).thenReturn(true);
+        when(vehicleRepository.findById(8)).thenReturn(Optional.of(vehicle));
+        when(customerRepository.findById(12)).thenReturn(Optional.of(owner()));
+        var request = request(LocalDate.of(2026, 1, 1), LocalDate.of(2027, 1, 1));
+        var mismatch = new InsurancePolicyRequest(request.companyId(), request.vehicleId(),
+                request.policyholderCustomerId(), request.policyNumber(), request.insuranceType(),
+                request.startDate(), request.endDate(), request.insuredAmount(), request.deductible(),
+                request.repairShopTerms(), request.partsTerms(), request.certificateReference(),
+                request.registeredOwnerName(), "Trần Văn Bình");
+
+        assertThrows(BadRequestException.class, () -> service.createPolicy(mismatch));
+        verify(policyRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void createPolicyRejectsDifferentContractHolder() {
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(8);
+        vehicle.setCustomerId(12);
+        when(companyRepository.existsById(3)).thenReturn(true);
+        when(vehicleRepository.findById(8)).thenReturn(Optional.of(vehicle));
+        var request = request(LocalDate.of(2026, 1, 1), LocalDate.of(2027, 1, 1));
+        var mismatch = new InsurancePolicyRequest(request.companyId(), request.vehicleId(),
+                15, request.policyNumber(), request.insuranceType(), request.startDate(), request.endDate(),
+                request.insuredAmount(), request.deductible(), request.repairShopTerms(), request.partsTerms(),
+                request.certificateReference(), request.registeredOwnerName(), request.certificateOwnerName());
+
+        assertThrows(BadRequestException.class, () -> service.createPolicy(mismatch));
+        verify(policyRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
     void verificationRecordsEmployeeAndDoesNotInferApprovalFromDates() {
         InsurancePolicy policy = new InsurancePolicy(3, 8, 12, "HD-123", "VAT_CHAT_XE",
-                LocalDate.of(2026, 1, 1), LocalDate.of(2027, 1, 1), null, null, null, null, null);
+                LocalDate.of(2026, 1, 1), LocalDate.of(2027, 1, 1), null, null, null, null, null,
+                "Nguyễn Văn An", "Nguyễn Văn An");
         when(policyRepository.findById(5)).thenReturn(Optional.of(policy));
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(8);
+        vehicle.setCustomerId(12);
+        when(vehicleRepository.findById(8)).thenReturn(Optional.of(vehicle));
+        when(customerRepository.findById(12)).thenReturn(Optional.of(owner()));
         when(staffContext.employeeId(authentication)).thenReturn(9);
         when(policyRepository.saveAndFlush(policy)).thenReturn(policy);
 
@@ -102,7 +151,8 @@ class InsuranceCatalogServiceTest {
     @Test
     void verificationCannotOverwritePreviousResult() {
         InsurancePolicy policy = new InsurancePolicy(3, 8, 12, "HD-123", "VAT_CHAT_XE",
-                LocalDate.of(2026, 1, 1), LocalDate.of(2027, 1, 1), null, null, null, null, null);
+                LocalDate.of(2026, 1, 1), LocalDate.of(2027, 1, 1), null, null, null, null, null,
+                "Nguyễn Văn An", "Nguyễn Văn An");
         policy.verify("KHONG_HOP_LE", "Không tìm thấy hợp đồng.", 9, java.time.LocalDateTime.now());
         when(policyRepository.findById(5)).thenReturn(Optional.of(policy));
 
@@ -111,8 +161,34 @@ class InsuranceCatalogServiceTest {
         verify(policyRepository, never()).saveAndFlush(any());
     }
 
+    @Test
+    void verificationRejectsLegacyPolicyWithoutOwnerNames() {
+        InsurancePolicy policy = new InsurancePolicy(3, 8, 12, "HD-123", "TNDS",
+                LocalDate.of(2026, 1, 1), LocalDate.of(2027, 1, 1), null, null, null, null, null,
+                null, null);
+        Vehicle vehicle = new Vehicle();
+        vehicle.setId(8);
+        vehicle.setCustomerId(12);
+        when(policyRepository.findById(5)).thenReturn(Optional.of(policy));
+        when(vehicleRepository.findById(8)).thenReturn(Optional.of(vehicle));
+        when(customerRepository.findById(12)).thenReturn(Optional.of(owner()));
+
+        assertThrows(BadRequestException.class, () -> service.verifyPolicy(5,
+                new InsurancePolicyVerificationRequest("DA_XAC_MINH", "Đã đối chiếu."),
+                authentication));
+        verify(policyRepository, never()).saveAndFlush(any());
+    }
+
     private InsurancePolicyRequest request(LocalDate start, LocalDate end) {
-        return new InsurancePolicyRequest(3, 8, " HD-123 ", "VAT_CHAT_XE", start, end,
-                new BigDecimal("1000000000.00"), new BigDecimal("500000.00"), null, null, null);
+        return new InsurancePolicyRequest(3, 8, 12, " HD-123 ", "VAT_CHAT_XE", start, end,
+                new BigDecimal("1000000000.00"), new BigDecimal("500000.00"), null, null, null,
+                "Nguyễn Văn An", "Nguyễn Văn An");
+    }
+
+    private Customer owner() {
+        Customer customer = new Customer();
+        customer.setId(12);
+        customer.setFullName("Nguyễn Văn An");
+        return customer;
     }
 }
