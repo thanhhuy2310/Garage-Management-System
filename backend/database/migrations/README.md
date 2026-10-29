@@ -17,6 +17,11 @@ Các file này là script SQL chạy thủ công, không phải Flyway. Hai nhá
 | 10 | `V005__insurance_company_policy.sql` | Danh mục công ty và hợp đồng bảo hiểm |
 | 11 | `V006__insurance_claim.sql` | Hồ sơ tổn thất và nhật ký tạo hồ sơ |
 | 12 | `V007__insurance_owner_names.sql` | Tên chủ xe trên đăng ký và giấy chứng nhận bảo hiểm |
+| 13 | `V008__appointment_workflow.sql` | Phiên bản lịch hẹn, cấu hình khung giờ, nhật ký thao tác; không seed sức chứa |
+
+V008 giữ nguyên lịch cũ, chạy lại an toàn. Quản lý cấu hình khung giờ qua Web/API trước khi khách đặt mới. Mặc định không mở khung giờ. Thay đổi cấu hình chỉ ảnh hưởng nhận lịch mới, không hủy lịch đã có. Không cấp cho ứng dụng khác quyền ghi trực tiếp LichHen bỏ qua khóa nghiệp vụ của API.
+
+Database kiểm chứng riêng có thể tạo bằng `../Initialize_VerificationDatabase.ps1`. Script từ chối database đã tồn tại; không dùng để khởi tạo lại môi trường đang có dữ liệu.
 
 Không chạy lại `QuanLyGaraOTo.sql` trên database đã có dữ liệu. Các file từ bước 2 đến bước 8 đều giữ dữ liệu hiện có và hỗ trợ chạy lại. Khi dùng `sqlcmd`, bật `QUOTED_IDENTIFIER` bằng tùy chọn `-I`.
 
