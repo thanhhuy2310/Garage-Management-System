@@ -69,6 +69,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CustomerNotificationApiTest {
 
     @MockitoBean
+    private com.gara.quanlygara.repository.InsuranceCompanyRepository insuranceCompanyRepository;
+
+    @MockitoBean
+    private com.gara.quanlygara.repository.InsurancePolicyRepository insurancePolicyRepository;
+
+    @MockitoBean
     private JdbcTemplate jdbcTemplateTestMock;
 
 

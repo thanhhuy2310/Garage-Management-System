@@ -66,6 +66,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class CustomerHistoryApiTest {
 
+    @MockitoBean
+    private com.gara.quanlygara.repository.InsuranceCompanyRepository insuranceCompanyRepository;
+
+    @MockitoBean
+    private com.gara.quanlygara.repository.InsurancePolicyRepository insurancePolicyRepository;
+
 
     @MockitoBean
     private JdbcTemplate jdbcTemplateTestMock;

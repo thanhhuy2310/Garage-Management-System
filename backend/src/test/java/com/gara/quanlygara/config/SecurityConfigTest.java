@@ -58,6 +58,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class SecurityConfigTest {
 
+    @MockitoBean
+    private com.gara.quanlygara.repository.InsuranceCompanyRepository insuranceCompanyRepository;
+
+    @MockitoBean
+    private com.gara.quanlygara.repository.InsurancePolicyRepository insurancePolicyRepository;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -144,6 +150,19 @@ class SecurityConfigTest {
         mockMvc.perform(get("/api/accounts"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    void insuranceApiRejectsRequestWithoutJwt() throws Exception {
+        mockMvc.perform(get("/api/insurance/companies"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(roles = "CUSTOMER")
+    void customerCannotReadInsuranceCatalog() throws Exception {
+        mockMvc.perform(get("/api/insurance/companies"))
+                .andExpect(status().isForbidden());
     }
 
     @Test

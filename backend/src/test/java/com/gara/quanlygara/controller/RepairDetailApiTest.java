@@ -71,6 +71,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RepairDetailApiTest {
 
     @MockitoBean
+    private com.gara.quanlygara.repository.InsuranceCompanyRepository insuranceCompanyRepository;
+
+    @MockitoBean
+    private com.gara.quanlygara.repository.InsurancePolicyRepository insurancePolicyRepository;
+
+    @MockitoBean
     private com.gara.quanlygara.service.RepairBusinessRules rules;
 
 
