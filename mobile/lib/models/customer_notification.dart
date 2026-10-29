@@ -1,4 +1,4 @@
-enum CustomerNotificationType { appointment, repair, parts, payment }
+enum CustomerNotificationType { appointment, repair, maintenance, general, parts, payment }
 
 class CustomerNotification {
   const CustomerNotification({

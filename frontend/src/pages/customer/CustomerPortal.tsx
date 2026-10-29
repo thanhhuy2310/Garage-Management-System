@@ -174,7 +174,7 @@ export default function CustomerPortal({ onLogout, page, customerId, onNavigate 
         {page === "quotations" && <CustomerQuotations customerKey={customerKey} />}
         {page === "tracking" && <CustomerTracking />}
         {page === "history" && <CustomerHistory />}
-        {page === "notifications" && <CustomerNotifications customerKey={customerKey} />}
+        {page === "notifications" && <CustomerNotifications />}
         {page === "profile" && profile.data && <ProfileTab customer={profile.data} />}
       </div>
     </CustomerLayout>

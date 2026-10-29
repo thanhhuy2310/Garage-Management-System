@@ -42,6 +42,30 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
+  Future<void> _markRead(int id) async {
+    try {
+      await widget.controller.markNotificationRead(id);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không cập nhật được thông báo. Vui lòng thử lại.')),
+        );
+      }
+    }
+  }
+
+  Future<void> _markAllRead() async {
+    try {
+      await widget.controller.markAllNotificationsRead();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không cập nhật được thông báo. Vui lòng thử lại.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final unread = widget.controller.notifications
@@ -71,7 +95,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                       TextButton(
-                        onPressed: widget.controller.markAllNotificationsRead,
+                        onPressed: _markAllRead,
                         child: const Text('Đánh dấu đã đọc'),
                       ),
                     ],
@@ -81,8 +105,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 for (final item in widget.controller.notifications) ...[
                   _NotificationTile(
                     item: item,
-                    onTap: () =>
-                        widget.controller.markNotificationRead(item.id),
+                    onTap: () => _markRead(item.id),
                   ),
                   const SizedBox(height: 10),
                 ],
@@ -107,6 +130,8 @@ class _NotificationTile extends StatelessWidget {
     final icon = switch (item.type) {
       CustomerNotificationType.appointment => Icons.calendar_month_outlined,
       CustomerNotificationType.repair => Icons.car_repair_outlined,
+      CustomerNotificationType.maintenance => Icons.build_outlined,
+      CustomerNotificationType.general => Icons.notifications_none,
       CustomerNotificationType.parts => Icons.inventory_2_outlined,
       CustomerNotificationType.payment => Icons.receipt_long_outlined,
     };
