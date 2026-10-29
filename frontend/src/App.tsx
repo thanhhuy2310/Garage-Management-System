@@ -37,7 +37,7 @@ const BASE_ROLE_NAV: Record<Role, AdminPage[]> = {
   receptionist: ["customers", "vehicles", "appointments", "reception", "repair", "quotation", "invoice", "history"],
   technician: ["technician", "inventory"],
   warehouse: ["inventory"],
-  manager: ["dashboard", "staff", "services", "repair", "invoice", "reports"],
+  manager: ["dashboard", "appointments", "staff", "services", "repair", "invoice", "reports"],
   admin: ["settings"],
 };
 
