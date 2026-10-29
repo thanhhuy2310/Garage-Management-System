@@ -137,7 +137,7 @@ export default function Reports() {
       ]),
     ]
     const csv = rows
-      .map((row) => row.map((cell) => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(","))
+      .map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","))
       .join("\r\n")
     const url = URL.createObjectURL(new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }))
     const link = document.createElement("a")
@@ -241,7 +241,7 @@ export default function Reports() {
                   <XAxis dataKey="period" tickFormatter={monthLabel} tick={{ fontSize: 12 }} />
                   <YAxis tickFormatter={(value) => `${Math.round(value / 1_000_000)}tr`} tick={{ fontSize: 11 }} width={48} />
                   <Tooltip
-                    labelFormatter={monthLabel}
+                    labelFormatter={(label) => monthLabel(String(label ?? ""))}
                     formatter={(value, name) => [formatMoney(Number(value)), name === "collected" ? "Đã thu" : "Hóa đơn"]}
                   />
                   <Legend formatter={(value) => value === "collected" ? "Đã thu" : "Hóa đơn"} />
