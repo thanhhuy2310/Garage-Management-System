@@ -11,7 +11,7 @@ Ngày kiểm tra: 29/10/2026. Mốc kiểm tra: `334ca3f` của `origin/integrat
 | P1 | `frontend/src/main.tsx` chạy xác thực bộ mock khi khởi động. | Production còn phụ thuộc dữ liệu giả. | Loại bỏ sau khi các trang dùng dữ liệu thật. | Chưa xử lý; badge cố định đã bỏ |
 | P1 | Trang thông báo khách hàng Web/Mobile từng dùng mock tại runtime. | Nội dung và trạng thái đã đọc không lưu database. | Nối API `/api/customers/me/notifications`, phân trang, cập nhật đã đọc và kiểm tra schema V004. | Đã xử lý trong `117fb62`; build/analyze/test qua |
 | P1 | `mobile/lib/app/app.dart` còn điều hướng tới `feature_placeholder_screen.dart` cho một số tính năng. | Luồng khách hàng chưa hoàn chỉnh. | Xác minh route được dùng, thay bằng màn hình thực sau khi API sẵn sàng. | Chưa xử lý |
-| P1 | `backend/src/main/resources/application.properties` còn giá trị mặc định cho tên đăng nhập và mật khẩu SQL Server. | Môi trường cấu hình sai có thể vô tình sử dụng tài khoản mặc định. | Yêu cầu `DB_USERNAME`/`DB_PASSWORD` qua môi trường và cập nhật hướng dẫn triển khai, sau khi kiểm tra CI/local. | Chưa xử lý |
+| P1 | `backend/src/main/resources/application.properties` từng có tên đăng nhập và mật khẩu SQL Server mặc định. | Môi trường cấu hình sai có thể vô tình sử dụng tài khoản mặc định. | Yêu cầu `DB_USERNAME`/`DB_PASSWORD` qua môi trường. | Đã xử lý; 398 test qua |
 | P2 | `frontend/src/api/session.ts` dùng local/session storage cho phiên đăng nhập. | Phù hợp với session hiện tại; cần xem xét bảo mật token khi triển khai. | Giữ cho đến khi có phương án thay thế đồng bộ backend. | Ghi nhận |
 
 ## Phạm vi đã xác minh

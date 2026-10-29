@@ -18,7 +18,6 @@ Ngày đánh giá: 29/10/2026. Nhánh: `integration`. Đây là checkpoint thự
 1. Bảo hiểm: hồ sơ yêu cầu bồi thường, tài liệu và audit log, giám định hạng mục, báo giá nhiều phiên bản và duyệt từng dòng, liên kết kho, phân bổ hóa đơn/thanh toán, báo cáo, UI Web/Mobile. Module hiện tại **không** xác nhận bảo hiểm đã duyệt hoặc đã chuyển tiền.
 2. Production mock: Dashboard, lịch hẹn, tiếp nhận, báo giá và một số trang công khai/khách hàng trên Web; lịch hẹn và báo giá Mobile. Danh sách từng file ở `INTEGRATION_AUDIT.md`.
 3. Kiểm thử đầu cuối bằng tài khoản thật với API và SQL Server cho các màn Web/Mobile mới nối; xác nhận migration trên các môi trường khác.
-4. Cấu hình Backend còn giá trị đăng nhập SQL Server mặc định; cần loại bỏ có kiểm soát cùng cập nhật cấu hình deploy.
-5. Cleanup/refactor phần khác của dự án chưa được thực hiện; không xóa file hoặc sửa hàng loạt khi chưa xác minh dependency.
+4. Cleanup/refactor phần khác của dự án chưa được thực hiện; không xóa file hoặc sửa hàng loạt khi chưa xác minh dependency.
 
 Checkout chính trên máy còn thay đổi chưa commit của người dùng/nhóm. Các commit trên được tạo từ checkout tạm sạch rồi push `integration`; chưa đồng bộ ngược vào checkout chính để tránh ghi đè dữ liệu.
