@@ -35,6 +35,10 @@ export default function ServiceForm({
       setError("Vui lòng nhập tên dịch vụ và đơn giá hợp lệ.")
       return
     }
+    if (Number(price) % 1000 !== 0) {
+      setError("Đơn giá phải tròn nghìn đồng, ví dụ 150.000đ.")
+      return
+    }
     setSaving(true)
     onBusyChange(true)
     setError("")
@@ -84,7 +88,8 @@ export default function ServiceForm({
           required
           min="0"
           max="9999999999999999.99"
-          step="0.01"
+          step="1000"
+          helperText="Nhập giá tròn nghìn đồng, ví dụ 150000."
           value={price}
           onChange={(event) => setPrice(event.target.value)}
         />

@@ -61,6 +61,7 @@ function DetailForm({ editing, onSubmit, onCancel }: DetailFormProps) {
     if (!Number.isInteger(qty) || qty <= 0) return setError("Số lượng phải là số nguyên lớn hơn 0.");
     if (price !== null && (!Number.isFinite(price) || price < 0)) return setError("Đơn giá phải là số không âm.");
 
+    if (price !== null && price % 1000 !== 0) return setError("Đơn giá phải tròn nghìn đồng.");
     setSaving(true);
     try {
       await onSubmit({ type, itemId: editing ? editing.itemId : id, quantity: qty, unitPrice: price });
@@ -118,7 +119,7 @@ function DetailForm({ editing, onSubmit, onCancel }: DetailFormProps) {
       )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Input label="Số lượng *" type="number" inputMode="numeric" min={1} value={quantity} onChange={(event) => setQuantity(event.target.value)} required />
-        <Input label="Đơn giá (VND)" type="number" inputMode="decimal" min={0} step="any" value={unitPrice} onChange={(event) => setUnitPrice(event.target.value)} />
+        <Input label="Đơn giá (VND)" type="number" inputMode="numeric" min={0} step="1000" value={unitPrice} onChange={(event) => setUnitPrice(event.target.value)} />
       </div>
       <p className="text-xs leading-5 text-muted-foreground">
         Thêm hoặc sửa hạng mục chỉ ghi chi tiết phiếu; không xuất kho và không thay đổi tồn kho.

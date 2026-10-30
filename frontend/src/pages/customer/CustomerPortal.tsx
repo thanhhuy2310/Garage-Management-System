@@ -166,7 +166,6 @@ export default function CustomerPortal({ onLogout, page, customerId, onNavigate 
       }
     >
       <div key={page} className="customer-page-enter space-y-6">
-        {page === "quotations" && <Card className="border-warning/30 bg-warning-soft p-4"><p className="font-semibold">Dữ liệu minh họa — MOCK_ONLY</p><p className="text-sm">Báo giá chưa kết nối hệ thống gara. Thao tác tại đây chưa lưu xác nhận thật.</p></Card>}
         <QueryState loading={page === "profile" && profile.loading} error={profile.error} onRetry={profile.reload} />
         {page === "overview" && <CustomerOverview onNavigate={onNavigate} customerId={customerId} />}
         {page === "vehicles" && <CustomerVehicles customerId={customerId} />}

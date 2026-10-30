@@ -66,6 +66,7 @@ export default function ImportsTab({ refreshKey, onChanged }: { refreshKey: numb
       if (seen.has(row.partId)) return setFormError("Một phụ tùng chỉ xuất hiện một lần trong phiếu nhập.");
       if (!Number.isInteger(quantity) || quantity <= 0) return setFormError("Số lượng nhập phải là số nguyên lớn hơn 0.");
       if (row.unitPrice.trim() === "" || !Number.isFinite(unitPrice) || unitPrice < 0) return setFormError("Đơn giá nhập phải là số không âm.");
+      if (unitPrice % 1000 !== 0) return setFormError("Đơn giá nhập phải tròn nghìn đồng.");
       seen.add(row.partId);
       items.push({ partId: Number(row.partId), quantity, unitPrice });
     }
@@ -115,7 +116,7 @@ export default function ImportsTab({ refreshKey, onChanged }: { refreshKey: numb
                     options={[{ value: "", label: "— Chọn phụ tùng —" }, ...parts.map((part) => ({ value: String(part.id), label: `${part.id} · ${part.name}` }))]}
                   />
                   <Input label={index === 0 ? "Số lượng *" : undefined} type="number" min={1} value={row.quantity} onChange={(event) => updateRow(index, { quantity: event.target.value })} />
-                  <Input label={index === 0 ? "Đơn giá nhập *" : undefined} type="number" min={0} step="any" value={row.unitPrice} onChange={(event) => updateRow(index, { unitPrice: event.target.value })} />
+                  <Input label={index === 0 ? "Đơn giá nhập *" : undefined} type="number" min={0} step="1000" value={row.unitPrice} onChange={(event) => updateRow(index, { unitPrice: event.target.value })} />
                   <Button type="button" variant="outline" disabled={rows.length === 1} onClick={() => setRows((current) => current.filter((_, i) => i !== index))}>Xóa dòng</Button>
                 </div>
               ))}

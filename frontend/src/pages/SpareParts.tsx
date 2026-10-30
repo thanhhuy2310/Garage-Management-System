@@ -41,6 +41,7 @@ function SparePartForm({ warehouses, initial, onSubmit, onCancel }: PartFormProp
     if (!warehouseId) return setError("Vui lòng chọn kho.");
     if (!name.trim()) return setError("Vui lòng nhập tên phụ tùng.");
     if (unitPrice.trim() === "" || !Number.isFinite(price) || price < 0) return setError("Đơn giá phải là số không âm.");
+    if (price % 1000 !== 0) return setError("Đơn giá phải tròn nghìn đồng, ví dụ 50000.");
     if (!Number.isInteger(min) || min < 0) return setError("Mức tồn tối thiểu phải là số nguyên không âm.");
 
     setSaving(true);
@@ -73,7 +74,7 @@ function SparePartForm({ warehouses, initial, onSubmit, onCancel }: PartFormProp
       <Input label="Tên phụ tùng *" value={name} onChange={(event) => setName(event.target.value)} maxLength={150} autoFocus required />
       <Input label="Hãng sản xuất" value={manufacturer} onChange={(event) => setManufacturer(event.target.value)} maxLength={150} />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Input label="Đơn giá (VND) *" type="number" inputMode="decimal" min={0} step="any" value={unitPrice} onChange={(event) => setUnitPrice(event.target.value)} required />
+        <Input label="Đơn giá (VND) *" type="number" inputMode="numeric" min={0} step="1000" value={unitPrice} onChange={(event) => setUnitPrice(event.target.value)} required />
         <Input label="Mức tồn tối thiểu" type="number" inputMode="numeric" min={0} value={minStock} onChange={(event) => setMinStock(event.target.value)} />
       </div>
       {initial && (
