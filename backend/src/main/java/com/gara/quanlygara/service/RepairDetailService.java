@@ -1,6 +1,8 @@
 // TV3-TUAN7
 package com.gara.quanlygara.service;
 
+import com.gara.quanlygara.validation.PriceRules;
+
 import com.gara.quanlygara.dto.repairdetail.RepairDetailCreateRequest;
 import com.gara.quanlygara.dto.repairdetail.RepairDetailResponse;
 import com.gara.quanlygara.dto.repairdetail.RepairDetailType;
@@ -102,7 +104,7 @@ public class RepairDetailService {
                         .findById(new RepairServiceItem.Key(repairOrderId, itemId))
                         .orElseThrow(this::itemNotFound);
                 item.setQuantity(request.quantity());
-                if (request.unitPrice() != null) item.setUnitPrice(scale(request.unitPrice()));
+                if (request.unitPrice() != null) item.setUnitPrice(PriceRules.requireWholeThousand(request.unitPrice()));
                 serviceItemRepository.saveAndFlush(item);
             }
             case SPARE_PART -> {
@@ -110,7 +112,7 @@ public class RepairDetailService {
                         .findById(new RepairPartItem.Key(repairOrderId, itemId))
                         .orElseThrow(this::itemNotFound);
                 item.setQuantity(request.quantity());
-                if (request.unitPrice() != null) item.setUnitPrice(scale(request.unitPrice()));
+                if (request.unitPrice() != null) item.setUnitPrice(PriceRules.requireWholeThousand(request.unitPrice()));
                 partItemRepository.saveAndFlush(item);
             }
         }
@@ -150,7 +152,7 @@ public class RepairDetailService {
         item.setServiceId(request.itemId());
         item.setStatus("CHO_SUA");
         item.setQuantity(request.quantity());
-        item.setUnitPrice(scale(request.unitPrice() != null ? request.unitPrice() : catalogPrice));
+        item.setUnitPrice(PriceRules.requireWholeThousand(request.unitPrice() != null ? request.unitPrice() : catalogPrice));
         serviceItemRepository.saveAndFlush(item);
     }
 
@@ -166,7 +168,7 @@ public class RepairDetailService {
         item.setRepairOrderId(repairOrderId);
         item.setSparePartId(request.itemId());
         item.setQuantity(request.quantity());
-        item.setUnitPrice(scale(request.unitPrice() != null ? request.unitPrice() : part.getUnitPrice()));
+        item.setUnitPrice(PriceRules.requireWholeThousand(request.unitPrice() != null ? request.unitPrice() : part.getUnitPrice()));
         partItemRepository.saveAndFlush(item);
     }
 

@@ -92,7 +92,7 @@ class StockReceiptServiceTest {
         when(sparePartRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> service.create(request(new ImportRequest.Item(99, 1, BigDecimal.ONE)), 7));
+                () -> service.create(request(new ImportRequest.Item(99, 1, new BigDecimal("1000"))), 7));
         verify(receiptRepository, never()).saveAndFlush(any(StockReceipt.class));
         verify(sparePartRepository, never()).updateStockQuantity(anyInt(), anyInt());
     }
@@ -100,7 +100,7 @@ class StockReceiptServiceTest {
     @Test
     void importRejectsDuplicatePartInTheSameReceipt() {
         assertThrows(BadRequestException.class, () -> service.create(request(
-                new ImportRequest.Item(5, 1, BigDecimal.ONE), new ImportRequest.Item(5, 2, BigDecimal.ONE)), 7));
+                new ImportRequest.Item(5, 1, new BigDecimal("1000")), new ImportRequest.Item(5, 2, new BigDecimal("1000"))), 7));
         verify(receiptRepository, never()).saveAndFlush(any(StockReceipt.class));
     }
 
@@ -110,7 +110,7 @@ class StockReceiptServiceTest {
         when(sparePartRepository.lockStockQuantity(5)).thenReturn(Optional.of(Integer.MAX_VALUE));
 
         assertThrows(BadRequestException.class,
-                () -> service.create(request(new ImportRequest.Item(5, 1, BigDecimal.ONE)), 7));
+                () -> service.create(request(new ImportRequest.Item(5, 1, new BigDecimal("1000"))), 7));
         verify(sparePartRepository, never()).updateStockQuantity(anyInt(), anyInt());
     }
 
@@ -121,7 +121,7 @@ class StockReceiptServiceTest {
         when(sparePartRepository.updateStockQuantity(5, 2)).thenReturn(0);
 
         assertThrows(ConflictException.class,
-                () -> service.create(request(new ImportRequest.Item(5, 1, BigDecimal.ONE)), 7));
+                () -> service.create(request(new ImportRequest.Item(5, 1, new BigDecimal("1000"))), 7));
         // Không có try/catch nuốt lỗi và phương thức ghi chạy trong @Transactional => rollback toàn bộ.
         Method create = StockReceiptService.class.getMethod("create", ImportRequest.class, Integer.class);
         assertNotNull(create.getAnnotation(Transactional.class));

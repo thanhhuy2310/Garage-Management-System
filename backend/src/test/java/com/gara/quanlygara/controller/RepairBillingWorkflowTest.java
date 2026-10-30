@@ -26,6 +26,7 @@ class RepairBillingWorkflowTest extends ApiTestSupport {
         jdbc.execute("CREATE TABLE IF NOT EXISTS Kho (MaKho INT PRIMARY KEY, TenKho NVARCHAR(150), DiaChi NVARCHAR(255))");
         jdbc.execute("CREATE TABLE IF NOT EXISTS PhuTung (MaPhuTung INT PRIMARY KEY, MaKho INT, TenPhuTung NVARCHAR(150), HangSanXuat NVARCHAR(100), DonGia DECIMAL(18,2), SoLuongTon INT, MucTonToiThieu INT)");
         jdbc.execute("CREATE TABLE IF NOT EXISTS ChiTietPhuTung (MaPhieuSuaChua INT, MaPhuTung INT, SoLuong INT, DonGia DECIMAL(18,2))");
+        jdbc.execute("CREATE TABLE IF NOT EXISTS ChiTietBaoGia (MaChiTietBaoGia INT PRIMARY KEY, MaBaoGia INT, MaDichVu INT, MaPhuTung INT, NoiDung NVARCHAR(255), SoLuong INT, DonGia DECIMAL(18,2))");
         jdbc.execute("""
             CREATE TABLE IF NOT EXISTS BaoGia (
                 MaBaoGia INT PRIMARY KEY,
@@ -66,6 +67,7 @@ class RepairBillingWorkflowTest extends ApiTestSupport {
                 (9202, 9202, '2026-10-06 08:00:00', 0, 'DA_XAC_NHAN', '2026-10-06 08:00:00')
             """);
         jdbc.update("INSERT INTO PhieuXuatKho (MaPhieuXuat,MaPhieuSuaChua,MaNhanVienKho,NgayXuat,LyDo) VALUES (9202,9202,9201,'2026-10-06 08:00:00','Thay ma phanh')");
+        jdbc.update("INSERT INTO ChiTietBaoGia (MaChiTietBaoGia,MaBaoGia,MaDichVu,NoiDung,SoLuong,DonGia) VALUES (9201,9201,9201,'Phanh',2,200000),(9202,9202,9201,'Phanh',1,100000)");
         jdbc.update("INSERT INTO ChiTietPhieuXuat (MaPhieuXuat,MaPhuTung,SoLuong,DonGia,DaXacNhanSuDung,SoLuongThucDung,SoLuongHoanTra,MaKyThuatVienXacNhan,NgayXacNhan) VALUES (9202,9201,2,50000,1,2,0,9201,'2026-10-06 08:30:00')");
     }
 

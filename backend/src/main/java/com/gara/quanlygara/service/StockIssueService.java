@@ -102,10 +102,12 @@ public class StockIssueService {
         List<IssueRequest.Item> ordered = request.items().stream()
                 .sorted(Comparator.comparing(IssueRequest.Item::partId)).toList();
         Map<Integer, SparePart> parts = new HashMap<>();
+        Map<Integer, BigDecimal> approvedPrices = new HashMap<>();
         for (IssueRequest.Item item : ordered) {
             SparePart part = sparePartRepository.findById(item.partId())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phụ tùng " + item.partId() + "."));
             parts.put(part.getId(), part);
+            approvedPrices.put(part.getId(),rules.approvedPartPrice(request.repairOrderId(),part.getId(),item.quantity(),true));
         }
 
         // Kiểm tra tồn khả dụng = tồn - phần đã cấp phát chưa xác nhận. Khóa dòng phụ tùng để tuần tự hóa các phiếu đồng thời.
@@ -133,7 +135,7 @@ public class StockIssueService {
             detail.setIssueId(issue.getId());
             detail.setPartId(item.partId());
             detail.setQuantity(item.quantity());
-            detail.setUnitPrice(parts.get(item.partId()).getUnitPrice());
+            detail.setUnitPrice(approvedPrices.get(item.partId()));
             detail.setConfirmed(false);
             itemRepository.save(detail);
         }
@@ -183,6 +185,9 @@ public class StockIssueService {
 
         Integer stockAfter = null;
         if (actual > 0) {
+            BigDecimal approvedPrice=rules.approvedPartPrice(orderId,partId,actual,false);
+            if(item.getUnitPrice()==null || item.getUnitPrice().compareTo(approvedPrice)!=0)
+                throw new ConflictException("Đơn giá cấp phát không khớp báo giá đã duyệt. Cần đối chiếu trước khi xác nhận thực dùng.");
             int before = ledger.lock(partId);
             if (before < actual) {
                 throw new ConflictException("Số lượng tồn kho không đủ để xác nhận sử dụng.");

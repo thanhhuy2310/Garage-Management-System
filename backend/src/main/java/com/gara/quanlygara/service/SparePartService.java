@@ -1,6 +1,8 @@
 // TV3-TUAN7
 package com.gara.quanlygara.service;
 
+import com.gara.quanlygara.validation.PriceRules;
+
 import com.gara.quanlygara.dto.sparepart.SparePartPageResponse;
 import com.gara.quanlygara.dto.sparepart.SparePartRequest;
 import com.gara.quanlygara.dto.sparepart.SparePartResponse;
@@ -15,7 +17,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.RoundingMode;
 import java.util.List;
 
 /**
@@ -102,7 +103,7 @@ public class SparePartService {
         part.setWarehouseId(request.warehouseId());
         part.setName(request.name().trim().replaceAll("\\s+", " "));
         part.setManufacturer(normalizeOptional(request.manufacturer()));
-        part.setUnitPrice(request.unitPrice().setScale(2, RoundingMode.HALF_UP));
+        part.setUnitPrice(PriceRules.requireWholeThousand(request.unitPrice()));
         part.setMinStockLevel(request.minStockLevel() == null ? 0 : request.minStockLevel());
     }
 

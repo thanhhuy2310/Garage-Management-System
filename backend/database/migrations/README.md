@@ -18,10 +18,13 @@ Các file này là script SQL chạy thủ công, không phải Flyway. Hai nhá
 | 11 | `V006__insurance_claim.sql` | Hồ sơ tổn thất và nhật ký tạo hồ sơ |
 | 12 | `V007__insurance_owner_names.sql` | Tên chủ xe trên đăng ký và giấy chứng nhận bảo hiểm |
 | 13 | `V008__appointment_workflow.sql` | Phiên bản lịch hẹn, cấu hình khung giờ, nhật ký thao tác; không seed sức chứa |
+| 14 | `V009__quotation_workflow.sql` | Phiên bản báo giá, snapshot lịch sử; đối chiếu phụ tùng thực dùng với báo giá đã duyệt |
 
 V008 giữ nguyên lịch cũ, chạy lại an toàn. Quản lý cấu hình khung giờ qua Web/API trước khi khách đặt mới. Mặc định không mở khung giờ. Thay đổi cấu hình chỉ ảnh hưởng nhận lịch mới, không hủy lịch đã có. Không cấp cho ứng dụng khác quyền ghi trực tiếp LichHen bỏ qua khóa nghiệp vụ của API.
 
 Database kiểm chứng riêng có thể tạo bằng `../Initialize_VerificationDatabase.ps1`. Script từ chối database đã tồn tại; không dùng để khởi tạo lại môi trường đang có dữ liệu.
+
+V009 không đổi nội dung báo giá cũ, không bỏ unique một báo giá hiện hành/phiếu. Nội dung trước tích hợp được lưu snapshot khi lần đầu thay đổi qua API, với actor để trống vì không thể suy đoán người thực hiện cũ. Trigger xác nhận phụ tùng bảo vệ cả API và procedure SQL cũ: nếu thực dùng vượt báo giá hoặc sai giá, transaction phải rollback. Các fixture kho phải có chi tiết báo giá thật, không chỉ một header đã xác nhận. Khi rollback ứng dụng, giữ các cột và lịch sử bổ sung; không xóa lịch sử đã duyệt. Script dùng database đang chọn, không chứa USE cố định; chạy với `sqlcmd -I -f 65001 -d <database>`.
 
 Không chạy lại `QuanLyGaraOTo.sql` trên database đã có dữ liệu. Các file từ bước 2 đến bước 8 đều giữ dữ liệu hiện có và hỗ trợ chạy lại. Khi dùng `sqlcmd`, bật `QUOTED_IDENTIFIER` bằng tùy chọn `-I`.
 

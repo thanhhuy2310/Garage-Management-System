@@ -1,5 +1,7 @@
 package com.gara.quanlygara.service;
 
+import com.gara.quanlygara.validation.PriceRules;
+
 import com.gara.quanlygara.dto.service.ServiceRequest;
 import com.gara.quanlygara.dto.service.ServiceResponse;
 import com.gara.quanlygara.entity.GarageService;
@@ -64,7 +66,7 @@ public class ServiceCatalogService {
     private void apply(GarageService service, ServiceRequest request) {
         service.setName(request.name());
         service.setType(request.type());
-        service.setUnitPrice(request.unitPrice());
+        service.setUnitPrice(PriceRules.requireWholeThousand(request.unitPrice()));
         service.setDescription(request.description());
         if (request.active() != null) service.setActive(request.active());
     }

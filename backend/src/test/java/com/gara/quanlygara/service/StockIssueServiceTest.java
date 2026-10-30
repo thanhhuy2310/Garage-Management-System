@@ -77,8 +77,11 @@ class StockIssueServiceTest {
     @BeforeEach
     void setUp() {
         StockLedger ledger = new StockLedger(sparePartRepository, movementRepository);
+        RepairBusinessRules rules=org.mockito.Mockito.mock(RepairBusinessRules.class);
+        lenient().when(rules.approvedPartPrice(anyInt(),anyInt(),anyInt(),org.mockito.ArgumentMatchers.anyBoolean()))
+                .thenReturn(part().getUnitPrice());
         service = new StockIssueService(issueRepository, itemRepository, sparePartRepository, movementRepository,
-                repairPartItemRepository, repairServiceItemRepository, ledger, org.mockito.Mockito.mock(RepairBusinessRules.class));
+                repairPartItemRepository, repairServiceItemRepository, ledger, rules);
         lenient().when(sparePartRepository.updateStockQuantity(anyInt(), anyInt())).thenReturn(1);
         lenient().when(movementRepository.save(any(StockMovement.class))).thenAnswer(call -> call.getArgument(0));
         lenient().when(itemRepository.saveAndFlush(any(StockIssueItem.class))).thenAnswer(call -> call.getArgument(0));

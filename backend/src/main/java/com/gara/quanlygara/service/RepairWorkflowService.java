@@ -1,5 +1,7 @@
 package com.gara.quanlygara.service;
 
+import com.gara.quanlygara.validation.PriceRules;
+
 import com.gara.quanlygara.dto.repair.RepairRequests;
 import com.gara.quanlygara.entity.RepairOrder;
 import com.gara.quanlygara.entity.RepairProgress;
@@ -139,6 +141,7 @@ public class RepairWorkflowService {
         var states = jdbc.queryForList("SELECT TrangThai FROM ChiTietDichVu WHERE MaPhieuSuaChua = ? AND MaDichVu = ?",
                 String.class, id, serviceId);
         if (states.isEmpty()) throw new ResourceNotFoundException("Dịch vụ không có trên phiếu sửa chữa.");
+        rules.requireApprovedService(id,serviceId);
         String previous = states.getFirst() == null ? "CHO_SUA" : states.getFirst();
         if (!previous.equals(request.expectedStatus())) {
             throw new ConflictException("Dịch vụ vừa được cập nhật. Vui lòng tải lại.");
@@ -175,7 +178,7 @@ public class RepairWorkflowService {
         jdbc.update("""
                 INSERT INTO ChiTietDichVu (MaPhieuSuaChua, MaDichVu, SoLuong, DonGia, TrangThai)
                 VALUES (?, ?, ?, ?, N'CHO_SUA')
-                """, orderId, service.getId(), line.quantity(), service.getUnitPrice());
+                """, orderId, service.getId(), line.quantity(), PriceRules.requireWholeThousand(service.getUnitPrice()));
     }
 
     private void log(RepairOrder order, Integer serviceId, String status, String notes, Authentication auth) {

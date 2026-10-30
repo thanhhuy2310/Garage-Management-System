@@ -344,6 +344,7 @@ class WarehouseApiTest {
     void technicianConfirmsActualUsedAndStockDropsByActualOnly() throws Exception {
         account("ktv", AccountRole.TECHNICIAN, 2);
         arrangeConfirmable(5, 12);
+        when(rules.approvedPartPrice(9,5,3,false)).thenReturn(new BigDecimal("180000.00"));
 
         mockMvc.perform(post("/api/warehouse/exports/1/items/5/confirm").contentType(APPLICATION_JSON)
                         .content("{\"actualUsed\":3}"))

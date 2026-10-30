@@ -62,7 +62,7 @@ class ServiceControllerTest extends ApiTestSupport {
                         .contentType(APPLICATION_JSON)
                         .content("""
                                 {"name":"  Bảo dưỡng  ","type":"  Định kỳ ",
-                                 "unitPrice":250000.50,"description":"  Kiểm tra xe  "}
+                                 "unitPrice":250000,"description":"  Kiểm tra xe  "}
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.name").value("Bảo dưỡng"))

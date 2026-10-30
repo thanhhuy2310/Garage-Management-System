@@ -1,6 +1,8 @@
 // TV3-TUAN8
 package com.gara.quanlygara.service;
 
+import com.gara.quanlygara.validation.PriceRules;
+
 import com.gara.quanlygara.dto.warehouse.ImportRequest;
 import com.gara.quanlygara.dto.warehouse.ImportResponse;
 import com.gara.quanlygara.dto.warehouse.PageResponse;
@@ -68,6 +70,7 @@ public class StockReceiptService {
                 .sorted(Comparator.comparing(ImportRequest.Item::partId)).toList();
         Map<Integer, String> names = new HashMap<>();
         for (ImportRequest.Item item : ordered) {
+            PriceRules.requireWholeThousand(item.unitPrice());
             SparePart part = sparePartRepository.findById(item.partId())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phụ tùng " + item.partId() + "."));
             names.put(part.getId(), part.getName());
