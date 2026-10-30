@@ -68,7 +68,12 @@ class MockQuotationService implements QuotationService {
   }
 
   @override
-  Future<Quotation> updateStatus(String id, QuotationStatus status) async {
+  Future<Quotation> updateStatus(
+    String id,
+    QuotationStatus status, {
+    int? version,
+    String? reason,
+  }) async {
     await Future<void>.delayed(const Duration(milliseconds: 260));
     final index = _items.indexWhere((item) => item.id == id);
     final updated = _items[index].copyWith(status: status);

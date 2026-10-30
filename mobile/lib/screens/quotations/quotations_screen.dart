@@ -1,4 +1,3 @@
-import '../../core/widgets/demo_notice.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/app_controller.dart';
@@ -33,7 +32,7 @@ class _QuotationsScreenState extends State<QuotationsScreen> {
       _error = null;
     });
     try {
-      await widget.controller.loadCustomerExperience();
+      await widget.controller.loadQuotations();
     } catch (_) {
       _error = 'Không thể tải danh sách báo giá.';
     } finally {
@@ -44,7 +43,16 @@ class _QuotationsScreenState extends State<QuotationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Báo giá'), bottom: const DemoNotice()),
+      appBar: AppBar(
+        title: const Text('Báo giá'),
+        actions: [
+          IconButton(
+            onPressed: _loading ? null : _load,
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Tải lại',
+          ),
+        ],
+      ),
       body: SafeArea(
         top: false,
         child: _loading
@@ -90,7 +98,7 @@ class _QuotationsScreenState extends State<QuotationsScreen> {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      item.id,
+                                      'BG${item.id} · Lần ${item.revision}',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.w800,
                                         fontSize: 16,

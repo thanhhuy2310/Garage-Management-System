@@ -8,11 +8,15 @@ class QuotationLine {
     required this.name,
     required this.quantity,
     required this.unitPrice,
+    this.serverAmount,
+    this.kind = 'SERVICE',
   });
   final String name;
   final int quantity;
-  final int unitPrice;
-  int get amount => quantity * unitPrice;
+  final num unitPrice;
+  final num? serverAmount;
+  final String kind;
+  num get amount => serverAmount ?? quantity * unitPrice;
 }
 
 class Quotation {
@@ -23,6 +27,10 @@ class Quotation {
     required this.createdAt,
     required this.status,
     required this.lines,
+    this.version = 0,
+    this.revision = 1,
+    this.serverTotal,
+    this.rejectionReason,
   });
   final String id;
   final Vehicle vehicle;
@@ -30,7 +38,12 @@ class Quotation {
   final DateTime createdAt;
   final QuotationStatus status;
   final List<QuotationLine> lines;
-  int get total => lines.fold(0, (sum, line) => sum + line.amount);
+  final int version;
+  final int revision;
+  final num? serverTotal;
+  final String? rejectionReason;
+  num get total =>
+      serverTotal ?? lines.fold<num>(0, (sum, line) => sum + line.amount);
 
   Quotation copyWith({QuotationStatus? status}) => Quotation(
     id: id,
@@ -39,5 +52,9 @@ class Quotation {
     createdAt: createdAt,
     status: status ?? this.status,
     lines: lines,
+    version: version,
+    revision: revision,
+    serverTotal: serverTotal,
+    rejectionReason: rejectionReason,
   );
 }

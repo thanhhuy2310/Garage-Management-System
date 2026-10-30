@@ -3,5 +3,10 @@ import '../models/quotation.dart';
 
 abstract interface class QuotationService {
   Future<List<Quotation>> getQuotations(int customerId);
-  Future<Quotation> updateStatus(String id, QuotationStatus status);
+  Future<Quotation> updateStatus(
+    String id,
+    QuotationStatus status, {
+    int? version,
+    String? reason,
+  });
 }

@@ -1,4 +1,5 @@
 import '../services/customer_api.dart';
+
 import 'package:flutter/material.dart';
 
 import '../core/constants/app_config.dart';
@@ -19,7 +20,7 @@ import '../services/history_service.dart';
 import '../services/home_service.dart';
 import '../services/notification_service.dart';
 import '../services/profile_service.dart';
-import '../services/quotation_service.dart';
+import '../services/api_quotation_service.dart';
 import '../services/repair_service.dart';
 import '../services/vehicle_service.dart';
 import 'app_controller.dart';
@@ -47,13 +48,15 @@ class GarageCustomerApp extends StatefulWidget {
 }
 
 class _GarageCustomerAppState extends State<GarageCustomerApp> {
-  late final CustomerApi _api = CustomerApi(() => controller.session?.accessToken);
+  late final CustomerApi _api = CustomerApi(
+    () => controller.session?.accessToken,
+  );
   late final AppController controller = AppController(
     widget.authService ?? ApiAuthService(),
     widget.homeService ?? ApiHomeService(_api),
     widget.vehicleService ?? ApiVehicleService(_api),
     widget.appointmentService ?? ApiAppointmentService(_api),
-    MockQuotationService(),
+    ApiQuotationService(_api),
     ApiRepairService(),
     ApiNotificationService(_api),
     ApiProfileService(_api),

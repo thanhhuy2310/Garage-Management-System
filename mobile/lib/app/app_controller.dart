@@ -159,8 +159,30 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> respondToQuotation(String id, QuotationStatus status) async {
-    final updated = await quotationService.updateStatus(id, status);
+  Future<void> loadQuotations() async {
+    final current = session;
+    if (current == null) return;
+    final loaded = await quotationService.getQuotations(current.customerId);
+    if (!identical(session, current)) return;
+    quotations = loaded;
+    notifyListeners();
+  }
+
+  Future<void> respondToQuotation(
+    String id,
+    QuotationStatus status, {
+    int? version,
+    String? reason,
+  }) async {
+    final current = session;
+    final viewed = quotations.firstWhere((item) => item.id == id);
+    final updated = await quotationService.updateStatus(
+      id,
+      status,
+      version: version ?? viewed.version,
+      reason: reason,
+    );
+    if (!identical(session, current)) return;
     quotations = [
       for (final item in quotations)
         if (item.id == id) updated else item,

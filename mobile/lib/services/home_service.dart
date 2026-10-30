@@ -30,6 +30,8 @@ class ApiHomeService implements HomeService {
       api.request('/customers/$customerId/vehicles'),
       api.request('/customer/repairs'),
       api.request('/appointments'),
+      api.request('/quotations'),
+      api.request('/customers/me/notifications/unread-count'),
     ]);
     final upcoming =
         (values[2] as List)
@@ -56,9 +58,12 @@ class ApiHomeService implements HomeService {
                 !['HOAN_TAT', 'DA_HUY', 'HUY'].contains(r['order']['status']),
           )
           .length,
-      pendingQuotationCount: 0,
-      unreadNotificationCount: 0,
-      hasConnectedCustomerExperience: false,
+      pendingQuotationCount: (values[3] as List)
+          .where((q) => q['status'] == 'CHO_XAC_NHAN')
+          .length,
+      unreadNotificationCount:
+          (values[4] as Map<String, dynamic>)['count'] as int,
+      hasConnectedCustomerExperience: true,
     );
   }
 }
