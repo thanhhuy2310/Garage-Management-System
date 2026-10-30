@@ -39,10 +39,12 @@ public class RepairWorkflowService {
     private final RepairOrderQueryService queries;
     private final JdbcTemplate jdbc;
     private final RepairBusinessRules rules;
+    private final com.gara.quanlygara.repository.ReceptionRepository receptions;
 
     public RepairWorkflowService(RepairOrderRepository orders, RepairProgressRepository progress,
                                  GarageServiceRepository services, RepairOrderQueryService queries,
-                                 JdbcTemplate jdbc, RepairBusinessRules rules) {
+                                 JdbcTemplate jdbc, RepairBusinessRules rules, com.gara.quanlygara.repository.ReceptionRepository receptions) {
+        this.receptions = receptions;
         this.rules = rules;
         this.orders = orders;
         this.progress = progress;
@@ -63,10 +65,8 @@ public class RepairWorkflowService {
     }
 
     public RepairOrder create(RepairRequests.Create request, Authentication auth) {
-        if (jdbc.queryForObject("SELECT COUNT(*) FROM PhieuTiepNhan WHERE MaTiepNhan = ?",
-                Integer.class, request.receptionId()) == 0) {
-            throw new ResourceNotFoundException("Không tìm thấy phiếu tiếp nhận.");
-        }
+        receptions.findForUpdate(request.receptionId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu tiếp nhận."));
         if (orders.existsByReceptionId(request.receptionId())) {
             throw new ConflictException("Phiếu tiếp nhận đã có phiếu sửa chữa.");
         }

@@ -19,6 +19,7 @@ Các file này là script SQL chạy thủ công, không phải Flyway. Hai nhá
 | 12 | `V007__insurance_owner_names.sql` | Tên chủ xe trên đăng ký và giấy chứng nhận bảo hiểm |
 | 13 | `V008__appointment_workflow.sql` | Phiên bản lịch hẹn, cấu hình khung giờ, nhật ký thao tác; không seed sức chứa |
 | 14 | `V009__quotation_workflow.sql` | Phiên bản báo giá, snapshot lịch sử; đối chiếu phụ tùng thực dùng với báo giá đã duyệt |
+| 15 | `V010__reception_workflow.sql` | Liên kết lịch hẹn duy nhất, số km tiếp nhận, nhân viên và phiên bản; giữ phiếu cũ |
 
 V008 giữ nguyên lịch cũ, chạy lại an toàn. Quản lý cấu hình khung giờ qua Web/API trước khi khách đặt mới. Mặc định không mở khung giờ. Thay đổi cấu hình chỉ ảnh hưởng nhận lịch mới, không hủy lịch đã có. Không cấp cho ứng dụng khác quyền ghi trực tiếp LichHen bỏ qua khóa nghiệp vụ của API.
 
