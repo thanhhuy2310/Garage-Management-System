@@ -1,202 +1,98 @@
-import React, { useState } from "react";
-import { Card, Button, Input, Select, Badge, Icons, Textarea } from "../components/ui";
-import { dichVu, khachHang, lichHen, phieuTiepNhan, xe } from "../mock/data";
-
-const STEPS = ["Thông tin khách", "Thông tin xe", "Lịch hẹn", "Tình trạng xe", "Phiếu tiếp nhận"];
-const receptionRecord = phieuTiepNhan[0];
-const selectedVehicle = xe.find((vehicle) => vehicle.MaXe === receptionRecord.MaXe)!;
-const selectedCustomer = khachHang.find((customer) => customer.MaKhachHang === selectedVehicle.MaKhachHang)!;
-const selectedAppointment = lichHen.find((appointment) => appointment.MaXe === selectedVehicle.MaXe)!;
-const selectedService = dichVu.find((service) => service.MaDichVu === selectedAppointment.MaDichVu)!;
-
-export default function Reception() {
-  const [step, setStep] = useState(0);
-  const [submitted, setSubmitted] = useState(false);
-
-  if (submitted) {
-    return (
-      <div className="mx-auto max-w-2xl">
-        <Card className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success-soft">
-            <span className="scale-150 text-success" aria-hidden="true">{Icons.check}</span>
-          </div>
-          <h2 className="text-xl font-bold text-slate-800 mb-2">Đã lập phiếu tiếp nhận</h2>
-          <p className="mb-1 text-slate-500">Phiếu tiếp nhận: <strong className="mono text-primary">{receptionRecord.MaTiepNhan}</strong></p>
-          <p className="text-slate-500 mb-6">Xe <strong>{selectedVehicle.BienSo}</strong> của khách hàng <strong>{selectedCustomer.HoTen}</strong> đã được tiếp nhận.</p>
-          <div className="flex gap-3 justify-center">
-            <Button variant="outline" icon={Icons.printer}>In phiếu tiếp nhận</Button>
-            <Button onClick={() => setSubmitted(false)}>Tiếp nhận xe khác</Button>
-          </div>
-        </Card>
-      </div>
-    );
+import React, {useCallback,useEffect,useState} from "react";
+import {Card,Button,Input,Select,Textarea,Modal} from "../components/ui";
+import {customersApi,type Customer,type CustomerPayload} from "../api/customers";
+import {vehiclesApi,toVehiclePayload,type Vehicle} from "../api/vehicles";
+import {appointmentsApi,type Appointment} from "../api/appointments";
+import {receptionsApi,type Reception,type ReceptionInput} from "../api/receptions";
+import {garageApi} from "../api/garage";
+import {errorMessage} from "../api/client";
+import type {GarageService} from "../types/garage";
+import {formatGarageDate} from "../utils/garageFormat";
+import VehicleForm from "../features/vehicles/VehicleForm";
+const STEPS=["Thông tin khách","Thông tin xe","Lịch hẹn","Tình trạng xe","Phiếu tiếp nhận"];
+const empty:ReceptionInput={customerId:0,vehicleId:0,appointmentId:null,mileage:null,initialCondition:"",customerRequest:"",notes:""};
+const emptyCustomer:CustomerPayload={fullName:"",phone:"",email:"",address:""};
+export default function ReceptionPage(){
+  const [step,setStep]=useState(0),[input,setInput]=useState<ReceptionInput>(empty);
+  const [customers,setCustomers]=useState<Customer[]>([]),[vehicles,setVehicles]=useState<Vehicle[]>([]);
+  const [appointments,setAppointments]=useState<Appointment[]>([]),[records,setRecords]=useState<Reception[]>([]);
+  const [services,setServices]=useState<GarageService[]>([]),[serviceIds,setServiceIds]=useState<number[]>([]);
+  const [selected,setSelected]=useState<Reception|null>(null),[editing,setEditing]=useState(false),[repairForm,setRepairForm]=useState(false);
+  const [loading,setLoading]=useState(true),[vehicleLoading,setVehicleLoading]=useState(false),[busy,setBusy]=useState(false);
+  const [error,setError]=useState(""),[notice,setNotice]=useState(""),[search,setSearch]=useState("");
+  const [addCustomer,setAddCustomer]=useState(false),[addVehicle,setAddVehicle]=useState(false),[customerForm,setCustomerForm]=useState(emptyCustomer);
+  const load=useCallback(async()=>{
+    setLoading(true);setError("");
+    try{const [c,a,r,s]=await Promise.all([customersApi.list(),appointmentsApi.list(),receptionsApi.list(),garageApi.services()]);setCustomers(c);setAppointments(a);setRecords(r);setServices(s);}
+    catch(e){setError(errorMessage(e));}finally{setLoading(false);}
+  },[]);
+  useEffect(()=>{void load();},[load]);
+  useEffect(()=>{
+    if(!input.customerId){setVehicles([]);return;}
+    let active=true;setVehicleLoading(true);
+    vehiclesApi.listByCustomer(input.customerId).then(v=>{if(active)setVehicles(v);}).catch(e=>{if(active)setError(errorMessage(e));}).finally(()=>{if(active)setVehicleLoading(false);});
+    return()=>{active=false;};
+  },[input.customerId]);
+  const customer=customers.find(c=>c.id===input.customerId),vehicle=vehicles.find(v=>v.id===input.vehicleId);
+  function update<K extends keyof ReceptionInput>(key:K,value:ReceptionInput[K]){setInput(old=>({...old,[key]:value}));}
+  function next(){
+    setError("");
+    if(step===0&&!input.customerId){setError("Vui lòng chọn khách hàng.");return;}
+    if(step===1&&(!vehicle||vehicleLoading)){setError("Vui lòng chọn xe của khách hàng.");return;}
+    if(step===1&&input.mileage!==null&&(!Number.isInteger(input.mileage)||input.mileage<0)){setError("Số km phải là số nguyên không âm.");return;}
+    if(step===2&&!input.customerRequest.trim()){setError("Vui lòng nhập yêu cầu của khách hàng.");return;}
+    if(step===3&&!input.initialCondition.trim()){setError("Vui lòng ghi tình trạng ban đầu của xe.");return;}
+    setStep(step+1);
   }
-
-  return (
-    <div className="mx-auto max-w-5xl">
-      {/* Step indicator */}
-      <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-2">
-        {STEPS.map((s, i) => (
-          <React.Fragment key={s}>
-            <button onClick={() => setStep(i)} className="flex min-h-11 flex-shrink-0 items-center gap-2 rounded-md px-1">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
-                i < step ? "border-success bg-success text-white" :
-                i === step ? "bg-primary border-primary text-primary-foreground" :
-                "bg-white border-slate-300 text-slate-400"
-              }`}>
-                {i < step ? <span aria-hidden="true">{Icons.check}</span> : i + 1}
-              </div>
-              <span className={`text-sm font-medium hidden sm:block ${i <= step ? "text-slate-800" : "text-slate-400"}`}>{s}</span>
-            </button>
-            {i < STEPS.length - 1 && <div className={`h-0.5 flex-1 ${i < step ? "bg-success" : "bg-border"}`} />}
-          </React.Fragment>
-        ))}
+  async function save(){
+    if(busy)return;setBusy(true);setError("");
+    try{const result=editing&&selected?await receptionsApi.update(selected,input):await receptionsApi.create(input);
+      const saved=await receptionsApi.get(result.id);setSelected(saved);setEditing(false);await load();setNotice("Đã lưu phiếu tiếp nhận.");
+    }catch(e){setError(errorMessage(e));}finally{setBusy(false);}
+  }
+  async function open(id:number){setError("");try{setSelected(await receptionsApi.get(id));setEditing(false);}catch(e){setError(errorMessage(e));}}
+  async function createCustomer(event:React.FormEvent){event.preventDefault();if(busy)return;setBusy(true);setError("");
+    try{const c=await customersApi.create(customerForm);setCustomers(old=>[c,...old]);setInput({...empty,customerId:c.id});setAddCustomer(false);setCustomerForm(emptyCustomer);}
+    catch(e){setError(errorMessage(e));}finally{setBusy(false);}}
+  async function createRepair(){if(!selected||busy)return;setBusy(true);setError("");
+    try{await garageApi.createRepair({receptionId:selected.id,services:serviceIds.map(serviceId=>({serviceId,quantity:1}))});setSelected(await receptionsApi.get(selected.id));setRepairForm(false);await load();setNotice("Đã lập phiếu sửa chữa từ phiếu tiếp nhận.");}
+    catch(e){setError(errorMessage(e));}finally{setBusy(false);}}
+  if(loading&&!records.length&&!customers.length)return <p role="status">Đang tải dữ liệu tiếp nhận…</p>;
+  return <div className="mx-auto max-w-5xl space-y-6">
+    {error&&<p role="alert" className="rounded-lg bg-danger-soft p-3 text-danger">{error}</p>}
+    {notice&&<p role="status" className="rounded-lg bg-success-soft p-3">{notice}</p>}
+    {selected&&!editing?<Card className="space-y-4 p-5">
+      <h2 className="text-xl font-bold">Phiếu tiếp nhận TN{selected.id}</h2>
+      <p>{selected.customerName} · {selected.licensePlate}</p>
+      <p>Lịch hẹn: {selected.appointmentId?`LH${selected.appointmentId}`:"Xe đến trực tiếp"} · {formatGarageDate(selected.receivedAt)}</p>
+      <p>Số km tiếp nhận: {selected.mileage?.toLocaleString("vi-VN")??"Chưa ghi nhận"}</p>
+      <p>Tình trạng: {selected.initialCondition}</p><p>Yêu cầu: {selected.customerRequest}</p><p>Ghi chú: {selected.notes||"Không có"}</p>
+      <p>{selected.repairOrderId?`Đã lập phiếu sửa chữa PSC${selected.repairOrderId}`:"Chưa lập phiếu sửa chữa"}</p>
+      <div className="flex flex-wrap gap-3">
+        {!selected.repairOrderId&&<><Button disabled={busy} onClick={()=>{setInput({customerId:selected.customerId,vehicleId:selected.vehicleId,appointmentId:selected.appointmentId,mileage:selected.mileage,initialCondition:selected.initialCondition??"",customerRequest:selected.customerRequest??"",notes:selected.notes??""});setEditing(true);setStep(1);setNotice("");}}>Cập nhật tiếp nhận</Button>
+          <Button disabled={busy} onClick={()=>{setServiceIds([]);setRepairForm(true);}}>Lập phiếu sửa chữa</Button></>}
+        {selected.repairOrderId&&<a className="font-semibold text-primary underline" href="/admin/repair">Mở quản lý sửa chữa</a>}
+        <Button variant="outline" onClick={()=>{setSelected(null);setInput(empty);setStep(0);setNotice("");}}>Tiếp nhận xe khác</Button>
       </div>
-
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="space-y-4 xl:col-span-2">
-          {step === 0 && (
-            <Card className="p-4 sm:p-5 lg:p-6">
-              <h3 className="font-semibold text-slate-800 mb-4">Thông tin khách hàng</h3>
-              <div className="space-y-4">
-                <Select label="Khách hàng *" options={[
-                  { value: "", label: "-- Tìm hoặc chọn khách hàng --" },
-                  ...khachHang.map(customer => ({ value: customer.MaKhachHang, label: `${customer.HoTen} – ${customer.SoDienThoai}` })),
-                ]} />
-                <div className="rounded-lg border border-info/20 bg-info-soft p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info font-bold text-white">N</div>
-                    <div>
-                      <p className="font-semibold text-slate-800">{selectedCustomer.HoTen}</p>
-                      <p className="text-xs text-slate-500 mono">{selectedCustomer.MaKhachHang} · {selectedCustomer.SoDienThoai}</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-500">{selectedCustomer.DiaChi} · {xe.filter(vehicle => vehicle.MaKhachHang === selectedCustomer.MaKhachHang).length} xe đăng ký</p>
-                </div>
-                <p className="text-xs text-muted-foreground">Chưa tìm thấy? <button type="button" className="font-medium text-primary underline">Thêm khách hàng mới</button></p>
-              </div>
-            </Card>
-          )}
-
-          {step === 1 && (
-            <Card className="p-4 sm:p-5 lg:p-6">
-              <h3 className="font-semibold text-slate-800 mb-4">Thông tin xe</h3>
-              <div className="space-y-4">
-                <Select label="Chọn xe *" options={[
-                  { value: "", label: "-- Chọn xe --" },
-                  ...xe.filter(vehicle => vehicle.MaKhachHang === selectedCustomer.MaKhachHang).map(vehicle => ({
-                    value: vehicle.MaXe,
-                    label: `${vehicle.BienSo} – ${vehicle.HangXe} ${vehicle.DongXe} ${vehicle.NamSanXuat}`,
-                  })),
-                ]} />
-                <div className="rounded-lg border border-border bg-surface-subtle p-4">
-                  <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
-                    <div><p className="mb-1 text-xs text-slate-400">Biển số</p><p className="mono font-bold text-primary">{selectedVehicle.BienSo}</p></div>
-                    <div><p className="text-xs text-slate-400 mb-1">Hãng / dòng xe</p><p className="font-medium">{selectedVehicle.HangXe} {selectedVehicle.DongXe}</p></div>
-                    <div><p className="text-xs text-slate-400 mb-1">Năm sản xuất</p><p className="font-medium">{selectedVehicle.NamSanXuat}</p></div>
-                    <div><p className="text-xs text-slate-400 mb-1">Số km đã lưu</p><p className="font-medium">{selectedVehicle.SoKm?.toLocaleString("vi-VN")} km</p></div>
-                    <div><p className="text-xs text-slate-400 mb-1">Mã xe</p><p className="font-medium mono">{selectedVehicle.MaXe}</p></div>
-                    <div><p className="text-xs text-slate-400 mb-1">Mã khách hàng</p><p className="font-medium mono">{selectedVehicle.MaKhachHang}</p></div>
-                  </div>
-                </div>
-                <Input label="Số km hiện tại *" placeholder="45200" type="number" />
-              </div>
-            </Card>
-          )}
-
-          {step === 2 && (
-            <Card className="p-4 sm:p-5 lg:p-6">
-              <h3 className="font-semibold text-slate-800 mb-4">Lịch hẹn liên quan</h3>
-              <div className="space-y-3">
-                <div className="flex flex-col gap-3 rounded-lg border border-info/20 bg-info-soft p-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="font-semibold text-slate-800">{selectedAppointment.MaLichHen} – {selectedService.TenDichVu}</p>
-                    <p className="text-xs text-slate-500 mt-1">{selectedAppointment.NgayHen.split("-").reverse().join("/")} lúc {selectedAppointment.GioHen} · Trạng thái: Đã xác nhận</p>
-                  </div>
-                  <Badge variant="confirmed" />
-                </div>
-                <p className="text-xs text-muted-foreground">Không có lịch hẹn? <button type="button" className="font-medium text-primary underline">Nhập yêu cầu trực tiếp</button></p>
-                <Textarea label="Yêu cầu của khách hàng" defaultValue={receptionRecord.YeuCauKhachHang ?? ""} />
-              </div>
-            </Card>
-          )}
-
-          {step === 3 && (
-            <Card className="p-4 sm:p-5 lg:p-6">
-              <h3 className="font-semibold text-slate-800 mb-4">Tình trạng xe ban đầu</h3>
-              <div className="space-y-3">
-                {["Ngoại thất xe", "Nội thất xe", "Lốp xe", "Đèn xe", "Hệ thống điện", "Hệ thống phanh"].map(item => (
-                  <div key={item} className="flex flex-col gap-3 rounded-lg bg-surface-subtle p-3 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-sm font-medium text-slate-700">{item}</span>
-                    <div className="flex gap-2">
-                      {["Tốt", "Bình thường", "Cần chú ý"].map(opt => (
-                        <label key={opt} className="flex items-center gap-1 text-xs cursor-pointer">
-                          <input type="radio" name={item} className="accent-primary" defaultChecked={opt === "Tốt"} />
-                          <span className="text-slate-600">{opt}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-                <Textarea label="Ghi chú tình trạng xe" placeholder="Xước nhẹ cánh cửa bên phải, lốp trước trái hơi xì..." />
-              </div>
-            </Card>
-          )}
-
-          {step === 4 && (
-            <Card className="p-4 sm:p-5 lg:p-6">
-              <h3 className="font-semibold text-slate-800 mb-4">Xác nhận phiếu tiếp nhận</h3>
-              <div className="mb-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
-                <div className="rounded-lg bg-surface-subtle p-3"><p className="mb-1 text-xs text-muted-foreground">Khách hàng</p><p className="font-semibold">{selectedCustomer.HoTen}</p></div>
-                <div className="rounded-lg bg-surface-subtle p-3"><p className="mb-1 text-xs text-slate-400">Biển số xe</p><p className="mono font-bold text-primary">{selectedVehicle.BienSo}</p></div>
-                <div className="rounded-lg bg-surface-subtle p-3"><p className="mb-1 text-xs text-muted-foreground">Số km</p><p className="font-semibold">{selectedVehicle.SoKm?.toLocaleString("vi-VN")} km</p></div>
-                <div className="rounded-lg bg-surface-subtle p-3"><p className="mb-1 text-xs text-muted-foreground">Thời gian tiếp nhận</p><p className="font-semibold">{new Date(receptionRecord.NgayTiepNhan).toLocaleString("vi-VN")}</p></div>
-              </div>
-              <div className="mb-4 rounded-lg border border-warning/25 bg-warning-soft p-3">
-                <p className="text-xs font-medium text-warning">Yêu cầu khách: {receptionRecord.YeuCauKhachHang}</p>
-              </div>
-              <Input label="Ghi chú" defaultValue={receptionRecord.GhiChu ?? ""} placeholder="Ghi chú cho phiếu tiếp nhận" />
-            </Card>
-          )}
-
-          {/* Navigation */}
-          <div className="flex justify-between">
-            <Button variant="outline" icon={Icons.arrowLeft} onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}>Quay lại</Button>
-            {step < STEPS.length - 1
-              ? <Button icon={Icons.arrowRight} onClick={() => setStep(step + 1)}>Tiếp theo</Button>
-              : <Button icon={Icons.checkCircle} onClick={() => setSubmitted(true)}>Lập phiếu tiếp nhận</Button>
-            }
-          </div>
-        </div>
-
-        {/* Summary panel */}
-        <Card className="detail-panel h-fit p-4 sm:p-5 lg:p-6">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Tóm tắt</p>
-          <div className="space-y-3 text-sm">
-            <div>
-              <p className="text-xs text-slate-400">Khách hàng</p>
-              <p className="font-semibold text-slate-800">{step >= 0 ? selectedCustomer.HoTen : "—"}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Xe</p>
-              <p className="mono font-bold text-primary">{step >= 1 ? selectedVehicle.BienSo : "—"}</p>
-              <p className="text-xs text-slate-500">{step >= 1 ? `${selectedVehicle.HangXe} ${selectedVehicle.DongXe} ${selectedVehicle.NamSanXuat}` : ""}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Lịch hẹn</p>
-              <p className="font-semibold">{step >= 2 ? selectedAppointment.MaLichHen : "—"}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Yêu cầu</p>
-              <p className="text-slate-700 text-xs leading-relaxed">{step >= 2 ? receptionRecord.YeuCauKhachHang : "—"}</p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-400">Số km</p>
-              <p className="font-semibold">{step >= 1 ? `${selectedVehicle.SoKm?.toLocaleString("vi-VN")} km` : "—"}</p>
-            </div>
-          </div>
-        </Card>
-      </div>
-    </div>
-  );
+    </Card>:<>
+      <div className="flex gap-2 overflow-x-auto pb-2">{STEPS.map((label,index)=><div key={label} className={`flex items-center gap-2 whitespace-nowrap ${index===step?"font-bold text-primary":"text-muted-foreground"}`}><span className="rounded-full border px-3 py-1">{index+1}</span>{label}</div>)}</div>
+      <div className="grid gap-6 xl:grid-cols-3"><Card className="space-y-4 p-5 xl:col-span-2">
+        <h3 className="font-semibold">{STEPS[step]}</h3>
+        {step===0&&<><Select label="Khách hàng" required value={String(input.customerId||"")} onChange={e=>setInput({...empty,customerId:Number(e.target.value)})} options={[{value:"",label:"Chọn khách hàng"},...customers.filter(c=>c.active).map(c=>({value:String(c.id),label:`${c.fullName} – ${c.phone}`}))]}/><Button variant="outline" onClick={()=>setAddCustomer(true)}>Thêm khách hàng mới</Button></>}
+        {step===1&&<>{vehicleLoading?<p role="status">Đang tải xe…</p>:<Select label="Chọn xe" disabled={editing} value={String(input.vehicleId||"")} onChange={e=>{const v=vehicles.find(v=>v.id===Number(e.target.value));setInput(old=>({...old,vehicleId:v?.id??0,mileage:v?.mileage??null,appointmentId:null}));}} options={[{value:"",label:"Chọn xe của khách hàng"},...vehicles.map(v=>({value:String(v.id),label:`${v.licensePlate} – ${v.brand??""} ${v.model??""}`}))]}/>}
+          <Input label="Số km hiện tại" type="number" min="0" step="1" value={input.mileage??""} onChange={e=>update("mileage",e.target.value===""?null:Number(e.target.value))}/>
+          {!editing&&<Button variant="outline" disabled={!input.customerId} onClick={()=>setAddVehicle(true)}>Thêm xe cho khách</Button>}</>}
+        {step===2&&<><Select label="Lịch hẹn liên quan" disabled={editing} value={input.appointmentId??""} onChange={e=>{const id=e.target.value?Number(e.target.value):null;const a=appointments.find(a=>a.id===id);setInput(old=>({...old,appointmentId:id,customerRequest:a?.note||old.customerRequest}));}} options={[{value:"",label:"Xe đến trực tiếp"},...appointments.filter(a=>a.vehicleId===input.vehicleId&&(a.status==="DA_XAC_NHAN"||a.id===input.appointmentId)).map(a=>({value:String(a.id),label:`LH${a.id} · ${a.date} ${a.time.slice(0,5)}`}))]}/><Textarea label="Yêu cầu của khách hàng" required maxLength={1000} value={input.customerRequest} onChange={e=>update("customerRequest",e.target.value)}/></>}
+        {step===3&&<><Textarea label="Tình trạng xe ban đầu" required maxLength={1000} value={input.initialCondition} onChange={e=>update("initialCondition",e.target.value)} placeholder="Ngoại thất, phụ kiện kèm theo, dấu hiệu bất thường…"/><Textarea label="Ghi chú" maxLength={1000} value={input.notes} onChange={e=>update("notes",e.target.value)}/></>}
+        {step===4&&<><p>{customer?.fullName} · {vehicle?.licensePlate}</p><p>Tình trạng: {input.initialCondition}</p><p>Yêu cầu: {input.customerRequest}</p><p>{input.appointmentId?`Liên kết lịch LH${input.appointmentId}`:"Xe đến trực tiếp"}</p></>}
+        <div className="flex justify-between"><Button variant="outline" disabled={busy||step===(editing?1:0)} onClick={()=>setStep(step-1)}>Quay lại</Button>{step<4?<Button disabled={busy||vehicleLoading} onClick={next}>Tiếp theo</Button>:<Button disabled={busy} onClick={()=>void save()}>{busy?"Đang lưu…":editing?"Lưu cập nhật":"Lập phiếu tiếp nhận"}</Button>}</div>
+      </Card><Card className="h-fit space-y-3 p-5"><h3 className="font-semibold">Tóm tắt</h3><p>{customer?.fullName??"Chưa chọn khách"}</p><p>{vehicle?.licensePlate??"Chưa chọn xe"}</p><p>{input.mileage?.toLocaleString("vi-VN")??"—"} km</p><p>{input.customerRequest||"Chưa nhập yêu cầu"}</p></Card></div>
+    </>}
+    <Card className="space-y-3 p-5"><div className="flex flex-wrap items-end gap-3"><Input label="Tìm phiếu tiếp nhận" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Mã phiếu, biển số hoặc tên khách"/><Button variant="outline" disabled={loading} onClick={()=>void load()}>Tải lại danh sách</Button></div>
+      {!records.length&&<p>Chưa có phiếu tiếp nhận.</p>}{records.filter(r=>`${r.id} ${r.licensePlate} ${r.customerName}`.toLocaleLowerCase("vi").includes(search.toLocaleLowerCase("vi"))).map(r=><button type="button" key={r.id} onClick={()=>void open(r.id)} className="block w-full rounded border border-border p-3 text-left">TN{r.id} · {r.licensePlate} · {r.customerName}<span className="block text-sm text-muted-foreground">{formatGarageDate(r.receivedAt)} · {r.repairOrderId?`PSC${r.repairOrderId}`:"Chưa lập phiếu sửa chữa"}</span></button>)}
+    </Card>
+    <Modal open={addCustomer} onClose={()=>{if(!busy)setAddCustomer(false);}} title="Thêm khách hàng mới"><form onSubmit={createCustomer} className="space-y-3"><Input label="Họ tên" required maxLength={150} value={customerForm.fullName} onChange={e=>setCustomerForm({...customerForm,fullName:e.target.value})}/><Input label="Số điện thoại" required value={customerForm.phone} onChange={e=>setCustomerForm({...customerForm,phone:e.target.value})}/><Input label="Email" type="email" value={customerForm.email} onChange={e=>setCustomerForm({...customerForm,email:e.target.value})}/><Input label="Địa chỉ" value={customerForm.address} onChange={e=>setCustomerForm({...customerForm,address:e.target.value})}/>{error&&<p role="alert">{error}</p>}<Button type="submit" disabled={busy}>Lưu khách hàng</Button></form></Modal>
+    <Modal open={addVehicle} onClose={()=>setAddVehicle(false)} title="Thêm xe cho khách">{addVehicle&&<VehicleForm initialValue={{customerId:input.customerId,plate:"",brand:"",model:"",year:null,mileage:null}} onCancel={()=>setAddVehicle(false)} onSubmit={async value=>{const v=await vehiclesApi.create(toVehiclePayload(input.customerId,value));setVehicles(old=>[v,...old]);setInput(old=>({...old,vehicleId:v.id,mileage:v.mileage,appointmentId:null}));setAddVehicle(false);}}/>}</Modal>
+    <Modal open={repairForm} onClose={()=>{if(!busy)setRepairForm(false);}} title="Lập phiếu sửa chữa"><div className="space-y-4"><p>Chọn dịch vụ cần kiểm tra/sửa chữa cho TN{selected?.id}.</p>{services.map(s=><label key={s.id} className="flex gap-2"><input type="checkbox" checked={serviceIds.includes(s.id)} onChange={e=>setServiceIds(old=>e.target.checked?[...old,s.id]:old.filter(id=>id!==s.id))}/>{s.name}</label>)}{error&&<p role="alert">{error}</p>}<Button disabled={busy||!serviceIds.length} onClick={()=>void createRepair()}>Tạo phiếu sửa chữa</Button></div></Modal>
+  </div>;
 }

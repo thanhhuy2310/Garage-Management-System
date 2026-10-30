@@ -15,7 +15,7 @@ function sql(query:string){
 }
 async function confirm(page:Page){await page.getByRole("button",{name:"Xác nhận thao tác",exact:true}).click();await expect(page.getByRole("dialog")).toHaveCount(0);}
 async function selectQuote(page:Page){await page.getByRole("button").filter({hasText:`BG${f.quoteId} · ${f.plate}`}).click();}
-test("quotation stage 1 Web creates and sends real quote for Android",async({page,browser},info)=>{
+test("quotation stage 1 Web creates and sends real quote for Android",async({page,browser})=>{
   await login(page,f.manager);await page.goto("/admin/quotation");
   await expect(page.getByText(/MOCK_ONLY/)).toHaveCount(0);
   await page.getByRole("button",{name:"Tạo báo giá",exact:true}).click();
@@ -38,13 +38,13 @@ test("quotation stage 1 Web creates and sends real quote for Android",async({pag
   await page.reload();await selectQuote(page);
   expect(sql("SELECT CONCAT(TrangThai,':',CONVERT(VARCHAR,TongTien)) FROM BaoGia WHERE MaBaoGia="+Number(f.quoteId))).toBe("CHO_XAC_NHAN:200000.00");
   expect(sql("SELECT COUNT(*) FROM ChiTietBaoGia WHERE MaBaoGia="+Number(f.quoteId))).toBe("2");
-  await page.screenshot({path:info.outputPath("staff-sent.png"),fullPage:true});
+
   const context=await browser.newContext();const customer=await context.newPage();await login(customer,f.customer);await customer.goto("/customer/quotations");await selectQuote(customer);
   await expect(customer.getByRole("button",{name:"Chấp thuận báo giá",exact:true})).toBeVisible();
   await expect(customer.getByText("200.000 ₫",{exact:true})).toHaveCount(2);
-  await customer.screenshot({path:info.outputPath("customer-received.png"),fullPage:true});await context.close();
+  await context.close();
 });
-test("quotation stage 2 Web revises after Android rejection",async({page},info)=>{
+test("quotation stage 2 Web revises after Android rejection",async({page})=>{
   await login(page,f.manager);await page.goto("/admin/quotation");await selectQuote(page);
   expect(sql("SELECT TrangThai FROM BaoGia WHERE MaBaoGia="+Number(f.quoteId))).toBe("KHONG_DONG_Y");
   await expect(page.getByText(/Lý do từ chối:/)).toContainText("Xem lại số lượng dịch vụ");
@@ -53,9 +53,9 @@ test("quotation stage 2 Web revises after Android rejection",async({page},info)=
   await page.getByRole("button",{name:"Lưu bản nháp",exact:true}).click();await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.getByRole("button",{name:"Gửi khách xác nhận",exact:true}).click();await confirm(page);
   expect(sql("SELECT CONCAT(TrangThai,':',PhienBan,':',LanDieuChinh,':',CONVERT(VARCHAR,TongTien)) FROM BaoGia WHERE MaBaoGia="+Number(f.quoteId))).toBe("CHO_XAC_NHAN:5:2:350000.00");
-  await page.screenshot({path:info.outputPath("revised-sent.png"),fullPage:true});
+
 });
-test("quotation stage 3 Web reloads Android approval and immutable history",async({page},info)=>{
+test("quotation stage 3 Web reloads Android approval and immutable history",async({page})=>{
   await login(page,f.manager);await page.goto("/admin/quotation");await selectQuote(page);
   expect(sql("SELECT CONCAT(TrangThai,':',PhienBan) FROM BaoGia WHERE MaBaoGia="+Number(f.quoteId))).toBe("DA_XAC_NHAN:6");
   expect(sql("SELECT COUNT(*) FROM LichSuBaoGia WHERE MaBaoGia="+Number(f.quoteId))).toBe("7");
@@ -68,7 +68,7 @@ test("quotation stage 3 Web reloads Android approval and immutable history",asyn
     await page.setViewportSize({width,height:1000});
     if(width<1280) await expect.poll(()=>page.locator("aside").evaluate(el=>el.getBoundingClientRect().right)).toBeLessThanOrEqual(0);
     await page.getByRole("heading",{name:`Báo giá BG${f.quoteId}`,exact:true}).scrollIntoViewIfNeeded();
-    await page.screenshot({path:info.outputPath(`approval-${width}.png`),fullPage:true});
+
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   }
 });

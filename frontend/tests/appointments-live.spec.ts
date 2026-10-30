@@ -16,7 +16,7 @@ function sql(query:string) {
   if(!/^QuanLyGaraOTo_Verify_\d{8}$/.test(fixture.database)) throw new Error("Not a verification database");
   return execFileSync("sqlcmd",["-S","localhost","-E","-C","-d",fixture.database,"-h","-1","-W","-b","-Q","SET NOCOUNT ON; "+query],{encoding:"utf8"}).trim();
 }
-test("create on customer Web and confirm on staff Web with SQL persistence",async({page,browser,request},info)=>{
+test("create on customer Web and confirm on staff Web with SQL persistence",async({page,browser,request})=>{
   if(fixture.bookingId) {
     const previous=await request.get(fixture.apiUrl+"/appointments/"+fixture.bookingId,{headers:{Authorization:"Bearer "+fixture.customer.token}});
     if(previous.ok()) {
@@ -46,7 +46,7 @@ test("create on customer Web and confirm on staff Web with SQL persistence",asyn
   const row=page.getByRole("row").filter({hasText:"LH"+item.id});
   await expect(row).toContainText(fixture.plate);await expect(row).toContainText("Chờ xác nhận");
   expect(sql("SELECT TrangThai FROM LichHen WHERE MaLichHen="+Number(item.id))).toBe("CHO_XAC_NHAN");
-  await page.screenshot({path:info.outputPath("customer-created.png"),fullPage:true});
+
   const managerContext=await browser.newContext();const staff=await managerContext.newPage();
   await login(staff,fixture.manager);await staff.goto("/admin/appointments");
   const staffRow=staff.getByRole("row").filter({hasText:"LH"+item.id});
@@ -55,12 +55,12 @@ test("create on customer Web and confirm on staff Web with SQL persistence",asyn
   await expect(staff.getByRole("dialog")).toHaveCount(0);
   await staff.reload();await expect(staffRow).toContainText("Đã xác nhận");
   expect(sql("SELECT TrangThai FROM LichHen WHERE MaLichHen="+Number(item.id))).toBe("DA_XAC_NHAN");
-  await staff.screenshot({path:info.outputPath("staff-confirmed.png"),fullPage:true});
+
   const denied=await request.get(fixture.apiUrl+"/appointments/"+item.id,{headers:{Authorization:"Bearer "+fixture.otherCustomer.token}});
   expect(denied.status()).toBe(404);
   await managerContext.close();
 });
-test("reload Web after Flutter reschedule and cancellation",async({page},info)=>{
+test("reload Web after Flutter reschedule and cancellation",async({page})=>{
   expect(fixture.bookingId).toBeGreaterThan(0);
   await login(page,fixture.customer);await page.goto("/customer/appointments");
   const row=page.getByRole("row").filter({hasText:"LH"+fixture.bookingId});
@@ -70,12 +70,12 @@ test("reload Web after Flutter reschedule and cancellation",async({page},info)=>
   expect(sql("SELECT COUNT(*) FROM LichSuLichHen WHERE MaLichHen="+Number(fixture.bookingId))).toBe("4");
   for(const width of [1440,768,390]) {
     await page.setViewportSize({width,height:1000});
-    await page.screenshot({path:info.outputPath("synced-"+width+".png"),fullPage:true});
+
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   }
 });
 
-test("staff Web reads the appointment created through Android UI",async({page},info)=>{
+test("staff Web reads the appointment created through Android UI",async({page})=>{
   await login(page,fixture.manager);
   const loaded=page.waitForResponse(r=>r.request().method()==="GET" && r.url().endsWith("/api/appointments"));
   await page.goto("/admin/appointments");
@@ -91,5 +91,5 @@ test("staff Web reads the appointment created through Android UI",async({page},i
     " AND MaXe="+Number(fixture.vehicleId)+" AND MaDichVu="+Number(fixture.serviceId)+
     " AND PhienBan=0 AND TrangThai=N'CHO_XAC_NHAN'" )).toBe("1");
   await page.reload();await expect(row).toContainText(fixture.plate);
-  await page.screenshot({path:info.outputPath("android-booking-on-staff-web.png"),fullPage:true});
+
 });
