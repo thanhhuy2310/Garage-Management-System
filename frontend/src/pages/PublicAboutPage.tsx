@@ -1,9 +1,8 @@
+import {usePublicCatalog} from "../components/PublicCatalogProvider";
 import PublicFooter from "../components/PublicFooter";
 import PublicHeader, { type PublicPageKey } from "../components/PublicHeader";
 import { Icons } from "../components/ui";
 import { GARAGE_NAME } from "../data";
-import { dichVu } from "../mock/data";
-import { phuTung } from "../mock/schemaData";
 
 const VALUES = [
   { title: "Minh bạch", description: "Báo giá chi tiết từng hạng mục, khách duyệt mới làm.", icon: Icons.fileText, tint: "bg-info-soft text-info" },
@@ -19,6 +18,7 @@ interface PublicAboutPageProps {
 }
 
 export default function PublicAboutPage({ onNavigate, onLogin, onBook, accountLabel }: PublicAboutPageProps) {
+  const {dichVu,phuTung,ready}=usePublicCatalog();
   return (
     <div className="min-h-screen bg-background">
       <PublicHeader active="about" onNavigate={onNavigate} onLogin={onLogin} onBook={onBook} accountLabel={accountLabel} />
@@ -44,8 +44,8 @@ export default function PublicAboutPage({ onNavigate, onLogin, onBook, accountLa
             </p>
             <div className="mt-6 grid grid-cols-3 gap-3">
               {[
-                { value: String(dichVu.length), label: "Hạng mục dịch vụ" },
-                { value: String(phuTung.length), label: "Mã phụ tùng" },
+                { value: ready ? String(dichVu.length) : "—", label: "Hạng mục dịch vụ" },
+                { value: ready ? String(phuTung.length) : "—", label: "Mã phụ tùng" },
                 { value: "6", label: "Bước quy trình" },
               ].map((stat) => (
                 <div key={stat.label} className="card-shadow rounded-lg border border-border bg-card p-4 text-center">

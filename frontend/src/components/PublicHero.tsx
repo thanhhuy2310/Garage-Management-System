@@ -1,5 +1,4 @@
-import { dichVu } from "../mock/data";
-import { phuTung } from "../mock/schemaData";
+import {usePublicCatalog} from "./PublicCatalogProvider";
 import { Icons } from "./ui";
 
 interface PublicHeroProps {
@@ -7,13 +6,15 @@ interface PublicHeroProps {
   onViewServices: () => void;
 }
 
-const STATS = [
-  { value: String(dichVu.length), label: "Hạng mục dịch vụ" },
-  { value: String(phuTung.length), label: "Mã phụ tùng" },
-  { value: "6", label: "Bước xử lý" },
-];
+
 
 export default function PublicHero({ onBook, onViewServices }: PublicHeroProps) {
+  const {dichVu,phuTung,ready}=usePublicCatalog();
+const STATS = [
+  { value: ready ? String(dichVu.length) : "—", label: "Hạng mục dịch vụ" },
+  { value: ready ? String(phuTung.length) : "—", label: "Mã phụ tùng" },
+  { value: "6", label: "Bước xử lý" },
+];
   return (
     <section aria-label="Giới thiệu gara" className="public-hero public-reveal relative isolate flex min-h-[690px] items-center overflow-hidden text-white lg:min-h-[760px]">
       <div className="public-hero-grid pointer-events-none absolute inset-0" aria-hidden="true" />

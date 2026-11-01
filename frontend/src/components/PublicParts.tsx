@@ -1,12 +1,14 @@
+import {getInventoryStatus,type InventoryStatus} from "../api/publicCatalog";
+import {formatMoney as formatCurrency} from "../utils/garageFormat";
+import {usePublicCatalog} from "./PublicCatalogProvider";
 import { useMemo } from "react";
 import { Badge, Icons } from "./ui";
-import { formatCurrency } from "../mock/data";
-import { getInventoryStatus, phuTung } from "../mock/schemaData";
 
 interface PublicPartsProps { onBook: () => void; onViewAll: () => void; }
 
 export default function PublicParts({ onBook, onViewAll }: PublicPartsProps) {
-  const featured = useMemo(() => phuTung.filter((part) => getInventoryStatus(part) === "ok").slice(0, 4), []);
+  const {phuTung}=usePublicCatalog();
+  const featured = useMemo(() => phuTung.filter((part) => getInventoryStatus(part) === "ok").slice(0, 4), [phuTung]);
 
   return (
     <section aria-labelledby="homepage-parts-title" className="public-reveal bg-surface">

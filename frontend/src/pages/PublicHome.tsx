@@ -1,3 +1,4 @@
+import PublicCatalogProvider from "../components/PublicCatalogProvider";
 import { useEffect, useRef } from "react";
 import PublicHeader, { type PublicPageKey } from "../components/PublicHeader";
 import PublicAbout from "../components/PublicAbout";
@@ -20,7 +21,7 @@ interface PublicHomeProps {
   accountLabel?: string;
 }
 
-export default function PublicHome({ page, onNavigate, onLogin, onBook, accountLabel }: PublicHomeProps) {
+function PublicHomeContent({ page, onNavigate, onLogin, onBook, accountLabel }: PublicHomeProps) {
   const homeRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -75,3 +76,5 @@ export default function PublicHome({ page, onNavigate, onLogin, onBook, accountL
     </div>
   );
 }
+
+export default function PublicHome(props:PublicHomeProps) { return <PublicCatalogProvider><PublicHomeContent {...props}/></PublicCatalogProvider>; }

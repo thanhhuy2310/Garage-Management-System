@@ -1,9 +1,10 @@
+import {getInventoryStatus,type InventoryStatus} from "../api/publicCatalog";
+import {formatMoney as formatCurrency} from "../utils/garageFormat";
+import {usePublicCatalog} from "../components/PublicCatalogProvider";
 import { useMemo, useState } from "react";
 import PublicFooter from "../components/PublicFooter";
 import PublicHeader, { type PublicPageKey } from "../components/PublicHeader";
 import { Badge, Icons } from "../components/ui";
-import { formatCurrency } from "../mock/data";
-import { getInventoryStatus, phuTung, type InventoryStatus } from "../mock/schemaData";
 
 const STATUS_FILTERS: { key: "all" | InventoryStatus; label: string }[] = [
   { key: "all", label: "Tất cả" },
@@ -20,6 +21,7 @@ interface PublicPartsPageProps {
 }
 
 export default function PublicPartsPage({ onNavigate, onLogin, onBook, accountLabel }: PublicPartsPageProps) {
+  const {phuTung,ready}=usePublicCatalog();
   const [status, setStatus] = useState<"all" | InventoryStatus>("all");
   const [search, setSearch] = useState("");
 
@@ -33,7 +35,7 @@ export default function PublicPartsPage({ onNavigate, onLogin, onBook, accountLa
           `${part.TenPhuTung} ${part.HangSanXuat ?? ""} ${part.MaPhuTung}`.toLowerCase().includes(keyword);
         return matchesStatus && matchesKeyword;
       }),
-    [status, keyword],
+    [status, keyword, phuTung],
   );
 
   return (
@@ -45,7 +47,7 @@ export default function PublicPartsPage({ onNavigate, onLogin, onBook, accountLa
             <p className="text-xs font-bold uppercase tracking-widest text-accent">Phụ tùng</p>
             <h1 className="ui-page-title mt-2 text-3xl sm:text-4xl">Kho phụ tùng công khai</h1>
             <p className="ui-secondary-text mt-3 max-w-2xl text-base leading-relaxed">
-              Có {phuTung.length} mã phụ tùng trong danh mục. Tình trạng tồn kho được hiển thị theo dữ liệu hiện có
+              Có {ready ? phuTung.length : "—"} mã phụ tùng trong danh mục. Tình trạng tồn kho được hiển thị theo dữ liệu hiện có
               để khách kiểm tra trước khi đặt lịch.
             </p>
           </div>

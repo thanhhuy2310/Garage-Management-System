@@ -1,6 +1,6 @@
+import {usePublicCatalog} from "./PublicCatalogProvider";
 import { Icons } from "./ui";
 import { GARAGE_NAME } from "../data";
-import { dichVu } from "../mock/data";
 
 const STRENGTHS = [
   { title: "Báo giá trước khi sửa", description: "Chi tiết từng dịch vụ và phụ tùng, khách duyệt mới thực hiện.", icon: Icons.fileText },
@@ -11,6 +11,7 @@ const STRENGTHS = [
 interface PublicAboutProps { onNavigateAbout: () => void; }
 
 export default function PublicAbout({ onNavigateAbout }: PublicAboutProps) {
+  const {dichVu,ready}=usePublicCatalog();
   return (
     <section aria-labelledby="homepage-about-title" className="public-reveal border-y border-border bg-surface-subtle">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
@@ -37,7 +38,7 @@ export default function PublicAbout({ onNavigateAbout }: PublicAboutProps) {
 
               <div className="bg-brand-dark/88 backdrop-blur-md">
                 <div className="grid grid-cols-2 border border-white/15">
-                  <div className="border-r border-white/15 p-5 sm:p-6"><p className="tabular-nums text-4xl font-black text-accent">{dichVu.length}</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-white/60">Hạng mục dịch vụ</p></div>
+                  <div className="border-r border-white/15 p-5 sm:p-6"><p className="tabular-nums text-4xl font-black text-accent">{ready ? dichVu.length : "—"}</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-white/60">Hạng mục dịch vụ</p></div>
                   <div className="p-5 sm:p-6"><p className="tabular-nums text-4xl font-black text-accent">06</p><p className="mt-1 text-xs font-bold uppercase tracking-wider text-white/60">Bước kiểm soát</p></div>
                   <div className="col-span-2 flex items-start gap-4 border-t border-white/15 p-5 sm:items-center sm:p-6"><span className="grid h-11 w-11 flex-shrink-0 place-items-center bg-accent text-white" aria-hidden="true">{Icons.bell}</span><p className="text-base leading-7 text-white/80">Nhắc lịch bảo dưỡng và thông báo tiến độ tự động cho khách hàng.</p></div>
                 </div>

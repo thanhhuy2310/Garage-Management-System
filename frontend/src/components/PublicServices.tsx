@@ -1,6 +1,7 @@
+import {formatMoney as formatCurrency} from "../utils/garageFormat";
+import {usePublicCatalog} from "./PublicCatalogProvider";
 import { useMemo } from "react";
 import { Icons } from "./ui";
-import { dichVu, formatCurrency } from "../mock/data";
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   "Bảo dưỡng": Icons.clipboard,
@@ -17,6 +18,7 @@ interface PublicServicesProps {
 }
 
 export default function PublicServices({ onBook, onViewAll }: PublicServicesProps) {
+  const {dichVu}=usePublicCatalog();
   const groups = useMemo(() => {
     const map = new Map<string, { count: number; minPrice: number; sample: string }>();
     for (const service of dichVu) {
@@ -32,7 +34,7 @@ export default function PublicServices({ onBook, onViewAll }: PublicServicesProp
       }
     }
     return [...map.entries()];
-  }, []);
+  }, [dichVu]);
 
   return (
     <section aria-labelledby="homepage-services-title" className="public-reveal bg-brand-dark text-white">

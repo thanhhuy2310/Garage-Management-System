@@ -1,7 +1,8 @@
+import {formatMoney as formatCurrency} from "../utils/garageFormat";
+import {usePublicCatalog} from "../components/PublicCatalogProvider";
 import { useMemo, useState } from "react";
 import PublicFooter from "../components/PublicFooter";
 import PublicHeader, { type PublicPageKey } from "../components/PublicHeader";
-import { dichVu, formatCurrency } from "../mock/data";
 
 interface PublicServicesPageProps {
   onNavigate: (page: PublicPageKey) => void;
@@ -11,12 +12,13 @@ interface PublicServicesPageProps {
 }
 
 export default function PublicServicesPage({ onNavigate, onLogin, onBook, accountLabel }: PublicServicesPageProps) {
+  const {dichVu,ready}=usePublicCatalog();
   const [category, setCategory] = useState("Tất cả");
   const [search, setSearch] = useState("");
 
   const categories = useMemo(
     () => ["Tất cả", ...Array.from(new Set(dichVu.map((service) => service.LoaiDichVu).filter(Boolean))) as string[]],
-    [],
+    [dichVu],
   );
 
   const keyword = search.trim().toLowerCase();
@@ -36,7 +38,7 @@ export default function PublicServicesPage({ onNavigate, onLogin, onBook, accoun
             <p className="text-xs font-bold uppercase tracking-widest text-accent">Dịch vụ</p>
             <h1 className="ui-page-title mt-2 text-3xl sm:text-4xl">Bảng dịch vụ &amp; giá công khai</h1>
             <p className="ui-secondary-text mt-3 max-w-2xl text-base leading-relaxed">
-              {dichVu.length} hạng mục thuộc {categories.length - 1} nhóm dịch vụ. Giá niêm yết là giá tham khảo —
+              {ready ? dichVu.length : "—"} hạng mục thuộc {categories.length - 1} nhóm dịch vụ. Giá niêm yết là giá tham khảo —
               gara báo giá xác nhận chính xác theo tình trạng xe trước khi làm.
             </p>
           </div>
