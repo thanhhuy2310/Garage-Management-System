@@ -12,6 +12,8 @@ import java.util.List;
 
 public interface TechnicianAssignmentRepository extends JpaRepository<TechnicianAssignment, TechnicianAssignmentId> {
 
+    boolean existsById_TechnicianId(Integer technicianId);
+
     @Query("""
             select new com.gara.quanlygara.dto.technician.TechnicianAssignmentResponse(
                 a.id.repairOrderId, a.id.technicianId, e.fullName, a.assignedAt, a.notes)

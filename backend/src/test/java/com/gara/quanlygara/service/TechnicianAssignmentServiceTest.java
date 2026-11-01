@@ -44,6 +44,7 @@ class TechnicianAssignmentServiceTest {
         order.setId(1);
         order.setStatus("DANG_SUA");
         when(repairOrderRepository.findForUpdate(1)).thenReturn(Optional.of(order));
+        when(technicianRepository.findForUpdate(2)).thenReturn(Optional.of(new com.gara.quanlygara.entity.Technician()));
         when(technicianRepository.findOptionById(2))
                 .thenReturn(Optional.of(new TechnicianResponse(2, "Kỹ thuật viên")));
     }

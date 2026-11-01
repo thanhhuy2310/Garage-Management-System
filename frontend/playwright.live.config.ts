@@ -1,6 +1,6 @@
 import { defineConfig } from "@playwright/test";
 export default defineConfig({
-  testDir:"./tests",testMatch:/(appointments|quotations|receptions)-live\.spec\.ts/,workers:1,
+  testDir:"./tests",testMatch:/(appointments|quotations|receptions|staff)-live\.spec\.ts/,workers:1,
   use:{baseURL:"http://127.0.0.1:5188",channel:"chrome",viewport:{width:1440,height:1000},
     screenshot:"off",video:"off",trace:"off"},
   webServer:{

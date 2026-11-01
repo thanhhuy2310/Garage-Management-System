@@ -167,7 +167,7 @@ public class AccountService {
         if (employeeId == null || customerId != null) {
             throw new BadRequestException("Tài khoản nhân viên phải liên kết đúng một nhân viên và không được liên kết khách hàng.");
         }
-        if (!employeeRepository.existsById(employeeId)) {
+        if (employeeRepository.findForUpdate(employeeId).isEmpty()) {
             throw new BadRequestException("Nhân viên được chọn không tồn tại.");
         }
         if (role == AccountRole.TECHNICIAN && !technicianRepository.existsById(employeeId)) {

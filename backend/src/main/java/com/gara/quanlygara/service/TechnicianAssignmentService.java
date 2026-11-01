@@ -65,7 +65,11 @@ public class TechnicianAssignmentService {
         if (java.util.Set.of("HOAN_TAT", "HUY", "DA_HUY").contains(order.getStatus())) {
             throw new ConflictException("Phiếu đã kết thúc, không thể phân công thêm kỹ thuật viên.");
         }
-        rules.requireAcceptedQuote(repairOrderId);
+        if (!java.util.Set.of("MOI_TAO", "DANG_KIEM_TRA").contains(order.getStatus())) {
+            rules.requireAcceptedQuote(repairOrderId);
+        }
+        technicianRepository.findForUpdate(request.technicianId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỹ thuật viên."));
         TechnicianResponse technician = technicianRepository.findOptionById(request.technicianId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỹ thuật viên."));
         TechnicianAssignmentId id = new TechnicianAssignmentId(repairOrderId, technician.id());

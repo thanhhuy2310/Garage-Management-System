@@ -53,7 +53,7 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
 
     @BeforeEach
     void setUp() {
-        jdbc.execute("CREATE TABLE IF NOT EXISTS BaoGia (MaBaoGia INT PRIMARY KEY,MaPhieuSuaChua INT,TrangThai NVARCHAR(50))");
+        jdbc.execute("CREATE TABLE IF NOT EXISTS BaoGia (MaBaoGia INT PRIMARY KEY,MaPhieuSuaChua INT,TrangThai NVARCHAR(50),NgayLap TIMESTAMP)");
         firstTechnician = saveEmployee("KÃƒÂ¡Ã‚Â»Ã‚Â¹ thuÃƒÂ¡Ã‚ÂºÃ‚Â­t viÃƒÆ’Ã‚Âªn A", true);
         secondTechnician = saveEmployee("KÃƒÂ¡Ã‚Â»Ã‚Â¹ thuÃƒÂ¡Ã‚ÂºÃ‚Â­t viÃƒÆ’Ã‚Âªn B", true);
         receptionist = saveEmployee("LÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¦ tÃƒÆ’Ã‚Â¢n", false);

@@ -79,7 +79,7 @@ class AccountServiceTest {
 
     @Test
     void createTechnicianRejectsEmployeeWithoutTechnicianRecord() {
-        when(employeeRepository.existsById(4)).thenReturn(true);
+        when(employeeRepository.findForUpdate(4)).thenReturn(java.util.Optional.of(new com.gara.quanlygara.entity.Employee()));
         when(technicianRepository.existsById(4)).thenReturn(false);
 
         var request = new CreateAccountRequest(
@@ -131,7 +131,7 @@ class AccountServiceTest {
 
     @Test
     void technicianWithMissingEmployeeFailsValidation() {
-        when(employeeRepository.existsById(99)).thenReturn(false);
+        when(employeeRepository.findForUpdate(99)).thenReturn(java.util.Optional.empty());
 
         assertThrows(BadRequestException.class,
                 () -> accountService.validateAccountOwner(AccountRole.TECHNICIAN, null, 99));
@@ -139,7 +139,7 @@ class AccountServiceTest {
 
     @Test
     void staffWithMissingEmployeeFailsValidation() {
-        when(employeeRepository.existsById(99)).thenReturn(false);
+        when(employeeRepository.findForUpdate(99)).thenReturn(java.util.Optional.empty());
 
         assertThrows(BadRequestException.class,
                 () -> accountService.validateAccountOwner(AccountRole.MANAGER, null, 99));
@@ -149,7 +149,7 @@ class AccountServiceTest {
     void changeRoleAllowsStaffToStaffWhenOwnerMatches() {
         Account account = staffAccount(AccountRole.RECEPTIONIST, 1);
         when(accountRepository.findById(10)).thenReturn(Optional.of(account));
-        when(employeeRepository.existsById(1)).thenReturn(true);
+        when(employeeRepository.findForUpdate(1)).thenReturn(java.util.Optional.of(new com.gara.quanlygara.entity.Employee()));
         when(accountRepository.save(account)).thenReturn(account);
 
         var response = accountService.changeRole(10, "MANAGER");
@@ -173,7 +173,7 @@ class AccountServiceTest {
     private AccountResponse createStaffAccount(String role, int employeeId, boolean technician) {
         String username = role.toLowerCase() + "-new";
         when(accountRepository.existsByUsername(username)).thenReturn(false);
-        when(employeeRepository.existsById(employeeId)).thenReturn(true);
+        when(employeeRepository.findForUpdate(employeeId)).thenReturn(java.util.Optional.of(new com.gara.quanlygara.entity.Employee()));
         if (AccountRole.TECHNICIAN.name().equals(role)) {
             when(technicianRepository.existsById(employeeId)).thenReturn(technician);
         }

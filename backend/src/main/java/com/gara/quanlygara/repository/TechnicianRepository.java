@@ -11,6 +11,10 @@ import java.util.Optional;
 
 public interface TechnicianRepository extends JpaRepository<Technician, Integer> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select t from Technician t where t.employeeId = :id")
+    Optional<Technician> findForUpdate(@Param("id") Integer id);
+
     @Query("""
             select new com.gara.quanlygara.dto.technician.TechnicianResponse(t.employeeId, e.fullName)
             from Technician t join Employee e on e.id = t.employeeId
