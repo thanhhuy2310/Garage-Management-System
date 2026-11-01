@@ -1,0 +1,27 @@
+import {test,expect} from "@playwright/test";
+import {readFileSync} from "node:fs";
+const path=process.env.GARAGE_VERIFY_CREDENTIALS;
+const f=path?JSON.parse(readFileSync(path,"utf8").replace(/^\uFEFF/,"")):null;
+test.skip(!f,"Requires isolated verification credentials.");
+test("dashboard shows real API totals, switches periods and exposes fetch failure",async({page})=>{
+  await page.goto("/login");
+  await page.getByLabel("Tên đăng nhập",{exact:true}).fill(f.manager.username);
+  await page.getByLabel("Mật khẩu",{exact:true}).fill(f.manager.password);
+  await page.getByRole("button",{name:"Đăng nhập",exact:true}).click();
+  await expect(page).not.toHaveURL(/\/login$/);
+  const response=page.waitForResponse(r=>r.url().endsWith("/api/reports/dashboard"));
+  await page.goto("/admin/dashboard");
+  const result=await response;expect(result.status()).toBe(200);const data=(await result.json()).data;
+  await expect(page.getByText("Tiếp nhận hôm nay",{exact:true}).locator("..")).toContainText(String(data.receivedToday));
+  const money=new Intl.NumberFormat("vi-VN",{style:"currency",currency:"VND",minimumFractionDigits:0,maximumFractionDigits:2});
+  await expect(page.getByText("Thực thu hôm nay",{exact:true}).locator("..")).toContainText(money.format(data.collectedToday));
+  await expect(page.getByText(/MOCK_ONLY|minh họa/)).toHaveCount(0);
+  await page.getByRole("button",{name:"7 tháng",exact:true}).click();
+  await expect(page.getByRole("img",{name:"Biểu đồ doanh thu trong 7 tháng gần nhất",exact:true})).toBeVisible();
+  await page.route("**/api/reports/dashboard",route=>route.fulfill({status:503,contentType:"application/json",body:JSON.stringify({success:false,message:"Không tải được thống kê."})}));
+  await page.reload();await expect(page.getByRole("alert")).toContainText("Không tải được thống kê.");
+  await expect(page.getByText("Thực thu hôm nay",{exact:true})).toHaveCount(0);
+  await page.unroute("**/api/reports/dashboard");
+  await page.getByRole("button",{name:"Thử lại",exact:true}).click();
+  await expect(page.getByText("Thực thu hôm nay",{exact:true})).toBeVisible();
+});

@@ -80,6 +80,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class WarehouseApiTest {
+    @MockitoBean private com.gara.quanlygara.repository.ReceptionRepository receptionRepository;
+    @MockitoBean private com.gara.quanlygara.repository.DashboardRepository dashboardRepository;
 
     @MockitoBean
     private com.gara.quanlygara.repository.InsuranceCompanyRepository insuranceCompanyRepository;

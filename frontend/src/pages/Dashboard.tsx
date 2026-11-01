@@ -12,11 +12,10 @@ import {
   XAxis, YAxis, Tooltip, ResponsiveContainer
 } from "recharts";
 import { Card, StatCard, Badge, Icons } from "../components/ui";
-import {
-  mockAppointments,
-  mockQuotations, chartRevenue, chartMonthly, chartServices,
-  DEMO_TODAY, formatCurrency
-} from "../mock/data";
+import { appointmentsApi, appointmentLabels } from "../api/appointments";
+import { quotationsApi } from "../api/quotations";
+import { dashboardApi } from "../api/dashboard";
+import { formatMoney as formatCurrency } from "../utils/garageFormat";
 
 const PIE_COLORS = ["#2563eb", "#b45309", "#047857", "#f97316", "#7c3aed", "#526176"];
 
@@ -25,6 +24,10 @@ type ChartPeriod = "week" | "month";
 export default function Dashboard() {
   const repairs = useGarageQuery(garageApi.repairOrders);
   const stock = useGarageQuery(loadLowStock);
+  const appointments = useGarageQuery(appointmentsApi.list);
+  const quotations = useGarageQuery(quotationsApi.list);
+  const dashboard = useGarageQuery(dashboardApi.get);
+  const today = dashboard.data?.date ?? "";
   const statusMap: Record<string, string> = {MOI_TAO: "pending", CHO_SUA: "pending", DANG_KIEM_TRA: "pending", DANG_SUA: "in_progress", CHO_PHU_TUNG: "waiting_parts", HOAN_TAT: "completed", HUY: "cancelled", DA_HUY: "cancelled"};
   const repairRows = (repairs.data ?? []).map(r => ({id: r.id, vehicle: r.licensePlate, customer: r.customerName, status: statusMap[r.status] ?? "pending"}));
   const inventoryRows = (stock.data?.items ?? []).map(p => ({id: p.id, name: p.name, stock: p.stockQuantity, minStock: p.minStockLevel, status: p.stockStatus === "HET_HANG" ? "out" : "low"}));
@@ -43,41 +46,37 @@ const pieData = [
 ];
 
 const lowStock = inventoryRows.filter(i => i.status === "low" || i.status === "out");
-const todayAppointments = mockAppointments.filter(a => a.date === DEMO_TODAY);
-const pendingQuotations = mockQuotations
-  .filter((quotation) => quotation.status === "pending")
-  .map((quotation) => ({
-    ...quotation,
-    total: [...quotation.services, ...quotation.parts]
-      .reduce((sum, item) => sum + item.qty * item.price, 0),
-  }));
-
-
+const todayAppointments = (appointments.data ?? []).filter(a => a.date === today && !["HUY", "DA_HUY"].includes(a.status));
+const pendingQuotations = (quotations.data ?? []).filter(q => q.status === "CHO_XAC_NHAN");
+const chartRevenue = (dashboard.data?.dailyRevenue ?? []).map(p => ({date: p.period.slice(5).split("-").reverse().join("/"),revenue: p.revenue}));
+const chartMonthly = (dashboard.data?.monthlyRevenue ?? []).map(p => ({month: p.period.slice(5)+"/"+p.period.slice(0,4),revenue: p.revenue}));
+const chartServices = (dashboard.data?.popularServices ?? []).map(p => ({name:p.name,value:p.count}));
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>("week");
-  const data = (chartPeriod === "week" ? chartRevenue : chartMonthly) as any[];
-  const xKey = chartPeriod === "week" ? "date" : "month";
+  const data = chartPeriod === "week" ? chartRevenue.map(p => ({label:p.date,revenue:p.revenue})) : chartMonthly.map(p => ({label:p.month,revenue:p.revenue}));
+  const xKey = "label";
+  const queries = [repairs,stock,appointments,quotations,dashboard];
+  if (queries.some(q => q.loading || q.error)) return <div className="space-y-3">{queries.map((q,i) => <QueryState key={i} {...q} onRetry={q.reload}/>)}</div>;
 
   return (
     <div className="space-y-6">
-      <p className="rounded-lg bg-warning-soft p-4 text-sm">Phiếu sửa chữa và cảnh báo kho lấy từ hệ thống. Lịch hẹn, báo giá và biểu đồ báo cáo bên dưới là dữ liệu minh họa (MOCK_ONLY).</p>
       <QueryState {...repairs} onRetry={repairs.reload}/><QueryState {...stock} onRetry={stock.reload}/>
       {/* Page heading */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="ui-page-title">Tổng quan gara</h2>
-          <p className="ui-secondary-text text-sm">Phiếu sửa chữa và tồn kho hiện tại · Biểu đồ minh họa ngày {DEMO_TODAY}</p>
+          <p className="ui-secondary-text text-sm">Phiếu sửa chữa, tồn kho và doanh thu thực thu · {today}</p>
         </div>
-        <span className="mono w-fit rounded-md bg-surface-subtle px-2 py-1 text-xs text-muted-foreground">{DEMO_TODAY}</span>
+        <span className="mono w-fit rounded-md bg-surface-subtle px-2 py-1 text-xs text-muted-foreground">{today}</span>
       </div>
 
       {/* Primary KPI group */}
       <div>
         <h3 className="ui-section-title mb-3 text-sm">Chỉ số tổng quan</h3>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Tiếp nhận hôm nay (mẫu)" value="4" icon={Icons.truck} color="navy" trend="+1 so với hôm qua" trendUp />
+        <StatCard label="Tiếp nhận hôm nay" value={dashboard.data!.receivedToday} icon={Icons.truck} color="navy" />
         <StatCard label="Đang sửa chữa" value={repairs.data ? repairStatusCount.in_progress + repairStatusCount.waiting_parts : "—"} icon={Icons.wrench} color="blue" />
-        <StatCard label="Lịch hẹn hôm nay (mẫu)" value={todayAppointments.length} icon={Icons.calendar} color="navy" />
-          <StatCard label="Doanh thu hôm nay (mẫu)" value={formatCurrency(chartRevenue.at(-1)?.revenue ?? 0)} icon={Icons.creditCard} color="green" trend="+12% so hôm qua" trendUp />
+        <StatCard label="Lịch hẹn hôm nay" value={todayAppointments.length} icon={Icons.calendar} color="navy" />
+          <StatCard label="Thực thu hôm nay" value={formatCurrency(dashboard.data!.collectedToday)} icon={Icons.creditCard} color="green" />
         </div>
       </div>
 
@@ -86,7 +85,7 @@ const pendingQuotations = mockQuotations
         <h3 className="ui-section-title mb-3 text-sm">Cần xử lý</h3>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Đã hoàn tất" value={repairs.data ? repairStatusCount.completed : "—"} icon={Icons.checkCircle} color="green" />
-        <StatCard label="Báo giá chờ xác nhận (mẫu)" value={pendingQuotations.length} icon={Icons.fileText} color="amber" />
+        <StatCard label="Báo giá chờ xác nhận" value={pendingQuotations.length} icon={Icons.fileText} color="amber" />
           <StatCard label="Phụ tùng sắp hết" value={stock.data?.count ?? "—"} icon={Icons.alertTriangle} color="red" />
         </div>
       </div>
@@ -96,7 +95,7 @@ const pendingQuotations = mockQuotations
         {/* Revenue chart */}
         <Card className="p-4 sm:p-5 xl:col-span-2">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h3 className="text-base font-semibold text-foreground">Doanh thu & Lượt sửa chữa</h3>
+            <h3 className="text-base font-semibold text-foreground">Doanh thu thực thu</h3>
             <div className="flex gap-1 bg-slate-100 p-0.5 rounded-lg">
               {(["week", "month"] as ChartPeriod[]).map(p => (
                 <button key={p} onClick={() => setChartPeriod(p)} aria-pressed={chartPeriod === p}
@@ -167,16 +166,17 @@ const pendingQuotations = mockQuotations
             <span className="text-xs text-slate-400">{todayAppointments.length} lịch hẹn</span>
           </div>
           <div className="divide-y divide-border">
+            {todayAppointments.length === 0 && <p className="text-sm text-slate-500">Chưa có lịch hẹn hôm nay.</p>}
             {todayAppointments.map(a => (
               <div key={a.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
                 <div className="w-10 text-center">
                   <span className="mono block rounded-md bg-primary-soft px-1.5 py-1 text-xs font-semibold text-primary">{a.time}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-800 truncate">{a.customer}</p>
-                  <p className="text-xs text-slate-500 truncate">{a.vehicle} · {a.service}</p>
+                  <p className="text-sm font-medium text-slate-800 truncate">{a.customerName}</p>
+                  <p className="text-xs text-slate-500 truncate">{a.plate} · {a.serviceName ?? "Tư vấn tại gara"}</p>
                 </div>
-                <Badge variant={a.status as any} />
+                <Badge variant={a.status === "DA_XAC_NHAN" ? "confirmed" : a.status === "DA_DEN" ? "arrived" : "pending"} label={appointmentLabels[a.status] ?? a.status} />
               </div>
             ))}
           </div>
@@ -223,7 +223,7 @@ const pendingQuotations = mockQuotations
               <div key={q.id} className="flex items-center justify-between gap-3 py-3 last:pb-0">
                 <div>
                   <p className="text-xs font-medium text-warning">Báo giá chờ xác nhận</p>
-                  <p className="text-xs text-muted-foreground">{q.customer} · {q.vehicle}</p>
+                  <p className="text-xs text-muted-foreground">{q.customerName} · {q.plate}</p>
                 </div>
                 <span className="whitespace-nowrap text-xs font-bold text-warning">{formatCurrency(q.total)}</span>
               </div>
@@ -235,7 +235,7 @@ const pendingQuotations = mockQuotations
       {/* Services chart */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card className="p-4 sm:p-5">
-          <h3 className="mb-4 text-base font-semibold text-foreground">Dịch vụ sử dụng nhiều nhất</h3>
+          <h3 className="mb-4 text-base font-semibold text-foreground">Dịch vụ sử dụng nhiều nhất · 7 tháng</h3>
           <div role="img" aria-label="Biểu đồ các dịch vụ được sử dụng nhiều nhất">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartServices} layout="vertical" margin={{ left: 0, right: 30 }}>
@@ -251,7 +251,7 @@ const pendingQuotations = mockQuotations
         </Card>
 
         <Card className="p-4 sm:p-5">
-          <h3 className="mb-4 text-base font-semibold text-foreground">Doanh thu theo tháng</h3>
+          <h3 className="mb-4 text-base font-semibold text-foreground">Thực thu theo tháng</h3>
           <div role="img" aria-label="Biểu đồ doanh thu theo tháng">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartMonthly} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
