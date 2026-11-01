@@ -1,5 +1,7 @@
 package com.gara.quanlygara.dto.service;
 
+import com.gara.quanlygara.validation.ServiceTypes;
+
 import com.gara.quanlygara.entity.GarageService;
 
 import java.math.BigDecimal;
@@ -13,7 +15,7 @@ public record ServiceResponse(
         boolean active
 ) {
     public static ServiceResponse from(GarageService service) {
-        return new ServiceResponse(service.getId(), service.getName(), service.getType(),
+        return new ServiceResponse(service.getId(), service.getName(), ServiceTypes.normalize(service.getType()),
                 service.getUnitPrice(), service.getDescription(), service.isActive());
     }
 }

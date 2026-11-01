@@ -1,6 +1,8 @@
 // TV3-TUAN10
 package com.gara.quanlygara.service;
 
+import com.gara.quanlygara.validation.ServiceTypes;
+
 import com.gara.quanlygara.dto.notification.MaintenanceReminderRequest;
 import com.gara.quanlygara.dto.notification.MaintenanceReminderResponse;
 import com.gara.quanlygara.dto.warehouse.PageResponse;
@@ -29,7 +31,6 @@ import java.util.Set;
 public class MaintenanceReminderService {
 
     private static final Logger log = LoggerFactory.getLogger(MaintenanceReminderService.class);
-    private static final String MAINTENANCE_SERVICE_TYPE = "BAO_DUONG";
     private static final int MAX_PAGE_SIZE = 100;
     private static final Set<String> STATUSES = Set.of(
             MaintenanceReminder.PENDING, MaintenanceReminder.REMINDED, MaintenanceReminder.CANCELLED);
@@ -56,7 +57,7 @@ public class MaintenanceReminderService {
         if (request.serviceId() != null) {
             String type = repository.findServiceType(request.serviceId())
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dịch vụ."));
-            if (!MAINTENANCE_SERVICE_TYPE.equalsIgnoreCase(type)) {
+            if (!ServiceTypes.isMaintenance(type)) {
                 throw new BadRequestException("Dịch vụ được chọn không thuộc loại bảo dưỡng.");
             }
         }

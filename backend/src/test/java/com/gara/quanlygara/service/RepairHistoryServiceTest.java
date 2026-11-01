@@ -75,6 +75,9 @@ class RepairHistoryServiceTest {
         var repair = new HistoryDetailResponse.ServiceLine(2, "Thay má phanh", "SUA_CHUA", 1, BigDecimal.ONE, BigDecimal.ONE);
 
         assertEquals("BAO_DUONG", RepairHistoryService.category(List.of(maintenance)));
+        var legacy = new HistoryDetailResponse.ServiceLine(3, "Thay dầu", " Bảo dưỡng ", 1, BigDecimal.ONE, BigDecimal.ONE);
+        assertEquals("BAO_DUONG", RepairHistoryService.category(List.of(legacy, maintenance)));
+        assertEquals("BAO_DUONG_SUA_CHUA", RepairHistoryService.category(List.of(legacy, repair)));
         assertEquals("BAO_DUONG_SUA_CHUA", RepairHistoryService.category(List.of(maintenance, repair)));
         assertEquals("SUA_CHUA", RepairHistoryService.category(List.of(repair)));
         assertEquals("SUA_CHUA", RepairHistoryService.category(List.of()));

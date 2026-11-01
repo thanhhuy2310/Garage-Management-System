@@ -216,16 +216,17 @@ class NotificationsSqlServerIT {
 
         assertEquals(3, reminderService.processDue(today), "Chỉ 3 lịch đến hạn: ngày, km của khách A và lịch của khách B");
         assertEquals(0, reminderService.processDue(today), "Chạy lại không tạo thêm");
-        assertEquals(0, reminderService.processDue(today.plusDays(1)), "Ngày khác: lịch đã nhắc không bị nhắc lại");
+        assertEquals(1, reminderService.processDue(today.plusDays(1)), "Ngày tiếp theo có thêm một lịch đến hạn");
+        assertEquals(0, reminderService.processDue(today.plusDays(1)), "Chạy lại không gửi trùng");
 
-        assertEquals(3, jdbc.queryForObject("SELECT COUNT(*) FROM ThongBao WHERE MaLichNhac IS NOT NULL AND MaLichNhac IN (?,?,?,?,?,?,?)",
+        assertEquals(4, jdbc.queryForObject("SELECT COUNT(*) FROM ThongBao WHERE MaLichNhac IS NOT NULL AND MaLichNhac IN (?,?,?,?,?,?,?)",
                 Integer.class, dueByDate, notDueByDate, dueByKm, notDueByKm, cancelled, alreadyReminded, otherCustomersDue));
         assertEquals("DA_NHAC", jdbc.queryForObject("SELECT TrangThai FROM LichNhacBaoDuong WHERE MaLichNhac = ?", String.class, dueByDate));
         assertEquals("CHO_NHAC", jdbc.queryForObject("SELECT TrangThai FROM LichNhacBaoDuong WHERE MaLichNhac = ?", String.class, notDueByKm));
         assertEquals("DA_HUY", jdbc.queryForObject("SELECT TrangThai FROM LichNhacBaoDuong WHERE MaLichNhac = ?", String.class, cancelled));
 
         JsonNode data = list(usernameA);
-        assertEquals(2, data.path("totalElements").asInt(), "Khách A chỉ thấy 2 thông báo nhắc của mình");
+        assertEquals(3, data.path("totalElements").asInt(), "Khách A chỉ thấy 3 thông báo nhắc của mình");
         data.path("items").forEach(item -> assertEquals("maintenance", item.path("type").asText()));
     }
 }

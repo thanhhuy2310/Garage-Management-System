@@ -157,7 +157,7 @@ class RepairHistorySqlServerIT {
         int vehicleA3 = vehicle(customerA, "IT" + tag + "A3");
         int vehicleB1 = vehicle(customerB, "IT" + tag + "B1");
 
-        int maintenance = service(tag + "m", "BAO_DUONG", "300000");
+        int maintenance = service(tag + "m", "Bảo dưỡng", "300000");
         int repair = service(tag + "r", "SUA_CHUA", "500000");
         int partX = part(tag + "x", "90000");
 

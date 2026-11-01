@@ -1,6 +1,8 @@
 // TV3-TUAN9
 package com.gara.quanlygara.service;
 
+import com.gara.quanlygara.validation.ServiceTypes;
+
 import com.gara.quanlygara.dto.history.HistoryDetailResponse;
 import com.gara.quanlygara.dto.history.HistoryItemResponse;
 import com.gara.quanlygara.dto.history.HistoryPageResponse;
@@ -133,7 +135,7 @@ public class RepairHistoryService {
 
     /** Toàn bộ dịch vụ là BAO_DUONG => bảo dưỡng; có cả BAO_DUONG và loại khác => hỗn hợp; còn lại => sửa chữa. */
     static String category(List<HistoryDetailResponse.ServiceLine> services) {
-        long maintenance = services.stream().filter(line -> MAINTENANCE.equalsIgnoreCase(line.type())).count();
+        long maintenance = services.stream().filter(line -> ServiceTypes.isMaintenance(line.type())).count();
         if (maintenance == 0) return REPAIR;
         return maintenance == services.size() ? MAINTENANCE : MIXED;
     }
