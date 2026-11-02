@@ -65,6 +65,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class CustomerHistoryApiTest {
+    @MockitoBean private com.gara.quanlygara.repository.ContactMessageRepository contactMessageRepository;
     @MockitoBean private com.gara.quanlygara.repository.ReceptionRepository receptionRepository;
     @MockitoBean private com.gara.quanlygara.repository.DashboardRepository dashboardRepository;
 

@@ -24,7 +24,8 @@ $scripts = @(
     'migrations/V007__insurance_owner_names.sql',
     'migrations/V008__appointment_workflow.sql',
     'migrations/V009__quotation_workflow.sql',
-    'migrations/V010__reception_workflow.sql'
+    'migrations/V010__reception_workflow.sql',
+    'migrations/V011__customer_contact_messages.sql'
 )
 $targetFolder = Join-Path ([IO.Path]::GetTempPath()) $Database
 New-Item -ItemType Directory -Path $targetFolder -Force | Out-Null

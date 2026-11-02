@@ -15,7 +15,7 @@ const PAGE_TITLES: Record<string, string> = {
   "repair-details": "Chi tiết phiếu sửa chữa",
   invoice: "Hóa đơn & Thanh toán",
   history: "Lịch sử sửa chữa",
-  notifications: "Thông báo",
+  notifications: "Lời nhắn khách hàng",
   reports: "Báo cáo – Thống kê",
   staff: "Nhân viên",
   settings: "Tài khoản & Phân quyền",

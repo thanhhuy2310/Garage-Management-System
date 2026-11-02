@@ -34,10 +34,10 @@ export type Page = AdminPage;
 
 const BASE_ROLE_NAV: Record<Role, AdminPage[]> = {
   customer: [],
-  receptionist: ["customers", "vehicles", "appointments", "reception", "repair", "quotation", "invoice", "history"],
+  receptionist: ["customers", "vehicles", "appointments", "reception", "repair", "quotation", "invoice", "history", "notifications"],
   technician: ["technician", "inventory"],
   warehouse: ["inventory"],
-  manager: ["dashboard", "appointments", "reception", "quotation", "staff", "services", "repair", "invoice", "reports"],
+  manager: ["dashboard", "appointments", "reception", "quotation", "staff", "services", "repair", "invoice", "reports", "notifications"],
   admin: ["settings"],
 };
 

@@ -1,3 +1,5 @@
+import {contactMessagesApi,type ContactInput} from "../api/contactMessages";
+import {errorMessage} from "../api/client";
 import { useState } from "react";
 import PublicFooter from "../components/PublicFooter";
 import PublicHeader, { type PublicPageKey } from "../components/PublicHeader";
@@ -18,7 +20,14 @@ interface PublicContactPageProps {
 }
 
 export default function PublicContactPage({ onNavigate, onLogin, onBook, accountLabel }: PublicContactPageProps) {
-  const [sent, setSent] = useState(false);
+  const [sent, setSent] = useState<number|null>(null);
+  const [busy,setBusy]=useState(false),[error,setError]=useState("");
+  const [input,setInput]=useState<ContactInput>(()=>({requestId:crypto.randomUUID(),fullName:"",phone:"",plate:"",message:""}));
+  async function submit(event:React.FormEvent){
+    event.preventDefault();if(busy)return;setBusy(true);setError("");
+    try{const receipt=await contactMessagesApi.send(input);setSent(receipt.id);}
+    catch(e){setError(errorMessage(e));}finally{setBusy(false);}
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -63,23 +72,24 @@ export default function PublicContactPage({ onNavigate, onLogin, onBook, account
                 </span>
                 <h2 className="ui-card-title mt-4">Đã nhận lời nhắn</h2>
                 <p className="ui-secondary-text mt-1 max-w-sm text-sm">
-                  Gara sẽ liên hệ lại trong giờ làm việc. Trường hợp gấp, gọi hotline 0901 234 567.
+                  Mã lời nhắn: {sent}. Gara sẽ liên hệ lại trong giờ làm việc. Trường hợp gấp, gọi hotline 0901 234 567.
                 </p>
               </div>
             ) : (
               <form
-                onSubmit={(e) => { e.preventDefault(); setSent(true); }}
+                onSubmit={submit}
                 className="space-y-4"
               >
                 <h2 className="ui-card-title">Gửi lời nhắn</h2>
+                {error&&<p role="alert" className="text-red-700">{error}</p>}
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Input label="Họ tên *" placeholder="Nguyễn Văn An" required />
-                  <Input label="Số điện thoại *" placeholder="0901 234 567" required />
+                  <Input label="Họ tên *" placeholder="Nguyễn Văn An" required maxLength={100} value={input.fullName} onChange={e=>setInput({...input,fullName:e.target.value})} />
+                  <Input label="Số điện thoại *" placeholder="0901 234 567" required maxLength={20} value={input.phone} onChange={e=>setInput({...input,phone:e.target.value})} />
                 </div>
-                <Input label="Biển số xe" placeholder="51G-123.45" />
-                <Textarea label="Nội dung *" placeholder="Xe kêu lạ khi đạp phanh, muốn kiểm tra..." required />
+                <Input label="Biển số xe" placeholder="51G-123.45" maxLength={20} value={input.plate} onChange={e=>setInput({...input,plate:e.target.value})} />
+                <Textarea label="Nội dung *" placeholder="Xe kêu lạ khi đạp phanh, muốn kiểm tra..." required maxLength={2000} value={input.message} onChange={e=>setInput({...input,message:e.target.value})} />
                 <div className="flex justify-end">
-                  <Button type="submit" icon={Icons.send}>Gửi lời nhắn</Button>
+                  <Button type="submit" icon={Icons.send} disabled={busy}>{busy?"Đang gửi…":"Gửi lời nhắn"}</Button>
                 </div>
               </form>
             )}

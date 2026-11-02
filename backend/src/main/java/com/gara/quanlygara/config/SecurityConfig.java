@@ -53,7 +53,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.GET, "/api/health", "/api/public/services", "/api/public/parts").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register", "/api/public/contact-messages").permitAll()
                         .requestMatchers("/api/auth/me", "/api/auth/logout", "/api/auth/change-password").authenticated()
                         .requestMatchers("/api/accounts/**").hasRole("ADMIN")
                         .anyRequest().access(new WebExpressionAuthorizationManager(

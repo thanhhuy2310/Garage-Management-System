@@ -17,7 +17,7 @@ const ALL_NAV_ITEMS = [
   { key: "repair-details", label: "Chi tiết phiếu sửa", icon: Icons.wrench },
   { key: "invoice", label: "Hóa đơn & Thanh toán", icon: Icons.creditCard },
   { key: "history", label: "Lịch sử sửa chữa", icon: Icons.history },
-  { key: "notifications", label: "Thông báo", icon: Icons.bell },
+  { key: "notifications", label: "Lời nhắn khách hàng", icon: Icons.bell },
   { key: "reports", label: "Báo cáo – Thống kê", icon: Icons.barChart },
   { key: "staff", label: "Nhân viên", icon: Icons.userCheck },
   { key: "settings", label: "Tài khoản & Phân quyền", icon: Icons.settings },
