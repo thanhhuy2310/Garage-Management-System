@@ -57,6 +57,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class SecurityConfigTest {
+    @MockitoBean private com.gara.quanlygara.repository.ContactMessageRepository contactMessages;
+    @MockitoBean private com.gara.quanlygara.repository.DashboardRepository dashboard;
+    @MockitoBean private com.gara.quanlygara.repository.ReceptionRepository receptions;
 
     @MockitoBean
     private com.gara.quanlygara.repository.InsuranceCompanyRepository insuranceCompanyRepository;
@@ -277,7 +280,7 @@ class SecurityConfigTest {
         account.setActive(true);
         account.setEmployeeId(1);
         when(accountRepository.findById(1)).thenReturn(Optional.of(account));
-        when(employeeRepository.existsById(1)).thenReturn(true);
+        when(employeeRepository.findForUpdate(1)).thenReturn(Optional.of(new com.gara.quanlygara.entity.Employee()));
         when(accountRepository.save(account)).thenReturn(account);
 
         mockMvc.perform(patch("/api/accounts/1/role")

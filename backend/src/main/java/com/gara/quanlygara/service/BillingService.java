@@ -25,13 +25,15 @@ import java.util.Locale;
 @Transactional(readOnly = true)
 public class BillingService {
     private final RepairBusinessRules rules;
+    private final InsuranceLedger insurance;
     private final InvoiceRepository invoices;
     private final PaymentRepository payments;
     private final RepairOrderRepository orders;
     private final JdbcTemplate jdbc;
     private final ReceivingBankAccountRepository banks;
     public BillingService(InvoiceRepository invoices, PaymentRepository payments,
-                          RepairOrderRepository orders, JdbcTemplate jdbc, ReceivingBankAccountRepository banks, RepairBusinessRules rules) {
+                          RepairOrderRepository orders, JdbcTemplate jdbc, ReceivingBankAccountRepository banks, RepairBusinessRules rules, InsuranceLedger insurance) {
+        this.insurance = insurance;
         this.rules = rules;
         this.invoices = invoices;
         this.payments = payments;
@@ -61,10 +63,11 @@ public class BillingService {
         var vehicle = orders.findOverviews(invoice.getRepairOrderId(), 0).stream().findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu sửa chữa của hóa đơn."));
         BigDecimal paid = payments.totalPaid(id);
+        Integer claim = insurance.claimForOrder(invoice.getRepairOrderId());
         return new InvoiceResponse.Detail(new InvoiceResponse(id, invoice.getRepairOrderId(), invoice.getCreatedAt(),
                 invoice.getStatus(), invoice.getTotal(), paid, invoice.getTotal().subtract(paid),
                 vehicle.getLicensePlate(), vehicle.getCustomerName()), lines(invoice.getRepairOrderId()),
-                payments.findByInvoiceIdOrderByPaidAtDescIdDesc(id));
+                payments.findByInvoiceIdOrderByPaidAtDescIdDesc(id), claim, claim == null ? null : insurance.balance(id));
     }
 
     @Transactional
@@ -89,20 +92,23 @@ public class BillingService {
     }
 
     @Transactional
-    public InvoiceResponse.Detail recordPayment(Integer id, BillingRequests.RecordPayment request) {
+    public InvoiceResponse.Detail recordPayment(Integer id, BillingRequests.RecordPayment request, Integer employeeId) {
         // Serialize collection on the invoice before calculating its outstanding balance.
         Invoice invoice = invoices.findForUpdate(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hóa đơn."));
         String requestId = request.requestId().toLowerCase(Locale.ROOT);
+        Integer claim = insurance.claimForOrder(invoice.getRepairOrderId());
         var existing = payments.findByRequestId(requestId);
         if (existing.isPresent()) {
             Payment payment = existing.get();
-            if (!payment.getInvoiceId().equals(id) || payment.getAmount().compareTo(request.amount()) != 0
+            if ((claim != null && !insurance.matchesReceipt(payment.getId(),request)) || (claim == null && "INSURER".equals(request.payer()))
+                    || !payment.getInvoiceId().equals(id) || payment.getAmount().compareTo(request.amount()) != 0
                     || !payment.getMethod().equals(request.method())
                     || !java.util.Objects.equals(payment.getBankAccountId(), request.bankAccountId())) {
                 throw new ConflictException("Mã yêu cầu đã được sử dụng cho một thanh toán khác.");
             }
             return getById(id);
         }
+        insurance.validateReceipt(id,claim,request);
         BigDecimal remaining = invoice.getTotal().subtract(payments.totalPaid(id));
         if (request.bankAccountId() != null) {
             if (!"CHUYEN_KHOAN".equals(request.method())) throw new BadRequestException("Tiền mặt không dùng tài khoản ngân hàng.");
@@ -121,6 +127,7 @@ public class BillingService {
         payment.setBankAccountId(request.bankAccountId());
         payment.setPaidAt(now());
         payments.saveAndFlush(payment);
+        if ("INSURER".equals(request.payer())) insurance.saveReceipt(payment.getId(),id,claim,request,employeeId);
         invoice.setStatus(remaining.compareTo(request.amount()) == 0 ? "DA_THANH_TOAN" : "CHUA_THANH_TOAN");
         invoices.saveAndFlush(invoice);
         return getById(id);

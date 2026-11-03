@@ -15,7 +15,11 @@ import java.util.List;
 @PreAuthorize("hasAnyRole('MANAGER','RECEPTIONIST')")
 public class BillingController {
     private final BillingService billing;
-    public BillingController(BillingService billing) { this.billing = billing; }
+    private final com.gara.quanlygara.security.StaffContext staff;
+    public BillingController(BillingService billing, com.gara.quanlygara.security.StaffContext staff) {
+        this.billing = billing;
+        this.staff = staff;
+    }
     @GetMapping
     public ApiResponse<List<InvoiceResponse>> getAll() {
         return ApiResponse.success("Danh sách hóa đơn.", billing.getAll());
@@ -31,7 +35,8 @@ public class BillingController {
     }
     @PostMapping("/{id}/payments")
     public ApiResponse<InvoiceResponse.Detail> pay(@PathVariable Integer id,
-            @Valid @RequestBody BillingRequests.RecordPayment request) {
-        return ApiResponse.success("Đã ghi nhận thanh toán.", billing.recordPayment(id, request));
+            @Valid @RequestBody BillingRequests.RecordPayment request,
+            org.springframework.security.core.Authentication authentication) {
+        return ApiResponse.success("Đã ghi nhận thanh toán.", billing.recordPayment(id, request, "INSURER".equals(request.payer()) ? staff.employeeId(authentication) : null));
     }
 }

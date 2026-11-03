@@ -9,5 +9,5 @@ public record InvoiceResponse(Integer id, Integer repairOrderId, LocalDateTime c
                               BigDecimal total, BigDecimal paid, BigDecimal remaining,
                               String licensePlate, String customerName) {
     public record Line(String type, Integer id, String name, Integer quantity, BigDecimal unitPrice) { }
-    public record Detail(InvoiceResponse invoice, List<Line> lines, List<Payment> payments) { }
+    public record Detail(InvoiceResponse invoice, List<Line> lines, List<Payment> payments, Integer insuranceClaimId, com.gara.quanlygara.service.InsuranceLedger.Balance insuranceBalance) { }
 }

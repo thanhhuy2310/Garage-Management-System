@@ -12,8 +12,10 @@ import java.math.BigDecimal;
 public class RepairBusinessRules {
     private final RepairOrderRepository orders;
     private final JdbcTemplate jdbc;
+    private final InsuranceLedger insurance;
 
-    public RepairBusinessRules(RepairOrderRepository orders, JdbcTemplate jdbc) {
+    public RepairBusinessRules(RepairOrderRepository orders, JdbcTemplate jdbc, InsuranceLedger insurance) {
+        this.insurance = insurance;
         this.orders = orders;
         this.jdbc = jdbc;
     }
@@ -28,10 +30,12 @@ public class RepairBusinessRules {
     }
 
     public void requireAcceptedQuote(Integer id) {
+        insurance.requireDecision(id);
         if (!hasAcceptedQuote(id)) throw new ConflictException("Khách hàng chưa xác nhận báo giá của phiếu sửa chữa.");
     }
 
     public void requireApprovedService(Integer orderId,Integer serviceId) {
+        insurance.requireDecision(orderId);
         if(jdbc.queryForObject("""
             SELECT COUNT(*) FROM BaoGia b JOIN ChiTietBaoGia q ON q.MaBaoGia=b.MaBaoGia
             JOIN ChiTietDichVu d ON d.MaPhieuSuaChua=b.MaPhieuSuaChua AND d.MaDichVu=q.MaDichVu
@@ -43,6 +47,7 @@ public class RepairBusinessRules {
 
     /** Called while holding the repair-order lock, before locking stock rows. */
     public BigDecimal approvedPartPrice(Integer orderId,Integer partId,int quantity,boolean allocation) {
+        insurance.requireDecision(orderId);
         var quotes=jdbc.query("""
             SELECT SUM(CONVERT(BIGINT,q.SoLuong)),MIN(q.DonGia),MAX(q.DonGia)
             FROM BaoGia b JOIN ChiTietBaoGia q ON q.MaBaoGia=b.MaBaoGia

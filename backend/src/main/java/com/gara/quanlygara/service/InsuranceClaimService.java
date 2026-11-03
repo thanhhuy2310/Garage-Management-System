@@ -67,6 +67,10 @@ public class InsuranceClaimService {
         if (!policy.getCustomerId().equals(vehicle.getCustomerId())) {
             throw new BadRequestException("Người đứng tên hợp đồng không khớp với chủ xe hiện tại.");
         }
+        if (receptionRepository.repairForUpdate(reception.getId()).filter(r ->
+                !java.util.Set.of("MOI_TAO","DANG_KIEM_TRA","CHO_SUA").contains(r.getStatus())).isPresent()) {
+            throw new ConflictException("Cần mở hồ sơ bảo hiểm trước khi bắt đầu sửa chữa.");
+        }
         String location = request.incidentLocation().strip();
         String insurerNumber = normalize(request.insurerClaimNumber());
         if (insurerNumber != null) insurerNumber = insurerNumber.toUpperCase(Locale.ROOT);

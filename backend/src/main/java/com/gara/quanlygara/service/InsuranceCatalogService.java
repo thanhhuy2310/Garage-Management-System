@@ -119,7 +119,8 @@ public class InsuranceCatalogService {
     @Transactional
     public InsurancePolicyResponse verifyPolicy(Integer id, InsurancePolicyVerificationRequest request,
                                                 Authentication authentication) {
-        InsurancePolicy policy = findPolicy(id);
+        InsurancePolicy policy = policyRepository.forVerification(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hợp đồng bảo hiểm."));
         if (!"CHUA_XAC_MINH".equals(policy.getVerificationStatus())) {
             throw new ConflictException("Hợp đồng đã được xác minh. Không được ghi đè kết quả cũ.");
         }
@@ -130,6 +131,7 @@ public class InsuranceCatalogService {
         if (!vehicle.getCustomerId().equals(policy.getCustomerId())) {
             throw new BadRequestException("Người đứng tên hợp đồng không trùng với chủ xe hiện tại.");
         }
+        policy.completeOwnerNames(trim(request.registeredOwnerName()), trim(request.certificateOwnerName()));
         validateOwnerNames(policy.getRegisteredOwnerName(), policy.getCertificateOwnerName(), owner.getFullName());
         policy.verify(request.status(), request.note().strip(), staffContext.employeeId(authentication),
                 LocalDateTime.now());
@@ -145,7 +147,7 @@ public class InsuranceCatalogService {
         return value == null || value.isBlank() ? null : value.strip();
     }
 
-    private void validateOwnerNames(String registrationName, String certificateName, String customerName) {
+    static void validateOwnerNames(String registrationName, String certificateName, String customerName) {
         if (registrationName == null || certificateName == null || customerName == null
                 || !normalizeName(registrationName).equals(normalizeName(certificateName))
                 || !normalizeName(registrationName).equals(normalizeName(customerName))) {
@@ -153,7 +155,7 @@ public class InsuranceCatalogService {
         }
     }
 
-    private String normalizeName(String value) {
+    private static String normalizeName(String value) {
         return value.strip().replaceAll("\\s+", " ").toUpperCase(Locale.ROOT);
     }
 }

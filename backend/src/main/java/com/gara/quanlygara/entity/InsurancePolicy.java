@@ -79,6 +79,10 @@ public class InsurancePolicy {
         this.certificateOwnerName = certificateOwnerName;
     }
 
+    public void completeOwnerNames(String registration, String certificate) {
+        if (registeredOwnerName == null) registeredOwnerName = registration;
+        if (certificateOwnerName == null) certificateOwnerName = certificate;
+    }
     public void verify(String status, String note, Integer employeeId, LocalDateTime time) {
         this.verificationStatus = status;
         this.verificationNote = note;

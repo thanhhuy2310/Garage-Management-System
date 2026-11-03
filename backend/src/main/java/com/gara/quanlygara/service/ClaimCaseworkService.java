@@ -98,7 +98,7 @@ public class ClaimCaseworkService {
     public void upload(int id,int version,String category,MultipartFile file,int staff) throws IOException {
         if(!Set.of("GIAM_DINH","QUYET_DINH","CHUYEN_TIEN","KHAC").contains(category))
             throw new BadRequestException("Loại chứng từ không hợp lệ.");
-        if(file.isEmpty() || file.getSize()>2097152) throw new BadRequestException("Chứng từ phải từ 1 byte đến 2 MB.");
+        if(file.isEmpty() || file.getSize()>1048576) throw new BadRequestException("Chứng từ phải từ 1 byte đến 1 MB.");
         byte[] bytes=file.getBytes();
         String type;
         if(starts(bytes,0x25,0x50,0x44,0x46,0x2d)) type="application/pdf";
@@ -108,6 +108,12 @@ public class ClaimCaseworkService {
         String name=Objects.toString(file.getOriginalFilename(),"").strip();
         if(name.isEmpty() || name.length()>180 || name.chars().anyMatch(c->c<32 || c==127 || c==47 || c==92))
             throw new BadRequestException("Tên tệp không hợp lệ.");
+        String lower=name.toLowerCase(Locale.ROOT);
+        if (!(type.equals("application/pdf") && lower.endsWith(".pdf")
+                || type.equals("image/jpeg") && (lower.endsWith(".jpg") || lower.endsWith(".jpeg"))
+                || type.equals("image/png") && lower.endsWith(".png"))) {
+            throw new BadRequestException("Phần mở rộng không khớp nội dung chứng từ.");
+        }
         String status=lock(id,version);
         db.update("INSERT INTO ChungTuBaoHiem(MaHoSoBaoHiem,Loai,TenTep,Kieu,NoiDung,MaNhanVien) VALUES(?,?,?,?,?,?)",id,category,name,type,bytes,staff);
         event(id,staff,"LUU_CHUNG_TU",status,status,name);

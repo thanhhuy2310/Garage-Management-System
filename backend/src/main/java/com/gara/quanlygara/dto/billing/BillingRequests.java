@@ -10,6 +10,13 @@ public final class BillingRequests {
             @NotNull @DecimalMin(value = "0", inclusive = false) @Digits(integer = 16, fraction = 2) BigDecimal amount,
             @NotNull @Pattern(regexp = "TIEN_MAT|CHUYEN_KHOAN") String method,
             @NotNull @Pattern(regexp = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}") String requestId,
-            @Positive Integer bankAccountId
-    ) { }
+            @Positive Integer bankAccountId,
+            @Pattern(regexp = "CUSTOMER|INSURER") String payer,
+            @Positive Integer documentId,
+            @Size(max = 100) String reference
+    ) {
+        public RecordPayment(BigDecimal amount, String method, String requestId, Integer bankAccountId) {
+            this(amount, method, requestId, bankAccountId, null, null, null);
+        }
+    }
 }

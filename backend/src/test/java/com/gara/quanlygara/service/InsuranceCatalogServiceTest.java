@@ -130,7 +130,7 @@ class InsuranceCatalogServiceTest {
         InsurancePolicy policy = new InsurancePolicy(3, 8, 12, "HD-123", "VAT_CHAT_XE",
                 LocalDate.of(2026, 1, 1), LocalDate.of(2027, 1, 1), null, null, null, null, null,
                 "Nguyễn Văn An", "Nguyễn Văn An");
-        when(policyRepository.findById(5)).thenReturn(Optional.of(policy));
+        when(policyRepository.forVerification(5)).thenReturn(Optional.of(policy));
         Vehicle vehicle = new Vehicle();
         vehicle.setId(8);
         vehicle.setCustomerId(12);
@@ -154,7 +154,7 @@ class InsuranceCatalogServiceTest {
                 LocalDate.of(2026, 1, 1), LocalDate.of(2027, 1, 1), null, null, null, null, null,
                 "Nguyễn Văn An", "Nguyễn Văn An");
         policy.verify("KHONG_HOP_LE", "Không tìm thấy hợp đồng.", 9, java.time.LocalDateTime.now());
-        when(policyRepository.findById(5)).thenReturn(Optional.of(policy));
+        when(policyRepository.forVerification(5)).thenReturn(Optional.of(policy));
 
         assertThrows(ConflictException.class, () -> service.verifyPolicy(5,
                 new InsurancePolicyVerificationRequest("DA_XAC_MINH", "Đã đối chiếu."), authentication));
@@ -169,7 +169,7 @@ class InsuranceCatalogServiceTest {
         Vehicle vehicle = new Vehicle();
         vehicle.setId(8);
         vehicle.setCustomerId(12);
-        when(policyRepository.findById(5)).thenReturn(Optional.of(policy));
+        when(policyRepository.forVerification(5)).thenReturn(Optional.of(policy));
         when(vehicleRepository.findById(8)).thenReturn(Optional.of(vehicle));
         when(customerRepository.findById(12)).thenReturn(Optional.of(owner()));
 

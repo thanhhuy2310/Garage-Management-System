@@ -88,4 +88,70 @@ class InsuranceWorkflowSqlServerIT {
         assertEquals(200,file.getStatus());assertEquals("%PDF-1.7\n%%EOF",file.getContentAsString());
         assertTrue(file.getHeader("Content-Disposition").startsWith("attachment"));
     }
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(booleans={true,false})
+    void actualInvoiceSeparatesCustomerAndInsurerUntilBothHavePaid(boolean direct)throws Exception {
+        inspect();
+        int service=insert("DichVu","MaDichVu",Map.of("TenDichVu","Sửa cửa","DonGia",200000));
+        var repair=call(post("/api/repair-orders"),Map.of("receptionId",reception,"services",List.of(Map.of("serviceId",service,"quantity",1))),201);
+        int order=repair.path("order").path("id").asInt();
+        var quote=call(post("/api/quotations"),Map.of("repairOrderId",order,
+                "lines",List.of(Map.of("kind","SERVICE","itemId",service,"quantity",1))),201);
+        int quoteId=quote.path("id").asInt(),line=quote.path("lines").get(0).path("id").asInt();
+        var sent=call(post("/api/quotations/"+quoteId+"/send"),Map.of("version",0),200);
+        var decision=mvc.perform(post("/api/quotations/"+quoteId+"/decision").with(user(owner).roles("CUSTOMER"))
+            .contentType(APPLICATION_JSON).content(json.writeValueAsBytes(Map.of("version",sent.path("version").asInt(),"accepted",true)))).andReturn();
+        assertEquals(200,decision.getResponse().getStatus());
+        String finance=path+"/finance";
+        var progress=Map.of("expectedStatus","MOI_TAO","status","DANG_SUA","notes","Bắt đầu");
+        call(put("/api/repair-orders/"+order+"/progress"),progress,409);
+        call(post(finance+"/proposals"),Map.of("version",version(),"quoteId",quoteId,"revision",1,"direct",direct,
+                "lines",List.of(Map.of("lineId",line,"amount",180000))),200);
+        int proposal=call(get(finance),null,200).path("proposals").get(0).path("id").asInt();
+        int evidence=upload("QUYET_DINH");
+        var approval=Map.of("version",version(),"proposalId",proposal,"documentId",evidence,"reference","QD-01","reason","Trừ phần khách tự chịu",
+                "lines",List.of(Map.of("lineId",line,"amount",150000)));
+        call(post(finance+"/decisions"),approval,409);
+        call(post("/api/insurance/policies/"+policy+"/verification"),Map.of("status","DA_XAC_MINH","note","Đã đối chiếu giấy chứng nhận"),200);
+        call(post(finance+"/decisions"),approval,200);
+        db.update("INSERT INTO KyThuatVien(MaNhanVien) VALUES(?)",employee);
+        call(post("/api/repair-orders/"+order+"/technicians"),Map.of("technicianId",employee),201);
+        call(put("/api/repair-orders/"+order+"/progress"),progress,200);
+        String servicePath="/api/repair-orders/"+order+"/services/"+service+"/progress";
+        call(put(servicePath),Map.of("expectedStatus","CHO_SUA","status","DANG_SUA","notes","Sửa cửa"),200);
+        call(put(servicePath),Map.of("expectedStatus","DANG_SUA","status","HOAN_TAT","notes","Đã kiểm tra"),200);
+        call(put("/api/repair-orders/"+order+"/progress"),Map.of("expectedStatus","DANG_SUA","status","HOAN_TAT","notes","Nghiệm thu"),200);
+        int invoice=call(post("/api/invoices"),Map.of("repairOrderId",order),201).path("invoice").path("id").asInt();
+        String payments="/api/invoices/"+invoice+"/payments";
+        int insurer=direct?150000:0,customerShare=200000-insurer;
+        var customerPayment=Map.of("amount",customerShare,"method","TIEN_MAT","requestId",UUID.randomUUID().toString());
+        call(post(payments),customerPayment,409);
+        call(post(finance+"/settlements"),Map.of("version",version(),"invoiceId",invoice,"proposalId",proposal,
+                "lines",List.of(Map.of("lineId",line,"amount",insurer))),200);
+        call(post(payments),Map.of("amount",customerShare+1,"method","TIEN_MAT","requestId",UUID.randomUUID().toString()),409);
+        call(post(payments),customerPayment,200);
+        if(direct) {
+            call(post(finance+"/close").param("version",""+version()),null,409);
+            int bankDoc=upload("CHUYEN_TIEN");
+            var receipt=Map.of("amount",insurer,"method","CHUYEN_KHOAN","requestId",UUID.randomUUID().toString(),
+                    "payer","INSURER","documentId",bankDoc,"reference","BANK-01");
+            call(post(payments),receipt,200);call(post(payments),receipt,200);
+        }
+        String summary="/api/customers/me/quotations/"+quoteId+"/insurance";
+        var response=mvc.perform(get(summary).with(user(owner).roles("CUSTOMER"))).andReturn().getResponse();
+        assertEquals(200,response.getStatus());
+        var share=json.readTree(response.getContentAsByteArray()).path("data");
+        assertEquals(customerShare,share.path("customerAmount").asInt());
+        assertEquals(0,share.path("remaining").asInt());
+        assertFalse(share.has("documents"));
+        int other=insert("KhachHang","MaKhachHang",Map.of("HoTen","Lê Minh","SoDienThoai",owner));
+        insert("TaiKhoan","MaTaiKhoan",Map.of("TenDangNhap",owner+"x","MatKhauHash","unused","VaiTro","CUSTOMER","MaKhachHang",other));
+        assertEquals(404,mvc.perform(get(summary).with(user(owner+"x").roles("CUSTOMER"))).andReturn().getResponse().getStatus());
+        var balance=call(get(finance),null,200).path("balance");
+        assertEquals(insurer,balance.path("insurerPaid").asInt());
+        assertEquals(customerShare,balance.path("customerPaid").asInt());
+        assertEquals(200000,db.queryForObject("SELECT SUM(SoTien) FROM ThanhToan WHERE MaHoaDon=?",Integer.class,invoice));
+        call(post(finance+"/close").param("version",""+version()),null,200);
+        assertEquals("DA_DONG",call(get(path+"/casework"),null,200).path("status").asText());
+    }
 }
