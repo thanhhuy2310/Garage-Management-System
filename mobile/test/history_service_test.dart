@@ -128,7 +128,8 @@ void main() {
     expect(page.items.first.vehicleName, 'Toyota Camry');
     expect(page.items.first.category, HistoryCategory.maintenance);
     expect(page.items.first.totalCost, 1380000.0);
-    expect(page.items.first.date, DateTime(2026, 9, 20, 10));
+    // The API sends garage time (UTC+7) without an offset. Compare the instant on any runner.
+    expect(page.items.first.date?.toUtc(), DateTime.utc(2026, 9, 20, 3));
   });
 
   test('getHistory passes the vehicle filter as a query parameter', () async {
