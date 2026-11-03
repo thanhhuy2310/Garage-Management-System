@@ -138,6 +138,19 @@ class RepairBillingSqlServerIT {
         assertTrue(send(get("/api/customers/me/notifications/unread-count"), customer, null, 200).path("count").asInt() > 0);
     }
 
+    @Test
+    void loggingOutRevokesOnlyThePresentedToken() throws Exception {
+        assertTrue(jdbc.queryForObject("SELECT DB_NAME()",String.class).startsWith("QuanLyGaraOTo_Verify_"));
+        String username="minhan_"+tag;
+        String phone="09"+String.format("%08d",Integer.toUnsignedLong(tag.hashCode())%100000000);
+        send(post("/api/auth/register"),null,Map.of("fullName","Nguyễn Minh An","phone",phone,"username",username,"password",password),201);
+        String first=login(username), second=login(username);
+        assertNotEquals(first,second);
+        send(post("/api/auth/logout"),first,null,200);
+        send(get("/api/auth/me"),first,null,401);
+        send(get("/api/auth/me"),second,null,200);
+    }
+
     private void progress(String path, String token, String from, String to) throws Exception {
         send(put(path + "/progress"), token, Map.of("expectedStatus", from, "status", to, "notes", "Đã kiểm tra tại xưởng."), 200);
     }

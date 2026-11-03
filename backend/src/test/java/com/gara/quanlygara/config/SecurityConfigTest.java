@@ -57,6 +57,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @AutoConfigureMockMvc
 class SecurityConfigTest {
+    @MockitoBean private com.gara.quanlygara.security.SessionRevocations revocations;
     @MockitoBean private com.gara.quanlygara.repository.ContactMessageRepository contactMessages;
     @MockitoBean private com.gara.quanlygara.repository.DashboardRepository dashboard;
     @MockitoBean private com.gara.quanlygara.repository.ReceptionRepository receptions;

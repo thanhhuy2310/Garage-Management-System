@@ -34,6 +34,7 @@ public class JwtService {
     public String generateToken(Account account) {
         Instant now = Instant.now();
         return Jwts.builder()
+                .id(java.util.UUID.randomUUID().toString())
                 .subject(account.getUsername())
                 .claim("role", account.getRole().name())
                 .claim("accountId", account.getId())
@@ -71,6 +72,8 @@ public class JwtService {
             throw new IllegalStateException("Cannot bind account credentials", exception);
         }
     }
+
+    public Instant expiresAt(String token) { return parseClaims(token).getExpiration().toInstant(); }
 
     public long getExpirationSeconds() {
         return expirationMs / 1000;

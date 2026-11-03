@@ -21,9 +21,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
     private final AccountRepository accounts;
+    private final SessionRevocations revocations;
 
     public JwtAuthenticationFilter(JwtService jwtService, CustomUserDetailsService userDetailsService,
-                                   AccountRepository accounts) {
+                                   AccountRepository accounts, SessionRevocations revocations) {
+        this.revocations=revocations;
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
         this.accounts = accounts;
@@ -46,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String username = jwtService.extractUsername(token);
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
                 var account = accounts.findByUsername(username).orElse(null);
-                if (account != null && jwtService.isValid(token, account)) {
+                if (account != null && jwtService.isValid(token, account) && !revocations.contains(token)) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

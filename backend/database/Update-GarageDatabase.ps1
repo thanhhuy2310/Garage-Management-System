@@ -25,6 +25,7 @@ $steps=[ordered]@{
     'migrations/V011__customer_contact_messages.sql'="OBJECT_ID('dbo.LienHeKhachHang') IS NOT NULL"
     'migrations/V012__insurance_assessment.sql'="OBJECT_ID('dbo.ChungTuBaoHiem') IS NOT NULL AND OBJECT_ID('dbo.KetQuaGiamDinh') IS NOT NULL"
     'migrations/V013__insurance_receivables.sql'="OBJECT_ID('dbo.ThuBaoHiem') IS NOT NULL AND OBJECT_ID('dbo.PhanBoDongBaoHiem') IS NOT NULL AND OBJECT_ID('dbo.CongNoBaoHiem') IS NOT NULL"
+    'migrations/V014__session_revocations.sql'="OBJECT_ID('dbo.RevokedSession') IS NOT NULL"
 }
 $ids=@($steps.Keys); $end=$ids.Count-1; $baseline=-1
 if($Through){$end=$ids.IndexOf($Through); if($end -lt 0){throw 'Unknown Through migration'}}

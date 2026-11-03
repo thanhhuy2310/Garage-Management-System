@@ -8,6 +8,9 @@ import com.gara.quanlygara.dto.auth.LoginResponse;
 import com.gara.quanlygara.dto.auth.RegisterRequest;
 import com.gara.quanlygara.service.AuthService;
 import jakarta.validation.Valid;
+import com.gara.quanlygara.security.JwtService;
+import com.gara.quanlygara.security.SessionRevocations;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -24,7 +27,12 @@ public class AuthController {
 
     private final AuthService authService;
 
-    public AuthController(AuthService authService) {
+    private final JwtService jwt;
+    private final SessionRevocations revocations;
+
+    public AuthController(AuthService authService, JwtService jwt, SessionRevocations revocations) {
+        this.jwt=jwt;
+        this.revocations=revocations;
         this.authService = authService;
     }
 
@@ -40,7 +48,11 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout() {
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestHeader(value="Authorization",required=false) String header, Authentication auth) {
+        if(header!=null && header.startsWith("Bearer ")) {
+            String token=header.substring(7);
+            revocations.revoke(token,jwt.expiresAt(token),auth.getName());
+        }
         return ResponseEntity.ok(ApiResponse.success("Đăng xuất thành công."));
     }
 
