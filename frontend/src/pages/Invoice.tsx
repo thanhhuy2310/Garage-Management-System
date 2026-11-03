@@ -246,7 +246,12 @@ function InvoiceContent({
               </div>
             ))}
           </div>
-          {detail.invoice.remaining > 0 && (
+          {detail.insuranceClaimId && <div className="my-3 rounded-lg border p-3">
+            {detail.insuranceBalance ? <><p>Khách còn phải trả: {formatMoney(detail.insuranceBalance.customerDue-detail.insuranceBalance.customerPaid)}</p>
+              <p>Bảo hiểm còn phải trả: {formatMoney(detail.insuranceBalance.insurerDue-detail.insuranceBalance.insurerPaid)}</p></>
+              : <p>Hóa đơn đang chờ phân bổ công nợ.</p>}
+            <a className="text-primary underline" href="/admin/insurance">Mở hồ sơ bảo hiểm để đối soát</a></div>}
+          {(detail.insuranceClaimId ? detail.insuranceBalance && detail.insuranceBalance.customerDue > detail.insuranceBalance.customerPaid : detail.invoice.remaining > 0) && (
             <Button
               className="mt-6 w-full justify-center"
               onClick={() => setPay(true)}

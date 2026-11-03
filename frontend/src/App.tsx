@@ -8,6 +8,7 @@ import { navigateTo, ROUTE_PATHS, useAppRoute, type AdminPage, type Role } from 
 import { authApi, type LoginResponse } from "./api/auth";
 import { clearSession, readSession, saveSession, updateStoredAccount, type StoredSession } from "./api/session";
 
+const Insurance = lazy(() => import("./pages/Insurance"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Appointments = lazy(() => import("./pages/Appointments"));
 const Reception = lazy(() => import("./pages/Reception"));
@@ -34,10 +35,10 @@ export type Page = AdminPage;
 
 const BASE_ROLE_NAV: Record<Role, AdminPage[]> = {
   customer: [],
-  receptionist: ["customers", "vehicles", "appointments", "reception", "repair", "quotation", "invoice", "history", "notifications"],
+  receptionist: ["customers", "vehicles", "appointments", "reception", "repair", "quotation", "invoice", "history", "notifications", "insurance"],
   technician: ["technician", "inventory"],
   warehouse: ["inventory"],
-  manager: ["dashboard", "appointments", "reception", "quotation", "staff", "services", "repair", "invoice", "reports", "notifications"],
+  manager: ["dashboard", "insurance", "appointments", "reception", "quotation", "staff", "services", "repair", "invoice", "reports", "notifications"],
   admin: ["settings"],
 };
 
@@ -59,6 +60,7 @@ function accountRole(role: string): Role | null {
 
 function PageContent({ page }: { page: AdminPage }) {
   switch (page) {
+    case "insurance": return <Insurance />;
     case "dashboard": return <Dashboard />;
     case "appointments": return <Appointments />;
     case "reception": return <Reception />;

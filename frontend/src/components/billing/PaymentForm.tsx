@@ -27,6 +27,9 @@ export default function PaymentForm({
   onSaved: (value: InvoiceDetail) => void
   onBusyChange: (busy: boolean) => void
 }) {
+  const remaining = detail.insuranceBalance
+    ? detail.insuranceBalance.customerDue - detail.insuranceBalance.customerPaid
+    : detail.invoice.remaining
   const key = `garage_pending_payment_${detail.invoice.id}`
   const [pending, setPending] = useState<PaymentRequest | null>(() => {
     try {
@@ -36,7 +39,7 @@ export default function PaymentForm({
     }
   })
   const [amount, setAmount] = useState(
-    String(pending?.amount ?? detail.invoice.remaining),
+    String(pending?.amount ?? remaining),
   )
   const [method, setMethod] = useState<PaymentRequest["method"]>(
     pending?.method ?? "TIEN_MAT",
@@ -88,7 +91,7 @@ export default function PaymentForm({
     <form onSubmit={submit} className="space-y-5">
       <p className="text-sm">
         Hóa đơn #{detail.invoice.id} · Còn phải thu{" "}
-        <strong>{formatMoney(detail.invoice.remaining)}</strong>
+        <strong>{formatMoney(remaining)}</strong>
       </p>
       <Input
         label="Số tiền đã nhận (đ)"
@@ -96,7 +99,7 @@ export default function PaymentForm({
         type="number"
         min="0.01"
         step="0.01"
-        max={pending ? undefined : detail.invoice.remaining}
+        max={pending ? undefined : remaining}
         disabled={busy || !!pending}
         value={amount}
         onChange={(e) => {
@@ -145,7 +148,7 @@ export default function PaymentForm({
           {bank &&
           Number.isSafeInteger(Number(amount)) &&
           Number(amount) > 0 &&
-          Number(amount) <= detail.invoice.remaining ? (
+          Number(amount) <= remaining ? (
             <TransferQrPayment
               key={`${bank.id}-${amount}`}
               bank={bank}

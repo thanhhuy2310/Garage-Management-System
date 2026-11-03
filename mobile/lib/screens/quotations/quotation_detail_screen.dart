@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../app/app_controller.dart';
 import '../../app/app_theme.dart';
 import '../../core/utils/formatters.dart';
+import '../../services/quotation_coverage_reader.dart';
+import 'quotation_insurance.dart';
 import '../../core/widgets/feedback_states.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/status_badge.dart';
@@ -25,6 +27,7 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
   bool _saving = false;
   bool _submitting = false;
   bool _loading = false;
+  int _coverageRefresh = 0;
   String? _error;
   Quotation? get _item {
     for (final item in widget.controller.quotations) {
@@ -40,6 +43,7 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
     });
     try {
       await widget.controller.loadQuotations();
+      _coverageRefresh++;
     } catch (error) {
       if (mounted) {
         setState(
@@ -257,6 +261,13 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
                 ),
               ),
             ),
+            if (widget.controller.quotationService
+                case final QuotationCoverageReader reader)
+              QuotationInsurance(
+                key: ValueKey('${item.id}-${item.version}-$_coverageRefresh'),
+                service: reader,
+                id: item.id,
+              ),
             if (item.rejectionReason != null)
               Padding(
                 padding: const EdgeInsets.only(top: 16),

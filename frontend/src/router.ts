@@ -5,7 +5,7 @@ export type Role = "customer" | "receptionist" | "technician" | "warehouse" | "m
 export type AdminPage =
   | "dashboard" | "appointments" | "reception" | "repair" | "quotation"
   | "customers" | "vehicles" | "services" | "inventory" | "invoice"
-  | "history" | "notifications" | "reports" | "staff" | "settings"
+  | "insurance" | "history" | "notifications" | "reports" | "staff" | "settings"
   | "technician" | "design-system" | "spare-parts" | "repair-details";
 
 export type PublicPage = "home" | "about" | "services" | "parts" | "contact" | "login" | "register";
@@ -19,7 +19,7 @@ export type AppRoute =
 export const ADMIN_PAGES = new Set<AdminPage>([
   "dashboard", "appointments", "reception", "repair", "quotation",
   "customers", "vehicles", "services", "inventory", "invoice",
-  "history", "notifications", "reports", "staff", "settings",
+  "insurance", "history", "notifications", "reports", "staff", "settings",
   "technician", "design-system", "spare-parts", "repair-details",
 ]);
 

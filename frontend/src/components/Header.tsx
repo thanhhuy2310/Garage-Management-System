@@ -14,6 +14,7 @@ const PAGE_TITLES: Record<string, string> = {
   "spare-parts": "Danh mục phụ tùng",
   "repair-details": "Chi tiết phiếu sửa chữa",
   invoice: "Hóa đơn & Thanh toán",
+  insurance: "Bảo hiểm vật chất xe",
   history: "Lịch sử sửa chữa",
   notifications: "Lời nhắn khách hàng",
   reports: "Báo cáo – Thống kê",

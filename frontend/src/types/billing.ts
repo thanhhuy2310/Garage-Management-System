@@ -11,6 +11,8 @@ export interface InvoiceSummary {
 }
 
 export interface InvoiceDetail {
+  insuranceClaimId?: number | null
+  insuranceBalance?: {insurerDue:number;customerDue:number;insurerPaid:number;customerPaid:number} | null
   invoice: InvoiceSummary
   lines: {
     type: string
@@ -38,6 +40,9 @@ export interface BankAccount {
 }
 
 export interface PaymentRequest {
+  payer?: "CUSTOMER" | "INSURER"
+  documentId?: number
+  reference?: string
   amount: number
   method: "TIEN_MAT" | "CHUYEN_KHOAN"
   requestId: string

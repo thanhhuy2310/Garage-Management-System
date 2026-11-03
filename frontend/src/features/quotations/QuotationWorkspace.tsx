@@ -14,6 +14,8 @@ type Action="send"|"revise"|"accept"|"reject";
 const emptyRow=():Row=>({kind:"SERVICE",itemId:"",quantity:"1",price:""});
 const actionLabel:Record<Action,string>={send:"Gửi khách xác nhận",revise:"Tạo lần điều chỉnh",accept:"Chấp thuận báo giá",reject:"Từ chối báo giá"};
 
+import CustomerCoverage from "../insurance/CustomerCoverage";
+
 export default function QuotationWorkspace({customer=false}:{customer?:boolean}) {
   const [items,setItems]=useState<Quotation[]>([]),[selected,setSelected]=useState<number|null>(null);
   const [loading,setLoading]=useState(true),[error,setError]=useState(""),[notice,setNotice]=useState("");
@@ -104,6 +106,7 @@ export default function QuotationWorkspace({customer=false}:{customer?:boolean})
         <ul className="divide-y divide-border">{detail.lines.map(l=><li key={l.id} className="flex flex-wrap justify-between gap-3 py-3">
           <div className="min-w-0"><p className="font-semibold break-words">{l.name}</p><p className="text-sm text-muted-foreground">{l.kind==="SERVICE"?"Dịch vụ":"Phụ tùng dự kiến"} · {l.quantity} × {money(l.unitPrice)}</p></div><strong>{money(l.amount)}</strong>
         </li>)}</ul>
+        {customer&&!snapshot&&<CustomerCoverage id={detail.id}/>}
         <p className="flex flex-wrap justify-between gap-2 border-t border-border pt-4 text-lg font-bold"><span>Tổng báo giá</span><span>{money(detail.total)}</span></p>
         {detail.rejectionReason&&<p>Lý do từ chối: {detail.rejectionReason}</p>}
         {!snapshot&&current&&<div className="flex flex-wrap gap-2">

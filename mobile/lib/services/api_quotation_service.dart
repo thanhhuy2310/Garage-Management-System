@@ -3,8 +3,13 @@ import '../models/quotation.dart';
 import '../models/vehicle.dart';
 import 'customer_api.dart';
 import 'quotation_service.dart';
+import 'quotation_coverage_reader.dart';
 
-class ApiQuotationService implements QuotationService {
+class ApiQuotationService implements QuotationService, QuotationCoverageReader {
+  @override
+  Future<Map<String, dynamic>?> getCoverage(String quotationId) async =>
+      await api.request('/customers/me/quotations/$quotationId/insurance')
+          as Map<String, dynamic>?;
   ApiQuotationService(this.api);
   final CustomerApi api;
 
