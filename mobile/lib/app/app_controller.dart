@@ -1,4 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+
+import '../services/remembered_session.dart';
+import '../services/customer_api.dart';
 
 import '../models/customer_profile.dart';
 import '../models/customer_notification.dart';
@@ -38,6 +43,33 @@ class AppController extends ChangeNotifier {
   final NotificationService notificationService;
   final ProfileService profileService;
 
+  late final RememberedSession? _storage = _authService is ApiAuthService
+      ? RememberedSession()
+      : null;
+  Timer? _expiry;
+  VoidCallback? onExpired;
+
+  void _activate(UserSession current) {
+    session = current;
+    _expiry?.cancel();
+    if (_storage != null) {
+      _expiry = Timer(
+        RememberedSession.remaining(current.accessToken),
+        () async {
+          _clear();
+          onExpired?.call();
+          await _storage.save(null);
+        },
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _expiry?.cancel();
+    super.dispose();
+  }
+
   UserSession? session;
   CustomerProfile? profile;
   HomeSummary? summary;
@@ -57,6 +89,15 @@ class AppController extends ChangeNotifier {
 
   Future<void> initialize() async {
     await Future<void>.delayed(const Duration(milliseconds: 900));
+    try {
+      final saved = await _storage?.restore();
+      if (saved != null) {
+        _activate(saved);
+        await loadHome();
+      }
+    } catch (_) {
+      authError = 'Không thể khôi phục phiên. Vui lòng kiểm tra kết nối hoặc đăng nhập lại.';
+    }
     initialized = true;
     notifyListeners();
   }
@@ -64,19 +105,25 @@ class AppController extends ChangeNotifier {
   Future<bool> signIn({
     required String username,
     required String password,
+    bool remember = false,
   }) async {
     signingIn = true;
     authError = null;
     notifyListeners();
     try {
-      session = await _authService.login(
+      final current = await _authService.login(
         username: username,
         password: password,
       );
+      await _storage?.save(remember ? current.accessToken : null);
+      _activate(current);
       await loadHome();
       return true;
     } on AuthException catch (error) {
       authError = error.message;
+      return false;
+    } catch (_) {
+      authError = 'Không thể mở phiên đăng nhập. Vui lòng thử lại.';
       return false;
     } finally {
       signingIn = false;
@@ -224,6 +271,24 @@ class AppController extends ChangeNotifier {
 
   Future<void> signOut() async {
     final current = session;
+    if (current != null) {
+      if (_storage != null) {
+        try {
+          await CustomerApi(() => current.accessToken)
+              .request('/auth/logout', method: 'POST');
+        } on SessionExpired {
+          /* Already invalid. */
+        }
+      } else {
+        await _authService.logout(current);
+      }
+    }
+    await _storage?.save(null);
+    _clear();
+  }
+
+  void _clear() {
+    _expiry?.cancel();
     session = null;
     profile = null;
     summary = null;
@@ -234,6 +299,5 @@ class AppController extends ChangeNotifier {
     repairs = const [];
     notifications = const [];
     notifyListeners();
-    if (current != null) await _authService.logout(current);
   }
 }

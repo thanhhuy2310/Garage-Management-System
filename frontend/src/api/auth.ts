@@ -21,8 +21,8 @@ export interface ChangePasswordRequest {
 }
 
 export const authApi = {
-  async login(payload: LoginRequest): Promise<LoginResponse> {
-    return unwrap(await api.post<ApiResponse<LoginResponse>>("/api/auth/login", payload));
+  async login(payload: LoginRequest, remember = false): Promise<LoginResponse> {
+    return unwrap(await api.post<ApiResponse<LoginResponse>>("/api/auth/login", payload, {params:{remember}}));
   },
 
   async register(payload: RegisterRequest): Promise<LoginResponse> {

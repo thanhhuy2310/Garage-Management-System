@@ -51,8 +51,8 @@ export default function Register({ onRegistered, onLogin }: RegisterProps) {
         username: username.trim(),
         password,
       });
-      rememberUsername(username, true);
-      onRegistered(response, true);
+      rememberUsername(username, false);
+      onRegistered(response, false);
     } catch (registerError) {
       setError(errorMessage(
         registerError,

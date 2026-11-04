@@ -151,6 +151,28 @@ class RepairBillingSqlServerIT {
         send(get("/api/auth/me"),second,null,200);
     }
 
+    @Test
+    void browserCookiesRestoreRememberedSessionsAndRejectReplay() throws Exception {
+        assertTrue(jdbc.queryForObject("SELECT DB_NAME()",String.class).startsWith("QuanLyGaraOTo_Verify_"));
+        String username="hanh_"+tag;
+        String phone="09"+String.format("%08d",Integer.toUnsignedLong(tag.hashCode())%100000000);
+        send(post("/api/auth/register"),null,Map.of("fullName","Nguyễn Hạnh","phone",phone,"username",username,"password",password),201);
+        for(boolean remember:new boolean[]{false,true}) {
+            var response=mvc.perform(post("/api/auth/login").secure(true).header("X-Garage-Client","web")
+                    .param("remember",String.valueOf(remember)).contentType(APPLICATION_JSON)
+                    .content(json.writeValueAsBytes(Map.of("username",username,"password",password)))).andReturn().getResponse();
+            var cookie=response.getCookie("garage_session");
+            assertNotNull(cookie);
+            assertTrue(cookie.isHttpOnly() && cookie.getSecure());
+            assertEquals(remember,cookie.getMaxAge()>0);
+            assertTrue(json.readTree(response.getContentAsByteArray()).at("/data/accessToken").isNull());
+            send(get("/api/auth/me").cookie(cookie),null,null,401);
+            send(get("/api/auth/me").cookie(cookie).header("X-Garage-Client","web"),null,null,200);
+            send(post("/api/auth/logout").cookie(cookie).header("X-Garage-Client","web"),null,null,200);
+            send(get("/api/auth/me").cookie(cookie).header("X-Garage-Client","web"),null,null,401);
+        }
+    }
+
     private void progress(String path, String token, String from, String to) throws Exception {
         send(put(path + "/progress"), token, Map.of("expectedStatus", from, "status", to, "notes", "Đã kiểm tra tại xưởng."), 200);
     }

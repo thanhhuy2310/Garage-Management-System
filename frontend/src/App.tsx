@@ -95,6 +95,7 @@ function PageLoading() {
 export default function App() {
   const route = useAppRoute();
   const [session, setSession] = useState<StoredSession | null>(() => readSession());
+  const [checking, setChecking] = useState(Boolean(session));
   const role = session ? accountRole(session.account.role) : null;
   const loggedIn = Boolean(session && role);
   const allowedPages = role ? ROLE_NAV[role] : [];
@@ -112,11 +113,11 @@ export default function App() {
       .catch(() => {
         clearSession();
         setSession(null);
-      });
+      }).finally(() => setChecking(false));
   }, []);
 
   useEffect(() => {
-    if (!loggedIn || !role || isPublicContent) return;
+    if (checking || !loggedIn || !role || isPublicContent) return;
     if (role === "customer") {
       if (route.area !== "customer") navigateTo(ROUTE_PATHS.customer(), true);
       return;
@@ -124,7 +125,7 @@ export default function App() {
     if (landingPage && (route.area !== "admin" || !allowedPages.includes(route.page))) {
       navigateTo(ROUTE_PATHS.admin(landingPage), true);
     }
-  }, [allowedPages, landingPage, loggedIn, role, route, isPublicContent]);
+  }, [allowedPages, landingPage, loggedIn, role, route, isPublicContent, checking]);
 
   const handleLogin = (response: LoginResponse, remember: boolean) => {
     const nextRole = accountRole(response.account.role);
@@ -142,13 +143,18 @@ export default function App() {
   const handleLogout = async () => {
     try {
       await authApi.logout();
-    } finally {
+    } catch {
+      window.alert("Không thể kết nối để đăng xuất. Vui lòng thử lại.");
+      return;
+    }
+    {
       clearSession();
       setSession(null);
       navigateTo("/", true);
     }
   };
 
+  if (checking) return <PageLoading />;
   if (isPublicContent && route.area === "public") {
     const publicPage = route.page as PublicPageKey;
     const goPublic = (page: PublicPageKey) => navigateTo(ROUTE_PATHS.public(page));

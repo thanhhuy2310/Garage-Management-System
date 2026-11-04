@@ -40,7 +40,7 @@ export default function Login({ onLogin, onBack, onRegister }: LoginProps) {
     setError("");
     setLoading(true);
     try {
-      const response = await authApi.login({ username: username.trim(), password });
+      const response = await authApi.login({ username: username.trim(), password }, remember);
       rememberUsername(username, remember);
       onLogin(response, remember);
     } catch (loginError) {
@@ -61,12 +61,12 @@ export default function Login({ onLogin, onBack, onRegister }: LoginProps) {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label htmlFor="username" className="mb-1.5 block text-sm font-medium text-slate-700">Tên đăng nhập</label>
-          <input id="username" value={username} onChange={(event) => handleUsernameChange(event.target.value)} autoComplete="username" className="h-11 w-full rounded-md border border-border bg-surface px-4 text-base text-foreground shadow-sm transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 sm:text-sm" />
+          <input name="username" id="username" value={username} onChange={(event) => handleUsernameChange(event.target.value)} autoComplete="username" className="h-11 w-full rounded-md border border-border bg-surface px-4 text-base text-foreground shadow-sm transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 sm:text-sm" />
         </div>
         <div>
           <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-slate-700">Mật khẩu</label>
           <div className="relative">
-            <input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" className="h-11 w-full rounded-md border border-border bg-surface px-4 pr-12 text-base text-foreground shadow-sm transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 sm:text-sm" />
+            <input name="password" id="password" type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" className="h-11 w-full rounded-md border border-border bg-surface px-4 pr-12 text-base text-foreground shadow-sm transition-all hover:border-slate-400 focus:border-ring focus:ring-2 focus:ring-ring/15 sm:text-sm" />
             <button
               type="button"
               onClick={() => setShowPassword((visible) => !visible)}

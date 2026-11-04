@@ -80,7 +80,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       destructive: true,
     );
     if (!confirmed) return;
-    await widget.controller.signOut();
+    try { await widget.controller.signOut(); }
+    catch (_) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Chưa thể đăng xuất. Vui lòng kiểm tra kết nối và thử lại.')));
+      return;
+    }
     if (mounted) {
       Navigator.pushNamedAndRemoveUntil(context, AppRoutes.login, (_) => false);
     }

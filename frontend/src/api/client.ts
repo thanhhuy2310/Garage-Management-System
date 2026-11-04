@@ -1,18 +1,14 @@
 import axios from "axios";
-import { clearSession, getAccessToken } from "./session";
+import { clearSession } from "./session";
 import type { ApiResponse } from "./types";
 import { readRoute } from "../router";
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? "",
-  headers: { "Content-Type": "application/json" },
+  withCredentials: true,
+  headers: { "Content-Type": "application/json", "X-Garage-Client": "web" },
 });
 
-api.interceptors.request.use((config) => {
-  const token = getAccessToken();
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
 
 api.interceptors.response.use(
   (response) => response,

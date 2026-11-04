@@ -3,6 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 import '../core/constants/app_config.dart';
 
+class SessionExpired extends StateError {
+  SessionExpired() : super('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+}
+
 class CustomerApi {
   CustomerApi(this.tokenProvider, {HttpClient? client, String? baseUrl}) : _client = client ?? HttpClient(), _baseUrl = baseUrl ?? AppConfig.apiBaseUrl;
   final String? Function() tokenProvider;
@@ -19,7 +23,7 @@ class CustomerApi {
       final response = await req.close().timeout(const Duration(seconds: 12));
       final text = await utf8.decoder.bind(response).join().timeout(const Duration(seconds: 12));
       final payload = text.isEmpty ? <String, dynamic>{} : jsonDecode(text) as Map<String, dynamic>;
-      if (response.statusCode == 401) throw StateError('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+      if (response.statusCode == 401) throw SessionExpired();
       if (response.statusCode < 200 || response.statusCode >= 300 || payload['success'] == false) {
         throw StateError(payload['message']?.toString() ?? 'Không thể thực hiện yêu cầu.');
       }

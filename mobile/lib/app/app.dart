@@ -18,11 +18,11 @@ import '../services/appointment_service.dart';
 import '../services/api_appointment_service.dart';
 import '../services/history_service.dart';
 import '../services/home_service.dart';
-import '../services/notification_service.dart';
 import '../services/profile_service.dart';
 import '../services/api_quotation_service.dart';
 import '../services/repair_service.dart';
 import '../services/vehicle_service.dart';
+import '../services/notification_service.dart';
 import 'app_controller.dart';
 import 'app_routes.dart';
 import 'app_theme.dart';
@@ -48,6 +48,13 @@ class GarageCustomerApp extends StatefulWidget {
 }
 
 class _GarageCustomerAppState extends State<GarageCustomerApp> {
+  final _navigation = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+    controller.onExpired = () => _navigation.currentState?.pushNamedAndRemoveUntil(AppRoutes.login, (_) => false);
+  }
   late final CustomerApi _api = CustomerApi(
     () => controller.session?.accessToken,
   );
@@ -122,6 +129,7 @@ class _GarageCustomerAppState extends State<GarageCustomerApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _navigation,
       title: AppConfig.garageName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
