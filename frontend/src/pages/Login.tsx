@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { authApi, type LoginResponse } from "../api/auth";
 import { errorMessage } from "../api/client";
 import { readRememberedUsername, rememberUsername } from "../api/session";
+import PasswordRecovery from "./PasswordRecovery";
 import AuthLayout from "../components/auth/AuthLayout";
 import { Icons } from "../components/ui";
 
@@ -12,6 +13,7 @@ interface LoginProps {
 }
 
 export default function Login({ onLogin, onBack, onRegister }: LoginProps) {
+  const [recovering,setRecovering]=useState(false);
   const rememberedUsername = readRememberedUsername();
   const [username, setUsername] = useState(rememberedUsername);
   const [password, setPassword] = useState("");
@@ -53,6 +55,7 @@ export default function Login({ onLogin, onBack, onRegister }: LoginProps) {
     }
   };
 
+  if(recovering)return <PasswordRecovery back={()=>setRecovering(false)}/>;
   return (
     <AuthLayout>
       <h2 className="mb-1 text-2xl font-semibold text-foreground">Đăng nhập</h2>
@@ -84,6 +87,7 @@ export default function Login({ onLogin, onBack, onRegister }: LoginProps) {
             <input type="checkbox" checked={remember} onChange={(event) => handleRememberChange(event.target.checked)} className="h-4 w-4 cursor-pointer accent-primary" />
             <span className="text-sm text-slate-600">Ghi nhớ đăng nhập</span>
           </label>
+          <button className="ml-auto text-sm text-primary" type="button" onClick={()=>setRecovering(true)}>Quên mật khẩu?</button>
         </div>
 
         {error && <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">{error}</p>}

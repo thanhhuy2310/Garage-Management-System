@@ -8,6 +8,9 @@ import com.gara.quanlygara.dto.auth.LoginResponse;
 import com.gara.quanlygara.dto.auth.RegisterRequest;
 import com.gara.quanlygara.service.AuthService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
+import com.gara.quanlygara.service.PasswordRecovery;
+import com.gara.quanlygara.exception.BadRequestException;
 import com.gara.quanlygara.security.JwtService;
 import com.gara.quanlygara.security.SessionRevocations;
 import com.gara.quanlygara.security.BrowserSession;
@@ -33,7 +36,9 @@ public class AuthController {
     private final JwtService jwt;
     private final SessionRevocations revocations;
 
-    public AuthController(AuthService authService, JwtService jwt, SessionRevocations revocations) {
+    private final PasswordRecovery recovery;
+    public AuthController(AuthService authService, JwtService jwt, SessionRevocations revocations,PasswordRecovery recovery) {
+        this.recovery=recovery;
         this.jwt=jwt;
         this.revocations=revocations;
         this.authService = authService;
@@ -66,6 +71,32 @@ public class AuthController {
         var result=ResponseEntity.ok();
         if(BrowserSession.isBrowser(http)) result.header(HttpHeaders.SET_COOKIE,BrowserSession.cookie(http,"",0).toString());
         return result.body(ApiResponse.success("Đăng xuất thành công."));
+    }
+
+    public record ResetEmail(@NotBlank @Email @Size(max=150) String email) {}
+    public record VerifyCode(@NotBlank @Email @Size(max=150) String email,@NotBlank @Pattern(regexp="[0-9]{6}") String code) {}
+    public record ResetPassword(@NotBlank @Email @Size(max=150) String email,@NotBlank @Pattern(regexp="[a-f0-9]{64}") String ticket,
+                                @NotBlank @Size(min=8,max=72) String password,@NotBlank @Size(max=72) String confirmation) {}
+    @PostMapping("/recovery/request")
+    public ResponseEntity<ApiResponse<Void>> requestCode(@Valid @RequestBody ResetEmail input) {
+        return switch(recovery.request(input.email())) {
+            case ACCEPTED -> ResponseEntity.accepted().body(ApiResponse.success("Nếu email liên kết với một tài khoản, bạn sẽ nhận được mã xác minh."));
+            case LIMITED -> ResponseEntity.status(429).body(ApiResponse.error("Đã đạt giới hạn gửi mã. Vui lòng thử lại sau.",null));
+            case UNAVAILABLE -> ResponseEntity.status(503).body(ApiResponse.error("Dịch vụ gửi email chưa được cấu hình. Vui lòng liên hệ gara.",null));
+        };
+    }
+    @PostMapping("/recovery/verify")
+    public ResponseEntity<ApiResponse<String>> verifyCode(@Valid @RequestBody VerifyCode input) {
+        String ticket=recovery.verify(input.email(),input.code());
+        if(ticket==null) throw new BadRequestException("Mã không hợp lệ hoặc đã hết hạn.");
+        return ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore()).body(ApiResponse.success("Đã xác minh.",ticket));
+    }
+    @PostMapping("/recovery/complete")
+    public ApiResponse<Void> resetPassword(@Valid @RequestBody ResetPassword input) {
+        if(!input.password().equals(input.confirmation()) || input.password().getBytes(java.nio.charset.StandardCharsets.UTF_8).length>72)
+            throw new BadRequestException("Mật khẩu xác nhận phải khớp và mật khẩu không vượt quá 72 byte.");
+        if(!recovery.complete(input.email(),input.ticket(),input.password())) throw new BadRequestException("Yêu cầu khôi phục không còn hiệu lực.");
+        return ApiResponse.success("Đã đổi mật khẩu. Vui lòng đăng nhập lại.");
     }
 
     @GetMapping("/me")

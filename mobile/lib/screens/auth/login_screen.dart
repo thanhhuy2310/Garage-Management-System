@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'password_recovery_screen.dart';
 import '../../app/app_controller.dart';
 import '../../app/app_routes.dart';
 import '../../app/app_theme.dart';
@@ -151,6 +152,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ? null
                                   : (v) =>
                                         setState(() => _remember = v ?? false),
+                            ),
+                            TextButton(
+                              onPressed: widget.controller.signingIn
+                                  ? null
+                                  : () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute<void>(
+                                        builder: (_) =>
+                                            const PasswordRecoveryScreen(),
+                                      ),
+                                    ),
+                              child: const Text('Quên mật khẩu?'),
                             ),
                             if (widget.controller.authError != null) ...[
                               const SizedBox(height: 16),
