@@ -3,7 +3,7 @@ import type { ApiResponse } from "./types";
 import type { RepairOrderDetail } from "../types/garage";
 export interface HistoryItem { repairOrderId: number; vehicleId: number; licensePlate: string; brand: string; model: string; completedAt: string | null; totalCost: number; result: string | null; summary: string }
 export interface HistoryLine { name: string; quantity: number; unitPrice: number; lineTotal: number }
-export interface HistoryDetail { item: HistoryItem; services: HistoryLine[]; parts: HistoryLine[]; serviceTotal: number; partsTotal: number }
+export interface HistoryDetail { insurance?: {garageAmount:number;customerAmount:number;approved:number} | null; item: HistoryItem; services: HistoryLine[]; parts: HistoryLine[]; serviceTotal: number; partsTotal: number }
 export interface HistoryPage { items: HistoryItem[]; page: number; size: number; totalElements: number; totalPages: number }
 export interface HistoryVehicle { vehicleId: number; licensePlate: string; brand: string; model: string; completedCount: number }
 export const customerRepairsApi = {

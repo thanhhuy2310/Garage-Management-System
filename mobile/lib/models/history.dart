@@ -1,4 +1,5 @@
 import 'repair_order.dart' show parseGarageDate;
+
 // TV3-TUAN9
 /// Lượt sửa chữa/bảo dưỡng đã hoàn tất, tổng hợp từ dữ liệu nghiệp vụ gốc bởi backend
 /// (GET /api/customers/me/history). Không có dữ liệu mock.
@@ -67,7 +68,8 @@ class HistoryItem {
   final DateTime? startedAt;
   final DateTime? completedAt;
 
-  String get vehicleName => [brand, model].where((part) => part.isNotEmpty).join(' ');
+  String get vehicleName =>
+      [brand, model].where((part) => part.isNotEmpty).join(' ');
 
   /// Ngày hiển thị: hoàn thành, nếu chưa có thì bắt đầu, rồi đến ngày lập phiếu.
   DateTime? get date => completedAt ?? startedAt ?? createdAt;
@@ -110,13 +112,14 @@ class HistoryPartLine {
     required this.lineTotal,
   });
 
-  factory HistoryPartLine.fromJson(Map<String, dynamic> json) => HistoryPartLine(
-    partId: _asInt(json['partId']),
-    name: _asText(json['name']),
-    quantity: _asInt(json['quantity']),
-    unitPrice: json['unitPrice'] ?? 0,
-    lineTotal: json['lineTotal'] ?? 0,
-  );
+  factory HistoryPartLine.fromJson(Map<String, dynamic> json) =>
+      HistoryPartLine(
+        partId: _asInt(json['partId']),
+        name: _asText(json['name']),
+        quantity: _asInt(json['quantity']),
+        unitPrice: json['unitPrice'] ?? 0,
+        lineTotal: json['lineTotal'] ?? 0,
+      );
 
   final int partId;
   final String name;
@@ -132,6 +135,7 @@ class HistoryDetail {
     required this.parts,
     required this.serviceTotal,
     required this.partsTotal,
+    this.insurance,
   });
 
   factory HistoryDetail.fromJson(Map<String, dynamic> json) {
@@ -140,13 +144,16 @@ class HistoryDetail {
       throw const FormatException('Thiếu thông tin phiếu sửa chữa.');
     }
     List<T> lines<T>(Object? raw, T Function(Map<String, dynamic>) parse) =>
-        raw is List ? raw.whereType<Map<String, dynamic>>().map(parse).toList() : <T>[];
+        raw is List
+        ? raw.whereType<Map<String, dynamic>>().map(parse).toList()
+        : <T>[];
     return HistoryDetail(
       item: HistoryItem.fromJson(item),
       services: lines(json['services'], HistoryServiceLine.fromJson),
       parts: lines(json['parts'], HistoryPartLine.fromJson),
       serviceTotal: json['serviceTotal'] ?? 0,
       partsTotal: json['partsTotal'] ?? 0,
+      insurance: json['insurance'] as Map<String, dynamic>?,
     );
   }
 
@@ -155,6 +162,7 @@ class HistoryDetail {
   final List<HistoryPartLine> parts;
   final Object serviceTotal;
   final Object partsTotal;
+  final Map<String, dynamic>? insurance;
 }
 
 class HistoryPage {
@@ -170,7 +178,10 @@ class HistoryPage {
     final raw = json['items'];
     return HistoryPage(
       items: raw is List
-          ? raw.whereType<Map<String, dynamic>>().map(HistoryItem.fromJson).toList()
+          ? raw
+                .whereType<Map<String, dynamic>>()
+                .map(HistoryItem.fromJson)
+                .toList()
           : <HistoryItem>[],
       page: _asInt(json['page']),
       size: _asInt(json['size']),

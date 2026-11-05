@@ -190,7 +190,7 @@ public class InsuranceLedger {
         cases.event(claim,staff,"QUYET_DINH_CHI_TRA",status,status,input.reference().strip()+" · "+input.reason().strip());
     }
 
-    public record CustomerShare(BigDecimal approved, boolean direct, BigDecimal customerAmount, boolean settled, BigDecimal remaining) {}
+    public record CustomerShare(BigDecimal approved, boolean direct, BigDecimal customerAmount, boolean settled, BigDecimal remaining,BigDecimal total,BigDecimal garageAmount) {}
     public CustomerShare customerShare(com.gara.quanlygara.dto.quotation.QuotationDtos.View quote) {
         Integer claim=claimForOrder(quote.repairOrderId());
         if(claim==null) return null;
@@ -200,15 +200,15 @@ public class InsuranceLedger {
             FROM DeNghiBoiThuong d LEFT JOIN CongNoBaoHiem c ON c.DeNghiId=d.Id
             WHERE d.MaHoSoBaoHiem=? AND d.MaBaoGia=? AND d.LanDieuChinh=?
             """,claim,quote.id(),quote.revision());
-        if(rows.isEmpty() || rows.getFirst().get("MaChungTu")==null) return new CustomerShare(null,false,null,false,null);
+        if(rows.isEmpty() || rows.getFirst().get("MaChungTu")==null) return new CustomerShare(null,false,null,false,null,quote.total(),null);
         var row=rows.getFirst();
         boolean direct=Boolean.TRUE.equals(row.get("NhanTienTaiGara"));
         BigDecimal approved=money(row,"approved");
         if(row.get("MaHoaDon")!=null) {
             var b=balance(number(row,"MaHoaDon"));
-            return new CustomerShare(approved,direct,b.customerDue(),true,b.customerDue().subtract(b.customerPaid()));
+            return new CustomerShare(approved,direct,b.customerDue(),true,b.customerDue().subtract(b.customerPaid()),b.customerDue().add(b.insurerDue()),b.insurerDue());
         }
-        return new CustomerShare(approved,direct,direct?quote.total().subtract(approved):quote.total(),false,null);
+        return new CustomerShare(approved,direct,direct?quote.total().subtract(approved):quote.total(),false,null,quote.total(),direct?approved:BigDecimal.ZERO);
     }
 
     public record Balance(BigDecimal insurerDue,BigDecimal customerDue,BigDecimal insurerPaid,BigDecimal customerPaid) {}

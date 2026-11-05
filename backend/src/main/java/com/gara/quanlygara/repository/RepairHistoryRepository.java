@@ -16,6 +16,13 @@ import java.util.List;
  */
 public interface RepairHistoryRepository extends Repository<Vehicle, Integer> {
 
+    @Query(value="""
+        SELECT c.BaoHiem,c.KhachHang,(SELECT SUM(l.ChapThuan) FROM PhanBoDongBaoHiem l WHERE l.DeNghiId=c.DeNghiId)
+        FROM CongNoBaoHiem c JOIN HoaDon h ON c.MaHoaDon=h.MaHoaDon
+        WHERE h.MaPhieuSuaChua=:orderId
+        """,nativeQuery=true)
+    List<Object[]> insuranceSettlement(@Param("orderId") int orderId);
+
     /**
      * Cột: 0 MaPhieuSuaChua, 1 MaXe, 2 BienSo, 3 HangXe, 4 DongXe, 5 NgayLap, 6 NgayBatDau, 7 NgayHoanThanh,
      * 8 KetQua, 9 tổng chi phí (dbo.fn_TinhTongChiPhiSuaChua). Mới nhất trước và phân trang bằng OFFSET/FETCH.

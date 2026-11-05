@@ -154,6 +154,11 @@ class InsuranceWorkflowSqlServerIT {
         assertEquals(200,response.getStatus());
         var share=json.readTree(response.getContentAsByteArray()).path("data");
         assertEquals(customerShare,share.path("customerAmount").asInt());
+        assertEquals(insurer,share.path("garageAmount").asInt());
+        assertEquals(200000,share.path("total").asInt());
+        var history=mvc.perform(get("/api/customers/me/history/"+order).with(user(owner).roles("CUSTOMER"))).andReturn().getResponse();
+        assertEquals(200,history.getStatus());
+        assertEquals(customerShare,json.readTree(history.getContentAsByteArray()).at("/data/insurance/customerAmount").intValue());
         assertEquals(0,share.path("remaining").asInt());
         assertFalse(share.has("documents"));
         int other=insert("KhachHang","MaKhachHang",Map.of("HoTen","Lê Minh","SoDienThoai",owner));

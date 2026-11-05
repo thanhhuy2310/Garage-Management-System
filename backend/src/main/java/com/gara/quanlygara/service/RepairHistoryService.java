@@ -88,7 +88,9 @@ public class RepairHistoryService {
                 .reduce(BigDecimal.ZERO.setScale(2), BigDecimal::add);
         BigDecimal partsTotal = entry.parts().stream().map(HistoryDetailResponse.PartLine::lineTotal)
                 .reduce(BigDecimal.ZERO.setScale(2), BigDecimal::add);
-        return new HistoryDetailResponse(entry.item(), entry.services(), entry.parts(), serviceTotal, partsTotal);
+        var settlement=repository.insuranceSettlement(repairOrderId).stream().findFirst()
+                .map(row->new HistoryDetailResponse.InsuranceAmounts((BigDecimal)row[0],(BigDecimal)row[1],(BigDecimal)row[2])).orElse(null);
+        return new HistoryDetailResponse(entry.item(), entry.services(), entry.parts(), serviceTotal, partsTotal, settlement);
     }
 
     private record Built(

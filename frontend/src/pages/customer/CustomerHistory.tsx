@@ -8,6 +8,7 @@ function Details({id}: {id: number}) {
   const load = useCallback((signal: AbortSignal) => customerRepairsApi.detail(id, signal), [id]);
   const query = useGarageQuery(load);
   return <div><QueryState {...query} onRetry={query.reload}/>{query.data && <ul className="mt-2 space-y-2">
+    {query.data.insurance&&<li>Bảo hiểm duyệt {formatMoney(query.data.insurance.approved)} · trả trực tiếp cho gara {formatMoney(query.data.insurance.garageAmount)} · khách thanh toán theo hóa đơn {formatMoney(query.data.insurance.customerAmount)}</li>}
     {[...query.data.services, ...query.data.parts].map((line, index) => <li key={index} className="flex justify-between gap-3 rounded-lg bg-surface-subtle p-3 text-sm"><span>{line.name} ×{line.quantity}</span><span>{formatMoney(line.lineTotal)}</span></li>)}
   </ul>}</div>;
 }

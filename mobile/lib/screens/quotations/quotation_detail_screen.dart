@@ -65,6 +65,15 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
     });
     String note = '';
     try {
+      String? coverage;
+      final service = widget.controller.quotationService;
+      if (approve && service is QuotationCoverageReader) {
+        coverage = coverageSummary(
+          await (service as QuotationCoverageReader).getCoverage(item.id),
+          item.total.toDouble(),
+        );
+        if (!mounted) return;
+      }
       final reason = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
@@ -76,6 +85,7 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
                 Text(
                   'BG${item.id} · Lần ${item.revision}\nTổng tiền: ${formatCurrency(item.total)}',
                 ),
+                if (coverage != null) Text(coverage),
                 const SizedBox(height: 16),
                 TextField(
                   maxLength: 500,
@@ -266,6 +276,7 @@ class _QuotationDetailScreenState extends State<QuotationDetailScreen> {
               QuotationInsurance(
                 key: ValueKey('${item.id}-${item.version}-$_coverageRefresh'),
                 service: reader,
+                total: item.total.toDouble(),
                 id: item.id,
               ),
             if (item.rejectionReason != null)

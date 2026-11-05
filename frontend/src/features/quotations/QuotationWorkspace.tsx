@@ -28,6 +28,7 @@ export default function QuotationWorkspace({customer=false}:{customer?:boolean})
   const [rows,setRows]=useState<Row[]>([emptyRow()]),[catalogLoading,setCatalogLoading]=useState(false);
   const [busy,setBusy]=useState(false),[formError,setFormError]=useState("");
   const [action,setAction]=useState<{name:Action;quote:Quotation}|null>(null),[reason,setReason]=useState("");
+  const [coverageReady,setCoverageReady]=useState(false);
   const current=items.find(q=>q.id===selected),detail=snapshot??current;
   const load=useCallback(async()=>{
     setLoading(true);setError("");
@@ -65,9 +66,9 @@ export default function QuotationWorkspace({customer=false}:{customer?:boolean})
       await saved(item,"Đã lưu bản nháp. Gửi khách xác nhận khi nội dung đã đầy đủ.");
     }catch(e){setFormError(errorMessage(e));}finally{setBusy(false);}
   }
-  function openAction(name:Action,quote:Quotation){setAction({name,quote});setReason("");setFormError("");}
+  function openAction(name:Action,quote:Quotation){setCoverageReady(false);setAction({name,quote});setReason("");setFormError("");}
   async function execute(event:React.FormEvent){
-    event.preventDefault();if(!action||busy)return;setBusy(true);setFormError("");
+    event.preventDefault();if(!action||busy||(action.name==="accept"&&!coverageReady))return;setBusy(true);setFormError("");
     try{
       const {name,quote}=action;
       const updated=name==="accept"||name==="reject"?await quotationsApi.decide(quote,name==="accept",reason):await quotationsApi.change(quote,name,reason);
@@ -106,7 +107,7 @@ export default function QuotationWorkspace({customer=false}:{customer?:boolean})
         <ul className="divide-y divide-border">{detail.lines.map(l=><li key={l.id} className="flex flex-wrap justify-between gap-3 py-3">
           <div className="min-w-0"><p className="font-semibold break-words">{l.name}</p><p className="text-sm text-muted-foreground">{l.kind==="SERVICE"?"Dịch vụ":"Phụ tùng dự kiến"} · {l.quantity} × {money(l.unitPrice)}</p></div><strong>{money(l.amount)}</strong>
         </li>)}</ul>
-        {customer&&!snapshot&&<CustomerCoverage id={detail.id}/>}
+        {customer&&!snapshot&&<CustomerCoverage key={detail.id} id={detail.id} total={detail.total}/>}
         <p className="flex flex-wrap justify-between gap-2 border-t border-border pt-4 text-lg font-bold"><span>Tổng báo giá</span><span>{money(detail.total)}</span></p>
         {detail.rejectionReason&&<p>Lý do từ chối: {detail.rejectionReason}</p>}
         {!snapshot&&current&&<div className="flex flex-wrap gap-2">
@@ -140,9 +141,10 @@ export default function QuotationWorkspace({customer=false}:{customer?:boolean})
     </Modal>
     <Modal open={!!action} onClose={()=>{if(!busy)setAction(null);}} title={action?actionLabel[action.name]:"Báo giá"}>
       {action&&<form onSubmit={execute} className="space-y-4"><p>BG{action.quote.id} · {action.quote.plate} · Lần {action.quote.revision}</p><p className="font-bold">Tổng tiền: {money(action.quote.total)}</p>
+        {action.name==="accept"&&<CustomerCoverage id={action.quote.id} total={action.quote.total} onReady={setCoverageReady}/>}
         {action.name==="revise"&&<p>Nội dung cũ được giữ trong lịch sử. Gara cần gửi lại và nhận xác nhận của khách trước khi thực hiện hạng mục.</p>}
         <Textarea label={action.name==="revise"?"Lý do điều chỉnh":"Ghi chú"} required={action.name==="revise"} maxLength={500} value={reason} onChange={e=>setReason(e.target.value)}/>
-        {formError&&<p role="alert" className="text-danger">{formError}</p>}<Button type="submit" disabled={busy}>{busy?"Đang lưu…":"Xác nhận thao tác"}</Button>
+        {formError&&<p role="alert" className="text-danger">{formError}</p>}<Button type="submit" disabled={busy||(action.name==="accept"&&!coverageReady)}>{busy?"Đang lưu…":"Xác nhận thao tác"}</Button>
       </form>}
     </Modal>
   </div>;

@@ -9,8 +9,9 @@ public record HistoryDetailResponse(
         List<ServiceLine> services,
         List<PartLine> parts,
         BigDecimal serviceTotal,
-        BigDecimal partsTotal
+        BigDecimal partsTotal, InsuranceAmounts insurance
 ) {
+    public record InsuranceAmounts(BigDecimal garageAmount,BigDecimal customerAmount,BigDecimal approved) {}
     public record ServiceLine(
             Integer serviceId, String name, String type, Integer quantity, BigDecimal unitPrice, BigDecimal lineTotal) {
     }

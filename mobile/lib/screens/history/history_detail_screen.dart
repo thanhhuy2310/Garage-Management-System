@@ -196,6 +196,20 @@ class _DetailBody extends StatelessWidget {
                   label: 'Tiền phụ tùng',
                   value: formatCurrency(detail.partsTotal),
                 ),
+                if (detail.insurance case final amounts?) ...[
+                  _InfoRow(
+                    label: 'Bảo hiểm duyệt',
+                    value: formatCurrency(amounts['approved']),
+                  ),
+                  _InfoRow(
+                    label: 'Bảo hiểm trả trực tiếp cho gara',
+                    value: formatCurrency(amounts['garageAmount']),
+                  ),
+                  _InfoRow(
+                    label: 'Khách thanh toán theo hóa đơn',
+                    value: formatCurrency(amounts['customerAmount']),
+                  ),
+                ],
                 const Divider(height: 24),
                 _InfoRow(
                   label: 'Tổng chi phí',
@@ -210,7 +224,8 @@ class _DetailBody extends StatelessWidget {
     );
   }
 
-  static String _date(DateTime? value) => value == null ? '—' : formatDate(value);
+  static String _date(DateTime? value) =>
+      value == null ? '—' : formatDate(value);
 }
 
 class _InfoRow extends StatelessWidget {
@@ -240,7 +255,9 @@ class _InfoRow extends StatelessWidget {
             child: Text(label, style: const TextStyle(color: AppColors.muted)),
           ),
           const SizedBox(width: 12),
-          Flexible(child: Text(value, style: style, textAlign: TextAlign.right)),
+          Flexible(
+            child: Text(value, style: style, textAlign: TextAlign.right),
+          ),
         ],
       ),
     );

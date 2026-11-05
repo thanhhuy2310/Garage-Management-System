@@ -8,9 +8,11 @@ class QuotationInsurance extends StatefulWidget {
     super.key,
     required this.service,
     required this.id,
+    required this.total,
   });
   final QuotationCoverageReader service;
   final String id;
+  final num total;
   @override
   State<QuotationInsurance> createState() => _QuotationInsuranceState();
 }
@@ -31,19 +33,26 @@ class _QuotationInsuranceState extends State<QuotationInsurance> {
           child: const Text('Không tải được chi phí bảo hiểm. Thử lại'),
         );
       }
-      final share = snapshot.data;
-      if (share == null) return const SizedBox.shrink();
-      final approved = share['approved'] as num?;
-      return ListTile(
-        title: const Text('Bảo hiểm vật chất xe'),
-        subtitle: Text(
-          approved == null
-              ? 'Đang chờ kết quả chi trả.'
-              : 'Bảo hiểm chấp thuận ${formatCurrency(approved)} · ${share['direct'] == true ? 'trả cho gara' : 'hoàn trả cho khách'}\n'
-                    '${share['settled'] == true ? 'Phần khách theo hóa đơn' : 'Phần khách dự kiến trả gara'}: ${formatCurrency(share['customerAmount'] as num)}'
-                    '${share['remaining'] == null ? '' : '\nCòn phải trả: ${formatCurrency(share['remaining'] as num)}'}',
-        ),
-      );
+      if (snapshot.connectionState != ConnectionState.done) {
+        return const LinearProgressIndicator();
+      }
+      return Text(coverageSummary(snapshot.data, widget.total));
     },
   );
+}
+
+String coverageSummary(Map<String, dynamic>? share, num total) {
+  if (share == null) {
+    return 'Khách thanh toán tại gara: ${formatCurrency(total)} · Không có hồ sơ bảo hiểm.';
+  }
+  final gross = formatCurrency(share['total'] ?? total);
+  final approved = share['approved'] as num?;
+  if (approved == null) {
+    return 'Tổng chi phí sửa chữa: $gross\nĐang chờ bảo hiểm duyệt. Phần khách thực trả chưa xác định.';
+  }
+  return 'Tổng chi phí sửa chữa: $gross\nBảo hiểm chấp thuận: ${formatCurrency(approved)}'
+      '\nBảo hiểm trả trực tiếp cho gara: ${formatCurrency(share['garageAmount'] ?? (share['direct'] == true ? approved : 0))}'
+      '${share['direct'] == false ? ' (hoàn tiền cho khách)' : ''}'
+      '\nKhách thanh toán tại gara: ${formatCurrency(share['customerAmount'])}'
+      '${share['remaining'] == null ? '' : '\nCòn phải trả: ${formatCurrency(share['remaining'])}'}';
 }
