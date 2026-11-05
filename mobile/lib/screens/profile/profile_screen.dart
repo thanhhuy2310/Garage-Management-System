@@ -1,6 +1,8 @@
 import '../../services/profile_service.dart';
+
 import 'package:flutter/material.dart';
 
+import '../auth/password_recovery_screen.dart';
 import '../../app/app_controller.dart';
 import '../../app/app_routes.dart';
 import '../../app/app_theme.dart';
@@ -80,9 +82,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       destructive: true,
     );
     if (!confirmed) return;
-    try { await widget.controller.signOut(); }
-    catch (_) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Chưa thể đăng xuất. Vui lòng kiểm tra kết nối và thử lại.')));
+    try {
+      await widget.controller.signOut();
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Chưa thể đăng xuất. Vui lòng kiểm tra kết nối và thử lại.',
+            ),
+          ),
+        );
+      }
       return;
     }
     if (mounted) {
@@ -140,14 +151,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       TextButton.icon(
-                        onPressed: _saving || widget.controller.profileService is ApiProfileService
+                        onPressed:
+                            _saving ||
+                                widget.controller.profileService
+                                    is ApiProfileService
                             ? null
                             : () => setState(() => _editing = !_editing),
                         icon: Icon(
                           _editing ? Icons.close : Icons.edit_outlined,
                           size: 18,
                         ),
-                        label: Text(widget.controller.profileService is ApiProfileService ? 'Liên hệ lễ tân để sửa' : (_editing ? 'Hủy' : 'Chỉnh sửa')),
+                        label: Text(
+                          widget.controller.profileService is ApiProfileService
+                              ? 'Liên hệ lễ tân để sửa'
+                              : (_editing ? 'Hủy' : 'Chỉnh sửa'),
+                        ),
                       ),
                     ],
                   ),
@@ -190,6 +208,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     label: 'Địa chỉ',
                     enabled: _editing,
                     maxLines: 2,
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      final address = await Navigator.push<String>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PasswordRecoveryScreen(
+                            contactToken:
+                                widget.controller.session!.accessToken,
+                          ),
+                        ),
+                      );
+                      if (address != null && mounted) {
+                        _email.text = address;
+                        await widget.controller.loadHome();
+                      }
+                    },
+                    child: const Text("Cập nhật email khôi phục"),
                   ),
                   if (_editing) ...[
                     const SizedBox(height: 16),

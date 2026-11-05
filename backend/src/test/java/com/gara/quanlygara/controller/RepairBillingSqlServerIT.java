@@ -67,7 +67,7 @@ class RepairBillingSqlServerIT {
         String advisor = staffLogin(admin, employee("Lê Thanh Hà", "Cố vấn dịch vụ"), "thanhha_", "RECEPTIONIST");
         String username = "minhhanh_" + tag;
         String phone = "09" + String.format("%08d", Long.parseLong(tag, 16) % 100000000L);
-        var registered = send(post("/api/auth/register"), null, Map.of("fullName", "Nguyễn Minh Hạnh", "phone", phone,
+        var registered = send(post("/api/auth/register"), null, Map.of("fullName", "Nguyễn Minh Hạnh", "phone", phone, "email",username+"@example.invalid",
                 "username", username, "password", password), 201);
         int customerId = registered.path("account").path("customerId").asInt();
         String customer = login(username);
@@ -151,7 +151,7 @@ class RepairBillingSqlServerIT {
         assertTrue(jdbc.queryForObject("SELECT DB_NAME()",String.class).startsWith("QuanLyGaraOTo_Verify_"));
         String username="minhan_"+tag;
         String phone="09"+String.format("%08d",Integer.toUnsignedLong(tag.hashCode())%100000000);
-        send(post("/api/auth/register"),null,Map.of("fullName","Nguyễn Minh An","phone",phone,"username",username,"password",password),201);
+        send(post("/api/auth/register"),null,Map.of("fullName","Nguyễn Minh An","phone",phone,"email",username+"@example.invalid","username",username,"password",password),201);
         String first=login(username), second=login(username);
         assertNotEquals(first,second);
         send(post("/api/auth/logout"),first,null,200);
@@ -164,7 +164,7 @@ class RepairBillingSqlServerIT {
         assertTrue(jdbc.queryForObject("SELECT DB_NAME()",String.class).startsWith("QuanLyGaraOTo_Verify_"));
         String username="hanh_"+tag;
         String phone="09"+String.format("%08d",Integer.toUnsignedLong(tag.hashCode())%100000000);
-        send(post("/api/auth/register"),null,Map.of("fullName","Nguyễn Hạnh","phone",phone,"username",username,"password",password),201);
+        send(post("/api/auth/register"),null,Map.of("fullName","Nguyễn Hạnh","phone",phone,"email",username+"@example.invalid","username",username,"password",password),201);
         for(boolean remember:new boolean[]{false,true}) {
             var response=mvc.perform(post("/api/auth/login").secure(true).header("X-Garage-Client","web")
                     .param("remember",String.valueOf(remember)).contentType(APPLICATION_JSON)

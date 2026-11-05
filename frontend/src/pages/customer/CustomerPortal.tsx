@@ -1,4 +1,5 @@
 import { FormEvent, useCallback, useState } from "react";
+import ContactEmail from "../../features/auth/ContactEmail";
 import { authApi } from "../../api/auth";
 import { customersApi, type Customer } from "../../api/customers";
 import { errorMessage } from "../../api/client";
@@ -36,7 +37,7 @@ interface CustomerPortalProps {
   onNavigate: (page: CustomerPage) => void;
 }
 
-function ProfileTab({ customer }: { customer: Customer }) {
+function ProfileTab({ customer, saved }: { customer: Customer; saved:()=>void }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -89,6 +90,7 @@ function ProfileTab({ customer }: { customer: Customer }) {
           <p className="mt-1 text-muted-foreground">{[customer.phone, customer.email].filter(Boolean).join(" · ")}</p>
           {customer.address && <p className="mt-0.5 text-muted-foreground">{customer.address}</p>}
         </div>
+        <ContactEmail saved={saved}/>
         <p className="text-xs text-muted-foreground">Muốn cập nhật thông tin, liên hệ lễ tân gara để được hỗ trợ.</p>
       </Card>
       <Card className="p-4 sm:p-5">
@@ -174,7 +176,7 @@ export default function CustomerPortal({ onLogout, page, customerId, onNavigate 
         {page === "tracking" && <CustomerTracking />}
         {page === "history" && <CustomerHistory />}
         {page === "notifications" && <CustomerNotifications />}
-        {page === "profile" && profile.data && <ProfileTab customer={profile.data} />}
+        {page === "profile" && profile.data && <ProfileTab customer={profile.data} saved={profile.reload} />}
       </div>
     </CustomerLayout>
   );

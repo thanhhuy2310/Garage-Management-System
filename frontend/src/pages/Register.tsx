@@ -46,7 +46,7 @@ export default function Register({ onRegistered, onLogin }: RegisterProps) {
       const response = await authApi.register({
         fullName: fullName.trim(),
         phone: phone.trim(),
-        email: email.trim() || undefined,
+        email: email.trim(),
         address: address.trim() || undefined,
         username: username.trim(),
         password,
@@ -82,8 +82,8 @@ export default function Register({ onRegistered, onLogin }: RegisterProps) {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="register-email" className="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
-            <input id="register-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" className={INPUT_CLASS} />
+            <label htmlFor="register-email" className="mb-1.5 block text-sm font-medium text-slate-700">Email *</label>
+            <input id="register-email" required type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" className={INPUT_CLASS} />
           </div>
           <div>
             <label htmlFor="register-address" className="mb-1.5 block text-sm font-medium text-slate-700">Địa chỉ</label>

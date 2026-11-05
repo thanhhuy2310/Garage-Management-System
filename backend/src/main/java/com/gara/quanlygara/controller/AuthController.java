@@ -79,7 +79,22 @@ public class AuthController {
                                 @NotBlank @Size(min=8,max=72) String password,@NotBlank @Size(max=72) String confirmation) {}
     @PostMapping("/recovery/request")
     public ResponseEntity<ApiResponse<Void>> requestCode(@Valid @RequestBody ResetEmail input) {
-        return switch(recovery.request(input.email())) {
+        return codeResponse(recovery.request(input.email()));
+    }
+    public record ContactEmail(@NotBlank @Email @Size(max=150) String email,@NotBlank @Size(max=72) String password){}
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('CUSTOMER')")
+    @PostMapping("/contact-email/request")
+    public ResponseEntity<ApiResponse<Void>> contactCode(@Valid @RequestBody ContactEmail input,Authentication auth){
+        return codeResponse(recovery.requestContact(auth.getName(),input.email(),input.password()));
+    }
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('CUSTOMER')")
+    @PostMapping("/contact-email/verify")
+    public ApiResponse<Void> confirmEmail(@Valid @RequestBody VerifyCode input,Authentication auth){
+        if(!recovery.confirmContact(auth.getName(),input.email(),input.code()))throw new BadRequestException("Mã hoặc email không hợp lệ.");
+        return ApiResponse.success("Đã xác minh và cập nhật email.");
+    }
+    private ResponseEntity<ApiResponse<Void>> codeResponse(PasswordRecovery.Result result){
+        return switch(result) {
             case ACCEPTED -> ResponseEntity.accepted().body(ApiResponse.success("Nếu email liên kết với một tài khoản, bạn sẽ nhận được mã xác minh."));
             case LIMITED -> ResponseEntity.status(429).body(ApiResponse.error("Đã đạt giới hạn gửi mã. Vui lòng thử lại sau.",null));
             case UNAVAILABLE -> ResponseEntity.status(503).body(ApiResponse.error("Dịch vụ gửi email chưa được cấu hình. Vui lòng liên hệ gara.",null));

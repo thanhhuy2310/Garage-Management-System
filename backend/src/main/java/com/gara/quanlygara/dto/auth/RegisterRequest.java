@@ -10,6 +10,7 @@ public record RegisterRequest(
         @Size(max = 100, message = "Họ tên không được vượt quá 100 ký tự.") String fullName,
         @NotBlank(message = "Số điện thoại không được để trống.")
         @Pattern(regexp = "^\\+?[0-9]{9,15}$", message = "Số điện thoại không hợp lệ.") String phone,
+        @NotBlank(message = "Vui lòng nhập email để khôi phục tài khoản.")
         @Email(message = "Email không hợp lệ.")
         @Size(max = 150, message = "Email không được vượt quá 150 ký tự.") String email,
         @Size(max = 255, message = "Địa chỉ không được vượt quá 255 ký tự.") String address,

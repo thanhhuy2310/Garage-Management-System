@@ -57,21 +57,33 @@ public class PasswordRecovery {
     @Transactional
     public Result request(String email) {
         if(!mail.configured()) return Result.UNAVAILABLE;
+        var candidates=accounts(email);
+        return issue(emailKey(email),candidates.size()==1?candidates.getFirst():null,null);
+    }
+
+    @Transactional
+    public Result requestContact(String username,String email,String password){
+        var owner=accounts.findByUsername(username).orElseThrow();
+        if(owner.getCustomerId()==null || !encoder.matches(password,owner.getPasswordHash()))
+            throw new com.gara.quanlygara.exception.BadRequestException("Mật khẩu hiện tại không đúng.");
+        if(!mail.configured()) return Result.UNAVAILABLE;
+        String address=email.strip().toLowerCase(Locale.ROOT);
+        return issue(digest("contact:"+owner.getId()),Map.of("address",address,"MaTaiKhoan",owner.getId(),"MatKhauHash",owner.getPasswordHash()),address);
+    }
+
+    private Result issue(String id,Map<String,Object> account,String contact){
         long now=System.currentTimeMillis();
-        String id=emailKey(email);
         // Remove expired throttle records in bounded batches.
         db.update("DELETE TOP (64) FROM PasswordRecovery WHERE WindowStart<? AND ExpiresAt<?",now-PERIOD,now);
         var old=lock(id);
         boolean inWindow=old!=null && (long)old.get("WindowStart")>now-PERIOD;
         if(old!=null && ((long)old.get("LastRequest")>now-60000 || (inWindow && (int)old.get("Sends")>=3)))return Result.LIMITED;
-        var candidates=accounts(email);
-        var account=candidates.size()==1?candidates.getFirst():null;
         String code=String.format(Locale.ROOT,"%06d",RANDOM.nextInt(1000000));
         String hash=digest(id+":"+code);
         if(old==null) db.update("INSERT PasswordRecovery(EmailKey,ExpiresAt,WindowStart,LastRequest,Sends,Attempts) VALUES(?,0,?,0,0,0)",id,now);
         db.update("""
                 UPDATE PasswordRecovery SET AccountId=?,CredentialKey=?,CodeHash=?,TicketHash=NULL,ExpiresAt=?,WindowStart=?,LastRequest=?,Sends=?,Attempts=? WHERE EmailKey=?
-                """,account==null?null:account.get("MaTaiKhoan"),account==null?null:digest((String)account.get("MatKhauHash")),hash,
+                """,account==null?null:account.get("MaTaiKhoan"),account==null?null:digest((contact==null?"":contact+":")+account.get("MatKhauHash")),hash,
                 now+PERIOD,inWindow?old.get("WindowStart"):now,now,inWindow?(int)old.get("Sends")+1:1,inWindow?(int)old.get("Attempts"):0,id);
         if(account!=null) {
             String address=(String)account.get("address");
@@ -95,13 +107,29 @@ public class PasswordRecovery {
     }
     @Transactional
     public String verify(String email,String code){
-        String id=emailKey(email);var row=lock(id);
+        return verifyKey(emailKey(email),code);
+    }
+    private String verifyKey(String id,String code){
+        var row=lock(id);
         if(row==null || (long)row.get("ExpiresAt")<=System.currentTimeMillis() || row.get("CodeHash")==null || (int)row.get("Attempts")>=5)return null;
         db.update("UPDATE PasswordRecovery SET Attempts=Attempts+1 WHERE EmailKey=?",id);
         if(row.get("AccountId")==null || !matches((String)row.get("CodeHash"),digest(id+":"+code)))return null;
         byte[] bytes=new byte[32];RANDOM.nextBytes(bytes);String ticket=HexFormat.of().formatHex(bytes);
         db.update("UPDATE PasswordRecovery SET CodeHash=NULL,TicketHash=? WHERE EmailKey=?",digest(ticket),id);
         return ticket;
+    }
+    @Transactional(isolation=org.springframework.transaction.annotation.Isolation.SERIALIZABLE)
+    public boolean confirmContact(String username,String email,String code){
+        var owner=accounts.lockSessionOwner(username).orElseThrow();
+        String id=digest("contact:"+owner.getId());
+        String address=email.strip().toLowerCase(Locale.ROOT);
+        var row=lock(id);
+        if(row==null || owner.getCustomerId()==null || !matches((String)row.get("CredentialKey"),digest(address+":"+owner.getPasswordHash())))return false;
+        if(verifyKey(id,code)==null)return false;
+        if(accounts.countByContactEmail(address)>0)throw new com.gara.quanlygara.exception.ConflictException("Email đã liên kết với tài khoản.");
+        db.update("UPDATE KhachHang SET Email=? WHERE MaKhachHang=?",address,owner.getCustomerId());
+        db.update("UPDATE PasswordRecovery SET TicketHash=NULL WHERE EmailKey=?",id);
+        return true;
     }
     @Transactional
     public boolean complete(String email,String ticket,String password){

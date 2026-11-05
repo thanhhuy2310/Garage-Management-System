@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_config.dart';
 
 class PasswordRecoveryScreen extends StatefulWidget {
-  const PasswordRecoveryScreen({super.key});
+  const PasswordRecoveryScreen({super.key, this.contactToken});
+  final String? contactToken;
   @override
   State<PasswordRecoveryScreen> createState() => _PasswordRecoveryState();
 }
@@ -51,14 +52,23 @@ class _PasswordRecoveryState extends State<PasswordRecoveryScreen> {
       error = '';
     });
     try {
+      final changing = widget.contactToken != null;
+      final purpose = changing ? 'contact-email' : 'recovery';
       final route = ['request', 'verify', 'complete'][step];
       final request = await client
-          .postUrl(Uri.parse('${AppConfig.apiBaseUrl}/auth/recovery/$route'))
+          .postUrl(Uri.parse('${AppConfig.apiBaseUrl}/auth/$purpose/$route'))
           .timeout(const Duration(seconds: 12));
+      if (changing) {
+        request.headers.set(
+          HttpHeaders.authorizationHeader,
+          'Bearer ${widget.contactToken}',
+        );
+      }
       request.headers.contentType = ContentType.json;
       request.write(
         jsonEncode({
           'email': address,
+          if (changing && step == 0) 'password': password.text,
           if (step == 1) 'code': code.text,
           if (step == 2) ...{
             'ticket': ticket,
@@ -81,6 +91,11 @@ class _PasswordRecoveryState extends State<PasswordRecoveryScreen> {
         setState(() => error = data['message'] ?? 'Không thể xử lý yêu cầu.');
         return;
       }
+      if (changing && step == 1) {
+        Navigator.pop(context, address);
+        return;
+      }
+      if (changing) password.clear();
       if (step == 1) ticket = data['data'] as String;
       if (step == 2) {
         ticket = '';
@@ -99,7 +114,13 @@ class _PasswordRecoveryState extends State<PasswordRecoveryScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Quên mật khẩu')),
+    appBar: AppBar(
+      title: Text(
+        widget.contactToken == null
+            ? 'Quên mật khẩu'
+            : 'Cập nhật email khôi phục',
+      ),
+    ),
     body: ListView(
       padding: const EdgeInsets.all(24),
       children: [
@@ -112,9 +133,17 @@ class _PasswordRecoveryState extends State<PasswordRecoveryScreen> {
               labelText: 'Email liên kết với tài khoản',
             ),
           ),
+        if (step == 0 && widget.contactToken != null)
+          TextField(
+            controller: password,
+            obscureText: true,
+            decoration: const InputDecoration(labelText: 'Mật khẩu hiện tại'),
+          ),
         if (step == 1) ...[
           Text(
-            'Nếu email ${email.text.trim()} liên kết với tài khoản, hãy kiểm tra hộp thư và nhập mã trong 15 phút.',
+            widget.contactToken != null
+                ? 'Nhập mã trong hộp thư ${email.text.trim()}.'
+                : 'Nếu email ${email.text.trim()} liên kết với tài khoản, hãy kiểm tra hộp thư và nhập mã trong 15 phút.',
           ),
           TextField(
             controller: code,

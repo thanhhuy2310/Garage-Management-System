@@ -55,7 +55,7 @@ public class AuthService {
         return issueToken(account);
     }
 
-    @Transactional
+    @Transactional(isolation=org.springframework.transaction.annotation.Isolation.SERIALIZABLE)
     public LoginResponse register(RegisterRequest request) {
         String username = request.username().trim();
         String phone = request.phone().trim();
@@ -66,6 +66,8 @@ public class AuthService {
             throw new ConflictException("Số điện thoại đã được sử dụng.");
         }
 
+        if(request.email()==null || request.email().isBlank()) throw new BadRequestException("Vui lòng nhập email.");
+        if(accountRepository.countByContactEmail(request.email().strip())>0) throw new ConflictException("Email đã liên kết với tài khoản.");
         Customer customer = new Customer();
         customer.setFullName(request.fullName().trim());
         customer.setPhone(phone);

@@ -29,7 +29,7 @@ public class ResetMail {
     }
     public void send(String address,String otp) {
         var message=new SimpleMailMessage();
-        message.setFrom(from); message.setTo(address); message.setSubject("Khôi phục mật khẩu gara");
+        message.setFrom(from); message.setTo(address); message.setSubject("Mã xác minh tài khoản gara");
         message.setText("Mã xác minh của bạn là "+otp+". Mã dùng một lần và hết hạn sau 15 phút.");
         smtp.send(message);
     }

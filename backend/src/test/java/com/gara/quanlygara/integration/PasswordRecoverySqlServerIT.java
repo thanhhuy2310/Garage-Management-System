@@ -65,6 +65,23 @@ class PasswordRecoverySqlServerIT {
         db.update("UPDATE PasswordRecovery SET Attempts=0,ExpiresAt=0 WHERE AccountId=(SELECT MaTaiKhoan FROM TaiKhoan WHERE TenDangNhap=?)",username);
         postJson("recovery/verify",Map.of("email",email,"code",code),400);
     }
+    @Test void legacyCustomerCanLoginAndVerifyANewMailbox() throws Exception {
+        db.update("UPDATE KhachHang SET Email=NULL WHERE Email=?",email);
+        postJson("login",Map.of("username",username,"password",password),200);
+        postJson("register",Map.of("username",username+"x","password",password,"fullName","Trần An","phone","0901234567"),400);
+        String address=tag+"@example.invalid";
+        var path="/api/auth/contact-email/";
+        mvc.perform(post(path+"request").header("Authorization","Bearer "+original).contentType("application/json")
+                .content(json.writeValueAsBytes(Map.of("email",address,"password",password)))).andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isAccepted());
+        TransactionSynchronizationManager.getSynchronizations().forEach(s->s.afterCommit());
+        var code=ArgumentCaptor.forClass(String.class); verify(delivery,timeout(3000)).send(eq(address),code.capture());
+        var confirmation=Map.of("email",address,"code",code.getValue());
+        for(int expected:new int[]{200,400}){
+            assertEquals(expected,mvc.perform(post(path+"verify").header("Authorization","Bearer "+original).contentType("application/json")
+                    .content(json.writeValueAsBytes(confirmation))).andReturn().getResponse().getStatus());
+        }
+        assertEquals(1,db.queryForObject("SELECT COUNT(*) FROM KhachHang WHERE Email=?",Integer.class,address));
+    }
     @Test void missingMailConfigurationIsExplicitForAnyAddress()throws Exception {
         when(delivery.configured()).thenReturn(false);
         postJson("recovery/request",Map.of("email",email),503);
