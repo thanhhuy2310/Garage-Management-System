@@ -29,6 +29,7 @@ class Quotation {
     required this.lines,
     this.version = 0,
     this.revision = 1,
+    this.repairOrderId,
     this.serverTotal,
     this.rejectionReason,
   });
@@ -40,6 +41,7 @@ class Quotation {
   final List<QuotationLine> lines;
   final int version;
   final int revision;
+  final int? repairOrderId;
   final num? serverTotal;
   final String? rejectionReason;
   num get total =>
@@ -54,6 +56,7 @@ class Quotation {
     lines: lines,
     version: version,
     revision: revision,
+    repairOrderId:repairOrderId,
     serverTotal: serverTotal,
     rejectionReason: rejectionReason,
   );

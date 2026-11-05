@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { appointmentsApi, appointmentLabels, type Appointment, type Availability, type ScheduleSlot } from "../../api/appointments";
 import { customersApi, type Customer } from "../../api/customers";
-import { vehiclesApi, type Vehicle } from "../../api/vehicles";
+import VehicleForm from "../vehicles/VehicleForm";
+import { toVehiclePayload,vehiclesApi, type Vehicle } from "../../api/vehicles";
 import { garageApi } from "../../api/garage";
 import { errorMessage } from "../../api/client";
 import { readSession } from "../../api/session";
@@ -42,6 +43,8 @@ export default function AppointmentWorkspace({customerId,onBooked}: {customerId?
   const [day,setDay] = useState("1");
   const [scheduleTime,setScheduleTime] = useState("");
   const [capacity,setCapacity] = useState("");
+  const [addingVehicle,setAddingVehicle]=useState(false);
+  const targetId=customer?Number(new URLSearchParams(location.search).get("id")):0;
   const needsTime = action==="create" || action==="move";
 
   const load = useCallback(async () => {
@@ -67,6 +70,9 @@ export default function AppointmentWorkspace({customerId,onBooked}: {customerId?
       .finally(()=>{if(!controller.signal.aborted)setSlotsLoading(false);});
     return ()=>controller.abort();
   },[date,needsTime]);
+  useEffect(()=>{
+    if(customer && new URLSearchParams(location.search).get("book")==="1")void open("create");
+  },[customer]);
   async function open(next: Action,item: Appointment|null=null) {
     setNotice(""); setFormError(""); setSelected(item); setAction(next);
     setOwner(customerId??0); setVehicle(""); setService(""); setDate(""); setTime(""); setNote("");
@@ -101,7 +107,7 @@ export default function AppointmentWorkspace({customerId,onBooked}: {customerId?
     try {setSchedule(await appointmentsApi.configure({dayOfWeek:Number(day),time:scheduleTime,capacity:Number(capacity)}));}
     catch(e){setFormError(errorMessage(e));}finally{setBusy(false);}
   }
-  const filtered=items.filter(a=>(!status||a.status===status) &&
+  const filtered=items.filter(a=>(!targetId||a.id===targetId)&&(!status||a.status===status) &&
     (a.plate+" "+a.customerName+" "+a.id).toLocaleLowerCase("vi").includes(search.toLocaleLowerCase("vi")));
   const titles={create:"Đặt lịch mới",move:"Dời lịch hẹn",cancel:"Hủy lịch hẹn",confirm:"Xác nhận lịch hẹn"};
   return <div className="space-y-5">
@@ -143,13 +149,13 @@ export default function AppointmentWorkspace({customerId,onBooked}: {customerId?
       </article>)}</div>
       {!filtered.length && <p className="p-6 text-muted-foreground">Chưa có lịch hẹn phù hợp.</p>}
     </Card>}
-    <Modal open={action!==null} onClose={()=>{if(!busy)setAction(null);}} title={action?titles[action]:"Lịch hẹn"}>
+    <Modal open={action!==null&&!addingVehicle} onClose={()=>{if(!busy)setAction(null);}} title={action?titles[action]:"Lịch hẹn"}>
       <form className="space-y-4" onSubmit={save}>
         {selected && <p>LH{selected.id} · {selected.plate} · {selected.date} {selected.time.slice(0,5)}</p>}
         {action==="create" && <>
           {!customer && <Select required label="Khách hàng" value={owner||""} onChange={e=>setOwner(Number(e.target.value))} options={[{value:"",label:"Chọn khách hàng"},...customers.map(c=>({value:String(c.id),label:c.fullName+" · "+c.phone}))]}/>}
           <Select required label="Xe" value={vehicle} onChange={e=>setVehicle(e.target.value)} options={[{value:"",label:"Chọn xe"},...vehicles.map(v=>({value:String(v.id),label:v.licensePlate+" · "+(v.model??"")}))]}/>
-          {owner>0 && !vehicles.length && <p className="text-sm text-muted-foreground">Nếu chưa có xe, hãy thêm xe ở mục Quản lý xe rồi mở lại đặt lịch.</p>}
+          {customer&&<Button type="button" variant="outline" onClick={()=>setAddingVehicle(true)}>Thêm xe ngay</Button>}
           <Select label="Dịch vụ" value={service} onChange={e=>setService(e.target.value)} options={[{value:"",label:"Tư vấn chung"},...services.map(s=>({value:String(s.id),label:s.name}))]}/>
         </>}
         {needsTime && <>
@@ -173,6 +179,12 @@ export default function AppointmentWorkspace({customerId,onBooked}: {customerId?
         {formError && <p role="alert" className="text-danger">{formError}</p>}
         <div className="flex gap-2"><Button type="submit" disabled={busy||(needsTime&&(slotsLoading||!time))}>{busy?"Đang lưu…":action==="cancel"?"Xác nhận hủy":"Lưu lịch hẹn"}</Button><Button type="button" variant="outline" disabled={busy} onClick={()=>setAction(null)}>Đóng</Button></div>
       </form>
+    </Modal>
+    <Modal open={addingVehicle} onClose={()=>setAddingVehicle(false)} title="Thêm xe để đặt lịch">
+      <VehicleForm onCancel={()=>setAddingVehicle(false)} onSubmit={async value=>{
+        const created=await vehiclesApi.create(toVehiclePayload(owner,value));
+        setVehicles(old=>[...old,created]);setVehicle(String(created.id));setAddingVehicle(false);
+      }}/>
     </Modal>
     <Modal open={scheduleOpen} onClose={()=>{if(!busy)setScheduleOpen(false);}} title="Cấu hình khung giờ tiếp nhận">
       <form onSubmit={saveSchedule} className="space-y-4">

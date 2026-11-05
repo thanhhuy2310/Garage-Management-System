@@ -16,11 +16,12 @@ class AppointmentsScreen extends StatefulWidget {
   const AppointmentsScreen({
     super.key,
     required this.controller,
-    this.embedded = false,
+    this.embedded = false,this.focusId,
   });
 
   final AppController controller;
   final bool embedded;
+  final int? focusId;
 
   @override
   State<AppointmentsScreen> createState() => _AppointmentsScreenState();
@@ -54,7 +55,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
   List<Appointment> get _items => widget.controller.appointments
       .where(
-        (item) => switch (_filter) {
+        (item) => widget.focusId!=null?item.id==widget.focusId.toString():switch (_filter) {
           _AppointmentFilter.upcoming =>
             item.status != AppointmentStatus.completed &&
                 item.status != AppointmentStatus.cancelled,

@@ -17,6 +17,7 @@ export default function CustomerOverview({onNavigate, customerId}: {onNavigate: 
  const summaries = [{label: "Xe của tôi", value: vehicles.loading || vehicles.error ? "—" : vehicles.vehicles.length, icon: Icons.car}, {label: "Xe đang trong xưởng", value: active?.length ?? "—", icon: Icons.wrench}, {label: "Lịch hẹn sắp tới", value: upcoming?.length ?? "—", icon: Icons.calendar}, {label: "Thông báo chưa đọc", value: notifications.data?.count ?? "—", icon: Icons.bell}];
  return <div className="space-y-6">
   <div><p className="text-xs font-bold uppercase tracking-widest text-accent">Khu vực khách hàng</p><h1 className="ui-page-title mt-1 text-brand-dark">Tổng quan xe &amp; dịch vụ</h1></div>
+  <Button onClick={()=>window.location.assign("/customer/appointments?book=1")}>Đặt lịch ngay</Button>
   <QueryState loading={vehicles.loading} error={vehicles.error} onRetry={vehicles.reload}/><QueryState {...repairs} onRetry={repairs.reload}/>
   <QueryState {...appointments} onRetry={appointments.reload}/><QueryState {...notifications} onRetry={notifications.reload}/>
   <section aria-label="Chỉ số tổng quan" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{summaries.map(item => <Card key={item.label} className="flex min-h-28 items-center gap-4 p-4"><span className="text-primary">{item.icon}</span><div><p className="text-xl font-bold">{item.value}</p><p className="text-xs text-muted-foreground">{item.label}</p></div></Card>)}</section>

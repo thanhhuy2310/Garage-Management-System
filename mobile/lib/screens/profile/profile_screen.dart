@@ -1,4 +1,3 @@
-import '../../services/profile_service.dart';
 
 import 'package:flutter/material.dart';
 
@@ -55,7 +54,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final current = widget.controller.profile;
     if (current == null) return;
     setState(() => _saving = true);
-    await widget.controller.saveProfile(
+    try {
+      await widget.controller.saveProfile(
       CustomerProfile(
         id: current.id,
         fullName: _name.text.trim(),
@@ -64,6 +64,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         address: _address.text.trim(),
       ),
     );
+    } catch(error){
+      if(mounted){setState(()=>_saving=false);ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(error.toString())));}
+      return;
+    }
     if (!mounted) return;
     setState(() {
       _saving = false;
@@ -152,20 +156,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       TextButton.icon(
                         onPressed:
-                            _saving ||
-                                widget.controller.profileService
-                                    is ApiProfileService
+                            _saving
                             ? null
                             : () => setState(() => _editing = !_editing),
                         icon: Icon(
                           _editing ? Icons.close : Icons.edit_outlined,
                           size: 18,
                         ),
-                        label: Text(
-                          widget.controller.profileService is ApiProfileService
-                              ? 'Liên hệ lễ tân để sửa'
-                              : (_editing ? 'Hủy' : 'Chỉnh sửa'),
-                        ),
+                        label: Text(_editing ? 'Hủy' : 'Chỉnh sửa'),
                       ),
                     ],
                   ),
@@ -173,7 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   AppTextField(
                     controller: _name,
                     label: 'Họ và tên',
-                    enabled: _editing,
+                    enabled: false,
                     validator: (value) => value == null || value.trim().isEmpty
                         ? 'Vui lòng nhập họ tên.'
                         : null,
@@ -194,7 +192,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     controller: _email,
                     label: 'Email',
                     keyboardType: TextInputType.emailAddress,
-                    enabled: _editing,
+                    enabled: false,
                     validator: (value) =>
                         value != null &&
                             value.isNotEmpty &&

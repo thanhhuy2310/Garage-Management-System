@@ -32,7 +32,8 @@ export default function QuotationWorkspace({customer=false}:{customer?:boolean})
   const current=items.find(q=>q.id===selected),detail=snapshot??current;
   const load=useCallback(async()=>{
     setLoading(true);setError("");
-    try {const data=await quotationsApi.list();setItems(data);setSelected(id=>data.some(q=>q.id===id)?id:data[0]?.id??null);}
+    try {const data=await quotationsApi.list();const target=customer?Number(new URLSearchParams(location.search).get("repair")):0;
+      const visible=target?data.filter(q=>q.repairOrderId===target):data;setItems(visible);setSelected(id=>visible.some(q=>q.id===id)?id:visible[0]?.id??null);}
     catch(e){setError(errorMessage(e));}finally{setLoading(false);}
   },[]);
   useEffect(()=>{void load();},[load]);

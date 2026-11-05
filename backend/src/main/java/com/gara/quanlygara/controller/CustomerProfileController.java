@@ -20,6 +20,12 @@ public class CustomerProfileController {
         this.customerService = customerService;
     }
 
+    public record ContactDetails(@jakarta.validation.constraints.NotBlank @jakarta.validation.constraints.Pattern(regexp="^\\+?[0-9]{9,15}$") String phone,
+                                 @jakarta.validation.constraints.Size(max=255) String address) {}
+    @org.springframework.web.bind.annotation.PutMapping
+    public ApiResponse<CustomerResponse> updateProfile(Authentication auth,@jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody ContactDetails input){
+        return ApiResponse.success("Đã cập nhật thông tin liên hệ.",customerService.updateContact(auth.getName(),input.phone(),input.address()));
+    }
     @GetMapping
     public ApiResponse<CustomerResponse> getProfile(Authentication authentication) {
         return ApiResponse.success("Thông tin khách hàng.",

@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import { notificationsApi } from "../../api/notifications";
+import { navigateTo } from "../../router";
+import { type CustomerNotification, notificationsApi } from "../../api/notifications";
 import { errorMessage } from "../../api/client";
 import { QueryState } from "../../components/garage/QueryState";
 import { Button, Card, Icons } from "../../components/ui";
@@ -9,6 +10,7 @@ const TYPE_META: Record<string, { icon: React.ReactNode; tint: string; label: st
   appointment: { icon: Icons.calendar, tint: "bg-info-soft text-info", label: "Lịch hẹn" },
   repair: { icon: Icons.wrench, tint: "bg-primary-soft text-primary", label: "Sửa chữa" },
   maintenance: { icon: Icons.car, tint: "bg-warning-soft text-warning", label: "Bảo dưỡng" },
+  quotation:{icon:Icons.car,tint:"bg-primary-soft text-primary",label:"Báo giá"},
   general: { icon: Icons.info, tint: "bg-muted text-muted-foreground", label: "Thông báo" },
 };
 
@@ -26,12 +28,16 @@ export default function CustomerNotifications() {
     unread.reload();
   };
 
-  const markRead = async (id: number) => {
+  const markRead = async (notice:CustomerNotification) => {
+    const id=notice.id;
     setActionError("");
     setBusyId(id);
     try {
-      await notificationsApi.markRead(id);
-      refresh();
+      if(!notice.isRead)await notificationsApi.markRead(id);
+      if(notice.type==="quotation"&&notice.repairOrderId)navigateTo("/customer/quotations?repair="+notice.repairOrderId);
+      else if(notice.appointmentId)navigateTo("/customer/appointments?id="+notice.appointmentId);
+      else if(notice.repairOrderId)navigateTo("/customer/tracking?id="+notice.repairOrderId);
+      else refresh();
     } catch (error) {
       setActionError(errorMessage(error, "Không đánh dấu được thông báo. Vui lòng thử lại."));
     } finally {
@@ -90,8 +96,8 @@ export default function CustomerNotifications() {
                 <li key={notice.id}>
                   <button
                     type="button"
-                    disabled={notice.isRead || busyId !== null || busyAll}
-                    onClick={() => markRead(notice.id)}
+                    disabled={busyId !== null || busyAll}
+                    onClick={() => markRead(notice)}
                     className={`flex w-full items-start gap-4 rounded-lg border p-4 text-left transition-all hover:border-slate-300 disabled:cursor-default ${notice.isRead ? "border-border bg-white" : "border-info/30 bg-info-soft/40"}`}
                   >
                     <span className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg ${meta.tint}`} aria-hidden="true">

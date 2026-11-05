@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../appointments/appointments_screen.dart';
+import '../repairs/repair_progress_screen.dart';
+import '../quotations/quotation_detail_screen.dart';
 
 import '../../app/app_controller.dart';
 import '../../app/app_theme.dart';
@@ -42,13 +45,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
-  Future<void> _markRead(int id) async {
+  Future<void> _markRead(CustomerNotification item) async {
     try {
-      await widget.controller.markNotificationRead(id);
+      final controller=widget.controller;
+      if(!item.isRead)await controller.markNotificationRead(item.id);
+      Widget? target;
+      if(item.type==CustomerNotificationType.quotation && item.repairOrderId!=null){
+        await controller.loadQuotations();
+        final quote=controller.quotations.where((q)=>q.repairOrderId==item.repairOrderId).firstOrNull;
+        if(quote==null)throw StateError('Không tìm thấy báo giá');
+        target=QuotationDetailScreen(controller:controller,quotationId:quote.id);
+      }else if(item.appointmentId!=null){
+        target=AppointmentsScreen(controller:controller,focusId:item.appointmentId);
+      }else if(item.repairOrderId!=null){
+        target=RepairProgressScreen(controller:controller,focusId:item.repairOrderId);
+      }
+      if(mounted && target!=null)await Navigator.push(context,MaterialPageRoute<void>(builder:(_)=>target!));
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Không cập nhật được thông báo. Vui lòng thử lại.')),
+          const SnackBar(content: Text('Không mở được thông báo. Vui lòng thử lại.')),
         );
       }
     }
@@ -105,7 +121,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 for (final item in widget.controller.notifications) ...[
                   _NotificationTile(
                     item: item,
-                    onTap: () => _markRead(item.id),
+                    onTap: () => _markRead(item),
                   ),
                   const SizedBox(height: 10),
                 ],
@@ -131,6 +147,7 @@ class _NotificationTile extends StatelessWidget {
       CustomerNotificationType.appointment => Icons.calendar_month_outlined,
       CustomerNotificationType.repair => Icons.car_repair_outlined,
       CustomerNotificationType.maintenance => Icons.build_outlined,
+      CustomerNotificationType.quotation => Icons.receipt_outlined,
       CustomerNotificationType.general => Icons.notifications_none,
       CustomerNotificationType.parts => Icons.inventory_2_outlined,
       CustomerNotificationType.payment => Icons.receipt_long_outlined,

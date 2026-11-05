@@ -2,7 +2,7 @@ import { FormEvent, useCallback, useState } from "react";
 import ContactEmail from "../../features/auth/ContactEmail";
 import { authApi } from "../../api/auth";
 import { customersApi, type Customer } from "../../api/customers";
-import { errorMessage } from "../../api/client";
+import { api,errorMessage } from "../../api/client";
 import { QueryState } from "../../components/garage/QueryState";
 import { Button, Card, Icons, Input } from "../../components/ui";
 import CustomerLayout from "../../layouts/CustomerLayout";
@@ -38,6 +38,8 @@ interface CustomerPortalProps {
 }
 
 function ProfileTab({ customer, saved }: { customer: Customer; saved:()=>void }) {
+  const [contactError,setContactError]=useState("");
+  const [contactBusy,setContactBusy]=useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -91,7 +93,16 @@ function ProfileTab({ customer, saved }: { customer: Customer; saved:()=>void })
           {customer.address && <p className="mt-0.5 text-muted-foreground">{customer.address}</p>}
         </div>
         <ContactEmail saved={saved}/>
-        <p className="text-xs text-muted-foreground">Muốn cập nhật thông tin, liên hệ lễ tân gara để được hỗ trợ.</p>
+        <form className="space-y-3" onSubmit={async event=>{
+          event.preventDefault();if(contactBusy)return;
+          const data=new FormData(event.currentTarget);setContactBusy(true);setContactError("");
+          try{await api.put("/api/customer/profile",{phone:data.get("phone"),address:data.get("address")});saved();}
+          catch(ex){setContactError(errorMessage(ex));}finally{setContactBusy(false);}
+        }}>
+          <Input label="Số điện thoại" name="phone" type="tel" defaultValue={customer.phone} required pattern="[+]?[0-9]{9,15}"/>
+          <Input label="Địa chỉ" name="address" defaultValue={customer.address??""} maxLength={255}/>
+          {contactError&&<p role="alert">{contactError}</p>}<Button type="submit" disabled={contactBusy}>Lưu thông tin liên hệ</Button>
+        </form>
       </Card>
       <Card className="p-4 sm:p-5">
         <h3 className="ui-card-title">Đổi mật khẩu</h3>

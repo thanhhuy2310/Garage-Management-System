@@ -5,7 +5,8 @@ import { customerRepairsApi } from "../../api/customerRepairs";
 import { formatGarageDate, repairStatusLabel } from "../../utils/garageFormat";
 export default function CustomerTracking() {
   const query = useGarageQuery(customerRepairsApi.repairs);
-  const repairs = query.data?.filter(({order}) => !["HOAN_TAT", "DA_HUY", "HUY"].includes(order.status)) ?? [];
+  const target=Number(new URLSearchParams(location.search).get("id"));
+  const repairs = query.data?.filter(({order}) => target?order.id===target:!["HOAN_TAT", "DA_HUY", "HUY"].includes(order.status)) ?? [];
   return <div className="space-y-6">
     <div><h2 className="ui-section-title">Tiến độ sửa chữa</h2><p className="ui-secondary-text text-sm">Nhật ký cập nhật từ gara</p></div>
     <QueryState {...query} onRetry={query.reload} />

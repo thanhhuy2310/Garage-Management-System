@@ -26,6 +26,7 @@ class ApiQuotationService implements QuotationService, QuotationCoverageReader {
         )
         .toList();
     return Quotation(
+      repairOrderId:data['repairOrderId'] as int?,
       id: data['id'].toString(),
       vehicle: Vehicle(
         id: data['vehicleId'] as int,

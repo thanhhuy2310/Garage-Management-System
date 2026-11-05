@@ -14,12 +14,13 @@ class RepairProgressScreen extends StatefulWidget {
     required this.controller,
     this.historyOnly = false,
     this.embedded = false,
-    this.active = true,
+    this.active = true,this.focusId,
   });
   final AppController controller;
   final bool historyOnly;
   final bool embedded;
   final bool active;
+  final int? focusId;
   @override
   State<RepairProgressScreen> createState() => _RepairProgressScreenState();
 }
@@ -84,6 +85,7 @@ class _RepairProgressScreenState extends State<RepairProgressScreen>
   @override
   Widget build(BuildContext context) {
     final items = widget.controller.repairs.where((item) {
+      if(widget.focusId!=null)return item.id==widget.focusId.toString();
       final ended =
           item.status == RepairStatus.completed ||
           item.status == RepairStatus.cancelled;

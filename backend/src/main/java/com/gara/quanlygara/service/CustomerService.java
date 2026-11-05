@@ -76,6 +76,16 @@ public class CustomerService {
     }
 
     @Transactional
+    public CustomerResponse updateContact(String username,String phone,String address) {
+        int id=getCurrentProfile(username).id();
+        var customer=findEntity(id);
+        if(customerRepository.existsByPhoneAndIdNot(phone,id))throw new ConflictException("Số điện thoại đã được sử dụng.");
+        customer.setPhone(phone);
+        customer.setAddress(normalizeOptional(address));
+        return CustomerResponse.from(customerRepository.save(customer));
+    }
+
+    @Transactional
     public CustomerResponse changeStatus(Integer id, boolean active) {
         Customer customer = findEntity(id);
         customer.setActive(active);

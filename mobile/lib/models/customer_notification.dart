@@ -1,4 +1,4 @@
-enum CustomerNotificationType { appointment, repair, maintenance, general, parts, payment }
+enum CustomerNotificationType { appointment, repair, quotation, maintenance, general, parts, payment }
 
 class CustomerNotification {
   const CustomerNotification({
@@ -8,8 +8,10 @@ class CustomerNotification {
     required this.createdAt,
     required this.type,
     required this.isRead,
+    this.repairOrderId,this.appointmentId,
   });
   final int id;
+  final int? repairOrderId,appointmentId;
   final String title;
   final String message;
   final DateTime createdAt;
@@ -18,6 +20,7 @@ class CustomerNotification {
 
   CustomerNotification copyWith({bool? isRead}) => CustomerNotification(
     id: id,
+    repairOrderId:repairOrderId,appointmentId:appointmentId,
     title: title,
     message: message,
     createdAt: createdAt,

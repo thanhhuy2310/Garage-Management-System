@@ -17,6 +17,7 @@ class ApiNotificationService implements NotificationService {
   CustomerNotification _parse(Map<String, dynamic> value) {
     final type = switch (value['type']) {
       'appointment' => CustomerNotificationType.appointment,
+      'quotation' => CustomerNotificationType.quotation,
       'repair' => CustomerNotificationType.repair,
       'maintenance' => CustomerNotificationType.maintenance,
       _ => CustomerNotificationType.general,
@@ -28,6 +29,7 @@ class ApiNotificationService implements NotificationService {
       createdAt: DateTime.parse(value['createdAt'] as String),
       type: type,
       isRead: value['isRead'] as bool,
+      repairOrderId:value['repairOrderId'] as int?,appointmentId:value['appointmentId'] as int?,
     );
   }
 

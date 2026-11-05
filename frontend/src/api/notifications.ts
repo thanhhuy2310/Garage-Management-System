@@ -6,7 +6,7 @@ export interface CustomerNotification {
   title: string;
   message: string;
   createdAt: string;
-  type: "appointment" | "repair" | "maintenance" | "general";
+  type: "appointment" | "repair" | "maintenance" | "quotation" | "general";
   isRead: boolean;
   appointmentId: number | null;
   repairOrderId: number | null;

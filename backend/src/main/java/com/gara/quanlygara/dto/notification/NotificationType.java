@@ -5,6 +5,7 @@ package com.gara.quanlygara.dto.notification;
 public enum NotificationType {
     APPOINTMENT("appointment"),
     REPAIR("repair"),
+    QUOTATION("quotation"),
     MAINTENANCE("maintenance"),
     GENERAL("general");
 
@@ -21,6 +22,7 @@ public enum NotificationType {
     public static NotificationType fromCode(String code) {
         if (code == null) return GENERAL;
         return switch (code.trim().toUpperCase()) {
+            case "BAO_GIA" -> QUOTATION;
             case "LICH_HEN" -> APPOINTMENT;
             case "TIEN_DO_SUA_CHUA", "HOAN_TAT_SUA_CHUA" -> REPAIR;
             case "NHAC_BAO_DUONG" -> MAINTENANCE;
