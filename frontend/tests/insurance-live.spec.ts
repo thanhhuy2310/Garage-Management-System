@@ -47,18 +47,19 @@ test("claim and private evidence persist after browser reload",async({page,brows
   const claim=(await call("GET","/insurance/claims?vehicleId="+vehicle))[0];
   const prefix="/insurance/claims/"+claim.id;
   const work=()=>call("GET",prefix+"/finance");
-  for(const status of ["DA_THONG_BAO","CHO_GIAM_DINH"])await call("PUT",prefix+"/follow-up",{version:(await work()).version,status,assessor:"Nguyễn Minh An",note:"Đối chiếu hồ sơ"});
-  let state=await work();await call("POST",prefix+"/assessments",{version:state.version,documentId:state.documents[0].id,damage:"Cửa trước",finding:"Sửa vỏ cửa"});
   const svc=await call("POST","/services",{name:"Kiểm tra cửa "+suffix,type:"Bảo dưỡng",unitPrice:200000});
   const repair=await call("POST","/repair-orders",{receptionId:claim.receptionId,services:[{serviceId:svc.id,quantity:1}]});
   const quote=await call("POST","/quotations",{repairOrderId:repair.order.id,lines:[{kind:"SERVICE",itemId:svc.id,quantity:1}]});
   await call("POST","/quotations/"+quote.id+"/send",{version:quote.version});
   const lineId=quote.lines[0].id;
-  await call("POST",prefix+"/finance/proposals",{version:(await work()).version,quoteId:quote.id,revision:quote.revision,direct:true,lines:[{lineId,amount:180000}]});
-  state=await work();
+  const state=await work();
   const evidence=await request.post("/api"+prefix+"/documents",{headers:{Authorization:"Bearer "+staff.accessToken},multipart:{category:"QUYET_DINH",version:String(state.version),file:{name:"quyet-dinh.pdf",mimeType:"application/pdf",buffer:Buffer.from("%PDF-1.7\n%%EOF")}}});
-  expect(evidence.ok()).toBeTruthy();state=await work();
-  await call("POST",prefix+"/finance/decisions",{version:state.version,proposalId:state.proposals[0].id,documentId:state.documents.find((d:{category:string})=>d.category==="QUYET_DINH").id,reference:"QD"+suffix,reason:"Doanh nghiệp duyệt theo biên bản",lines:[{lineId,amount:150000}]});
+  expect(evidence.ok()).toBeTruthy();
+  await page.reload();await selectVehicle();f=await form("Ghi nhận mức bảo hiểm đã duyệt");
+  await f.locator("[name=payee]").selectOption("garage");
+  await f.locator("[name=document]").selectOption({index:1});
+  await f.locator("[name=reference]").fill("QD"+suffix);await f.locator("[name=reason]").fill("Đã kiểm tra hợp đồng và văn bản");
+  await f.locator("[name=line"+lineId+"]").fill("150000");await save(f,"/manual-decision");
   const client=await browser.newContext();try {
     const view=await client.newPage();await view.goto("/login");await view.getByLabel("Tên đăng nhập",{exact:true}).fill(config.customer.username);await view.getByLabel("Mật khẩu",{exact:true}).fill(config.customer.password);
     await view.getByRole("button",{name:"Đăng nhập",exact:true}).click();await expect(view).not.toHaveURL(/\/login$/);await view.goto("/customer/quotations");

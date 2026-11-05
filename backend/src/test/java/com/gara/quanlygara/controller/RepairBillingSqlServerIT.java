@@ -52,8 +52,9 @@ class RepairBillingSqlServerIT {
     private final String tag = UUID.randomUUID().toString().substring(0, 8);
     private final String password = UUID.randomUUID().toString();
 
-    @Test
-    void bookedRepairUsesApprovedPricesActualPartsAndOnePayment() throws Exception {
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(booleans={false,true})
+    void bookedRepairUsesApprovedPricesActualPartsAndOnePayment(boolean insured) throws Exception {
         assertTrue(jdbc.queryForObject("SELECT DB_NAME()", String.class).matches("QuanLyGaraOTo_Verify_\\d{8}"));
         String adminName = "nhatminh_" + tag;
         int adminId = employee("Đỗ Nhật Minh", "Quản trị viên");
@@ -71,6 +72,10 @@ class RepairBillingSqlServerIT {
                 "username", username, "password", password), 201);
         int customerId = registered.path("account").path("customerId").asInt();
         String customer = login(username);
+        var changed=send(put("/api/customer/profile"),customer,Map.of("phone",phone,"address","Quận 1","id",customerId+1,"email","wrong@example.invalid","fullName","Sai tên"),200);
+        assertEquals(customerId,changed.path("id").intValue());
+        assertEquals(username+"@example.invalid",changed.path("email").asText());
+        assertEquals("Nguyễn Minh Hạnh",changed.path("fullName").asText());
         int vehicle = send(post("/api/vehicles"), customer, Map.of("customerId", customerId,
                 "licensePlate", "51A-" + tag, "brand", "Toyota", "model", "Vios", "mileage", 20000), 201).path("id").asInt();
         int service = send(post("/api/services"), manager, Map.of("name", "Bảo dưỡng phanh", "type", "Bảo dưỡng",
@@ -107,6 +112,29 @@ class RepairBillingSqlServerIT {
         String quotePath = "/api/quotations/" + quote.path("id").asInt();
         var sent = send(post(quotePath + "/send"), advisor, Map.of("version", quote.path("version").asInt()), 200);
         send(post(quotePath + "/decision"), customer, Map.of("version", sent.path("version").asInt(), "accepted", true), 200);
+        String claimPath="";
+        List<Map<String,Integer>> zeroLines=new java.util.ArrayList<>();
+        if(insured){
+            var day=slot.toLocalDate();
+            int company=send(post("/api/insurance/companies"),advisor,Map.of("code",tag,"name","An Phát","active",true),201).path("id").intValue();
+            int policy=send(post("/api/insurance/policies"),advisor,Map.of("companyId",company,"vehicleId",vehicle,"policyholderCustomerId",customerId,"policyNumber",tag,
+                "insuranceType","VAT_CHAT_XE","startDate",day.minusDays(30),"endDate",day.plusDays(30),"registeredOwnerName","Nguyễn Minh Hạnh","certificateOwnerName","Nguyễn Minh Hạnh"),201).path("id").intValue();
+            send(post("/api/insurance/policies/"+policy+"/verification"),advisor,Map.of("status","DA_XAC_MINH","note","Đã đối chiếu đăng ký xe"),200);
+            int claim=send(post("/api/insurance/claims"),advisor,Map.of("policyId",policy,"receptionId",reception,"incidentAt",day.minusDays(1).atTime(9,0),
+                "incidentLocation","Quận 1","causeDescription","Va chạm","damageDescription","Hư cụm phanh"),201).path("id").intValue();
+            claimPath="/api/insurance/claims/"+claim;
+            var file=new org.springframework.mock.web.MockMultipartFile("file","quyet-dinh.pdf","application/pdf","%PDF-1.7\n%%EOF".getBytes());
+            send(multipart(claimPath+"/documents").file(file).param("version","0").param("category","QUYET_DINH"),advisor,null,200);
+            var state=send(get(claimPath+"/finance"),advisor,null,200);
+            List<Map<String,Integer>> approved=new java.util.ArrayList<>();
+            for(var line:quote.path("lines")){
+                int id=line.path("id").intValue();
+                approved.add(Map.of("lineId",id,"amount",line.path("kind").asText().equals("SERVICE")?100000:0));
+                zeroLines.add(Map.of("lineId",id,"amount",0));
+            }
+            var allocation=Map.of("version",state.path("version").intValue(),"direct",false,"quoteId",quote.path("id").intValue(),"revision",1,"lines",approved);
+            send(post(claimPath+"/finance/manual-decision"),advisor,Map.of("allocation",allocation,"documentId",state.path("documents").get(0).path("id").intValue(),"reference","QD-"+tag,"reason","Hoàn tiền cho khách"),200);
+        }
         progress(orderPath, mechanic, "DANG_KIEM_TRA", "DANG_SUA");
         String linePath = orderPath + "/services/" + service;
         progress(linePath, mechanic, "CHO_SUA", "DANG_SUA");
@@ -126,6 +154,11 @@ class RepairBillingSqlServerIT {
         int invoice = bill.path("id").asInt();
         assertEquals(300000, bill.path("total").asInt());
         var before = send(get("/api/reports/dashboard"), manager, null, 200).path("collectedToday").decimalValue();
+        if(insured){
+            var state=send(get(claimPath+"/finance"),advisor,null,200);
+            send(post(claimPath+"/finance/settlements"),advisor,Map.of("version",state.path("version").intValue(),"invoiceId",invoice,
+                "proposalId",state.path("proposals").get(0).path("id").intValue(),"lines",zeroLines),200);
+        }
         var payment = Map.of("amount", 300000, "method", "TIEN_MAT", "requestId", UUID.randomUUID().toString());
         for (int attempt = 0; attempt < 2; attempt++) {
             var paid = send(post("/api/invoices/" + invoice + "/payments"), advisor, payment, 200);
@@ -138,6 +171,10 @@ class RepairBillingSqlServerIT {
         var history = send(get("/api/customers/me/history"), customer, null, 200).path("items").get(0);
         assertEquals(order, history.path("repairOrderId").asInt());
         assertEquals(300000, history.path("totalCost").asInt());
+        if(insured){
+            var split=send(get("/api/customers/me/history/"+order),customer,null,200).path("insurance");
+            assertEquals(300000,split.path("customerAmount").intValue());assertEquals(100000,split.path("approved").intValue());assertEquals(0,split.path("garageAmount").intValue());
+        }
         var reminder = send(post("/api/maintenance-reminders"), advisor, Map.of("vehicleId", vehicle, "serviceId", service,
                 "dueDate", slot.toLocalDate().toString()), 201);
         reminders.processDue(slot.toLocalDate());
