@@ -156,7 +156,16 @@ export default function AppointmentWorkspace({customerId,onBooked}: {customerId?
           {action==="move" && <p>Lịch mới cần được gara xác nhận lại.</p>}
           <Input required label="Ngày hẹn" type="date" min={today()} value={date} onChange={e=>{setDate(e.target.value);setFormError("");}}/>
           {slotsLoading ? <p role="status">Đang kiểm tra khung giờ…</p> : availability && <>
-            <Select required label="Giờ hẹn (giờ Việt Nam)" value={time} onChange={e=>setTime(e.target.value)} options={[{value:"",label:"Chọn giờ còn trống"},...availability.slots.filter(s=>s.remaining>0).map(s=>({value:s.time,label:s.time.slice(0,5)+" · còn "+s.remaining+" chỗ"}))]}/>
+            <fieldset><legend>Giờ hẹn (giờ Việt Nam)</legend><div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+              {availability.slots.map(slot=>{
+                const open=slot.status==="AVAILABLE";
+                const label=open?"Còn "+slot.remaining+" chỗ":slot.status==="FULL"?"Hết chỗ":"Không khả dụng";
+                const color=open?"bg-green-100 text-green-900":slot.status==="FULL"?"bg-red-100 text-red-900":"bg-slate-100 text-slate-600";
+                return <button key={slot.time} type="button" disabled={!open} aria-pressed={slot.time===time}
+                  onClick={()=>setTime(slot.time)} className={color+" rounded p-2 "+(slot.time===time?"ring-2 ring-primary":"")}>
+                  {slot.time.slice(0,5)} <small className="block">{label}</small></button>;
+              })}
+            </div></fieldset>
             {!availability.slots.some(s=>s.remaining>0) && <p role="status">{availability.configured?"Ngày này không còn khung giờ có thể đặt.":"Gara chưa mở khung giờ cho ngày này."}</p>}
           </>}
         </>}
@@ -169,7 +178,7 @@ export default function AppointmentWorkspace({customerId,onBooked}: {customerId?
       <form onSubmit={saveSchedule} className="space-y-4">
         <p className="text-sm text-muted-foreground">Nhập sức chứa thực tế cho từng giờ, lặp lại hàng tuần. Đặt 0 để ngừng nhận lịch mới; lịch đã đặt vẫn được giữ.</p>
         <Select label="Ngày trong tuần" value={day} onChange={e=>setDay(e.target.value)} options={weekdays.map((label,i)=>({value:String(i+1),label}))}/>
-        <Input required label="Giờ bắt đầu" type="time" value={scheduleTime} onChange={e=>setScheduleTime(e.target.value)}/>
+        <Input required label="Giờ bắt đầu" type="time" min="08:00" max="18:30" step={1800} value={scheduleTime} onChange={e=>setScheduleTime(e.target.value)}/>
         <Input required label="Số xe có thể tiếp nhận" type="number" min="0" step="1" value={capacity} onChange={e=>setCapacity(e.target.value)}/>
         {formError && <p role="alert" className="text-danger">{formError}</p>}
         <Button type="submit" disabled={busy}>{busy?"Đang lưu…":"Lưu khung giờ"}</Button>

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../models/appointment.dart' show garageToday;
+
 import '../../app/app_theme.dart';
 
 class BookingCalendar extends StatelessWidget {
@@ -20,10 +22,7 @@ class BookingCalendar extends StatelessWidget {
   final ValueChanged<DateTime> onMonthChanged;
   final ValueChanged<DateTime> onDateSelected;
 
-  DateTime get _today {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month, now.day);
-  }
+  DateTime get _today => garageToday();
 
   bool _sameDay(DateTime? a, DateTime b) =>
       a != null && a.year == b.year && a.month == b.month && a.day == b.day;
@@ -133,7 +132,7 @@ class BookingCalendar extends StatelessWidget {
                     final past = date.isBefore(_today);
                     final beyondLimit = date.isAfter(maxDate);
                     final fullyBooked = _containsDay(fullyBookedDates, date);
-                    final disabled = past || fullyBooked || beyondLimit;
+                    final disabled = past || beyondLimit;
                     final selected = _sameDay(selectedDate, date);
                     final today = _sameDay(_today, date);
                     final background = selected

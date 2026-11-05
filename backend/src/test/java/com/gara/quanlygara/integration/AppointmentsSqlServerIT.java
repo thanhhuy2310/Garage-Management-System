@@ -31,7 +31,7 @@ class AppointmentsSqlServerIT {
     @Autowired JdbcTemplate jdbc;
     @Autowired PlatformTransactionManager transactionManager;
     final LocalDate date=LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh")).plusDays(14);
-    final String time="21:17:00";
+    final String time="09:00:00";
     final List<Integer> customers=new ArrayList<>(),vehicles=new ArrayList<>(),accounts=new ArrayList<>();
     String username,otherUsername,manager;
     Integer employeeId;
@@ -47,8 +47,6 @@ class AppointmentsSqlServerIT {
         employeeId=insert("NhanVien","MaNhanVien",Map.of("HoTen","Trần Quang Huy","ChucVu","Quản lý"));
         account(username,"CUSTOMER",a);account(otherUsername,"CUSTOMER",b);account(manager,"MANAGER",null);
         vehicle(a,"51A-"+tag);vehicle(b,"59B-"+tag);
-        jdbc.update("INSERT INTO KhungGioTiepNhan(Thu,Gio,SucChua,MaTaiKhoanCapNhat) VALUES(?,?,?,?)",
-            date.getDayOfWeek().getValue(),time,1,accounts.get(2));
     }
     int insert(String table,String key,Map<String,Object> values) {
         return new SimpleJdbcInsert(jdbc).withTableName(table).usingGeneratedKeyColumns(key)
@@ -110,6 +108,38 @@ class AppointmentsSqlServerIT {
         assertEquals(4,jdbc.queryForObject("SELECT COUNT(*) FROM ThongBao WHERE MaLichHen=?",Integer.class,id));
         mvc.perform(get("/api/appointments").with(as(otherUsername,"CUSTOMER"))).andExpect(status().isOk()).andExpect(jsonPath("$.data").isEmpty());
         mvc.perform(get("/api/appointments/"+id+"/history").with(as(username,"CUSTOMER"))).andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(4));
+    }
+    com.fasterxml.jackson.databind.JsonNode slots(String name,LocalDate day)throws Exception {
+        var response=mvc.perform(get("/api/appointments/availability").with(as(name,"CUSTOMER")).param("date",day.toString()))
+                .andExpect(status().isOk()).andReturn().getResponse();
+        return json.readTree(response.getContentAsByteArray()).path("data").path("slots");
+    }
+    @Test void occupiedSlotsPersistAcrossAccountsMoveAndCancel()throws Exception {
+        var initial=slots(username,date);
+        assertEquals(22,initial.size());
+        assertTrue(initial.findValuesAsText("status").stream().allMatch("AVAILABLE"::equals));
+        int id=create(0,username);
+        assertEquals("FULL",slots(username,date).get(2).path("status").asText());
+        assertEquals("FULL",slots(otherUsername,date).get(2).path("status").asText());
+        mvc.perform(patch("/api/appointments/"+id+"/reschedule").with(as(username,"CUSTOMER")).contentType(APPLICATION_JSON)
+                .content(body(Map.of("version",0,"date",date.toString(),"time","10:00")))).andExpect(status().isOk());
+        var after=slots(otherUsername,date);
+        assertEquals("AVAILABLE",after.get(2).path("status").asText());
+        assertEquals("FULL",after.get(4).path("status").asText());
+        mvc.perform(patch("/api/appointments/"+id+"/cancel").with(as(username,"CUSTOMER")).contentType(APPLICATION_JSON)
+                .content("{\"version\":1}")).andExpect(status().isOk());
+        assertEquals("AVAILABLE",slots(otherUsername,date).get(4).path("status").asText());
+        for(String invalid:List.of("07:30","19:00","18:45"))
+            mvc.perform(post("/api/appointments").with(as(username,"CUSTOMER")).contentType(APPLICATION_JSON)
+                .content(body(Map.of("vehicleId",vehicles.get(0),"date",date.toString(),"time",invalid)))).andExpect(status().isBadRequest());
+    }
+    @Test void configuredCapacityIsRespected()throws Exception {
+        mvc.perform(put("/api/appointments/schedule").with(as(manager,"MANAGER")).contentType(APPLICATION_JSON)
+            .content(body(Map.of("dayOfWeek",date.getDayOfWeek().getValue(),"time",time,"capacity",2)))).andExpect(status().isOk());
+        create(0,username);
+        assertEquals(1,slots(otherUsername,date).get(2).path("remaining").asInt());
+        create(1,otherUsername);
+        assertEquals("FULL",slots(username,date).get(2).path("status").asText());
     }
     @Test void concurrentLastSlotAllowsExactlyOneBooking()throws Exception {
         var start=new CountDownLatch(1);

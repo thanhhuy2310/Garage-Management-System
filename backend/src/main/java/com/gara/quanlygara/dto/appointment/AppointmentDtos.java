@@ -15,7 +15,7 @@ public final class AppointmentDtos {
     public record Change(@NotNull @PositiveOrZero Integer version, @Size(max=500) String reason) {}
     public record Schedule(@Min(1) @Max(7) int dayOfWeek, @NotNull LocalTime time,
                            @PositiveOrZero int capacity) {}
-    public record Slot(LocalTime time, int capacity, int remaining) {}
+    public record Slot(LocalTime time, int capacity, int remaining, String status) {}
     public record Availability(LocalDate date, boolean configured, List<Slot> slots) {}
     public record View(int id, int customerId, String customerName, int vehicleId, String plate,
                        String brand, String model, Integer year, Integer mileage, Integer serviceId,

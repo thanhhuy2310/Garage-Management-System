@@ -34,11 +34,22 @@ class AppointmentServiceTest {
     @Test void rejectsPastSlot() {
         assertThrows(BadRequestException.class,()->service.create(new Create(8,null,date.minusDays(2),time,""),customer));
     }
-    @Test void noConfigurationDoesNotInventAvailability() {
+    @Test void emptyScheduleOpensEveryHalfHourAllWeek() {
         when(repository.schedule()).thenReturn(List.of());
-        assertFalse(service.availability(date).configured());
-        assertTrue(service.availability(date).slots().isEmpty());
-        assertThrows(ConflictException.class,()->service.create(new Create(8,null,date,time,""),customer));
+        for(int day=0;day<7;day++) {
+            var slots=service.availability(date.plusDays(day)).slots();
+            assertEquals(22,slots.size());
+            for(int i=0;i<22;i++) {
+                assertEquals(LocalTime.of(8,0).plusMinutes(30L*i),slots.get(i).time());
+                assertEquals("AVAILABLE",slots.get(i).status());
+                assertEquals(1,slots.get(i).remaining());
+            }
+        }
+    }
+    @Test void closedAndPastSlotsStayVisibleButUnavailable() {
+        when(repository.schedule()).thenReturn(List.of(new Schedule(5,time,0)));
+        assertEquals("UNAVAILABLE",service.availability(date).slots().get(3).status());
+        assertTrue(service.availability(date.minusDays(2)).slots().stream().allMatch(s->s.status().equals("UNAVAILABLE")));
     }
     @Test void fullSlotCannotBeBooked() {
         when(repository.occupied(date,time,0)).thenReturn(1);

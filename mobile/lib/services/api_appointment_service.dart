@@ -70,11 +70,18 @@ class ApiAppointmentService implements AppointmentService, AppointmentChanges {
     final data = await api.request(
       '/appointments/availability?date=${dateKey(date)}',
     ) as Map<String, dynamic>;
-    final slots = (data['slots'] as List)
-        .where((s) => (s['remaining'] as int) > 0)
-        .map((s) => (s['time'] as String).substring(0, 5))
+    final statuses = <String, String>{};
+    for (final slot in data['slots'] as List) {
+      final time = (slot['time'] as String).substring(0, 5);
+      statuses[time] =
+          slot['status'] as String? ??
+          (slot['remaining'] > 0 ? 'AVAILABLE' : 'FULL');
+    }
+    final slots = statuses.keys
+        .where((time) => statuses[time] == 'AVAILABLE')
         .toList();
     return BookingAvailability(
+      statuses: statuses,
       availableSlots: slots,
       fullyBooked: slots.isEmpty,
       configured: data['configured'] as bool,

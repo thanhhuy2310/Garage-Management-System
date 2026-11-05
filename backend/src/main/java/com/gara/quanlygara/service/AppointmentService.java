@@ -21,7 +21,7 @@ public class AppointmentService {
     public AppointmentService(AppointmentRepository repository) {
         this(repository, Clock.system(ZoneId.of("Asia/Ho_Chi_Minh")));
     }
-    AppointmentService(AppointmentRepository repository, Clock clock) { this.repository = repository; this.clock = clock; }
+    public AppointmentService(AppointmentRepository repository, Clock clock) { this.repository = repository; this.clock = clock; }
     private Integer customerScope(Account actor) {
         if (actor.getRole() != AccountRole.CUSTOMER) return null;
         if (actor.getCustomerId() == null) throw new ForbiddenException("Tài khoản chưa liên kết khách hàng.");
@@ -37,10 +37,26 @@ public class AppointmentService {
     public List<Audit> history(int id, Account actor) { get(id, actor); return repository.history(id); }
     public List<Schedule> schedule() { return repository.schedule(); }
     public Availability availability(LocalDate date) {
-        var configured = repository.schedule().stream().filter(s -> s.dayOfWeek() == date.getDayOfWeek().getValue()).toList();
-        var slots = configured.stream().filter(s -> s.capacity() > 0 && date.atTime(s.time()).isAfter(LocalDateTime.now(clock)))
-            .map(s -> new Slot(s.time(),s.capacity(),Math.max(0,s.capacity()-repository.occupied(date,s.time(),0)))).toList();
-        return new Availability(date, !configured.isEmpty(), slots);
+        var schedule=repository.schedule();
+        var occupied=repository.occupiedDay(date);
+        var now=LocalDateTime.now(clock);
+        var slots=new java.util.ArrayList<Slot>(22);
+        for(LocalTime time=LocalTime.of(8,0);time.isBefore(LocalTime.of(19,0));time=time.plusMinutes(30)) {
+            int capacity=capacity(schedule,date,time);
+            // A legacy booking at 09:15 occupies both half-hours it overlaps.
+            var start=time.minusMinutes(30);
+            var end=time.plusMinutes(30);
+            int used=occupied.entrySet().stream().filter(e->e.getKey().isAfter(start) && e.getKey().isBefore(end))
+                    .mapToInt(java.util.Map.Entry::getValue).sum();
+            int remaining=capacity==0 || !date.atTime(time).isAfter(now) ? 0 : Math.max(0,capacity-used);
+            String status=capacity==0 || !date.atTime(time).isAfter(now) ? "UNAVAILABLE" : remaining==0 ? "FULL" : "AVAILABLE";
+            slots.add(new Slot(time,capacity,remaining,status));
+        }
+        return new Availability(date,true,slots);
+    }
+    private int capacity(List<Schedule> schedule,LocalDate date,LocalTime time) {
+        return schedule.stream().filter(s -> s.dayOfWeek()==date.getDayOfWeek().getValue() && s.time().equals(time))
+                .mapToInt(Schedule::capacity).findFirst().orElse(1);
     }
     @Transactional
     public List<Schedule> configure(Schedule slot, Account actor) {
@@ -103,14 +119,13 @@ public class AppointmentService {
             throw new ConflictException("Chỉ có thể thay đổi lịch chưa tiếp nhận và chưa hủy.");
     }
     private void requireMinute(LocalTime time) {
-        if (time.getSecond()!=0 || time.getNano()!=0) throw new BadRequestException("Khung giờ phải chính xác đến phút.");
+        if(time.isBefore(LocalTime.of(8,0)) || !time.isBefore(LocalTime.of(19,0)) || time.getMinute()%30!=0 || time.getSecond()!=0 || time.getNano()!=0)
+            throw new BadRequestException("Chọn khung giờ bắt đầu từ 08:00 đến 18:30, cách nhau 30 phút.");
     }
     private void checkSlot(int vehicleId, LocalDate date, LocalTime time, int excludedId) {
         requireMinute(time);
         if (!date.atTime(time).isAfter(LocalDateTime.now(clock))) throw new BadRequestException("Không thể đặt lịch trong quá khứ.");
-        int capacity = repository.schedule().stream()
-            .filter(s -> s.dayOfWeek()==date.getDayOfWeek().getValue() && s.time().equals(time))
-            .mapToInt(Schedule::capacity).findFirst().orElse(0);
+        int capacity=capacity(repository.schedule(),date,time);
         if (capacity<=0) throw new ConflictException("Gara chưa mở khung giờ này. Vui lòng chọn giờ khác.");
         if (repository.duplicateVehicle(vehicleId,date,time,excludedId)) throw new ConflictException("Xe đã có lịch trong khung giờ này.");
         if (repository.occupied(date,time,excludedId)>=capacity) throw new ConflictException("Khung giờ vừa hết chỗ. Vui lòng chọn giờ khác.");

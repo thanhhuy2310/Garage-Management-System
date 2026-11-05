@@ -34,6 +34,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc
 @Transactional
 class RepairBillingSqlServerIT {
+    @org.springframework.boot.test.context.TestConfiguration
+    static class OpeningHours {
+        @org.springframework.context.annotation.Bean @org.springframework.context.annotation.Primary
+        com.gara.quanlygara.service.AppointmentService morningBookings(com.gara.quanlygara.repository.AppointmentRepository repo) {
+            var zone=ZoneId.of("Asia/Ho_Chi_Minh");
+            var opening=java.time.LocalDate.now(zone).atStartOfDay(zone);
+            return new com.gara.quanlygara.service.AppointmentService(repo,java.time.Clock.fixed(opening.toInstant(),zone));
+        }
+    }
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
     @Autowired JdbcTemplate jdbc;
@@ -71,8 +80,7 @@ class RepairBillingSqlServerIT {
                 "DonGia", 50000, "SoLuongTon", 10));
 
         var now = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
-        var slot = now.plusMinutes(2).truncatedTo(ChronoUnit.MINUTES);
-        assumeTrue(slot.toLocalDate().equals(now.toLocalDate()), "Same-day arrival requires a future minute today");
+        var slot = now.toLocalDate().atTime(9,0);
         send(put("/api/appointments/schedule"), manager, Map.of("dayOfWeek", slot.getDayOfWeek().getValue(),
                 "time", slot.toLocalTime().toString(), "capacity", 5), 200);
         var booking = send(post("/api/appointments"), customer, Map.of("serviceId", service, "vehicleId", vehicle,

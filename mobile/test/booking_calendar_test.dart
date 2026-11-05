@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:garage_customer_mobile/screens/booking/booking_calendar.dart';
 
 void main() {
-  testWidgets('calendar shows month grid and disables fully booked date', (
+  testWidgets('calendar shows month grid and allows inspecting a fully booked date', (
     tester,
   ) async {
     final now = DateTime.now();
@@ -31,7 +31,7 @@ void main() {
     expect(find.text('11'), findsOneWidget);
 
     await tester.tap(find.text('11'));
-    expect(selected, isNull);
+    expect(selected, fullyBooked);
     // Opening days come from the API, including Sunday when configured.
     final sunday = visible.add(
       Duration(days: (DateTime.sunday - visible.weekday) % 7),

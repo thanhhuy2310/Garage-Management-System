@@ -7,7 +7,7 @@ export interface Appointment {
   note: string | null; status: string; version: number;
 }
 export interface BookingInput { vehicleId: number; serviceId: number | null; date: string; time: string; note: string }
-export interface BookingSlot { time: string; capacity: number; remaining: number }
+export interface BookingSlot { time: string; capacity: number; remaining: number; status: "AVAILABLE" | "FULL" | "UNAVAILABLE" }
 export interface Availability { date: string; configured: boolean; slots: BookingSlot[] }
 export interface ScheduleSlot { dayOfWeek: number; time: string; capacity: number }
 export const appointmentLabels: Record<string,string> = {

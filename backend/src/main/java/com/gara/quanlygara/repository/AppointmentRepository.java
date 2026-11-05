@@ -68,13 +68,21 @@ public class AppointmentRepository {
         return jdbc.query("SELECT Thu,Gio,SucChua FROM KhungGioTiepNhan ORDER BY Thu,Gio",
             (r,n) -> new Schedule(r.getInt(1), r.getTime(2).toLocalTime(), r.getInt(3)));
     }
+    public java.util.Map<LocalTime,Integer> occupiedDay(LocalDate date) {
+        return jdbc.query("SELECT GioHen,COUNT(*) FROM LichHen WHERE NgayHen=? AND TrangThai NOT IN (N'HUY',N'DA_HUY') GROUP BY GioHen",
+                rs -> {
+                    var counts=new java.util.HashMap<LocalTime,Integer>();
+                    while(rs.next()) counts.put(rs.getTime(1).toLocalTime(),rs.getInt(2));
+                    return counts;
+                },Date.valueOf(date));
+    }
     public int occupied(LocalDate date, LocalTime time, int excludedId) {
-        return jdbc.queryForObject("SELECT COUNT(*) FROM LichHen WHERE NgayHen=? AND GioHen=? AND MaLichHen<>? AND TrangThai NOT IN (N'HUY',N'DA_HUY')",
-            Integer.class, Date.valueOf(date), time.toString(), excludedId);
+        return jdbc.queryForObject("SELECT COUNT(*) FROM LichHen WHERE NgayHen=? AND GioHen>? AND GioHen<? AND MaLichHen<>? AND TrangThai NOT IN (N'HUY',N'DA_HUY')",
+            Integer.class, Date.valueOf(date), time.minusMinutes(30).toString(), time.plusMinutes(30).toString(), excludedId);
     }
     public boolean duplicateVehicle(int vehicleId, LocalDate date, LocalTime time, int excludedId) {
-        return jdbc.queryForObject("SELECT COUNT(*) FROM LichHen WHERE MaXe=? AND NgayHen=? AND GioHen=? AND MaLichHen<>? AND TrangThai NOT IN (N'HUY',N'DA_HUY')",
-            Integer.class, vehicleId, Date.valueOf(date), time.toString(), excludedId) > 0;
+        return jdbc.queryForObject("SELECT COUNT(*) FROM LichHen WHERE MaXe=? AND NgayHen=? AND GioHen>? AND GioHen<? AND MaLichHen<>? AND TrangThai NOT IN (N'HUY',N'DA_HUY')",
+            Integer.class, vehicleId, Date.valueOf(date), time.minusMinutes(30).toString(), time.plusMinutes(30).toString(), excludedId) > 0;
     }
     public int create(Create input, int customerId) {
         Map<String,Object> values = new LinkedHashMap<>();

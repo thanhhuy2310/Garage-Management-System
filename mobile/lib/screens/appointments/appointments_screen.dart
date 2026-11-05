@@ -7,6 +7,7 @@ import '../../core/utils/formatters.dart';
 import '../../core/widgets/feedback_states.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../models/appointment.dart';
+import '../booking/time_slot_picker.dart';
 import '../../services/appointment_service.dart';
 
 enum _AppointmentFilter { upcoming, completed, cancelled }
@@ -76,7 +77,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     DateTime? date;
     String? time;
     if (move) {
-      final now = DateUtils.dateOnly(DateTime.now());
+      final now = garageToday();
       date = await showDatePicker(
         context: context,
         firstDate: now,
@@ -92,21 +93,17 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
           context: context,
           builder: (context) => SimpleDialog(
             title: const Text('Chọn giờ mới'),
-            children: availability.availableSlots.isEmpty
-                ? [
-                    const Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Text('Ngày này chưa mở lịch hoặc đã hết chỗ.'),
-                    ),
-                  ]
-                : availability.availableSlots
-                      .map(
-                        (slot) => SimpleDialogOption(
-                          onPressed: () => Navigator.pop(context, slot),
-                          child: Text(slot),
-                        ),
-                      )
-                      .toList(),
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: TimeSlotPicker(
+                  availableSlots: availability.availableSlots,
+                  statuses: availability.statuses,
+                  selectedSlot: null,
+                  onSelected: (value) => Navigator.pop(context, value),
+                ),
+              ),
+            ],
           ),
         );
         if (time == null || !mounted) return;

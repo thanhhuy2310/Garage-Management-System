@@ -58,14 +58,21 @@ class AppointmentInput {
   final String note;
 }
 
+DateTime garageToday() {
+  final local = DateTime.now().toUtc().add(const Duration(hours: 7));
+  return DateTime(local.year, local.month, local.day);
+}
+
 class BookingAvailability {
   const BookingAvailability({
     required this.availableSlots,
     required this.fullyBooked,
     this.configured = true,
+    this.statuses = const {},
   });
 
   final List<String> availableSlots;
   final bool fullyBooked;
   final bool configured;
+  final Map<String, String> statuses;
 }

@@ -36,13 +36,11 @@ class _BookingScreenState extends State<BookingScreen> {
   String? _time;
   late DateTime _visibleMonth;
   List<String> _availableSlots = const [];
-  Set<DateTime> _fullyBookedDates = const {};
+  final Set<DateTime> _fullyBookedDates = {};
+  Map<String, String> _statuses = const {};
   int _availabilityRequest = 0;
 
-  DateTime get _today {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month, now.day);
-  }
+  DateTime get _today => garageToday();
 
   DateTime get _maxDate => _today.add(const Duration(days: 90));
 
@@ -67,7 +65,6 @@ class _BookingScreenState extends State<BookingScreen> {
     });
     try {
       await widget.controller.loadBookingData();
-      await _loadMonthAvailability(_visibleMonth);
     } catch (_) {
       _error = 'Không thể tải dữ liệu đặt lịch. Vui lòng thử lại.';
     } finally {
@@ -75,37 +72,8 @@ class _BookingScreenState extends State<BookingScreen> {
     }
   }
 
-  Future<void> _loadMonthAvailability(DateTime month) async {
-    final days = DateUtils.getDaysInMonth(month.year, month.month);
-    final results = await Future.wait([
-      for (var day = 1; day <= days; day++)
-        widget.controller.appointmentService.getAvailability(
-          DateTime(month.year, month.month, day),
-        ),
-    ]);
-    if (!mounted || _visibleMonth != month) return;
-    setState(() {
-      _fullyBookedDates = {
-        for (var day = 1; day <= days; day++)
-          if (results[day - 1].fullyBooked)
-            DateTime(month.year, month.month, day),
-      };
-    });
-  }
-
-  Future<void> _changeMonth(DateTime month) async {
-    setState(() {
-      _visibleMonth = month;
-      _fullyBookedDates = const {};
-    });
-    try {
-      await _loadMonthAvailability(month);
-    } catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(error.toString())));
-      }
-    }
+  void _changeMonth(DateTime month) {
+    setState(() => _visibleMonth = month);
   }
 
   Future<void> _selectDate(DateTime date) async {
@@ -114,12 +82,21 @@ class _BookingScreenState extends State<BookingScreen> {
       _date = date;
       _time = null;
       _availableSlots = const [];
+      _statuses = const {};
     });
     try {
       final availability = await widget.controller.appointmentService
           .getAvailability(date);
       if (!mounted || request != _availabilityRequest) return;
-      setState(() => _availableSlots = availability.availableSlots);
+      setState(() {
+        _availableSlots = availability.availableSlots;
+        _statuses = availability.statuses;
+        if (availability.fullyBooked) {
+          _fullyBookedDates.add(date);
+        } else {
+          _fullyBookedDates.remove(date);
+        }
+      });
       if (!availability.configured) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Gara chưa mở khung giờ cho ngày này.')),
@@ -389,6 +366,7 @@ class _BookingScreenState extends State<BookingScreen> {
         ),
         const SizedBox(height: 14),
         TimeSlotPicker(
+          statuses: _statuses,
           availableSlots: _availableSlots,
           selectedSlot: _time,
           onSelected: (value) => setState(() => _time = value),

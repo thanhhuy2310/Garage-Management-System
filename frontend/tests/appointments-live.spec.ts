@@ -35,7 +35,12 @@ test("create on customer Web and confirm on staff Web with SQL persistence",asyn
   await page.getByLabel("Xe",{exact:true}).selectOption(String(fixture.vehicleId));
   await page.getByLabel("Dịch vụ",{exact:true}).selectOption(String(fixture.serviceId));
   await page.getByLabel("Ngày hẹn",{exact:true}).fill(fixture.date);
-  await page.getByLabel("Giờ hẹn (giờ Việt Nam)",{exact:true}).selectOption(fixture.time+":00");
+  const grid=page.getByRole("group",{name:"Giờ hẹn (giờ Việt Nam)"});
+  await expect(grid.getByRole("button")).toHaveCount(22);
+  const chosen=grid.getByRole("button",{name:new RegExp("^"+fixture.time+" ")});
+  await expect(chosen).toHaveClass(/bg-green-100/);
+  const lastSpot=(await chosen.innerText()).includes("còn 1 chỗ") || (await chosen.innerText()).includes("Còn 1 chỗ");
+  await chosen.click();
   await page.getByLabel("Yêu cầu của bạn").fill("Kiểm tra phanh trước chuyến đi");
   const responsePromise=page.waitForResponse(r=>r.request().method()==="POST"&&r.url().endsWith("/api/appointments"));
   await page.getByRole("button",{name:"Lưu lịch hẹn",exact:true}).click();
@@ -47,6 +52,14 @@ test("create on customer Web and confirm on staff Web with SQL persistence",asyn
   await expect(row).toContainText(fixture.plate);await expect(row).toContainText("Chờ xác nhận");
   expect(sql("SELECT TrangThai FROM LichHen WHERE MaLichHen="+Number(item.id))).toBe("CHO_XAC_NHAN");
 
+  if(lastSpot){
+    await page.getByRole("button",{name:"Đặt lịch mới",exact:true}).click();
+    await page.getByLabel("Ngày hẹn",{exact:true}).fill(fixture.date);
+    const occupied=grid.getByRole("button",{name:fixture.time+" Hết chỗ"});
+    await expect(occupied).toBeDisabled();await expect(occupied).toHaveClass(/bg-red-100/);
+    const other=await request.get(fixture.apiUrl+"/appointments/availability?date="+fixture.date,{headers:{Authorization:"Bearer "+fixture.otherCustomer.token}});
+    expect((await other.json()).data.slots.find((s:{time:string})=>s.time.startsWith(fixture.time)).status).toBe("FULL");
+  }
   const managerContext=await browser.newContext();const staff=await managerContext.newPage();
   await login(staff,fixture.manager);await staff.goto("/admin/appointments");
   const staffRow=staff.getByRole("row").filter({hasText:"LH"+item.id});
