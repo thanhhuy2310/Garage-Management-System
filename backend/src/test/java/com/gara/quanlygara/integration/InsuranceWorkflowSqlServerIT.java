@@ -91,7 +91,7 @@ class InsuranceWorkflowSqlServerIT {
     @org.junit.jupiter.params.ParameterizedTest
     @org.junit.jupiter.params.provider.ValueSource(booleans={true,false})
     void actualInvoiceSeparatesCustomerAndInsurerUntilBothHavePaid(boolean direct)throws Exception {
-        inspect();
+        if(direct) inspect();
         int service=insert("DichVu","MaDichVu",Map.of("TenDichVu","Sửa cửa","DonGia",200000));
         var repair=call(post("/api/repair-orders"),Map.of("receptionId",reception,"services",List.of(Map.of("serviceId",service,"quantity",1))),201);
         int order=repair.path("order").path("id").asInt();
@@ -105,15 +105,27 @@ class InsuranceWorkflowSqlServerIT {
         String finance=path+"/finance";
         var progress=Map.of("expectedStatus","MOI_TAO","status","DANG_SUA","notes","Bắt đầu");
         call(put("/api/repair-orders/"+order+"/progress"),progress,409);
+        int proposal;
+        if(direct){
         call(post(finance+"/proposals"),Map.of("version",version(),"quoteId",quoteId,"revision",1,"direct",direct,
                 "lines",List.of(Map.of("lineId",line,"amount",180000))),200);
-        int proposal=call(get(finance),null,200).path("proposals").get(0).path("id").asInt();
+        proposal=call(get(finance),null,200).path("proposals").get(0).path("id").asInt();
         int evidence=upload("QUYET_DINH");
         var approval=Map.of("version",version(),"proposalId",proposal,"documentId",evidence,"reference","QD-01","reason","Trừ phần khách tự chịu",
                 "lines",List.of(Map.of("lineId",line,"amount",150000)));
         call(post(finance+"/decisions"),approval,409);
         call(post("/api/insurance/policies/"+policy+"/verification"),Map.of("status","DA_XAC_MINH","note","Đã đối chiếu giấy chứng nhận"),200);
         call(post(finance+"/decisions"),approval,200);
+        } else {
+            int evidence=upload("QUYET_DINH");
+            var allocation=Map.of("version",version(),"quoteId",quoteId,"revision",1,"direct",false,"lines",List.of(Map.of("lineId",line,"amount",150000)));
+            var manual=Map.of("allocation",allocation,"documentId",evidence,"reference","QD-02","reason","Đã đối chiếu quyết định chi trả");
+            call(post(finance+"/manual-decision"),manual,409);
+            call(post("/api/insurance/policies/"+policy+"/verification"),Map.of("status","DA_XAC_MINH","note","Đã đối chiếu chủ xe"),200);
+            call(post(finance+"/manual-decision"),manual,200);
+            call(post(finance+"/manual-decision"),manual,409);
+            proposal=call(get(finance),null,200).path("proposals").get(0).path("id").asInt();
+        }
         db.update("INSERT INTO KyThuatVien(MaNhanVien) VALUES(?)",employee);
         call(post("/api/repair-orders/"+order+"/technicians"),Map.of("technicianId",employee),201);
         call(put("/api/repair-orders/"+order+"/progress"),progress,200);

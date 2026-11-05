@@ -19,6 +19,8 @@ public class InsuranceLedger {
     public record Decision(@NotNull @Min(0) Integer version,@Positive int proposalId,@Positive int documentId,
                            @NotBlank @Size(max=100) String reference,@NotBlank @Size(max=500) String reason,
                            @NotEmpty @Size(max=100) List<@NotNull @Valid Amount> lines) {}
+    public record ManualDecision(@Valid @NotNull Allocation allocation,@Positive int documentId,
+                                 @NotBlank @Size(max=100) String reference,@NotBlank @Size(max=500) String reason) {}
     public record Settlement(@NotNull @Min(0) Integer version,@Positive int proposalId,@Positive int invoiceId,
                              @NotEmpty @Size(max=100) List<@NotNull @Valid Amount> lines) {}
     private final JdbcTemplate db;
@@ -102,6 +104,25 @@ public class InsuranceLedger {
         String status=cases.lock(claim,input.version());
         if(!"DANG_XU_LY".equals(status) || db.queryForObject("SELECT COUNT(*) FROM KetQuaGiamDinh WHERE MaHoSoBaoHiem=?",Integer.class,claim)==0)
             throw new ConflictException("Cần kết quả giám định trước khi đề nghị chi trả.");
+        snapshot(claim,input);
+        cases.event(claim,staff,"DE_NGHI_CHI_TRA",status,status,"Báo giá #"+input.quoteId()+", lần "+input.revision());
+    }
+
+    @Transactional
+    public void manualDecision(int claim,ManualDecision decision,int staff) {
+        var input=decision.allocation();
+        lockOrder(claim);
+        String status=cases.lock(claim,input.version());
+        if(!Set.of("MOI_TAO","DA_THONG_BAO","CHO_GIAM_DINH","DANG_XU_LY").contains(status))
+            throw new ConflictException("Hồ sơ không còn mở để ghi nhận quyết định.");
+        cases.requireDocument(claim,decision.documentId(),"QUYET_DINH");
+        validatePolicyTotal(claim,input.lines().stream().map(Amount::amount).reduce(BigDecimal.ZERO,BigDecimal::add));
+        int proposal=snapshot(claim,input);
+        cases.event(claim,staff,"DOI_CHIEU_QUYET_DINH",status,"DANG_XU_LY","Nhân viên đối chiếu văn bản "+decision.reference());
+        decide(claim,new Decision(input.version()+1,proposal,decision.documentId(),decision.reference(),decision.reason(),input.lines()),staff);
+    }
+
+    private int snapshot(int claim,Allocation input) {
         var quote=currentQuote(claim);
         if(number(quote,"id")!=input.quoteId() || number(quote,"revision")!=input.revision() ||
             !Set.of("CHO_XAC_NHAN","DA_XAC_NHAN").contains(quote.get("status")))
@@ -122,7 +143,24 @@ public class InsuranceLedger {
             db.update("INSERT INTO PhanBoDongBaoHiem(DeNghiId,DongBaoGia,Loai,MaHang,Ten,ThanhTien,DeNghi) VALUES(?,?,?,?,?,?,?)",
                     proposal,line,service?"SERVICE":"PART",row.get(service?"serviceId":"partId"),row.get("name"),total,bounded(requested,line,total));
         }
-        cases.event(claim,staff,"DE_NGHI_CHI_TRA",status,status,"Báo giá #"+input.quoteId()+", lần "+input.revision());
+        return proposal;
+    }
+
+    private void validatePolicyTotal(int claim,BigDecimal totalApproved) {
+        if(totalApproved.signum()>0) {
+            var policies=db.queryForList("""
+                SELECT k.HoTen,p.TenChuXeTrenDangKy,p.TenChuXeTrenChungNhan,p.SoTienBaoHiem
+                FROM HoSoBaoHiem h JOIN HopDongBaoHiem p ON h.MaHopDongBaoHiem=p.MaHopDongBaoHiem
+                JOIN Xe x ON x.MaXe=p.MaXe JOIN KhachHang k ON k.MaKhachHang=x.MaKhachHang
+                WHERE h.MaHoSoBaoHiem=? AND p.TrangThaiXacMinh=N'DA_XAC_MINH'
+                  AND p.MaKhachHang=x.MaKhachHang AND CAST(h.ThoiDiemSuCo AS DATE) BETWEEN p.NgayBatDau AND p.NgayKetThuc
+                """,claim);
+            if(policies.isEmpty()) throw new ConflictException("Chưa xác minh hợp đồng, sai chủ xe hoặc ngoài thời hạn tại ngày xảy ra sự cố.");
+            var policy=policies.getFirst();
+            InsuranceCatalogService.validateOwnerNames((String)policy.get("TenChuXeTrenDangKy"),(String)policy.get("TenChuXeTrenChungNhan"),(String)policy.get("HoTen"));
+            var limit=(BigDecimal)policy.get("SoTienBaoHiem");
+            if(limit!=null && totalApproved.compareTo(limit)>0) throw new ConflictException("Số tiền chấp thuận vượt số tiền bảo hiểm ghi trên hợp đồng.");
+        }
     }
 
     private Map<String,Object> currentProposal(int claim,int proposal) {
@@ -142,20 +180,7 @@ public class InsuranceLedger {
         var items=rows(input.proposalId());
         var values=amounts(input.lines(),items.size());
         BigDecimal totalApproved=values.values().stream().reduce(BigDecimal.ZERO,BigDecimal::add);
-        if(totalApproved.signum()>0) {
-            var policies=db.queryForList("""
-                SELECT k.HoTen,p.TenChuXeTrenDangKy,p.TenChuXeTrenChungNhan,p.SoTienBaoHiem
-                FROM HoSoBaoHiem h JOIN HopDongBaoHiem p ON h.MaHopDongBaoHiem=p.MaHopDongBaoHiem
-                JOIN Xe x ON x.MaXe=p.MaXe JOIN KhachHang k ON k.MaKhachHang=x.MaKhachHang
-                WHERE h.MaHoSoBaoHiem=? AND p.TrangThaiXacMinh=N'DA_XAC_MINH'
-                  AND p.MaKhachHang=x.MaKhachHang AND CAST(h.ThoiDiemSuCo AS DATE) BETWEEN p.NgayBatDau AND p.NgayKetThuc
-                """,claim);
-            if(policies.isEmpty()) throw new ConflictException("Chưa xác minh hợp đồng, sai chủ xe hoặc ngoài thời hạn tại ngày xảy ra sự cố.");
-            var policy=policies.getFirst();
-            InsuranceCatalogService.validateOwnerNames((String)policy.get("TenChuXeTrenDangKy"),(String)policy.get("TenChuXeTrenChungNhan"),(String)policy.get("HoTen"));
-            var limit=(BigDecimal)policy.get("SoTienBaoHiem");
-            if(limit!=null && totalApproved.compareTo(limit)>0) throw new ConflictException("Số tiền chấp thuận vượt số tiền bảo hiểm ghi trên hợp đồng.");
-        }
+        validatePolicyTotal(claim,totalApproved);
         for(var row:items) {
             int line=number(row,"lineId");
             db.update("UPDATE PhanBoDongBaoHiem SET ChapThuan=? WHERE DeNghiId=? AND DongBaoGia=?",

@@ -40,11 +40,22 @@ export default function InsuranceCase({id}:{id:number}){
   return <Card className="space-y-4 p-4" key={version}><h3 className="font-semibold">{claim.code} · {statusName(work.status)}</h3>
     <p>{claim.incidentLocation} · {claim.damageDescription}</p><p>Phiếu tiếp nhận TN{claim.receptionId}{work.orderId&&" · Phiếu sửa chữa "+work.orderId}{work.invoiceId&&" · Hóa đơn "+work.invoiceId}</p>
     {notice&&<p role="status">{notice}</p>}
+    {open&&quote&&!current&&["CHO_XAC_NHAN","DA_XAC_NHAN"].includes(quote.status)&&<InsuranceForm title="Ghi nhận mức bảo hiểm đã duyệt" done={done} save={f=>insuranceApi.save(finance+"/manual-decision",{
+      allocation:{version,quoteId:quote.id,revision:quote.revision,direct:val(f,"payee")==="garage",lines:amounts(f,lines)},
+      documentId:Number(f.get("document")),reference:val(f,"reference"),reason:val(f,"reason")})}>
+      <p>Tổng báo giá {formatMoney(quote.total)}. Nhập mức đã duyệt cho từng hạng mục. Hạng mục khách tự trả để 0.</p>
+      <DocumentChoice docs={work.documents} category="QUYET_DINH"/>
+      <Select label="Bên nhận tiền bảo hiểm" name="payee" required options={[{value:"",label:"Chọn theo quyết định"},{value:"garage",label:"Gara nhận trực tiếp"},{value:"customer",label:"Hoàn tiền cho khách"}]}/>
+      <Input name="reference" label="Số văn bản quyết định" required/><Input name="reason" label="Nội dung đã đối chiếu" required/>
+      <Lines rows={lines}/>
+    </InsuranceForm>}
+    <details><summary>Theo dõi giám định riêng</summary>
     {open&&<InsuranceForm title="Cập nhật bước xử lý và giám định viên" done={done} save={f=>insuranceApi.save(base+"/follow-up",{version,status:val(f,"status"),assessor:val(f,"assessor"),contact:val(f,"contact"),note:val(f,"note")},"put")}>
       <Select name="status" label="Bước xử lý" options={[work.status,steps[work.status]].filter(Boolean).map(s=>({value:s,label:statusName(s)}))}/>
       <Input name="assessor" label="Giám định viên hoặc đầu mối" defaultValue={claim.assessorName??""} required/>
       <Input name="contact" label="Thông tin liên hệ" defaultValue={claim.assessorContact??""}/><Input name="note" label="Nội dung thay đổi" required/>
     </InsuranceForm>}
+    </details>
     <h4 className="font-semibold">Chứng từ và giám định</h4>
     {open&&<InsuranceForm title="Lưu chứng từ" done={done} save={f=>insuranceApi.upload(id,version,f)}>
       <Select name="category" label="Loại chứng từ" options={Object.entries(categories).map(([value,label])=>({value,label}))}/>

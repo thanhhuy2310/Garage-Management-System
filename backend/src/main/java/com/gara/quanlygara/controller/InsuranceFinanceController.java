@@ -25,6 +25,11 @@ public class InsuranceFinanceController {
         ledger.propose(id,input,staff.employeeId(auth));
         return ApiResponse.success("Đã lưu đề nghị.");
     }
+    @PostMapping("/manual-decision")
+    public ApiResponse<Void> manualDecision(@PathVariable int id,@Valid @RequestBody InsuranceLedger.ManualDecision input,Authentication auth) {
+        ledger.manualDecision(id,input,staff.employeeId(auth));
+        return ApiResponse.success("Đã lưu quyết định và tính phần khách thanh toán.");
+    }
     @PostMapping("/decisions")
     public ApiResponse<Void> decide(@PathVariable int id,@Valid @RequestBody InsuranceLedger.Decision input,Authentication auth) {
         ledger.decide(id,input,staff.employeeId(auth));
