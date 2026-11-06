@@ -42,8 +42,10 @@ function VehicleInsurance({vehicle,companies}:{vehicle:Vehicle;companies:Company
       <Input name="number" label="Số hợp đồng" required/><Input name="registration" label="Tên chủ xe trên đăng ký" required/>
       <Input name="certificate" label="Tên trên giấy chứng nhận bảo hiểm" required/>
       <Input name="from" label="Hiệu lực từ" type="date" required/><Input name="to" label="Đến ngày" type="date" required/>
+      <details><summary>Thông tin hợp đồng nâng cao (không bắt buộc)</summary>
       <Input name="insured" label="Số tiền bảo hiểm" type="number" min={0}/><Input name="deductible" label="Miễn thường theo hợp đồng" type="number" min={0}/>
       <Input name="reference" label="Tham chiếu chứng nhận"/><Input name="garage" label="Điều khoản chọn gara"/><Input name="parts" label="Điều khoản phụ tùng"/>
+      </details>
     </InsuranceForm>
     {policies.map(p=><Card key={p.id} className="space-y-2 p-4"><b>{p.policyNumber} · {statusName(p.verificationStatus)}</b>
       <p>{companies.find(c=>c.id===p.companyId)?.name} · {p.startDate} – {p.endDate}</p><p>Chủ xe: {p.registeredOwnerName??"Chưa bổ sung"} · Chứng nhận: {p.certificateOwnerName??"Chưa bổ sung"}</p>

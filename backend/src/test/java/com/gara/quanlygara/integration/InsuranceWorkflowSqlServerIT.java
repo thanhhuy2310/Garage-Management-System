@@ -127,6 +127,8 @@ class InsuranceWorkflowSqlServerIT {
             proposal=call(get(finance),null,200).path("proposals").get(0).path("id").asInt();
         }
         db.update("INSERT INTO KyThuatVien(MaNhanVien) VALUES(?)",employee);
+        int shift=insert("CaLamKyThuatVien","Id",Map.of("TenCa","Ca kiểm thử","BatDau",java.sql.Time.valueOf("00:00:00"),"KetThuc",java.sql.Time.valueOf("23:59:59")));
+        db.update("INSERT INTO LichLamKyThuatVien(MaKyThuatVien,Ngay,MaCa) VALUES (?,?,?)",employee,LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh")),shift);
         call(post("/api/repair-orders/"+order+"/technicians"),Map.of("technicianId",employee),201);
         call(put("/api/repair-orders/"+order+"/progress"),progress,200);
         String servicePath="/api/repair-orders/"+order+"/services/"+service+"/progress";

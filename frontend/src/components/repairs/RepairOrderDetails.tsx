@@ -13,6 +13,7 @@ import RepairProgressForm, {
   nextServiceStates,
 } from "./RepairProgressForm"
 import RepairServiceForm from "./RepairServiceForm"
+import RepairInsurance from '../../features/insurance/RepairInsurance'
 
 export default function RepairOrderDetails({
   orderId,
@@ -130,6 +131,7 @@ export default function RepairOrderDetails({
               </p>
             )}
           </Card>
+          {(role==='MANAGER'||role==='RECEPTIONIST')&&<RepairInsurance receptionId={detail.order.receptionId}/>}
           <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.65fr)]">
             <div className="order-2 min-w-0 space-y-5 lg:order-1">
               <Card className="space-y-4 p-5">

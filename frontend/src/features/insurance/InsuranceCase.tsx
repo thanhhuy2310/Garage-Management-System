@@ -37,13 +37,18 @@ export default function InsuranceCase({id}:{id:number}){
   const lines=quote?.lines.map(l=>({lineId:l.id,name:l.name,cap:l.amount}))??[];
   const assessments=work.assessments.filter((a,i,all)=>all.findIndex(other=>other.item===a.item)===i);
   const balance=work.balance;
+  const approved=current?.documentId?current.lines.reduce((sum,line)=>sum+(line.approved??0),0):0;
+  const decisionLabel=current?.documentId?(approved>0?'Đã duyệt':'Từ chối'):'Chờ duyệt';
   return <Card className="space-y-4 p-4" key={version}><h3 className="font-semibold">{claim.code} · {statusName(work.status)}</h3>
+    <h4 className="font-semibold">1. Kiểm tra bảo hiểm sửa chữa</h4>
     <p>{claim.incidentLocation} · {claim.damageDescription}</p><p>Phiếu tiếp nhận TN{claim.receptionId}{work.orderId&&" · Phiếu sửa chữa "+work.orderId}{work.invoiceId&&" · Hóa đơn "+work.invoiceId}</p>
     {notice&&<p role="status">{notice}</p>}
+    <h4 className="font-semibold">2. Ghi nhận kết quả: {decisionLabel}</h4>
     {open&&quote&&!current&&["CHO_XAC_NHAN","DA_XAC_NHAN"].includes(quote.status)&&<InsuranceForm title="Ghi nhận mức bảo hiểm đã duyệt" done={done} save={f=>insuranceApi.save(finance+"/manual-decision",{
       allocation:{version,quoteId:quote.id,revision:quote.revision,direct:val(f,"payee")==="garage",lines:amounts(f,lines)},
       documentId:Number(f.get("document")),reference:val(f,"reference"),reason:val(f,"reason")})}>
       <p>Tổng báo giá {formatMoney(quote.total)}. Nhập mức đã duyệt cho từng hạng mục. Hạng mục khách tự trả để 0.</p>
+      <p>Nhập số tiền cuối cùng sau miễn thường theo quyết định. Nếu từ chối toàn bộ, nhập 0 cho mọi hạng mục và ghi rõ lý do.</p>
       <DocumentChoice docs={work.documents} category="QUYET_DINH"/>
       <Select label="Bên nhận tiền bảo hiểm" name="payee" required options={[{value:"",label:"Chọn theo quyết định"},{value:"garage",label:"Gara nhận trực tiếp"},{value:"customer",label:"Hoàn tiền cho khách"}]}/>
       <Input name="reference" label="Số văn bản quyết định" required/><Input name="reason" label="Nội dung đã đối chiếu" required/>
@@ -56,13 +61,14 @@ export default function InsuranceCase({id}:{id:number}){
       <Input name="contact" label="Thông tin liên hệ" defaultValue={claim.assessorContact??""}/><Input name="note" label="Nội dung thay đổi" required/>
     </InsuranceForm>}
     </details>
-    <h4 className="font-semibold">Chứng từ và giám định</h4>
+    <h4 className="font-semibold">Chứng từ xác nhận</h4>
     {open&&<InsuranceForm title="Lưu chứng từ" done={done} save={f=>insuranceApi.upload(id,version,f)}>
       <Select name="category" label="Loại chứng từ" options={Object.entries(categories).map(([value,label])=>({value,label}))}/>
       <Input type="file" name="file" label="Tệp PDF, JPEG hoặc PNG (tối đa 1 MB)" accept=".pdf,.jpg,.jpeg,.png" required/>
     </InsuranceForm>}
     {work.documents.map(d=><p key={d.id}><button type="button" className="text-primary underline" onClick={()=>{setDownloadError("");insuranceApi.download(id,d).catch(e=>setDownloadError(errorMessage(e)));}}>{d.filename}</button> · {categories[d.category]}</p>)}
     {downloadError&&<p role="alert">{downloadError}</p>}
+    <details><summary>Giám định và đề nghị chi trả nâng cao</summary>
     {open&&["DANG_XU_LY","CHO_GIAM_DINH"].includes(work.status)&&<InsuranceForm title="Ghi kết quả giám định" done={done} save={f=>insuranceApi.save(base+"/assessments",{version,item:val(f,"item")||null,documentId:Number(f.get("document")),damage:val(f,"damage"),finding:val(f,"finding")})}>
       <Select name="item" label="Hạng mục" options={[{value:"",label:"Hạng mục mới"},...assessments.map(a=>({value:a.item,label:"Điều chỉnh "+a.damage}))]}/>
       <DocumentChoice docs={work.documents} category="GIAM_DINH"/><Input name="damage" label="Hư hỏng" required/><Input name="finding" label="Kết luận giám định" required/>
@@ -73,6 +79,15 @@ export default function InsuranceCase({id}:{id:number}){
     {open&&quote&&!current&&assessments.length>0&&["CHO_XAC_NHAN","DA_XAC_NHAN"].includes(quote.status)&&<InsuranceForm title="Lập đề nghị chi trả theo báo giá" done={done} save={f=>insuranceApi.save(finance+"/proposals",{version,quoteId:quote.id,revision:quote.revision,direct:val(f,"payee")==="garage",lines:amounts(f,lines)})}>
       <Select label="Người nhận tiền bảo hiểm" name="payee" required options={[{value:"",label:"Chọn theo hồ sơ"},{value:"garage",label:"Doanh nghiệp chuyển tiền cho gara"},{value:"owner",label:"Khách trả gara, tự nhận bồi thường"}]}/>
       <Lines rows={lines}/></InsuranceForm>}
+    </details>
+    <h4 className="font-semibold">3. Phân bổ thanh toán</h4>
+    {quote&&<div className="rounded-lg border border-border p-3">
+      <p>Tổng báo giá: {formatMoney(quote.total)}</p>
+      <p>Bảo hiểm đã duyệt: {formatMoney(approved)}</p>
+      <p>Khách thanh toán gara theo báo giá: {formatMoney(quote.total-(current?.direct?approved:0))}</p>
+      <p>{current?.direct?'Bảo hiểm trả trực tiếp gara.':'Khách trả gara đầy đủ; bảo hiểm hoàn tiền cho khách nếu được duyệt.'}</p>
+      <p className="text-sm">Hóa đơn cuối cùng tính theo hạng mục thực hiện và phụ tùng thực dùng. Khoản chưa duyệt không được giảm trừ.</p>
+    </div>}
     {work.proposals.map(p=><div className="rounded-lg border p-3" key={p.id}><b>Báo giá #{p.quoteId}, lần {p.revision}</b> · {p.direct?"Gara nhận tiền":"Khách nhận bồi thường"}
       <p>{p.reference?"Quyết định "+p.reference:"Đang chờ doanh nghiệp trả lời"}</p>
       {p.lines.map(l=><p key={l.lineId}>{l.name} · đề nghị {formatMoney(l.requested)} · chấp thuận {l.approved==null?"chưa có":formatMoney(l.approved)}{l.payable!=null&&" · phải thu bảo hiểm "+formatMoney(l.payable)}</p>)}</div>)}

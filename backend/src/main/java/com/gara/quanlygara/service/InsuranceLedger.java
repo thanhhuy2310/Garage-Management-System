@@ -46,7 +46,7 @@ public class InsuranceLedger {
     }
     private BigDecimal bounded(Map<Integer,BigDecimal> values,int key,BigDecimal max) {
         var value=values.get(key);
-        if(value==null || value.compareTo(max)>0) throw new BadRequestException("Phân bổ sai dòng hoặc vượt hạn mức của dòng.");
+        if(value==null || value.signum()<0 || value.compareTo(max)>0) throw new BadRequestException("Phân bổ sai dòng hoặc vượt hạn mức của dòng.");
         return value;
     }
 
