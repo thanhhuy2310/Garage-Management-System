@@ -14,6 +14,12 @@ export interface Technician {
   fullName: string
 }
 
+export interface TechnicianShift { id: number; name: string; start: string; end: string }
+export interface TechnicianWorkload extends Technician {
+  activeVehicles: number; pendingTasks: number; completedToday: number; vehicleLimit: number
+  status: string; shiftStatus: string; assignable: boolean; shifts: TechnicianShift[]
+}
+
 export interface TechnicianAssignment {
   repairOrderId: number
   technician: Technician

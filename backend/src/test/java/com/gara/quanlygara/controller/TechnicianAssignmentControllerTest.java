@@ -54,11 +54,17 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     @BeforeEach
     void setUp() {
         jdbc.execute("CREATE TABLE IF NOT EXISTS BaoGia (MaBaoGia INT PRIMARY KEY,MaPhieuSuaChua INT,TrangThai NVARCHAR(50),NgayLap TIMESTAMP)");
+        jdbc.execute("ALTER TABLE KyThuatVien ADD COLUMN IF NOT EXISTS GioiHanXe INT DEFAULT 2 NOT NULL");
+        jdbc.execute("CREATE TABLE IF NOT EXISTS CaLamKyThuatVien(Id INT PRIMARY KEY,TenCa NVARCHAR(100),BatDau TIME,KetThuc TIME)");
+        jdbc.execute("CREATE TABLE IF NOT EXISTS LichLamKyThuatVien(MaKyThuatVien INT,Ngay DATE,MaCa INT)");
         firstTechnician = saveEmployee("KÃƒÂ¡Ã‚Â»Ã‚Â¹ thuÃƒÂ¡Ã‚ÂºÃ‚Â­t viÃƒÆ’Ã‚Âªn A", true);
         secondTechnician = saveEmployee("KÃƒÂ¡Ã‚Â»Ã‚Â¹ thuÃƒÂ¡Ã‚ÂºÃ‚Â­t viÃƒÆ’Ã‚Âªn B", true);
         receptionist = saveEmployee("LÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¦ tÃƒÆ’Ã‚Â¢n", false);
         firstOrder = saveOrder(1);
         secondOrder = saveOrder(2);
+        jdbc.update("MERGE INTO CaLamKyThuatVien KEY(Id) VALUES (1,'Ca kiểm thử','00:00:00','23:59:59')");
+        for (var employee:java.util.List.of(firstTechnician,secondTechnician))
+            jdbc.update("INSERT INTO LichLamKyThuatVien VALUES (?,?,1)",employee.getId(),java.time.LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")));
         jdbc.update("INSERT INTO BaoGia (MaBaoGia, MaPhieuSuaChua, TrangThai, NgayLap) VALUES (?,?,'DA_XAC_NHAN',CURRENT_TIMESTAMP),(?,?,'DA_XAC_NHAN',CURRENT_TIMESTAMP)", firstOrder.getId(), firstOrder.getId(), secondOrder.getId(), secondOrder.getId());
     }
 
@@ -238,6 +244,47 @@ class TechnicianAssignmentControllerTest extends ApiTestSupport {
     @ValueSource(strings = {"CUSTOMER", "RECEPTIONIST", "WAREHOUSE", "MANAGER", "ADMIN"})
     void myWorkEndpointIsOnlyForTechnicians(String role) throws Exception {
         mockMvc.perform(get("/api/technicians/me/repair-orders").with(user("not-technician").roles(role)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void workloadRejectsThirdVehicleAndReleasesCompletedVehicle() throws Exception {
+        firstOrder.setStatus("MOI_TAO"); secondOrder.setStatus("DANG_KIEM_TRA");
+        repairOrderRepository.saveAllAndFlush(java.util.List.of(firstOrder,secondOrder));
+        saveAssignment(firstOrder,firstTechnician,null);
+        saveAssignment(secondOrder,firstTechnician,null);
+        var third=saveOrder(3); third.setStatus("MOI_TAO"); repairOrderRepository.saveAndFlush(third);
+        mockMvc.perform(post(assignmentsUrl(third)).with(user("manager").roles("MANAGER"))
+                .contentType(APPLICATION_JSON).content(request(firstTechnician.getId())))
+                .andExpect(status().isConflict());
+        mockMvc.perform(get("/api/technicians/workload").with(user("manager").roles("MANAGER")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").value(secondTechnician.getId()))
+                .andExpect(jsonPath("$.data[0].status").value("Còn trống"))
+                .andExpect(jsonPath("$.data[1].activeVehicles").value(2))
+                .andExpect(jsonPath("$.data[1].status").value("Đang bận"));
+        firstOrder.setStatus("HOAN_TAT"); repairOrderRepository.saveAndFlush(firstOrder);
+        mockMvc.perform(post(assignmentsUrl(third)).with(user("manager").roles("MANAGER"))
+                .contentType(APPLICATION_JSON).content(request(firstTechnician.getId())))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void technicianWithoutShiftCannotBeAssigned() throws Exception {
+        jdbc.update("DELETE FROM LichLamKyThuatVien WHERE MaKyThuatVien=?",firstTechnician.getId());
+        mockMvc.perform(post(assignmentsUrl(firstOrder)).with(user("manager").roles("MANAGER"))
+                .contentType(APPLICATION_JSON).content(request(firstTechnician.getId())))
+                .andExpect(status().isConflict());
+        assertEquals(0,assignmentRepository.count());
+    }
+
+    @Test
+    void customerCannotReadWorkloadOrChangeSchedule() throws Exception {
+        mockMvc.perform(get("/api/technicians/workload").with(user("customer").roles("CUSTOMER")))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/technicians/{id}/schedule",firstTechnician.getId())
+                .with(user("customer").roles("CUSTOMER")).contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(Map.of("date","2026-11-06","shiftIds",java.util.List.of(1),"vehicleLimit",2))))
                 .andExpect(status().isForbidden());
     }
 

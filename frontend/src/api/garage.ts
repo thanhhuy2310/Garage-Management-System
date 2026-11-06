@@ -13,6 +13,21 @@ import type {
 } from "../types/garage"
 
 export const garageApi = {
+  async technicianWorkload(signal?: AbortSignal) {
+    return unwrap(await api.get<ApiResponse<import('../types/garage').TechnicianWorkload[]>>('/api/technicians/workload', { signal }))
+  },
+  async technicianSchedule(date: string, signal?: AbortSignal) {
+    return unwrap(await api.get<ApiResponse<import('../types/garage').TechnicianWorkload[]>>('/api/technicians/workload', { signal, params: { date } }))
+  },
+  async technicianShifts(signal?: AbortSignal) {
+    return unwrap(await api.get<ApiResponse<import('../types/garage').TechnicianShift[]>>('/api/technicians/shifts', { signal }))
+  },
+  async saveTechnicianSchedule(id: number, request: { date: string; shiftIds: number[]; vehicleLimit: number }) {
+    return unwrap(await api.put<ApiResponse<null>>(`/api/technicians/${id}/schedule`, request))
+  },
+  async saveTechnicianShift(id: number | null, request: { name: string; start: string; end: string }) {
+    return unwrap(await (id === null ? api.post<ApiResponse<null>>('/api/technicians/shifts', request) : api.put<ApiResponse<null>>(`/api/technicians/shifts/${id}`, request)))
+  },
   async allServices(signal?: AbortSignal) {
     return unwrap(await api.get<ApiResponse<GarageService[]>>("/api/services", { signal, params: { includeInactive: true } }));
   },

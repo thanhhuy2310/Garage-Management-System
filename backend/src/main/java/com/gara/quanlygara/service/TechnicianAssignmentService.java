@@ -35,11 +35,14 @@ public class TechnicianAssignmentService {
     private final TechnicianRepository technicianRepository;
     private final TechnicianAssignmentRepository assignmentRepository;
     private final AccountRepository accountRepository;
+    private final TechnicianWorkloadService workload;
 
     public TechnicianAssignmentService(RepairOrderRepository repairOrderRepository,
                                        TechnicianRepository technicianRepository,
                                        TechnicianAssignmentRepository assignmentRepository,
-                                       AccountRepository accountRepository, RepairBusinessRules rules) {
+                                       AccountRepository accountRepository, RepairBusinessRules rules,
+                                       TechnicianWorkloadService workload) {
+        this.workload = workload;
         this.rules = rules;
         this.repairOrderRepository = repairOrderRepository;
         this.technicianRepository = technicianRepository;
@@ -76,6 +79,7 @@ public class TechnicianAssignmentService {
         if (assignmentRepository.existsById(id)) {
             throw new ConflictException(DUPLICATE_ASSIGNMENT);
         }
+        workload.requireAssignable(technician.id());
 
         TechnicianAssignment assignment = new TechnicianAssignment();
         assignment.setId(id);
