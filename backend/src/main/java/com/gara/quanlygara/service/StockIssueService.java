@@ -37,9 +37,8 @@ import java.util.stream.Collectors;
 
 /**
  * Xuất kho = cấp phát phụ tùng cho phiếu sửa chữa.
- *  - Tạo phiếu xuất: kiểm tra tồn khả dụng, ghi số lượng cấp phát, KHÔNG giảm tồn, KHÔNG ghi biến động.
- *  - KTV xác nhận thực dùng (0..cấp phát): đây là thao tác DUY NHẤT giảm tồn, theo số lượng thực dùng;
- *    phần còn lại (cấp phát - thực dùng) là hoàn trả. Cùng quy tắc với dbo.sp_XacNhanSuDungPhuTung.
+ * Bản nháp giữ chỗ; kho xác nhận xuất trừ tồn; KTV xác nhận thực dùng không trừ lại.
+ * Phần không dùng chỉ tăng tồn sau khi nhân viên kho kiểm tra và xác nhận nhận trả.
  */
 @Service
 public class StockIssueService {
@@ -144,6 +143,47 @@ public class StockIssueService {
     }
 
     @Transactional
+    public IssueResponse confirmIssue(Integer id,Integer staff) {
+        var issue=issueRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Không tìm thấy phiếu xuất."));
+        rules.lock(issue.getRepairOrderId());
+        var lines=itemRepository.findByIssueId(id).stream().sorted(Comparator.comparing(StockIssueItem::getPartId)).toList();
+        if(lines.stream().allMatch(StockIssueItem::isIssued)) return get(id);
+        rules.requireAcceptedQuote(issue.getRepairOrderId());
+        if(!ISSUABLE_ORDER_STATUSES.contains(repairServiceItemRepository.findRepairOrderStatus(issue.getRepairOrderId()).orElse("")))
+            throw new ConflictException("Phiếu sửa chữa không còn cho phép xuất kho.");
+        for(var original:lines) {
+            var item=itemRepository.findForUpdate(id,original.getPartId()).orElseThrow();
+            if(item.isIssued())continue;
+            // The draft already counts towards the approved allocation: validate without adding it twice.
+            var price=rules.approvedPartPrice(issue.getRepairOrderId(),item.getPartId(),0,true);
+            if(item.getUnitPrice().compareTo(price)!=0) throw new ConflictException("Đơn giá xuất không khớp báo giá đã duyệt.");
+            int before=ledger.lock(item.getPartId());
+            if(before<item.getQuantity())throw new ConflictException("Không đủ tồn để xác nhận xuất kho.");
+            ledger.apply(item.getPartId(),before,before-item.getQuantity(),StockLedger.OUT,item.getQuantity(),null,id,"Kho xác nhận xuất; nhân viên #"+staff);
+            item.recordIssue(staff);itemRepository.saveAndFlush(item);
+        }
+        return get(id);
+    }
+
+    @Transactional
+    public IssueResponse.Item confirmReturn(Integer id,Integer part,Integer staff) {
+        var issue=issueRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Không tìm thấy phiếu xuất."));
+        rules.lock(issue.getRepairOrderId());
+        var item=itemRepository.findForUpdate(id,part).orElseThrow(()->new ResourceNotFoundException("Không tìm thấy phụ tùng xuất."));
+        if(!item.isIssued()||!item.isConfirmed())throw new ConflictException("Cần xác nhận xuất và thực dùng trước khi nhận hoàn trả.");
+        if(!item.isReturnConfirmed()) {
+            int returned=item.getReturnedQuantity();
+            if(returned>0) {
+                int before=ledger.lock(part);
+                if((long)before+returned>Integer.MAX_VALUE)throw new ConflictException("Tồn kho vượt giới hạn lưu trữ.");
+                ledger.apply(part,before,before+returned,StockLedger.IN,returned,null,id,"Kho kiểm tra đạt điều kiện và nhận hoàn trả; nhân viên #"+staff);
+            }
+            item.recordReturn(staff);itemRepository.saveAndFlush(item);
+        }
+        return toItem(item,sparePartRepository.findById(part).orElseThrow().getName(),null);
+    }
+
+    @Transactional
     public IssueResponse.Item confirmUsage(
             Integer issueId, Integer partId, ConfirmUsageRequest request,
             Integer callerEmployeeId, boolean callerIsTechnician
@@ -154,6 +194,7 @@ public class StockIssueService {
         rules.lock(currentIssue.getRepairOrderId());
         StockIssueItem item = itemRepository.findForUpdate(issueId, partId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chi tiết phiếu xuất."));
+        if(!item.isIssued())throw new ConflictException("Kho chưa xác nhận xuất phụ tùng.");
         if (item.isConfirmed()) {
             throw new ConflictException("Phụ tùng này đã được xác nhận sử dụng.");
         }
@@ -188,14 +229,6 @@ public class StockIssueService {
             BigDecimal approvedPrice=rules.approvedPartPrice(orderId,partId,actual,false);
             if(item.getUnitPrice()==null || item.getUnitPrice().compareTo(approvedPrice)!=0)
                 throw new ConflictException("Đơn giá cấp phát không khớp báo giá đã duyệt. Cần đối chiếu trước khi xác nhận thực dùng.");
-            int before = ledger.lock(partId);
-            if (before < actual) {
-                throw new ConflictException("Số lượng tồn kho không đủ để xác nhận sử dụng.");
-            }
-            stockAfter = before - actual;
-            // Tồn giảm theo SỐ LƯỢNG THỰC DÙNG, không phải số cấp phát.
-            ledger.apply(partId, before, stockAfter, StockLedger.OUT, actual, null, issueId,
-                    "KTV xác nhận thực dùng " + actual + "/" + issued + " (hoàn trả " + (issued - actual) + ")");
         }
 
         item.setConfirmed(true);
@@ -203,6 +236,7 @@ public class StockIssueService {
         item.setConfirmedTechnicianId(technicianId);
         item.setActualUsedQuantity(actual);
         item.setReturnedQuantity(issued - actual);
+        item.setReturnConfirmed(issued==actual);
         itemRepository.saveAndFlush(item);
 
         syncRepairPartLine(orderId, partId, item);
@@ -329,7 +363,7 @@ public class StockIssueService {
     }
 
     private Integer stockAfter(StockIssueItem item) {
-        if (!item.isConfirmed() || item.getActualUsedQuantity() == null || item.getActualUsedQuantity() == 0) return null;
+        if (!item.isIssued()) return null;
         return movementRepository
                 .findFirstByIssueIdAndPartIdAndTypeOrderByIdDesc(item.getIssueId(), item.getPartId(), StockLedger.OUT)
                 .map(movement -> movement.getQuantityAfter())
@@ -340,6 +374,6 @@ public class StockIssueService {
         return new IssueResponse.Item(
                 item.getPartId(), partName, item.getQuantity(), item.getUnitPrice(),
                 item.isConfirmed() ? CONFIRMED : PENDING, item.getConfirmedAt(), item.getConfirmedTechnicianId(),
-                item.getActualUsedQuantity(), item.getReturnedQuantity(), stockAfter);
+                item.getActualUsedQuantity(), item.getReturnedQuantity(), stockAfter,item.isIssued(),item.isReturnConfirmed());
     }
 }

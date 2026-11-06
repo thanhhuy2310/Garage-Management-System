@@ -60,7 +60,7 @@ public class StockIssueController {
     ) {
         Integer staffId = staffContext.employeeId(authentication);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Đã cấp phát phụ tùng, chờ kỹ thuật viên xác nhận thực dùng.",
+                .body(ApiResponse.success("Đã lập bản nháp phiếu xuất, chờ kho xác nhận xuất.",
                         issueService.create(request, staffId)));
     }
 
@@ -77,5 +77,16 @@ public class StockIssueController {
         Integer callerId = technician ? staffContext.employeeId(authentication) : null;
         return ResponseEntity.ok(ApiResponse.success("Đã xác nhận số lượng thực dùng.",
                 issueService.confirmUsage(issueId, partId, request, callerId, technician)));
+    }
+
+    @PostMapping("/{id}/confirm-issue")
+    @PreAuthorize("hasAnyRole('MANAGER','WAREHOUSE')")
+    public Object confirmIssue(@PathVariable Integer id,Authentication auth) {
+        return ApiResponse.success("Đã xác nhận xuất kho.",issueService.confirmIssue(id,staffContext.employeeId(auth)));
+    }
+    @PostMapping("/{id}/items/{partId}/confirm-return")
+    @PreAuthorize("hasAnyRole('MANAGER','WAREHOUSE')")
+    public Object confirmReturn(@PathVariable Integer id,@PathVariable Integer partId,Authentication auth) {
+        return ApiResponse.success("Đã nhận phụ tùng hoàn trả đủ điều kiện nhập lại.",issueService.confirmReturn(id,partId,staffContext.employeeId(auth)));
     }
 }

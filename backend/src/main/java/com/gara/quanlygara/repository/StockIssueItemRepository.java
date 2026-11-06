@@ -35,7 +35,7 @@ public interface StockIssueItemRepository extends JpaRepository<StockIssueItem, 
 
     // Số lượng đã cấp phát nhưng chưa xác nhận thực dùng (chưa trừ tồn): dùng để tính tồn khả dụng.
     @Query(value = "SELECT COALESCE(SUM(SoLuong), 0) FROM ChiTietPhieuXuat WHERE MaPhuTung = :partId "
-            + "AND DaXacNhanSuDung = 0", nativeQuery = true)
+            + "AND DaXuatKho = 0", nativeQuery = true)
     long sumPendingAllocation(@Param("partId") Integer partId);
 
     // Tổng thực dùng đã xác nhận của một phụ tùng trong một phiếu sửa chữa (qua mọi phiếu xuất).

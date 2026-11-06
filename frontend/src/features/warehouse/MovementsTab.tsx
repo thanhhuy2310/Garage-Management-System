@@ -37,7 +37,7 @@ export default function MovementsTab({ refreshKey }: { refreshKey: number }) {
           options={[
             { value: "ALL", label: "Tất cả loại biến động" },
             { value: "NHAP", label: "Nhập kho" },
-            { value: "XUAT", label: "Xuất (thực dùng)" },
+            { value: "XUAT", label: "Xuất kho" },
             { value: "KIEM_KE", label: "Kiểm kê" },
           ]}
         />

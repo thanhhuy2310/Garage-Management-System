@@ -77,6 +77,8 @@ export interface IssuePayload {
 export type IssueItemState = "CHO_XAC_NHAN" | "DA_XAC_NHAN";
 
 export interface IssueItem {
+  issued: boolean;
+  returnConfirmed: boolean;
   partId: number;
   partName: string;
   issuedQuantity: number;
@@ -150,6 +152,12 @@ export const inventoryApi = {
 };
 
 export const warehouseApi = {
+  async confirmIssue(id: number) {
+    return unwrap(await api.post<ApiResponse<StockIssue>>(`/api/warehouse/exports/${id}/confirm-issue`));
+  },
+  async confirmReturn(id: number, partId: number) {
+    return unwrap(await api.post<ApiResponse<IssueItem>>(`/api/warehouse/exports/${id}/items/${partId}/confirm-return`));
+  },
   async imports(params: PageParams = {}): Promise<PageResult<StockImport>> {
     return unwrap(await api.get<ApiResponse<PageResult<StockImport>>>("/api/warehouse/imports", { params }));
   },

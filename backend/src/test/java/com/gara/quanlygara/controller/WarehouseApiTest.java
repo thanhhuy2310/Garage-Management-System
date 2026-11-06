@@ -344,7 +344,7 @@ class WarehouseApiTest {
 
     @Test
     @WithMockUser(username = "ktv", roles = "TECHNICIAN")
-    void technicianConfirmsActualUsedAndStockDropsByActualOnly() throws Exception {
+    void technicianConfirmsActualUsedWithoutDeductingStockAgain() throws Exception {
         account("ktv", AccountRole.TECHNICIAN, 2);
         arrangeConfirmable(5, 12);
         when(rules.approvedPartPrice(9,5,3,false)).thenReturn(new BigDecimal("180000.00"));
@@ -356,9 +356,9 @@ class WarehouseApiTest {
                 .andExpect(jsonPath("$.data.issuedQuantity").value(5))
                 .andExpect(jsonPath("$.data.actualUsedQuantity").value(3))
                 .andExpect(jsonPath("$.data.returnedQuantity").value(2))
-                .andExpect(jsonPath("$.data.stockAfter").value(9));
+                .andExpect(jsonPath("$.data.returnConfirmed").value(false));
 
-        verify(sparePartRepository).updateStockQuantity(5, 9);
+        verify(sparePartRepository,never()).updateStockQuantity(anyInt(),anyInt());
     }
 
     @Test
@@ -598,6 +598,7 @@ class WarehouseApiTest {
     /** Ngá»¯ cáº£nh xÃ¡c nháº­n há»£p lá»‡: Ä‘Ã£ phÃ¢n cÃ´ng, bÃ¡o giÃ¡ xÃ¡c nháº­n, phiáº¿u sá»­a chá»¯a Ä‘ang sá»­a, Ä‘Ã£ cáº¥p phÃ¡t 5. */
     private StockIssueItem arrangeConfirmable(int issued, int stock) {
         StockIssueItem item = new StockIssueItem();
+        item.setIssued(true);
         item.setIssueId(1);
         item.setPartId(5);
         item.setQuantity(issued);

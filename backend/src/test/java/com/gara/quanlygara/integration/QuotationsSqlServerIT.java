@@ -197,6 +197,7 @@ class QuotationsSqlServerIT {
             .andExpect(status().isConflict());
         assertEquals(3,count("SELECT PhienBan FROM BaoGia WHERE MaBaoGia=?",id));
         send(id,3);decide(id,4,true);
+        stock.confirmIssue(issue,employee);
         call(put("/api/repair-orders/"+order+"/services/"+serviceId+"/progress"),manager,"MANAGER",progress).andExpect(status().isOk());
         stock.confirmUsage(issue,part,new ConfirmUsageRequest(1,null),employee,true);
         assertEquals(9,count("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",part));
@@ -262,8 +263,39 @@ class QuotationsSqlServerIT {
         assertEquals(10,count("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",part));
         assertEquals(0,count("SELECT COUNT(*) FROM ChiTietPhieuXuat WHERE MaPhieuXuat=? AND DaXacNhanSuDung=1",issue));
         assertEquals(0,count("SELECT COUNT(*) FROM BienDongKho WHERE MaPhuTung=?",part));
-        jdbc.update("EXEC dbo.sp_XacNhanSuDungPhuTung ?,?,?,?",issue,part,employee,1);
+        assertThrows(org.springframework.dao.DataAccessException.class,()->
+            jdbc.update("EXEC dbo.sp_XacNhanSuDungPhuTung ?,?,?,?",issue,part,employee,1));
+        assertEquals(10,count("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",part));
+    }
+
+    @Test void confirmedIssueUsageAndWarehouseReturnPersistExactlyOnce()throws Exception {
+        int id=data(call(post("/api/quotations"),manager,"MANAGER",Map.of("repairOrderId",order,"lines",List.of(
+            Map.of("kind","SERVICE","itemId",serviceId,"quantity",1),Map.of("kind","PART","itemId",part,"quantity",2))))
+            .andExpect(status().isCreated())).path("id").asInt();
+        send(id,0);decide(id,1,true);
+        jdbc.update("UPDATE PhieuSuaChua SET TrangThai=N'DANG_SUA' WHERE MaPhieuSuaChua=?",order);
+        var request=Map.of("repairOrderId",order,"requestedTechnicianId",employee,"reason","Thay lọc dầu","items",List.of(Map.of("partId",part,"quantity",2)));
+        int issue=data(call(post("/api/warehouse/exports"),manager,"MANAGER",request).andExpect(status().isCreated())).path("id").asInt();
+        assertEquals(10,count("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",part));
+        call(post("/api/warehouse/exports/"+issue+"/confirm-issue"),owner,"CUSTOMER",null).andExpect(status().isForbidden());
+        var executor=Executors.newFixedThreadPool(2);
+        try {
+            var first=executor.submit(()->stock.confirmIssue(issue,employee));
+            var second=executor.submit(()->stock.confirmIssue(issue,employee));
+            first.get(15,TimeUnit.SECONDS);second.get(15,TimeUnit.SECONDS);
+        } finally {executor.shutdownNow();}
+        assertEquals(8,count("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",part));
+        stock.confirmUsage(issue,part,new ConfirmUsageRequest(1,null),employee,true);
+        assertEquals(8,count("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",part));
+        call(get("/api/repair-orders/"+order+"/approved-parts"),manager,"MANAGER",null)
+            .andExpect(jsonPath("$.data[0].returnedQuantity").value(0));
+        stock.confirmReturn(issue,part,employee);stock.confirmReturn(issue,part,employee);
         assertEquals(9,count("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",part));
-        assertEquals(1,count("SELECT SoLuongHoanTra FROM ChiTietPhieuXuat WHERE MaPhieuXuat=?",issue));
+        assertEquals(1,count("SELECT SoLuong FROM ChiTietPhuTung WHERE MaPhieuSuaChua=? AND MaPhuTung=?",order,part));
+        assertEquals(2,count("SELECT COUNT(*) FROM BienDongKho WHERE MaPhuTung=?",part));
+        call(get("/api/repair-orders/"+order+"/approved-parts"),manager,"MANAGER",null)
+            .andExpect(jsonPath("$.data[0].issuedQuantity").value(2))
+            .andExpect(jsonPath("$.data[0].returnedQuantity").value(1))
+            .andExpect(jsonPath("$.data[0].actualUsedQuantity").value(1));
     }
 }

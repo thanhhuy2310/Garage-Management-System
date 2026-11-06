@@ -80,7 +80,7 @@ public class RepairBusinessRules {
     public void requireSettledParts(Integer id) {
         if (jdbc.queryForObject("""
                 SELECT COUNT(*) FROM ChiTietPhieuXuat ct JOIN PhieuXuatKho px ON px.MaPhieuXuat = ct.MaPhieuXuat
-                WHERE px.MaPhieuSuaChua = ? AND ct.DaXacNhanSuDung = 0
+                WHERE px.MaPhieuSuaChua = ? AND (ct.DaXacNhanSuDung = 0 OR ct.DaNhapTra = 0)
                 """, Integer.class, id) > 0) {
             throw new ConflictException("Cần xác nhận thực dùng/hoàn trả toàn bộ phụ tùng đã cấp phát trước khi hoàn tất.");
         }

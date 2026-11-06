@@ -83,7 +83,7 @@ export default function IssuesTab({ refreshKey, onChanged }: { refreshKey: numbe
     try {
       await warehouseApi.createIssue({ repairOrderId: order, requestedTechnicianId: technician, reason: reason.trim(), items });
       // Không báo "đã trừ tồn": cấp phát chưa giảm tồn.
-      setSuccess("Đã cấp phát — chờ KTV xác nhận thực dùng. Tồn kho chưa thay đổi.");
+      setSuccess("Đã lưu bản nháp. Chọn xác nhận xuất kho khi bàn giao phụ tùng để trừ tồn.");
       setOrderId(""); setTechnicianId(""); setReason(""); setRows([emptyRow()]);
       setPage(1);
       load();
@@ -119,7 +119,7 @@ export default function IssuesTab({ refreshKey, onChanged }: { refreshKey: numbe
         technicianId: needsTechnicianId ? technician : null,
       });
       setConfirming(null);
-      setSuccess("Đã xác nhận thực dùng. Tồn kho giảm theo số lượng thực dùng.");
+      setSuccess("Đã ghi nhận thực dùng. Tồn kho không trừ lại; phần dư chờ kho xác nhận nhận trả.");
       onChanged();
       load();
     } catch (confirmErr) {
@@ -130,6 +130,17 @@ export default function IssuesTab({ refreshKey, onChanged }: { refreshKey: numbe
   };
 
   const used = Number(actualUsed);
+  const warehouseAction = async (issue: StockIssue, partId?: number) => {
+    if (saving) return;
+    setSaving(true);setError('');setSuccess('');
+    try {
+      if(partId===undefined) await warehouseApi.confirmIssue(issue.id);
+      else await warehouseApi.confirmReturn(issue.id,partId);
+      setSuccess(partId===undefined?'Đã xuất kho và trừ tồn.':'Đã nhận phụ tùng đủ điều kiện nhập lại và cộng tồn.');
+      onChanged();load();
+    } catch(e) {setError(detailedErrorMessage(e,'Không thể xác nhận kho.'));}
+    finally {setSaving(false);}
+  };
   const preview = confirming && Number.isInteger(used) && used >= 0 && used <= confirming.item.issuedQuantity
     ? confirming.item.issuedQuantity - used
     : null;
@@ -137,7 +148,7 @@ export default function IssuesTab({ refreshKey, onChanged }: { refreshKey: numbe
   return (
     <div className="space-y-4">
       <div className="rounded-lg border border-info/20 bg-info-soft p-4 text-sm text-info">
-        Lập phiếu xuất là <strong>cấp phát</strong> và <strong>chưa trừ tồn kho</strong>. Tồn chỉ giảm khi kỹ thuật viên xác nhận số lượng thực dùng; phần chưa dùng được hoàn trả.
+        Bản nháp chưa trừ tồn. <strong>Kho xác nhận xuất thì tồn giảm ngay.</strong> Kỹ thuật viên ghi nhận thực dùng không trừ lần nữa. Phần dư chỉ cộng tồn khi kho kiểm tra và xác nhận nhận trả.
       </div>
 
       {canIssue && (
@@ -169,7 +180,7 @@ export default function IssuesTab({ refreshKey, onChanged }: { refreshKey: numbe
               <Button type="button" variant="outline" icon={Icons.plus} onClick={() => setRows((current) => [...current, emptyRow()])}>Thêm phụ tùng</Button>
             </div>
             {formError && <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">{formError}</p>}
-            <Button type="submit" disabled={saving}>{saving ? "Đang cấp phát..." : "Cấp phát phụ tùng"}</Button>
+            <Button type="submit" disabled={saving}>{saving ? "Đang lưu..." : "Lưu bản nháp phiếu xuất"}</Button>
           </form>
         </Card>
       )}
@@ -188,6 +199,7 @@ export default function IssuesTab({ refreshKey, onChanged }: { refreshKey: numbe
             </div>
             <p className="text-xs text-slate-500">Nhân viên kho: {issue.warehouseStaffId} · KTV yêu cầu: {issue.requestedTechnicianId ?? "—"}</p>
           </div>
+          {canIssue&&issue.items.some(item=>!item.issued)&&<Button disabled={saving} onClick={()=>warehouseAction(issue)}>Xác nhận xuất kho</Button>}
           <table className="data-table w-full">
             <thead>
               <tr>
@@ -203,17 +215,18 @@ export default function IssuesTab({ refreshKey, onChanged }: { refreshKey: numbe
                   <td>{item.partName}</td>
                   <td className="text-right">{item.issuedQuantity}</td>
                   <td className="text-right font-semibold">{item.actualUsedQuantity ?? "—"}</td>
-                  <td className="text-right">{item.returnedQuantity ?? "—"}</td>
+                  <td className="text-right">{item.returnedQuantity ?? "—"}{!!item.returnedQuantity&&!item.returnConfirmed&&' (chờ kho nhận)'}</td>
                   <td className="text-right">{item.stockAfter ?? "—"}</td>
                   <td>
                     {item.state === "DA_XAC_NHAN"
                       ? <Badge variant="completed" label="Đã xác nhận thực dùng" />
-                      : <Badge variant="pending" label="Đã cấp phát — chờ KTV xác nhận" />}
+                      : <Badge variant="pending" label={item.issued?"Đã xuất — chờ KTV xác nhận":"Bản nháp — chưa xuất"} />}
                   </td>
                   <td>
-                    {item.state === "CHO_XAC_NHAN" && canConfirmUsage && issue.repairOrderId !== null && (
+                    {item.issued && item.state === "CHO_XAC_NHAN" && canConfirmUsage && issue.repairOrderId !== null && (
                       <Button size="sm" variant="outline" onClick={() => openConfirm(issue, item)}>Xác nhận thực dùng</Button>
                     )}
+                    {canIssue&&item.state==='DA_XAC_NHAN'&&!item.returnConfirmed&&<Button size="sm" disabled={saving} onClick={()=>warehouseAction(issue,item.partId)}>Đã kiểm tra, nhận trả vào kho</Button>}
                   </td>
                 </tr>
               ))}
@@ -234,7 +247,7 @@ export default function IssuesTab({ refreshKey, onChanged }: { refreshKey: numbe
               <Input label="Mã kỹ thuật viên xác nhận *" type="number" min={1} value={confirmTechnician} onChange={(event) => setConfirmTechnician(event.target.value)} />
             )}
             <p className="text-sm text-slate-600">
-              {preview === null ? "Nhập số lượng từ 0 đến số đã cấp phát." : <>Hoàn trả: <strong>{preview}</strong> · Tồn kho giảm: <strong>{used}</strong></>}
+              {preview === null ? "Nhập số lượng từ 0 đến số đã cấp phát." : <>Đề nghị hoàn trả: <strong>{preview}</strong> · Tồn kho không trừ thêm.</>}
             </p>
             {confirmError && <p className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">{confirmError}</p>}
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

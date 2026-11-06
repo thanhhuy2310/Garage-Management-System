@@ -150,36 +150,31 @@ class StockIssueServiceTest {
     // ------------------------------------------------------------------ XÁC NHẬN THỰC DÙNG
 
     @Test
-    void actualUsedEqualsIssuedReducesStockByIssued() {
+    void actualUsedEqualsIssuedDoesNotDeductAgain() {
         StockIssueItem item = arrangeConfirm(5, 12, 5, null);
 
         var result = service.confirmUsage(ISSUE_ID, PART_ID, new ConfirmUsageRequest(5, null), TECHNICIAN_ID, true);
 
-        verify(sparePartRepository, times(1)).updateStockQuantity(PART_ID, 7);
+        verify(sparePartRepository, never()).updateStockQuantity(anyInt(),anyInt());
         assertEquals(5, result.actualUsedQuantity());
         assertEquals(0, result.returnedQuantity());
-        assertEquals(7, result.stockAfter());
+        assertNull(result.stockAfter());
+        assertTrue(result.returnConfirmed());
         assertTrue(item.isConfirmed());
     }
 
     @Test
-    void actualLessThanIssuedReducesStockByActualAndReturnsTheRest() {
-        // Cấp phát 5, thực dùng 3 => tồn giảm 3 (không phải 5), hoàn trả 2.
+    void actualLessThanIssuedRequestsReturnWithoutChangingStock() {
         StockIssueItem item = arrangeConfirm(5, 12, 3, null);
 
         var result = service.confirmUsage(ISSUE_ID, PART_ID, new ConfirmUsageRequest(3, null), TECHNICIAN_ID, true);
 
-        verify(sparePartRepository, times(1)).updateStockQuantity(PART_ID, 9);
-        ArgumentCaptor<StockMovement> movement = ArgumentCaptor.forClass(StockMovement.class);
-        verify(movementRepository, times(1)).save(movement.capture());
-        assertEquals("XUAT", movement.getValue().getType());
-        assertEquals(3, movement.getValue().getQuantity());
-        assertEquals(12, movement.getValue().getQuantityBefore());
-        assertEquals(9, movement.getValue().getQuantityAfter());
-        assertEquals(ISSUE_ID, movement.getValue().getIssueId());
+        verify(sparePartRepository, never()).updateStockQuantity(anyInt(),anyInt());
+        verify(movementRepository, never()).save(any());
+        assertFalse(result.returnConfirmed());
         assertEquals(3, result.actualUsedQuantity());
         assertEquals(2, result.returnedQuantity());
-        assertEquals(9, result.stockAfter());
+        assertNull(result.stockAfter());
         assertEquals(3, item.getActualUsedQuantity());
         assertEquals(2, item.getReturnedQuantity());
         assertEquals(TECHNICIAN_ID, item.getConfirmedTechnicianId());
@@ -250,14 +245,12 @@ class StockIssueServiceTest {
     }
 
     @Test
-    void insufficientStockForActualUsedIsRejectedAndNothingChanges() {
-        StockIssueItem item = arrangeConfirm(5, 2, 0, null);
-
-        assertThrows(ConflictException.class,
-                () -> service.confirmUsage(ISSUE_ID, PART_ID, new ConfirmUsageRequest(3, null), TECHNICIAN_ID, true));
+    void usageIsNotBlockedByStockAlreadyDeductedAtIssue() {
+        StockIssueItem item = arrangeConfirm(5, 0, 3, null);
+        service.confirmUsage(ISSUE_ID, PART_ID, new ConfirmUsageRequest(3, null), TECHNICIAN_ID, true);
         verify(sparePartRepository, never()).updateStockQuantity(anyInt(), anyInt());
         verify(movementRepository, never()).save(any(StockMovement.class));
-        assertFalse(item.isConfirmed());
+        assertTrue(item.isConfirmed());
     }
 
     @Test
@@ -354,8 +347,8 @@ class StockIssueServiceTest {
         assertThrows(ConflictException.class,
                 () -> service.confirmUsage(ISSUE_ID, PART_ID, new ConfirmUsageRequest(3, null), TECHNICIAN_ID, true));
 
-        verify(sparePartRepository, times(1)).updateStockQuantity(PART_ID, 9);
-        verify(movementRepository, times(1)).save(any(StockMovement.class));
+        verify(sparePartRepository, never()).updateStockQuantity(anyInt(),anyInt());
+        verify(movementRepository, never()).save(any(StockMovement.class));
         verify(repairPartItemRepository, times(1)).saveAndFlush(any(RepairPartItem.class));
         assertTrue(item.isConfirmed());
     }
@@ -402,6 +395,33 @@ class StockIssueServiceTest {
                 List.of(new IssueRequest.Item(PART_ID, quantity)));
     }
 
+    @Test
+    void issueConfirmationDeductsOnceAndReturnAddsBackOnce() {
+        var item=arrangeConfirm(2,10,1,null);item.setIssued(false);
+        when(itemRepository.findByIssueId(ISSUE_ID)).thenReturn(List.of(item));
+        when(sparePartRepository.findAllById(any())).thenReturn(List.of(part()));
+        service.confirmIssue(ISSUE_ID,7);
+        service.confirmIssue(ISSUE_ID,7);
+        verify(sparePartRepository,times(1)).updateStockQuantity(PART_ID,8);
+        service.confirmUsage(ISSUE_ID,PART_ID,new ConfirmUsageRequest(1,null),TECHNICIAN_ID,true);
+        verify(sparePartRepository,times(1)).updateStockQuantity(anyInt(),anyInt());
+        when(sparePartRepository.lockStockQuantity(PART_ID)).thenReturn(Optional.of(8));
+        service.confirmReturn(ISSUE_ID,PART_ID,7);
+        service.confirmReturn(ISSUE_ID,PART_ID,7);
+        verify(sparePartRepository,times(1)).updateStockQuantity(PART_ID,9);
+        assertTrue(item.isReturnConfirmed());
+    }
+
+    @Test
+    void draftCannotBeUsedAndExportCannotExceedStock() {
+        var item=arrangeConfirm(2,1,0,null);item.setIssued(false);
+        when(itemRepository.findByIssueId(ISSUE_ID)).thenReturn(List.of(item));
+        assertThrows(ConflictException.class,()->service.confirmUsage(ISSUE_ID,PART_ID,new ConfirmUsageRequest(1,null),TECHNICIAN_ID,true));
+        assertThrows(ConflictException.class,()->service.confirmIssue(ISSUE_ID,7));
+        verify(sparePartRepository,never()).updateStockQuantity(anyInt(),anyInt());
+        assertFalse(item.isIssued());
+    }
+
     private void arrangeIssue(int stock, long pending, String orderStatus, long assigned) {
         lenient().when(repairServiceItemRepository.findRepairOrderStatus(ORDER_ID)).thenReturn(Optional.of(orderStatus));
         lenient().when(itemRepository.countAssignment(ORDER_ID, TECHNICIAN_ID)).thenReturn(assigned);
@@ -422,6 +442,7 @@ class StockIssueServiceTest {
     /** Dựng ngữ cảnh xác nhận hợp lệ: đã phân công, báo giá đã xác nhận, phiếu sửa chữa đang sửa. */
     private StockIssueItem arrangeConfirm(int issued, int stock, long confirmedTotal, RepairPartItem existingLine) {
         StockIssueItem item = issueItem(issued);
+        item.setIssued(true);
         lenient().when(itemRepository.findForUpdate(ISSUE_ID, PART_ID)).thenReturn(Optional.of(item));
         lenient().when(issueRepository.findById(ISSUE_ID)).thenReturn(Optional.of(issue()));
         lenient().when(itemRepository.countAssignment(ORDER_ID, TECHNICIAN_ID)).thenReturn(1L);

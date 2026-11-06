@@ -15,12 +15,26 @@ import java.util.Objects;
 /**
  * Chi tiết phiếu xuất: bảng ChiTietPhieuXuat.
  * quantity (SoLuong) = số lượng CẤP PHÁT; actualUsedQuantity = KTV xác nhận thực dùng;
- * returnedQuantity = quantity - actualUsedQuantity. Chỉ lúc xác nhận thực dùng mới giảm tồn.
+ * returnedQuantity = quantity - actualUsedQuantity; chỉ cộng tồn sau khi kho xác nhận nhận trả.
  */
 @Entity
 @Table(name = "ChiTietPhieuXuat")
 @IdClass(StockIssueItem.Key.class)
 public class StockIssueItem {
+    @Column(name="DaXuatKho",nullable=false)
+    private boolean issued;
+    @Column(name="DaNhapTra",nullable=false)
+    private boolean returnConfirmed;
+    @Column(name="NgayXuatKho") private LocalDateTime issuedAt;
+    @Column(name="NguoiXuatKho") private Integer issuedBy;
+    @Column(name="NgayNhapTra") private LocalDateTime returnedAt;
+    @Column(name="NguoiNhapTra") private Integer returnedBy;
+    public boolean isIssued(){return issued;}
+    public void setIssued(boolean value){issued=value;}
+    public boolean isReturnConfirmed(){return returnConfirmed;}
+    public void setReturnConfirmed(boolean value){returnConfirmed=value;}
+    public void recordIssue(Integer staff){issued=true;issuedBy=staff;issuedAt=LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));}
+    public void recordReturn(Integer staff){returnConfirmed=true;returnedBy=staff;returnedAt=LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));}
 
     @Id
     @Column(name = "MaPhieuXuat")

@@ -14,8 +14,8 @@ public record IssueResponse(
         List<Item> items
 ) {
     /**
-     * state: CHO_XAC_NHAN (đã cấp phát, chờ KTV xác nhận thực dùng, CHƯA trừ tồn) hoặc DA_XAC_NHAN.
-     * stockAfter chỉ có khi đã xác nhận thực dùng > 0 (lấy từ biến động kho XUAT).
+     * state là trạng thái thực dùng. issued cho biết kho đã xuất và trừ tồn;
+     * returnConfirmed cho biết kho đã nhận phần dư. stockAfter lấy từ biến động xuất.
      */
     public record Item(
             Integer partId,
@@ -27,7 +27,9 @@ public record IssueResponse(
             Integer confirmedTechnicianId,
             Integer actualUsedQuantity,
             Integer returnedQuantity,
-            Integer stockAfter
+            Integer stockAfter,
+            boolean issued,
+            boolean returnConfirmed
     ) {
     }
 }

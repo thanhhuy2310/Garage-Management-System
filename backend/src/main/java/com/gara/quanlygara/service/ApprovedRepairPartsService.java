@@ -22,8 +22,8 @@ public class ApprovedRepairPartsService {
                    COALESCE(s.Issued,0),COALESCE(s.Returned,0),COALESCE(s.Used,0)
             FROM BaoGia b JOIN ChiTietBaoGia q ON q.MaBaoGia=b.MaBaoGia
             LEFT JOIN (
-                SELECT x.MaPhieuSuaChua,d.MaPhuTung,SUM(d.SoLuong) AS Issued,
-                       SUM(COALESCE(d.SoLuongHoanTra,0)) AS Returned,
+                SELECT x.MaPhieuSuaChua,d.MaPhuTung,SUM(CASE WHEN d.DaXuatKho=1 THEN d.SoLuong ELSE 0 END) AS Issued,
+                       SUM(CASE WHEN d.DaNhapTra=1 THEN COALESCE(d.SoLuongHoanTra,0) ELSE 0 END) AS Returned,
                        SUM(COALESCE(d.SoLuongThucDung,0)) AS Used
                 FROM PhieuXuatKho x JOIN ChiTietPhieuXuat d ON d.MaPhieuXuat=x.MaPhieuXuat
                 GROUP BY x.MaPhieuSuaChua,d.MaPhuTung
