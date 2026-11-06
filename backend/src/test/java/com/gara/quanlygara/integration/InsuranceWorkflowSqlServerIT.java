@@ -136,6 +136,9 @@ class InsuranceWorkflowSqlServerIT {
         call(put(servicePath),Map.of("expectedStatus","DANG_SUA","status","HOAN_TAT","notes","Đã kiểm tra"),200);
         call(put("/api/repair-orders/"+order+"/progress"),Map.of("expectedStatus","DANG_SUA","status","HOAN_TAT","notes","Nghiệm thu"),200);
         int invoice=call(post("/api/invoices"),Map.of("repairOrderId",order),201).path("invoice").path("id").asInt();
+        var pendingInvoice=customerGet("/api/customers/me/invoices/"+invoice,owner,200);
+        assertTrue(pendingInvoice.path("awaitingInsurance").asBoolean());
+        assertTrue(pendingInvoice.path("customerDue").isNull());
         String payments="/api/invoices/"+invoice+"/payments";
         int insurer=direct?150000:0,customerShare=200000-insurer;
         var customerPayment=Map.of("amount",customerShare,"method","TIEN_MAT","requestId",UUID.randomUUID().toString());
@@ -166,11 +169,30 @@ class InsuranceWorkflowSqlServerIT {
         int other=insert("KhachHang","MaKhachHang",Map.of("HoTen","Lê Minh","SoDienThoai",owner));
         insert("TaiKhoan","MaTaiKhoan",Map.of("TenDangNhap",owner+"x","MatKhauHash","unused","VaiTro","CUSTOMER","MaKhachHang",other));
         assertEquals(404,mvc.perform(get(summary).with(user(owner+"x").roles("CUSTOMER"))).andReturn().getResponse().getStatus());
+        var customerInvoice=customerGet("/api/customers/me/invoices/"+invoice,owner,200);
+        assertEquals(customerShare,customerInvoice.path("customerDue").asInt());
+        assertEquals(customerShare,customerInvoice.path("customerPaid").asInt());
+        assertEquals(150000,customerInvoice.path("insuranceSupport").asInt());
+        assertEquals(0,customerInvoice.path("remaining").asInt());
+        assertEquals("DA_THANH_TOAN",customerInvoice.path("status").asText());
+        assertEquals(direct?2:1,customerInvoice.path("payments").size());
+        customerGet("/api/customers/me/invoices/"+invoice,owner+"x",404);
+        customerGet("/api/customers/me/statistics?vehicleId="+vehicle,owner+"x",404);
+        assertEquals(0,customerGet("/api/customers/me/invoices",owner+"x",200).size());
+        var stats=customerGet("/api/customers/me/statistics",owner,200);
+        assertEquals(1,stats.path("completedVisits").asInt());
+        assertEquals(200000,stats.path("totalCost").asInt());
+        assertEquals(50000,stats.path("customerCost").asInt());
         var balance=call(get(finance),null,200).path("balance");
         assertEquals(insurer,balance.path("insurerPaid").asInt());
         assertEquals(customerShare,balance.path("customerPaid").asInt());
         assertEquals(200000,db.queryForObject("SELECT SUM(SoTien) FROM ThanhToan WHERE MaHoaDon=?",Integer.class,invoice));
         call(post(finance+"/close").param("version",""+version()),null,200);
         assertEquals("DA_DONG",call(get(path+"/casework"),null,200).path("status").asText());
+    }
+    JsonNode customerGet(String url,String username,int expected)throws Exception {
+        var response=mvc.perform(get(url).with(user(username).roles("CUSTOMER"))).andReturn().getResponse();
+        assertEquals(expected,response.getStatus(),response.getContentAsString());
+        return json.readTree(response.getContentAsByteArray()).path("data");
     }
 }

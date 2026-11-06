@@ -16,6 +16,7 @@ import CustomerOverview from "./CustomerOverview";
 import CustomerQuotations from "./CustomerQuotations";
 import CustomerTracking from "./CustomerTracking";
 import CustomerVehicles from "./CustomerVehicles";
+import {CustomerInvoices,CustomerStatistics} from './CustomerFinance';
 
 export type CustomerTab = CustomerPage;
 
@@ -26,6 +27,8 @@ const TABS: { key: CustomerTab; label: string; icon: React.ReactNode }[] = [
   { key: "quotations", label: "Báo giá", icon: Icons.fileText },
   { key: "tracking", label: "Tiến độ sửa chữa", icon: Icons.wrench },
   { key: "history", label: "Lịch sử", icon: Icons.history },
+  { key: "invoices", label: "Hóa đơn của tôi", icon: Icons.fileText },
+  { key: "statistics", label: "Thống kê xe", icon: Icons.car },
   { key: "notifications", label: "Thông báo", icon: Icons.bell },
   { key: "profile", label: "Hồ sơ", icon: Icons.userCheck },
 ];
@@ -186,6 +189,8 @@ export default function CustomerPortal({ onLogout, page, customerId, onNavigate 
         {page === "quotations" && <CustomerQuotations customerKey={customerKey} />}
         {page === "tracking" && <CustomerTracking />}
         {page === "history" && <CustomerHistory />}
+        {page === "invoices" && <CustomerInvoices />}
+        {page === "statistics" && <CustomerStatistics />}
         {page === "notifications" && <CustomerNotifications />}
         {page === "profile" && profile.data && <ProfileTab customer={profile.data} saved={profile.reload} />}
       </div>

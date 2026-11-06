@@ -8,6 +8,7 @@ import '../screens/auth/splash_screen.dart';
 import '../screens/booking/booking_screen.dart';
 import '../screens/profile/change_password_screen.dart';
 import '../screens/history/history_screen.dart';
+import '../screens/finance/customer_finance_screen.dart';
 import '../screens/quotations/quotations_screen.dart';
 // import '../screens/repairs/repair_progress_screen.dart';
 import '../screens/shared/feature_placeholder_screen.dart';
@@ -105,6 +106,8 @@ class _GarageCustomerAppState extends State<GarageCustomerApp> {
       ),
       AppRoutes.quotations => QuotationsScreen(controller: controller),
       AppRoutes.history => HistoryScreen(service: _historyService),
+      AppRoutes.invoices => CustomerFinanceScreen(api: _api),
+      AppRoutes.statistics => CustomerFinanceScreen(api: _api, statistics: true),
       AppRoutes.changePassword => ChangePasswordScreen(controller: controller),
       _ => const FeaturePlaceholderScreen(
         title: 'Không tìm thấy trang',

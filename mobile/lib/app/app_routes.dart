@@ -11,4 +11,6 @@ abstract final class AppRoutes {
   static const notifications = '/notifications';
   static const profile = '/profile';
   static const changePassword = '/change-password';
+  static const invoices = '/invoices';
+  static const statistics = '/statistics';
 }

@@ -255,6 +255,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const Divider(height: 1),
               ListTile(
+                leading: const Icon(Icons.receipt_long_outlined),
+                title: const Text('Hóa đơn của tôi'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.pushNamed(context, AppRoutes.invoices),
+              ),
+              ListTile(
+                leading: const Icon(Icons.bar_chart),
+                title: const Text('Thống kê xe của tôi'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.pushNamed(context, AppRoutes.statistics),
+              ),
+              const Divider(height: 1),
+              ListTile(
                 minTileHeight: 56,
                 leading: const Icon(Icons.logout, color: AppColors.danger),
                 title: const Text(
