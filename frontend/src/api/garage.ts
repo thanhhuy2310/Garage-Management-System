@@ -13,6 +13,9 @@ import type {
 } from "../types/garage"
 
 export const garageApi = {
+  async approvedRepairParts(id: number, signal?: AbortSignal) {
+    return unwrap(await api.get<ApiResponse<{id:number;name:string;approvedQuantity:number;unitPrice:number;issuedQuantity:number;returnedQuantity:number;actualUsedQuantity:number;status:string}[]>>(`/api/repair-orders/${id}/approved-parts`, { signal }))
+  },
   async technicianWorkload(signal?: AbortSignal) {
     return unwrap(await api.get<ApiResponse<import('../types/garage').TechnicianWorkload[]>>('/api/technicians/workload', { signal }))
   },

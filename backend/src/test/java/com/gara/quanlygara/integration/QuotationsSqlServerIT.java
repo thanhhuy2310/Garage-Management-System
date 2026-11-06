@@ -112,6 +112,8 @@ class QuotationsSqlServerIT {
     }
     @Test void persistenceOwnershipApprovalAndRepairGate()throws Exception {
         int id=create();
+        call(get("/api/repair-orders/"+order+"/approved-parts"),manager,"MANAGER",null)
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(0));
         assertEquals(new BigDecimal("250000.00"),jdbc.queryForObject("SELECT TongTien FROM BaoGia WHERE MaBaoGia=?",BigDecimal.class,id));
         assertEquals(10,count("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",part));
         assertEquals(0,count("SELECT COUNT(*) FROM ChiTietPhuTung WHERE MaPhieuSuaChua=?",order));
@@ -124,6 +126,12 @@ class QuotationsSqlServerIT {
         var progress=Map.of("expectedStatus","MOI_TAO","status","DANG_SUA","notes","Bắt đầu kiểm tra phanh");
         call(put("/api/repair-orders/"+order+"/progress"),manager,"MANAGER",progress).andExpect(status().isConflict());
         decide(id,1,true);decide(id,1,true);
+        call(get("/api/repair-orders/"+order+"/approved-parts"),manager,"MANAGER",null)
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1))
+            .andExpect(jsonPath("$.data[0].id").value(part))
+            .andExpect(jsonPath("$.data[0].approvedQuantity").value(1))
+            .andExpect(jsonPath("$.data[0].issuedQuantity").value(0));
+        call(get("/api/repair-orders/"+order+"/approved-parts"),other,"CUSTOMER",null).andExpect(status().isForbidden());
         assertEquals(3,count("SELECT COUNT(*) FROM LichSuBaoGia WHERE MaBaoGia=?",id));
         assertEquals(accounts.get(0),jdbc.queryForObject("SELECT MaNguoiDuyet FROM BaoGia WHERE MaBaoGia=?",Integer.class,id));
         assertEquals(2,count("SELECT SoLuong FROM ChiTietDichVu WHERE MaPhieuSuaChua=? AND MaDichVu=?",order,serviceId));

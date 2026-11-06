@@ -19,9 +19,17 @@ import java.util.List;
 public class RepairOrderController {
 
     private final RepairOrderQueryService repairOrderService;
+    private final com.gara.quanlygara.service.ApprovedRepairPartsService parts;
 
-    public RepairOrderController(RepairOrderQueryService repairOrderService) {
+    public RepairOrderController(RepairOrderQueryService repairOrderService,
+                                com.gara.quanlygara.service.ApprovedRepairPartsService parts) {
         this.repairOrderService = repairOrderService;
+        this.parts = parts;
+    }
+
+    @GetMapping("/{id}/approved-parts")
+    public Object parts(@PathVariable int id,Authentication authentication) {
+        return ApiResponse.success("Phụ tùng theo báo giá được duyệt.",parts.get(id,authentication));
     }
 
     @GetMapping

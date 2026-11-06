@@ -13,6 +13,7 @@ import RepairProgressForm, {
   nextServiceStates,
 } from "./RepairProgressForm"
 import RepairServiceForm from "./RepairServiceForm"
+import ApprovedRepairParts from './ApprovedRepairParts'
 import RepairInsurance from '../../features/insurance/RepairInsurance'
 
 export default function RepairOrderDetails({
@@ -218,6 +219,7 @@ export default function RepairOrderDetails({
                   </p>
                 )}
               </Card>
+              <ApprovedRepairParts orderId={orderId}/>
             </div>
             <Card className="order-1 space-y-4 p-5 lg:order-2">
               <div>
