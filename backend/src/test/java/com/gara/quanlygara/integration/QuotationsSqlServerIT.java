@@ -298,4 +298,28 @@ class QuotationsSqlServerIT {
             .andExpect(jsonPath("$.data[0].returnedQuantity").value(1))
             .andExpect(jsonPath("$.data[0].actualUsedQuantity").value(1));
     }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(ints={0,1})
+    void confirmsActualUsageAndReturnsUnusedStock(int actual)throws Exception {
+        int quote=create();
+        send(quote,0);
+        decide(quote,1,true);
+        jdbc.update("UPDATE PhieuSuaChua SET TrangThai=N'DANG_SUA' WHERE MaPhieuSuaChua=?",order);
+        var request=Map.of("repairOrderId",order,"requestedTechnicianId",employee,"reason","Thay lọc dầu",
+                "items",List.of(Map.of("partId",part,"quantity",1)));
+        int issue=data(call(post("/api/warehouse/exports"),manager,"MANAGER",request)
+                .andExpect(status().isCreated())).path("id").intValue();
+        stock.confirmIssue(issue,employee);
+        call(post("/api/warehouse/exports/"+issue+"/items/"+part+"/confirm"),manager,"MANAGER",Map.of("actualUsed",actual))
+                .andExpect(status().isForbidden());
+        stock.confirmUsage(issue,part,new ConfirmUsageRequest(actual,null),employee,true);
+        assertEquals(9,count("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",part));
+        assertThrows(com.gara.quanlygara.exception.ConflictException.class,
+                ()->stock.confirmUsage(issue,part,new ConfirmUsageRequest(actual,null),employee,true));
+        stock.confirmReturn(issue,part,employee);
+        assertEquals(10-actual,count("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",part));
+        assertEquals(actual,count("SELECT COALESCE(SUM(SoLuong),0) FROM ChiTietPhuTung WHERE MaPhieuSuaChua=? AND MaPhuTung=?",order,part));
+        assertEquals(actual==0?2:1,count("SELECT COUNT(*) FROM BienDongKho WHERE MaPhieuXuat=?",issue));
+    }
 }

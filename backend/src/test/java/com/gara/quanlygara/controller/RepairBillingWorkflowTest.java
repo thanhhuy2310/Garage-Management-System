@@ -68,7 +68,7 @@ class RepairBillingWorkflowTest extends ApiTestSupport {
             """);
         jdbc.update("INSERT INTO PhieuXuatKho (MaPhieuXuat,MaPhieuSuaChua,MaNhanVienKho,NgayXuat,LyDo) VALUES (9202,9202,9201,'2026-10-06 08:00:00','Thay ma phanh')");
         jdbc.update("INSERT INTO ChiTietBaoGia (MaChiTietBaoGia,MaBaoGia,MaDichVu,NoiDung,SoLuong,DonGia) VALUES (9201,9201,9201,'Phanh',2,200000),(9202,9202,9201,'Phanh',1,100000)");
-        jdbc.update("INSERT INTO ChiTietPhieuXuat (MaPhieuXuat,MaPhuTung,SoLuong,DonGia,DaXacNhanSuDung,SoLuongThucDung,SoLuongHoanTra,MaKyThuatVienXacNhan,NgayXacNhan) VALUES (9202,9201,2,50000,1,2,0,9201,'2026-10-06 08:30:00')");
+        jdbc.update("INSERT INTO ChiTietPhieuXuat (MaPhieuXuat,MaPhuTung,SoLuong,DonGia,DaXacNhanSuDung,SoLuongThucDung,SoLuongHoanTra,MaKyThuatVienXacNhan,NgayXacNhan,DaXuatKho,DaNhapTra) VALUES (9202,9201,2,50000,1,2,0,9201,'2026-10-06 08:30:00',1,1)");
     }
 
     @Test @WithMockUser(username = "flow-tech", roles = "TECHNICIAN")
@@ -200,7 +200,12 @@ class RepairBillingWorkflowTest extends ApiTestSupport {
                 Map.of("expectedStatus", from, "status", to, "notes", "Đã kiểm tra và cập nhật công việc."))));
     }
     private org.springframework.test.web.servlet.ResultActions createInvoice() throws Exception {
-        return mockMvc.perform(post("/api/invoices").contentType(APPLICATION_JSON).content("{\"repairOrderId\":9202}"));
+        return mockMvc.perform(post("/api/invoices").contentType(APPLICATION_JSON).content("{\"repairOrderId\":9202}"))
+                .andDo(result -> {
+                    if (result.getResponse().getStatus() >= 500) {
+                        throw new AssertionError("Lập hóa đơn thất bại", result.getResolvedException());
+                    }
+                });
     }
     private org.springframework.test.web.servlet.ResultActions pay(int id, int amount, String key) throws Exception {
         return mockMvc.perform(post("/api/invoices/{id}/payments", id).contentType(APPLICATION_JSON)

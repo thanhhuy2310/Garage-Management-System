@@ -102,6 +102,10 @@ class RepairBillingSqlServerIT {
                 "services", List.of(Map.of("serviceId", service, "quantity", 2))), 201);
         int order = repair.path("order").path("id").asInt();
         String orderPath = "/api/repair-orders/" + order;
+        int shift = insert("CaLamKyThuatVien", "Id", Map.of("TenCa", "Ca kiểm tra",
+                "BatDau", java.sql.Time.valueOf("00:00:00"), "KetThuc", java.sql.Time.valueOf("23:59:59")));
+        send(put("/api/technicians/" + mechanicId + "/schedule"), manager,
+                Map.of("date", slot.toLocalDate(), "shiftIds", List.of(shift), "vehicleLimit", 2), 200);
         send(post(orderPath + "/technicians"), manager, Map.of("technicianId", mechanicId), 201);
         progress(orderPath, mechanic, "MOI_TAO", "DANG_KIEM_TRA");
 
@@ -141,8 +145,13 @@ class RepairBillingSqlServerIT {
         var issue = send(post("/api/warehouse/exports"), manager, Map.of("repairOrderId", order,
                 "requestedTechnicianId", mechanicId, "reason", "Thay lọc dầu", "items", List.of(Map.of("partId", part, "quantity", 2))), 201);
         assertEquals(10, jdbc.queryForObject("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?", Integer.class, part));
+        String issuePath = "/api/warehouse/exports/" + issue.path("id").asInt();
+        send(post(issuePath + "/confirm-issue"), manager, null, 200);
+        assertEquals(8, jdbc.queryForObject("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?", Integer.class, part));
         send(post("/api/warehouse/exports/" + issue.path("id").asInt() + "/items/" + part + "/confirm"),
                 mechanic, Map.of("actualUsed", 1), 200);
+        assertEquals(8, jdbc.queryForObject("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?", Integer.class, part));
+        send(post(issuePath + "/items/" + part + "/confirm-return"), manager, null, 200);
         assertEquals(9, jdbc.queryForObject("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?", Integer.class, part));
         progress(linePath, mechanic, "DANG_SUA", "HOAN_TAT");
         progress(orderPath, mechanic, "DANG_SUA", "HOAN_TAT");
@@ -166,6 +175,15 @@ class RepairBillingSqlServerIT {
             assertEquals(1, paid.path("payments").size());
         }
         assertEquals(1, jdbc.queryForObject("SELECT COUNT(*) FROM ThanhToan WHERE MaHoaDon=?", Integer.class, invoice));
+        var renewedSession = login(username);
+        var receipt = send(get("/api/customers/me/invoices/" + invoice), renewedSession, null, 200);
+        assertEquals(300000, receipt.path("total").intValue());
+        assertEquals(300000, receipt.path("customerPaid").intValue());
+        assertEquals(0, receipt.path("remaining").intValue());
+        var stats = send(get("/api/customers/me/statistics").param("vehicleId", String.valueOf(vehicle)), renewedSession, null, 200);
+        assertEquals(1, stats.path("completedVisits").intValue());
+        assertEquals(1, stats.path("maintenanceVisits").intValue());
+        assertEquals(insured ? 200000 : 300000, stats.path("customerCost").intValue());
         var after = send(get("/api/reports/dashboard"), manager, null, 200).path("collectedToday").decimalValue();
         assertEquals(0, after.subtract(before).compareTo(BigDecimal.valueOf(300000)));
         var history = send(get("/api/customers/me/history"), customer, null, 200).path("items").get(0);

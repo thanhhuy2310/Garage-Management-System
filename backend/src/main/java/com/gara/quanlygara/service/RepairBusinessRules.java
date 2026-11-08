@@ -80,16 +80,16 @@ public class RepairBusinessRules {
     public void requireSettledParts(Integer id) {
         if (jdbc.queryForObject("""
                 SELECT COUNT(*) FROM ChiTietPhieuXuat ct JOIN PhieuXuatKho px ON px.MaPhieuXuat = ct.MaPhieuXuat
-                WHERE px.MaPhieuSuaChua = ? AND (ct.DaXacNhanSuDung = 0 OR ct.DaNhapTra = 0)
-                """, Integer.class, id) > 0) {
+                WHERE px.MaPhieuSuaChua = ? AND (ct.DaXacNhanSuDung = ? OR ct.DaNhapTra = ?)
+                """, Integer.class, id, false, false) > 0) {
             throw new ConflictException("Cần xác nhận thực dùng/hoàn trả toàn bộ phụ tùng đã cấp phát trước khi hoàn tất.");
         }
         if (jdbc.queryForObject("""
                 SELECT COUNT(*) FROM ChiTietPhuTung p WHERE p.MaPhieuSuaChua = ? AND p.SoLuong <>
                 (SELECT COALESCE(SUM(ct.SoLuongThucDung), 0) FROM ChiTietPhieuXuat ct
                  JOIN PhieuXuatKho px ON px.MaPhieuXuat = ct.MaPhieuXuat
-                 WHERE px.MaPhieuSuaChua = p.MaPhieuSuaChua AND ct.MaPhuTung = p.MaPhuTung AND ct.DaXacNhanSuDung = 1)
-                """, Integer.class, id) > 0) {
+                 WHERE px.MaPhieuSuaChua = p.MaPhieuSuaChua AND ct.MaPhuTung = p.MaPhuTung AND ct.DaXacNhanSuDung = ?)
+                """, Integer.class, id, true) > 0) {
             throw new ConflictException("Chi tiết phụ tùng chưa khớp số lượng thực dùng đã xác nhận.");
         }
     }
