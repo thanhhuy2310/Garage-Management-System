@@ -1,6 +1,6 @@
 -- ============================================================
 -- Test_Vehicles.sql - kiem tra rang buoc bang Xe (Tuan 6 - TV3)
--- Chay trong SSMS sau khi da tao database bang QuanLyGaraOTo.sql.
+-- Chay trong SSMS sau khi da tao database bang Script.sql.
 -- Toan bo du lieu test nam trong mot transaction va duoc ROLLBACK cuoi script.
 -- ============================================================
 USE QuanLyGaraOTo;
@@ -24,7 +24,7 @@ SELECT TOP 1 @c2 = MaKhachHang FROM KhachHang WHERE MaKhachHang <> @c1 ORDER BY 
 
 IF @c1 IS NULL
 BEGIN
-    PRINT N'Khong co khach hang nao trong bang KhachHang. Hay chay QuanLyGaraOTo.sql truoc.';
+    PRINT N'Khong co khach hang nao trong bang KhachHang. Hay chay Script.sql truoc.';
     RETURN;
 END;
 

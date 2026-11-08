@@ -4,7 +4,7 @@ Thư mục này chứa API của hệ thống gara. Backend dùng Java 21, Sprin
 
 ## Cách chạy
 
-1. Nếu chưa có database, chạy `database/QuanLyGaraOTo.sql` trong SQL Server Management Studio. Database đang có dữ liệu thì không chạy lại file này.
+1. Nếu chưa có database, chạy `database/Script.sql` trong SQL Server Management Studio. Script chỉ tạo schema, không chèn dữ liệu mẫu. Database đang có dữ liệu thì không chạy lại file này.
 2. Chọn database `QuanLyGaraOTo`, chạy các file theo thứ tự chính xác trong [`database/migrations/README.md`](database/migrations/README.md). Hai nhánh lịch sử có tên V002/V003 trùng nhau nên không chạy theo thứ tự tên file.
 3. Sao chép `.env.example` thành `.env` và điền thông tin kết nối SQL Server.
 4. Chạy lệnh:
@@ -24,7 +24,7 @@ http://localhost:8080/api/health
 <!-- TV3-TUAN8-AUDIT:db-setup BEGIN -->
 ### Cập nhật cấu trúc database (bắt buộc)
 
-Sau khi chạy `QuanLyGaraOTo.sql`, chạy tiếp các migration trong `backend/database/migrations/` **theo thứ tự**:
+Sau khi chạy `Script.sql`, chạy tiếp các migration trong `backend/database/migrations/` **theo thứ tự**:
 
 1. `V001__add_customer_status.sql`
 2. `V002__warehouse_actual_used_and_stock_check.sql` — bắt buộc cho kho (Tuần 8): thêm `SoLuongThucDung`, `SoLuongHoanTra`, bảng `PhieuKiemKe`/`ChiTietKiemKe`; sửa `sp_XacNhanSuDungPhuTung` (trừ tồn theo số lượng thực dùng) và `sp_KiemKeTonKho` (chỉ ghi nhận, không tự đổi tồn; chỉ MANAGER duyệt qua ứng dụng).
@@ -35,6 +35,8 @@ Chi tiết từng file: `backend/database/migrations/README.md`.
 
 Kho phụ tùng (tồn kho, nhập kho, xuất/cấp phát, xác nhận thực dùng, kiểm kê có phê duyệt, lịch sử biến động) **đã có API thật** từ Tuần 8; trang Kho trên website dùng API này, không còn dữ liệu mẫu.
 <!-- TV3-TUAN8-AUDIT:db-setup END -->
+
+Quản trị viên đầu tiên chỉ được tạo khi bật rõ `BOOTSTRAP_ADMIN_ENABLED=true` cùng các biến `BOOTSTRAP_ADMIN_USERNAME`, `BOOTSTRAP_ADMIN_PASSWORD`, `BOOTSTRAP_ADMIN_FULL_NAME`, `BOOTSTRAP_ADMIN_EMAIL`. Không có mật khẩu mặc định; sau lần khởi tạo phải tắt bootstrap và xóa mật khẩu khỏi môi trường.
 
 ## Các API đã có
 
@@ -60,14 +62,13 @@ Kho phụ tùng (tồn kho, nhập kho, xuất/cấp phát, xác nhận thực d
 - `/api/warehouse/imports`: nhập kho; mỗi chi tiết nhập tăng tồn đúng một lần.
 - `/api/warehouse/exports`: cấp phát phụ tùng, chưa trừ tồn. Chỉ KTV liên quan được xác nhận thực dùng; tồn giảm tại thời điểm xác nhận.
 - `/api/warehouse/checks`: kiểm kê do kho ghi nhận và quản lý duyệt/từ chối.
+- `/api/reports/overview`: báo cáo doanh thu, sửa chữa, tình trạng xe, nhập/xuất/tồn và hiệu suất kỹ thuật viên; chỉ MANAGER.
 
 Ví dụ request và quyền truy cập: [Test API dịch vụ và phân công](docs/API_SERVICE_TECHNICIAN_ASSIGNMENT.md).
 
-Luồng sửa chữa và thu tiền: [Cách dùng và test](docs/REPAIR_BILLING.md). Lịch hẹn, thao tác báo giá phía khách hàng, thông báo và báo cáo chưa có API đầy đủ; giao diện ghi rõ các phần này là `MOCK_ONLY`.
+Luồng sửa chữa và thu tiền: [Cách dùng và test](docs/REPAIR_BILLING.md). Các màn hình Web và Mobile sử dụng API Backend và dữ liệu SQL Server; dữ liệu giả không nằm trong luồng chạy ứng dụng.
 
 ## Chạy test
-
-Để có nhiều phiếu tiếp nhận, sửa chữa và hóa đơn phục vụ thử trên giao diện, xem [bộ dữ liệu test của Huy](database/seeds/README.md). File seed chạy riêng trên database local, không xóa dữ liệu đang có.
 
 ```powershell
 .\mvnw.cmd test

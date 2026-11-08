@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 /**
- * Xe của khách hàng. Ánh xạ trực tiếp vào bảng Xe của QuanLyGaraOTo.sql,
+ * Xe của khách hàng. Ánh xạ trực tiếp vào bảng Xe của Script.sql,
  * không đổi tên bảng/cột và không thêm cột mới.
  */
 @Entity

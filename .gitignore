@@ -22,3 +22,15 @@ Thumbs.db
 
 # Local Codex skills
 .agents/
+
+# One-time TV3 delivery scripts (patches already in source tree)
+TV3_*.ps1
+TV3_*.zip
+
+# Local Maven cache used by sandboxed verification
+backend/.m2/
+
+# Local reports and deployment notes kept outside the source release
+/.github/
+/deploy/
+/docs/

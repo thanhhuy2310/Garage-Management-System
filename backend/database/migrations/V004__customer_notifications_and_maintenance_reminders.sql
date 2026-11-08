@@ -13,7 +13,7 @@
 --
 -- Chay bang SSMS hoac "sqlcmd -I" (QUOTED_IDENTIFIER ON): bang ThongBao co chi muc co dieu kien nen moi
 -- trigger/INSERT vao ThongBao deu can QUOTED_IDENTIFIER ON.
--- Du lieu mau cua QuanLyGaraOTo.sql duoc nap TRUOC khi trigger nay ton tai nen khong sinh thong bao moi.
+-- Du lieu da co tu truoc khi trigger nay ton tai khong sinh thong bao moi.
 -- ============================================================
 USE QuanLyGaraOTo;
 GO

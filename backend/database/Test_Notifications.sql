@@ -1,7 +1,7 @@
 -- TV3-TUAN10
 -- ============================================================
 -- Test_Notifications.sql - trigger thong bao + lich nhac bao duong (Tuan 10 - TV3)
--- YEU CAU: da chay QuanLyGaraOTo.sql va migrations V001..V004.
+-- YEU CAU: da chay Script.sql va cac migration.
 -- Toan bo test nam trong mot transaction va duoc ROLLBACK cuoi script (trigger khong dung THROW nen an toan).
 -- Chay bang SSMS (hoac sqlcmd -I).
 -- ============================================================
