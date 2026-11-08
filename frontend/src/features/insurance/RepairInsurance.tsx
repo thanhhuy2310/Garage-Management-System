@@ -5,6 +5,7 @@ import {useGarageQuery} from '../../hooks/useGarageQuery'
 import {QueryState} from '../../components/garage/QueryState'
 import {Card} from '../../components/ui'
 import InsuranceCase from './InsuranceCase'
+import ClaimForm from './ClaimForm'
 import {statusName} from './forms'
 
 export default function RepairInsurance({receptionId}:{receptionId:number}) {
@@ -19,7 +20,9 @@ export default function RepairInsurance({receptionId}:{receptionId:number}) {
     {query.data&&<>
       {!query.data.policies.length&&<p>Xe chưa có hợp đồng bảo hiểm được lưu. Có thể sửa chữa và thanh toán thông thường.</p>}
       {query.data.policies.map(p=><p key={p.id}>{query.data?.companies.find(c=>c.id===p.companyId)?.name} · {p.policyNumber} · {p.startDate} – {p.endDate} · {statusName(p.verificationStatus)} · Chủ hợp đồng: {p.certificateOwnerName}</p>)}
-      {query.data.claim?<InsuranceCase id={query.data.claim.id}/>:<p>Chưa đăng ký sử dụng bảo hiểm cho lần sửa chữa này. <a href="/admin/insurance" className="text-primary underline">Kiểm tra hợp đồng và mở hồ sơ bảo hiểm</a></p>}
+      {query.data.claim ? <InsuranceCase id={query.data.claim.id}/> : query.data.policies.length > 0 &&
+        <ClaimForm policies={query.data.policies} receptions={[]} fixedReception={receptionId} onSaved={query.reload}/>}
+      <a href="/admin/insurance" className="text-primary underline">Quản lý và xác minh hợp đồng bảo hiểm</a>
     </>}
   </Card>
 }

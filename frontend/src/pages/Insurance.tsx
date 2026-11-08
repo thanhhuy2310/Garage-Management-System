@@ -1,11 +1,12 @@
 import {InsuranceForm,statusName,val} from "../features/insurance/forms";
 import {useCallback,useState} from "react";
-import {Card,Input,Select,Textarea} from "../components/ui";
+import {Card,Input,Select} from "../components/ui";
 import {QueryState} from "../components/garage/QueryState";
 import {useGarageQuery} from "../hooks/useGarageQuery";
 import {vehiclesApi,type Vehicle} from "../api/vehicles";
 import {receptionsApi} from "../api/receptions";
-import {insuranceApi,type Company,type Claim,type Policy} from "../api/insurance";
+import {insuranceApi,type Company,type Policy} from "../api/insurance";
+import ClaimForm from "../features/insurance/ClaimForm";
 import {formatMoney} from "../utils/garageFormat";
 import InsuranceCase from "../features/insurance/InsuranceCase";
 
@@ -55,15 +56,7 @@ function VehicleInsurance({vehicle,companies}:{vehicle:Vehicle;companies:Company
         {!p.registeredOwnerName&&<Input name="registration" label="Tên trên đăng ký xe" required/>}
         {!p.certificateOwnerName&&<Input name="certificate" label="Tên trên giấy chứng nhận" required/>}
         <Input name="note" label="Căn cứ xác minh" required/></InsuranceForm>}</Card>)}
-    {policies.length>0&&receptions.length>0&&<InsuranceForm title="Mở hồ sơ tổn thất" done={saved} save={async f=>{
-      const result=await insuranceApi.save<Claim>("claims",{policyId:Number(f.get("policy")),receptionId:Number(f.get("reception")),
-        incidentAt:val(f,"incidentAt"),insurerClaimNumber:optional(f,"number"),incidentLocation:val(f,"location"),causeDescription:val(f,"cause"),damageDescription:val(f,"damage")});
-      setSelected(result.id);
-    }}><Select name="policy" label="Hợp đồng" options={policies.map(p=>({value:String(p.id),label:p.policyNumber}))}/>
-      <Select name="reception" label="Phiếu tiếp nhận" options={receptions.map(r=>({value:String(r.id),label:"TN"+r.id+" · "+r.receivedAt}))}/>
-      <Input name="number" label="Mã hồ sơ phía bảo hiểm"/><Input name="incidentAt" label="Thời điểm sự cố" type="datetime-local" required/>
-      <Input name="location" label="Địa điểm" required/><Textarea name="cause" label="Nguyên nhân" required/><Textarea name="damage" label="Tổn thất ghi nhận" required/>
-    </InsuranceForm>}
+    {policies.length>0&&receptions.length>0&&<ClaimForm policies={policies} receptions={receptions} onCreated={setSelected} onSaved={saved}/>}
     {!receptions.length&&<p>Mở hồ sơ mới từ phiếu tiếp nhận của xe. <a href="/admin/reception">Xem tiếp nhận</a></p>}
     <h3 className="font-semibold">Hồ sơ tổn thất</h3>
     {claims.length===0?<p>Xe chưa có hồ sơ tổn thất.</p>:<Select label="Chọn hồ sơ" value={String(selected||claims[0].id)} onChange={e=>setSelected(Number(e.target.value))} options={claims.map(c=>({value:String(c.id),label:c.code+" · "+statusName(c.status)}))}/>}
