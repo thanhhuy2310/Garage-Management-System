@@ -24,12 +24,25 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @EnabledIfEnvironmentVariable(named="RUN_SQLSERVER_IT",matches="true")
 @Transactional
 class InsuranceWorkflowSqlServerIT {
+    // Run the customer's booking step on the preceding day, regardless of the time
+    // the suite starts. The controller, SQL repository and slot checks remain real.
+    @org.springframework.boot.test.context.TestConfiguration
+    static class BookingTime {
+        @org.springframework.context.annotation.Bean
+        @org.springframework.context.annotation.Primary
+        com.gara.quanlygara.service.AppointmentService bookingDuringOpeningHours(
+                com.gara.quanlygara.repository.AppointmentRepository repository) {
+            ZoneId zone = ZoneId.of("Asia/Ho_Chi_Minh");
+            var previousDay = LocalDate.now(zone).minusDays(1).atTime(9, 0).atZone(zone);
+            return new com.gara.quanlygara.service.AppointmentService(repository, Clock.fixed(previousDay.toInstant(), zone));
+        }
+    }
     @Autowired MockMvc mvc;
     @Autowired JdbcTemplate db;
     @Autowired ObjectMapper json;
     String manager,owner,path;
     int customer,vehicle,employee,policy,claim,reception;
-    LocalDate day=LocalDate.now();
+    LocalDate day=LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh"));
     int insert(String table,String key,Map<String,Object> values) {
         return new SimpleJdbcInsert(db).withTableName(table).usingGeneratedKeyColumns(key)
             .usingColumns(values.keySet().toArray(String[]::new)).executeAndReturnKey(values).intValue();
@@ -51,7 +64,18 @@ class InsuranceWorkflowSqlServerIT {
         insert("TaiKhoan","MaTaiKhoan",Map.of("TenDangNhap",manager,"MatKhauHash","unused","VaiTro","MANAGER","MaNhanVien",employee));
         insert("TaiKhoan","MaTaiKhoan",Map.of("TenDangNhap",owner,"MatKhauHash","unused","VaiTro","CUSTOMER","MaKhachHang",customer));
         vehicle=insert("Xe","MaXe",Map.of("MaKhachHang",customer,"BienSo","51A-"+tag));
-        reception=insert("PhieuTiepNhan","MaTiepNhan",Map.of("MaXe",vehicle,"NgayTiepNhan",java.sql.Timestamp.valueOf(day.atStartOfDay())));
+        var slots = customerGet("/api/appointments/availability?date=" + day, owner, 200).path("slots");
+        var available = java.util.stream.StreamSupport.stream(slots.spliterator(), false)
+                .filter(slot -> slot.path("remaining").asInt() > 0).findFirst().orElseThrow();
+        var booked = mvc.perform(post("/api/appointments").with(user(owner).roles("CUSTOMER")).contentType(APPLICATION_JSON)
+                .content(json.writeValueAsBytes(Map.of("vehicleId", vehicle, "date", day, "time", available.path("time").asText()))))
+                .andReturn().getResponse();
+        assertEquals(201, booked.getStatus(), booked.getContentAsString());
+        var appointment = json.readTree(booked.getContentAsByteArray()).path("data");
+        int appointmentId = appointment.path("id").intValue();
+        call(patch("/api/appointments/" + appointmentId + "/confirm"), Map.of("version", appointment.path("version").intValue()), 200);
+        reception=call(post("/api/receptions"),Map.of("appointmentId",appointmentId,"customerId",customer,"vehicleId",vehicle,"mileage",25000,
+                "initialCondition","Móp cửa, cần kiểm tra lọc dầu","customerRequest","Sửa cửa và thay lọc dầu"),201).path("id").asInt();
         int company=insert("CongTyBaoHiem","MaCongTyBaoHiem",Map.of("MaCongTy",tag,"TenCongTy","An Phát"));
         policy=call(post("/api/insurance/policies"),Map.of("companyId",company,"vehicleId",vehicle,"policyholderCustomerId",customer,
             "policyNumber",tag,"insuranceType","VAT_CHAT_XE","startDate",day.minusDays(30),"endDate",day.plusDays(30),
@@ -93,11 +117,14 @@ class InsuranceWorkflowSqlServerIT {
     void actualInvoiceSeparatesCustomerAndInsurerUntilBothHavePaid(boolean direct)throws Exception {
         if(direct) inspect();
         int service=insert("DichVu","MaDichVu",Map.of("TenDichVu","Sửa cửa","DonGia",200000));
+        int warehouse=insert("Kho","MaKho",Map.of("TenKho","Kho phía sau"));
+        int part=insert("PhuTung","MaPhuTung",Map.of("MaKho",warehouse,"TenPhuTung","Lọc dầu","DonGia",50000,"SoLuongTon",10));
         var repair=call(post("/api/repair-orders"),Map.of("receptionId",reception,"services",List.of(Map.of("serviceId",service,"quantity",1))),201);
         int order=repair.path("order").path("id").asInt();
         var quote=call(post("/api/quotations"),Map.of("repairOrderId",order,
-                "lines",List.of(Map.of("kind","SERVICE","itemId",service,"quantity",1))),201);
+                "lines",List.of(Map.of("kind","SERVICE","itemId",service,"quantity",1),Map.of("kind","PART","itemId",part,"quantity",2))),201);
         int quoteId=quote.path("id").asInt(),line=quote.path("lines").get(0).path("id").asInt();
+        int partLine=quote.path("lines").get(1).path("id").asInt();
         var sent=call(post("/api/quotations/"+quoteId+"/send"),Map.of("version",0),200);
         var decision=mvc.perform(post("/api/quotations/"+quoteId+"/decision").with(user(owner).roles("CUSTOMER"))
             .contentType(APPLICATION_JSON).content(json.writeValueAsBytes(Map.of("version",sent.path("version").asInt(),"accepted",true)))).andReturn();
@@ -108,17 +135,17 @@ class InsuranceWorkflowSqlServerIT {
         int proposal;
         if(direct){
         call(post(finance+"/proposals"),Map.of("version",version(),"quoteId",quoteId,"revision",1,"direct",direct,
-                "lines",List.of(Map.of("lineId",line,"amount",180000))),200);
+                "lines",List.of(Map.of("lineId",line,"amount",180000),Map.of("lineId",partLine,"amount",0))),200);
         proposal=call(get(finance),null,200).path("proposals").get(0).path("id").asInt();
         int evidence=upload("QUYET_DINH");
         var approval=Map.of("version",version(),"proposalId",proposal,"documentId",evidence,"reference","QD-01","reason","Trừ phần khách tự chịu",
-                "lines",List.of(Map.of("lineId",line,"amount",150000)));
+                "lines",List.of(Map.of("lineId",line,"amount",150000),Map.of("lineId",partLine,"amount",0)));
         call(post(finance+"/decisions"),approval,409);
         call(post("/api/insurance/policies/"+policy+"/verification"),Map.of("status","DA_XAC_MINH","note","Đã đối chiếu giấy chứng nhận"),200);
         call(post(finance+"/decisions"),approval,200);
         } else {
             int evidence=upload("QUYET_DINH");
-            var allocation=Map.of("version",version(),"quoteId",quoteId,"revision",1,"direct",false,"lines",List.of(Map.of("lineId",line,"amount",150000)));
+            var allocation=Map.of("version",version(),"quoteId",quoteId,"revision",1,"direct",false,"lines",List.of(Map.of("lineId",line,"amount",150000),Map.of("lineId",partLine,"amount",0)));
             var manual=Map.of("allocation",allocation,"documentId",evidence,"reference","QD-02","reason","Đã đối chiếu quyết định chi trả");
             call(post(finance+"/manual-decision"),manual,409);
             call(post("/api/insurance/policies/"+policy+"/verification"),Map.of("status","DA_XAC_MINH","note","Đã đối chiếu chủ xe"),200);
@@ -126,25 +153,43 @@ class InsuranceWorkflowSqlServerIT {
             call(post(finance+"/manual-decision"),manual,409);
             proposal=call(get(finance),null,200).path("proposals").get(0).path("id").asInt();
         }
-        db.update("INSERT INTO KyThuatVien(MaNhanVien) VALUES(?)",employee);
+        int technicianId=insert("NhanVien","MaNhanVien",Map.of("HoTen","Trần Minh Hải","ChucVu","Kỹ thuật viên"));
+        db.update("INSERT INTO KyThuatVien(MaNhanVien) VALUES(?)",technicianId);
         int shift=insert("CaLamKyThuatVien","Id",Map.of("TenCa","Ca kiểm thử","BatDau",java.sql.Time.valueOf("00:00:00"),"KetThuc",java.sql.Time.valueOf("23:59:59")));
-        db.update("INSERT INTO LichLamKyThuatVien(MaKyThuatVien,Ngay,MaCa) VALUES (?,?,?)",employee,LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh")),shift);
-        call(post("/api/repair-orders/"+order+"/technicians"),Map.of("technicianId",employee),201);
+        db.update("INSERT INTO LichLamKyThuatVien(MaKyThuatVien,Ngay,MaCa) VALUES (?,?,?)",technicianId,day,shift);
+        call(post("/api/repair-orders/"+order+"/technicians"),Map.of("technicianId",technicianId),201);
         call(put("/api/repair-orders/"+order+"/progress"),progress,200);
+        int issue=call(post("/api/warehouse/exports"),Map.of("repairOrderId",order,"requestedTechnicianId",technicianId,
+                "reason","Cấp lọc dầu theo báo giá","items",List.of(Map.of("partId",part,"quantity",2))),201).path("id").asInt();
+        assertEquals(10,db.queryForObject("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",Integer.class,part));
+        call(post("/api/warehouse/exports/"+issue+"/confirm-issue"),null,200);
+        call(post("/api/warehouse/exports/"+issue+"/confirm-issue"),null,200);
+        assertEquals(8,db.queryForObject("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",Integer.class,part));
+        // A separate employee-linked account exercises the technician-only usage API.
+        String technician=manager+"_ktv";
+        insert("TaiKhoan","MaTaiKhoan",Map.of("TenDangNhap",technician,"MatKhauHash","unused","VaiTro","TECHNICIAN","MaNhanVien",technicianId));
+        var used=mvc.perform(post("/api/warehouse/exports/"+issue+"/items/"+part+"/confirm").with(user(technician).roles("TECHNICIAN"))
+                .contentType(APPLICATION_JSON).content(json.writeValueAsBytes(Map.of("actualUsed",1)))).andReturn().getResponse();
+        assertEquals(200,used.getStatus(),used.getContentAsString());
+        assertEquals(8,db.queryForObject("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",Integer.class,part));
         String servicePath="/api/repair-orders/"+order+"/services/"+service+"/progress";
         call(put(servicePath),Map.of("expectedStatus","CHO_SUA","status","DANG_SUA","notes","Sửa cửa"),200);
         call(put(servicePath),Map.of("expectedStatus","DANG_SUA","status","HOAN_TAT","notes","Đã kiểm tra"),200);
+        call(put("/api/repair-orders/"+order+"/progress"),Map.of("expectedStatus","DANG_SUA","status","HOAN_TAT","notes","Nghiệm thu"),409);
+        call(post("/api/warehouse/exports/"+issue+"/items/"+part+"/confirm-return"),null,200);
+        call(post("/api/warehouse/exports/"+issue+"/items/"+part+"/confirm-return"),null,200);
+        assertEquals(9,db.queryForObject("SELECT SoLuongTon FROM PhuTung WHERE MaPhuTung=?",Integer.class,part));
         call(put("/api/repair-orders/"+order+"/progress"),Map.of("expectedStatus","DANG_SUA","status","HOAN_TAT","notes","Nghiệm thu"),200);
         int invoice=call(post("/api/invoices"),Map.of("repairOrderId",order),201).path("invoice").path("id").asInt();
         var pendingInvoice=customerGet("/api/customers/me/invoices/"+invoice,owner,200);
         assertTrue(pendingInvoice.path("awaitingInsurance").asBoolean());
         assertTrue(pendingInvoice.path("customerDue").isNull());
         String payments="/api/invoices/"+invoice+"/payments";
-        int insurer=direct?150000:0,customerShare=200000-insurer;
+        int insurer=direct?150000:0,customerShare=250000-insurer;
         var customerPayment=Map.of("amount",customerShare,"method","TIEN_MAT","requestId",UUID.randomUUID().toString());
         call(post(payments),customerPayment,409);
         call(post(finance+"/settlements"),Map.of("version",version(),"invoiceId",invoice,"proposalId",proposal,
-                "lines",List.of(Map.of("lineId",line,"amount",insurer))),200);
+                "lines",List.of(Map.of("lineId",line,"amount",insurer),Map.of("lineId",partLine,"amount",0))),200);
         call(post(payments),Map.of("amount",customerShare+1,"method","TIEN_MAT","requestId",UUID.randomUUID().toString()),409);
         call(post(payments),customerPayment,200);
         if(direct) {
@@ -160,7 +205,7 @@ class InsuranceWorkflowSqlServerIT {
         var share=json.readTree(response.getContentAsByteArray()).path("data");
         assertEquals(customerShare,share.path("customerAmount").asInt());
         assertEquals(insurer,share.path("garageAmount").asInt());
-        assertEquals(200000,share.path("total").asInt());
+        assertEquals(250000,share.path("total").asInt());
         var history=mvc.perform(get("/api/customers/me/history/"+order).with(user(owner).roles("CUSTOMER"))).andReturn().getResponse();
         assertEquals(200,history.getStatus());
         assertEquals(customerShare,json.readTree(history.getContentAsByteArray()).at("/data/insurance/customerAmount").intValue());
@@ -181,12 +226,14 @@ class InsuranceWorkflowSqlServerIT {
         assertEquals(0,customerGet("/api/customers/me/invoices",owner+"x",200).size());
         var stats=customerGet("/api/customers/me/statistics",owner,200);
         assertEquals(1,stats.path("completedVisits").asInt());
-        assertEquals(200000,stats.path("totalCost").asInt());
-        assertEquals(50000,stats.path("customerCost").asInt());
+        assertEquals(250000,stats.path("totalCost").asInt());
+        assertEquals(100000,stats.path("customerCost").asInt());
+        assertEquals(2,customerInvoice.path("lines").size());
+        assertEquals(1,db.queryForObject("SELECT SoLuong FROM ChiTietPhuTung WHERE MaPhieuSuaChua=? AND MaPhuTung=?",Integer.class,order,part));
         var balance=call(get(finance),null,200).path("balance");
         assertEquals(insurer,balance.path("insurerPaid").asInt());
         assertEquals(customerShare,balance.path("customerPaid").asInt());
-        assertEquals(200000,db.queryForObject("SELECT SUM(SoTien) FROM ThanhToan WHERE MaHoaDon=?",Integer.class,invoice));
+        assertEquals(250000,db.queryForObject("SELECT SUM(SoTien) FROM ThanhToan WHERE MaHoaDon=?",Integer.class,invoice));
         call(post(finance+"/close").param("version",""+version()),null,200);
         assertEquals("DA_DONG",call(get(path+"/casework"),null,200).path("status").asText());
     }
