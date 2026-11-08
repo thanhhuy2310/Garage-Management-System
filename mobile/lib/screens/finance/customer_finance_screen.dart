@@ -152,9 +152,13 @@ class _CustomerFinanceScreenState extends State<CustomerFinanceScreen> {
     ]);
   }
 
+  String _vehicleLabel(Map<String, dynamic> car) => car['currentlyOwned'] == false
+      ? "${car['licensePlate']} (đã chuyển chủ)"
+      : car['licensePlate'] as String;
+
   List<Widget> _statistics(Map<String, dynamic> data) => [
     _card([
-      Text('Tổng số xe: ${data['vehicleCount']}'),
+      Text('Số xe hiện sở hữu: ${data['vehicleCount']}'),
       Text('Lượt hoàn thành: ${data['completedVisits']}'),
       Text(
         'Sửa chữa: ${data['repairVisits']} · Bảo dưỡng: ${data['maintenanceVisits']}',
@@ -174,7 +178,7 @@ class _CustomerFinanceScreenState extends State<CustomerFinanceScreen> {
     for (final v in data['vehicles'] as List<dynamic>)
       _card([
         Text(
-          v['vehicle']['licensePlate'] as String,
+          _vehicleLabel(v['vehicle'] as Map<String, dynamic>),
           style: Theme.of(context).textTheme.titleMedium,
         ),
         Text(
@@ -231,7 +235,7 @@ class _CustomerFinanceScreenState extends State<CustomerFinanceScreen> {
                 for (final v in _vehicles)
                   DropdownMenuItem<int>(
                     value: v['vehicle']['id'] as int,
-                    child: Text(v['vehicle']['licensePlate'] as String),
+                    child: Text(_vehicleLabel(v['vehicle'] as Map<String, dynamic>)),
                   ),
               ],
               onChanged: _loading

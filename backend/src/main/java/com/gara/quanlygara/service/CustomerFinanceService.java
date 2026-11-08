@@ -21,7 +21,10 @@ public class CustomerFinanceService {
             BigDecimal total,BigDecimal insuranceSupport,BigDecimal customerDue,BigDecimal customerPaid,
             BigDecimal remaining,String status,boolean awaitingInsurance,List<InvoiceResponse.Line> lines,List<Receipt> payments) {}
     private void vehicle(int customer,Integer vehicle) {
-        if(vehicle!=null && db.queryForObject("SELECT COUNT(*) FROM Xe WHERE MaXe=? AND MaKhachHang=?",Integer.class,vehicle,customer)==0)
+        if(vehicle!=null && db.queryForObject("""
+            SELECT COUNT(*) FROM Xe x WHERE x.MaXe=? AND (x.MaKhachHang=? OR EXISTS (
+                SELECT 1 FROM PhieuTiepNhan t WHERE t.MaXe=x.MaXe AND t.MaKhachHangTiepNhan=?))
+            """,Integer.class,vehicle,customer,customer)==0)
             throw new ResourceNotFoundException("Không tìm thấy xe.");
     }
     public List<CustomerInvoice> invoices(int customer,Integer vehicle) {
@@ -29,7 +32,7 @@ public class CustomerFinanceService {
         var ids=db.queryForList("""
             SELECT h.MaHoaDon FROM HoaDon h JOIN PhieuSuaChua r ON r.MaPhieuSuaChua=h.MaPhieuSuaChua
             JOIN PhieuTiepNhan t ON t.MaTiepNhan=r.MaTiepNhan JOIN Xe x ON x.MaXe=t.MaXe
-            WHERE x.MaKhachHang=? AND (?=0 OR x.MaXe=?) AND r.TrangThai NOT IN ('HUY','DA_HUY')
+            WHERE t.MaKhachHangTiepNhan=? AND (?=0 OR x.MaXe=?) AND r.TrangThai NOT IN ('HUY','DA_HUY')
             ORDER BY h.NgayLap DESC,h.MaHoaDon DESC
             """,Integer.class,customer,vehicle==null?0:vehicle,vehicle==null?0:vehicle);
         return ids.stream().map(id->invoice(customer,id)).toList();
@@ -38,7 +41,7 @@ public class CustomerFinanceService {
         var vehicles=db.queryForList("""
             SELECT x.MaXe FROM HoaDon h JOIN PhieuSuaChua r ON r.MaPhieuSuaChua=h.MaPhieuSuaChua
             JOIN PhieuTiepNhan t ON t.MaTiepNhan=r.MaTiepNhan JOIN Xe x ON x.MaXe=t.MaXe
-            WHERE h.MaHoaDon=? AND x.MaKhachHang=? AND r.TrangThai NOT IN ('HUY','DA_HUY')
+            WHERE h.MaHoaDon=? AND t.MaKhachHangTiepNhan=? AND r.TrangThai NOT IN ('HUY','DA_HUY')
             """,Integer.class,id,customer);
         if(vehicles.isEmpty())throw new ResourceNotFoundException("Không tìm thấy hóa đơn.");
         var detail=billing.getById(id);var h=detail.invoice();var b=detail.insuranceBalance();
@@ -65,7 +68,7 @@ public class CustomerFinanceService {
                 pending?"CHO_DOI_CHIEU":due.compareTo(paid)<=0?"DA_THANH_TOAN":paid.signum()>0?"THANH_TOAN_MOT_PHAN":"CHUA_THANH_TOAN",
                 pending,detail.lines(),payments);
     }
-    public record Vehicle(int id,String licensePlate,String brand,String model) {}
+    public record Vehicle(int id,String licensePlate,String brand,String model,boolean currentlyOwned) {}
     public record VehicleStats(Vehicle vehicle,int completedVisits,int repairVisits,int maintenanceVisits,
             BigDecimal totalCost,BigDecimal customerCost,int awaitingInvoicesOrInsurance,LocalDateTime lastRepair) {}
     public record Month(int year,int month,int completedVisits,BigDecimal totalCost,BigDecimal customerCost) {}
@@ -82,8 +85,12 @@ public class CustomerFinanceService {
     public Statistics statistics(int customer,Integer selected,Integer year) {
         vehicle(customer,selected);
         if(year!=null&&(year<1900||year>9999))throw new BadRequestException("Năm không hợp lệ.");
-        var vehicles=db.query("SELECT MaXe,BienSo,HangXe,DongXe FROM Xe WHERE MaKhachHang=? ORDER BY MaXe",
-                (r,n)->new Vehicle(r.getInt(1),r.getString(2),r.getString(3),r.getString(4)),customer);
+        var vehicles=db.query("""
+                SELECT x.MaXe,x.BienSo,x.HangXe,x.DongXe,CASE WHEN x.MaKhachHang=? THEN 1 ELSE 0 END
+                FROM Xe x WHERE x.MaKhachHang=? OR EXISTS (
+                    SELECT 1 FROM PhieuTiepNhan t WHERE t.MaXe=x.MaXe AND t.MaKhachHangTiepNhan=?)
+                ORDER BY x.MaXe
+                """,(r,n)->new Vehicle(r.getInt(1),r.getString(2),r.getString(3),r.getString(4),r.getBoolean(5)),customer,customer,customer);
         var totals=new HashMap<Integer,Totals>();var monthly=new TreeMap<YearMonth,Totals>();var all=new Totals();
         vehicles.forEach(v->totals.put(v.id(),new Totals()));
         var invoices=new HashMap<Integer,CustomerInvoice>();invoices(customer,selected).forEach(i->invoices.put(i.repairOrderId(),i));
@@ -92,7 +99,7 @@ public class CustomerFinanceService {
                 COALESCE((SELECT SUM(d.SoLuong*d.DonGia) FROM ChiTietDichVu d WHERE d.MaPhieuSuaChua=r.MaPhieuSuaChua),0)
                 +COALESCE((SELECT SUM(d.SoLuong*d.DonGia) FROM ChiTietPhuTung d WHERE d.MaPhieuSuaChua=r.MaPhieuSuaChua),0) AS cost
             FROM PhieuSuaChua r JOIN PhieuTiepNhan t ON t.MaTiepNhan=r.MaTiepNhan JOIN Xe x ON x.MaXe=t.MaXe
-            WHERE x.MaKhachHang=? AND r.TrangThai='HOAN_TAT' AND (?=0 OR x.MaXe=?)
+            WHERE t.MaKhachHangTiepNhan=? AND r.TrangThai='HOAN_TAT' AND (?=0 OR x.MaXe=?)
             """,customer,selected==null?0:selected,selected==null?0:selected);
         for(var row:orders) {
             int id=((Number)row.get("id")).intValue(),car=((Number)row.get("vehicle")).intValue();
@@ -109,6 +116,7 @@ public class CustomerFinanceService {
         }
         var rows=vehicles.stream().filter(v->selected==null||v.id()==selected).map(v->{var t=totals.get(v.id());return new VehicleStats(v,t.visits,t.repairs,t.maintenance,t.total,t.customer,t.pending,t.last);}).toList();
         var months=monthly.entrySet().stream().map(e->new Month(e.getKey().getYear(),e.getKey().getMonthValue(),e.getValue().visits,e.getValue().total,e.getValue().customer)).toList();
-        return new Statistics(vehicles.size(),all.visits,all.repairs,all.maintenance,all.total,all.customer,all.pending,rows,months);
+        int currentlyOwned = (int) vehicles.stream().filter(Vehicle::currentlyOwned).count();
+        return new Statistics(currentlyOwned,all.visits,all.repairs,all.maintenance,all.total,all.customer,all.pending,rows,months);
     }
 }

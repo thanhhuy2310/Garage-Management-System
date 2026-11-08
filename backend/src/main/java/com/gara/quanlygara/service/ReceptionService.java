@@ -51,6 +51,7 @@ public class ReceptionService {
         if(receptions.countOpenForVehicle(vehicle.getId())>0)
             throw new ConflictException("Xe đang có phiếu tiếp nhận hoặc sửa chữa chưa kết thúc. Hãy mở phiếu hiện có.");
         InsuranceReception reception=new InsuranceReception();
+        reception.setReceivedCustomerId(vehicle.getCustomerId());
         reception.setVehicleId(vehicle.getId()); reception.setAppointmentId(input.appointmentId());
         reception.setReceivedAt(now()); reception.setReceivedBy(actor.getEmployeeId());
         apply(reception,vehicle,input.mileage(),input.initialCondition(),input.customerRequest(),input.notes());

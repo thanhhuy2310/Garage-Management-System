@@ -18,6 +18,13 @@ public class InsuranceReception {
     @Column(name = "MaXe", nullable = false)
     private Integer vehicleId;
 
+    @Column(name = "MaKhachHangTiepNhan", updatable = false)
+    private Integer receivedCustomerId;
+
+    public void setReceivedCustomerId(Integer receivedCustomerId) {
+        this.receivedCustomerId = receivedCustomerId;
+    }
+
     // H2 integration tests build the reception table from JPA metadata.
     @Column(name = "NgayTiepNhan")
     private LocalDateTime receivedAt;

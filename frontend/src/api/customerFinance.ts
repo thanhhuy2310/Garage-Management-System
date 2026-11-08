@@ -7,7 +7,7 @@ export interface CustomerInvoice {
   payments:{paidAt:string;amount:number;method:string;payer:string}[]
 }
 export interface VehicleStats {
-  vehicle:{id:number;licensePlate:string;brand:string|null;model:string|null};completedVisits:number;repairVisits:number;maintenanceVisits:number
+  vehicle:{id:number;licensePlate:string;brand:string|null;model:string|null;currentlyOwned:boolean};completedVisits:number;repairVisits:number;maintenanceVisits:number
   totalCost:number;customerCost:number;awaitingInvoicesOrInsurance:number;lastRepair:string|null
 }
 export interface CustomerStats {

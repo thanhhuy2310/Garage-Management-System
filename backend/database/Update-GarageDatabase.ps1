@@ -13,7 +13,7 @@ $steps=[ordered]@{
     'migrations/V003__receiving_bank_accounts.sql'="COL_LENGTH('dbo.ThanhToan','MaTaiKhoanNhan') IS NOT NULL AND OBJECT_ID('dbo.TaiKhoanNganHangGara') IS NOT NULL"
     'migrations/V004__service_status.sql'="COL_LENGTH('dbo.DichVu','TrangThai') IS NOT NULL"
     'migrations/V002__warehouse_actual_used_and_stock_check.sql'="OBJECT_ID('dbo.ChiTietKiemKe') IS NOT NULL AND COL_LENGTH('dbo.ChiTietPhieuXuat','SoLuongThucDung') IS NOT NULL"
-    'migrations/V003__confirm_usage_row_lock.sql'="OBJECT_DEFINITION(OBJECT_ID('dbo.sp_XacNhanSuDungPhuTung')) LIKE '%WITH (UPDLOCK, HOLDLOCK)%'"
+    'migrations/V003__confirm_usage_row_lock.sql'="OBJECT_DEFINITION(OBJECT_ID('dbo.sp_XacNhanSuDungPhuTung')) LIKE '%WITH (UPDLOCK, HOLDLOCK)%' OR (COL_LENGTH('dbo.ChiTietPhieuXuat','DaXuatKho') IS NOT NULL AND OBJECT_DEFINITION(OBJECT_ID('dbo.sp_XacNhanSuDungPhuTung')) LIKE '%THROW 50019%')"
     'patches/Repair_Safety_Procedures.sql'="OBJECT_DEFINITION(OBJECT_ID('dbo.sp_GhiNhanThanhToan')) LIKE '%WITH (UPDLOCK, HOLDLOCK)%'"
     'migrations/V004__customer_notifications_and_maintenance_reminders.sql'="OBJECT_ID('dbo.TRG_LichHen_ThongBao') IS NOT NULL AND COL_LENGTH('dbo.ThongBao','MaLichNhac') IS NOT NULL"
     'migrations/V005__insurance_company_policy.sql'="OBJECT_ID('dbo.HopDongBaoHiem') IS NOT NULL"
@@ -27,6 +27,9 @@ $steps=[ordered]@{
     'migrations/V013__insurance_receivables.sql'="OBJECT_ID('dbo.ThuBaoHiem') IS NOT NULL AND OBJECT_ID('dbo.PhanBoDongBaoHiem') IS NOT NULL AND OBJECT_ID('dbo.CongNoBaoHiem') IS NOT NULL"
     'migrations/V014__session_revocations.sql'="OBJECT_ID('dbo.RevokedSession') IS NOT NULL"
     'migrations/V015__password_recovery.sql'="OBJECT_ID('dbo.PasswordRecovery') IS NOT NULL"
+    'migrations/V016__technician_schedule.sql'="COL_LENGTH('dbo.KyThuatVien','GioiHanXe') IS NOT NULL AND OBJECT_ID('dbo.LichLamKyThuatVien') IS NOT NULL"
+    'migrations/V017__confirmed_stock_issue_and_return.sql'="COL_LENGTH('dbo.ChiTietPhieuXuat','DaNhapTra') IS NOT NULL AND OBJECT_DEFINITION(OBJECT_ID('dbo.sp_XacNhanSuDungPhuTung')) LIKE '%THROW 50019%'"
+    'migrations/V018__reception_financial_owner.sql'="COL_LENGTH('dbo.PhieuTiepNhan','MaKhachHangTiepNhan') IS NOT NULL AND INDEXPROPERTY(OBJECT_ID('dbo.PhieuTiepNhan'),'IX_TiepNhan_Khach_Xe','IndexId') IS NOT NULL"
 }
 $ids=@($steps.Keys); $end=$ids.Count-1; $baseline=-1
 if($Through){$end=$ids.IndexOf($Through); if($end -lt 0){throw 'Unknown Through migration'}}

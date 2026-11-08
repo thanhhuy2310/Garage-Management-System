@@ -42,7 +42,7 @@ class CustomerFinanceSqlServerIT {
     }
     int visit(int month,String status,boolean invoice) {
         var date=Timestamp.valueOf(LocalDateTime.of(2026,month,3,10,0));
-        int reception=insert("PhieuTiepNhan","MaTiepNhan",Map.of("MaXe",vehicle,"NgayTiepNhan",date));
+        int reception=insert("PhieuTiepNhan","MaTiepNhan",Map.of("MaXe",vehicle,"MaKhachHangTiepNhan",customer,"NgayTiepNhan",date));
         int order=insert("PhieuSuaChua","MaPhieuSuaChua",Map.of("MaTiepNhan",reception,"NgayLap",date,"NgayHoanThanh",date,"TrangThai",status));
         db.update("INSERT INTO ChiTietDichVu(MaPhieuSuaChua,MaDichVu,SoLuong,DonGia,TrangThai) VALUES(?,?,2,100000,'HOAN_TAT'),(?,?,1,50000,'HOAN_TAT')",order,repair,order,maintenance);
         if(invoice) return insert("HoaDon","MaHoaDon",Map.of("MaPhieuSuaChua",order,"NgayLap",date,"TongTien",250000,"TrangThai","CHUA_THANH_TOAN"));
@@ -85,5 +85,22 @@ class CustomerFinanceSqlServerIT {
         assertEquals(250000,stats.path("totalCost").asInt());
         assertEquals(0,stats.path("customerCost").asInt());
         assertEquals(1,stats.path("awaitingInvoicesOrInsurance").asInt());
+    }
+
+    @Test void changingVehicleOwnerPreservesOriginalCustomersInvoicePrivacy()throws Exception {
+        int invoice = visit(5, "HOAN_TAT", true);
+        int buyer = insert("KhachHang", "MaKhachHang", Map.of("HoTen","Trần Minh Tú","SoDienThoai",owner));
+        String buyerLogin = owner + "_tu";
+        insert("TaiKhoan","MaTaiKhoan",Map.of("TenDangNhap",buyerLogin,"MatKhauHash","unused","VaiTro","CUSTOMER","MaKhachHang",buyer));
+        db.update("UPDATE Xe SET MaKhachHang=? WHERE MaXe=?",buyer,vehicle);
+        assertEquals(invoice,read("/invoices/"+invoice,200).path("id").intValue());
+        var original = read("/statistics?vehicleId="+vehicle,200);
+        assertEquals(1,original.path("completedVisits").intValue());
+        assertEquals(0,original.path("vehicleCount").intValue());
+        assertFalse(original.at("/vehicles/0/vehicle/currentlyOwned").booleanValue());
+        owner = buyerLogin;
+        read("/invoices/"+invoice,404);
+        assertEquals(0,read("/invoices?vehicleId="+vehicle,200).size());
+        assertEquals(0,read("/statistics?vehicleId="+vehicle,200).path("completedVisits").intValue());
     }
 }
