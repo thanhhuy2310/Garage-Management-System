@@ -63,6 +63,10 @@ public class TechnicianAssignmentService {
 
     @Transactional
     public TechnicianAssignmentResponse assign(Integer repairOrderId, TechnicianAssignmentRequest request) {
+        // Serialize capacity checks before locking individual orders. Two requests for
+        // the same technician must not each hold an order while waiting for this lock.
+        technicianRepository.findForUpdate(request.technicianId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỹ thuật viên."));
         var order = repairOrderRepository.findForUpdate(repairOrderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu sửa chữa."));
         if (java.util.Set.of("HOAN_TAT", "HUY", "DA_HUY").contains(order.getStatus())) {
@@ -71,8 +75,6 @@ public class TechnicianAssignmentService {
         if (!java.util.Set.of("MOI_TAO", "DANG_KIEM_TRA").contains(order.getStatus())) {
             rules.requireAcceptedQuote(repairOrderId);
         }
-        technicianRepository.findForUpdate(request.technicianId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỹ thuật viên."));
         TechnicianResponse technician = technicianRepository.findOptionById(request.technicianId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỹ thuật viên."));
         TechnicianAssignmentId id = new TechnicianAssignmentId(repairOrderId, technician.id());
@@ -107,6 +109,31 @@ public class TechnicianAssignmentService {
             throw new ForbiddenException("Tài khoản chưa được liên kết với kỹ thuật viên đang sử dụng hệ thống.");
         }
         return assignmentRepository.findRepairOrders(account.getEmployeeId());
+    }
+
+    @Transactional
+    public TechnicianAssignmentResponse transfer(int orderId, int previousTechnician,
+                                                 TechnicianAssignmentRequest request, String actor) {
+        int nextTechnician = request.technicianId();
+        if (previousTechnician == nextTechnician) {
+            throw new ConflictException("Vui lòng chọn kỹ thuật viên khác để bàn giao.");
+        }
+        // Opposite handovers acquire both workload locks in the same order.
+        for (int id : List.of(Math.min(previousTechnician, nextTechnician), Math.max(previousTechnician, nextTechnician))) {
+            technicianRepository.findForUpdate(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy kỹ thuật viên."));
+        }
+        rules.lock(orderId);
+        var previous = assignmentRepository.findById(new TechnicianAssignmentId(orderId, previousTechnician))
+                .orElseThrow(() -> new ConflictException("Phân công đã thay đổi. Vui lòng tải lại phiếu."));
+        var replacement = assign(orderId, request);
+        String history = "Bàn giao từ KTV #" + previousTechnician + " sang KTV #" + nextTechnician
+                + ". Phân công trước vào " + previous.getAssignedAt()
+                + (previous.getNotes() == null ? "." : ". Ghi chú cũ: " + previous.getNotes());
+        assignmentRepository.recordTransfer(orderId, history, actor, replacement.assignedAt());
+        assignmentRepository.delete(previous);
+        assignmentRepository.flush();
+        return replacement;
     }
 
     private void requireRepairOrder(Integer id) {

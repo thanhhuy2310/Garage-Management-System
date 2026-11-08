@@ -21,7 +21,55 @@ class TechnicianWorkloadSqlServerIT {
     @Autowired JdbcTemplate jdbc;
     @Autowired TechnicianAssignmentService assignments;
     @Autowired TechnicianWorkloadService workload;
+    @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
     private int id(String sql,Object...args){return jdbc.queryForObject(sql,Integer.class,args);}
+    @Test
+    @Transactional(propagation=org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED)
+    void simultaneousAssignmentsCannotExceedCapacity()throws Exception {
+        assertTrue(jdbc.queryForObject("SELECT DB_NAME()",String.class).startsWith("QuanLyGaraOTo_Verify_"));
+        var tx=new org.springframework.transaction.support.TransactionTemplate(transactions);
+        List<Integer> orders=new ArrayList<>(),cars=new ArrayList<>(),receptions=new ArrayList<>();
+        int[] keys=new int[3];
+        tx.executeWithoutResult(status->{
+            keys[0]=id("INSERT INTO NhanVien(HoTen,ChucVu) OUTPUT INSERTED.MaNhanVien VALUES (N'Trần Minh Hải',N'Kỹ thuật viên')");
+            jdbc.update("INSERT INTO KyThuatVien(MaNhanVien,GioiHanXe) VALUES (?,1)",keys[0]);
+            keys[1]=id("INSERT INTO CaLamKyThuatVien(TenCa,BatDau,KetThuc) OUTPUT INSERTED.Id VALUES (N'Ca kiểm thử đồng thời','00:00','23:59:59')");
+            jdbc.update("INSERT INTO LichLamKyThuatVien(MaKyThuatVien,Ngay,MaCa) VALUES(?,?,?)",keys[0],LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh")),keys[1]);
+            keys[2]=id("INSERT INTO KhachHang(HoTen,SoDienThoai) OUTPUT INSERTED.MaKhachHang VALUES(N'Lê Thanh An',?)",UUID.randomUUID().toString().substring(0,20));
+            for(int n=0;n<2;n++) {
+                int car=id("INSERT INTO Xe(MaKhachHang,BienSo) OUTPUT INSERTED.MaXe VALUES (?,?)",keys[2],UUID.randomUUID().toString().substring(0,15));cars.add(car);
+                int reception=id("INSERT INTO PhieuTiepNhan(MaXe,NgayTiepNhan) OUTPUT INSERTED.MaTiepNhan VALUES (?,SYSDATETIME())",car);receptions.add(reception);
+                orders.add(id("SET NOCOUNT ON; DECLARE @Ids TABLE(Id int); INSERT INTO PhieuSuaChua(MaTiepNhan,NgayLap,TrangThai) OUTPUT INSERTED.MaPhieuSuaChua INTO @Ids VALUES (?,SYSDATETIME(),N'MOI_TAO'); SELECT Id FROM @Ids;",reception));
+            }
+        });
+        var pool=java.util.concurrent.Executors.newFixedThreadPool(2);
+        var start=new java.util.concurrent.CountDownLatch(1);
+        try {
+            var futures=orders.stream().map(order->pool.submit(()->{
+                start.await();
+                try { assignments.assign(order,new TechnicianAssignmentRequest(keys[0],null));return true; }
+                catch(ConflictException expected){return false;}
+            })).toList();
+            start.countDown();
+            int successes=0;
+            for(var future:futures) if(future.get(20,java.util.concurrent.TimeUnit.SECONDS))successes++;
+            assertEquals(1,successes);
+            assertEquals(1,id("SELECT COUNT(*) FROM PhanCongKyThuatVien WHERE MaKyThuatVien=?",keys[0]));
+        } finally {
+            pool.shutdownNow();pool.awaitTermination(10,java.util.concurrent.TimeUnit.SECONDS);
+            tx.executeWithoutResult(status->{
+                jdbc.update("DELETE FROM PhanCongKyThuatVien WHERE MaKyThuatVien=?",keys[0]);
+                for(int order:orders)jdbc.update("DELETE FROM PhieuSuaChua WHERE MaPhieuSuaChua=?",order);
+                for(int reception:receptions)jdbc.update("DELETE FROM PhieuTiepNhan WHERE MaTiepNhan=?",reception);
+                for(int car:cars)jdbc.update("DELETE FROM Xe WHERE MaXe=?",car);
+                jdbc.update("DELETE FROM KhachHang WHERE MaKhachHang=?",keys[2]);
+                jdbc.update("DELETE FROM LichLamKyThuatVien WHERE MaKyThuatVien=?",keys[0]);
+                jdbc.update("DELETE FROM CaLamKyThuatVien WHERE Id=?",keys[1]);
+                jdbc.update("DELETE FROM KyThuatVien WHERE MaNhanVien=?",keys[0]);
+                jdbc.update("DELETE FROM NhanVien WHERE MaNhanVien=?",keys[0]);
+            });
+        }
+    }
     @Test void persistsSchedulesCountsDistinctWorkAndReleasesCompletedOrders() {
         assertEquals("QuanLyGaraOTo_Verify_20261029",jdbc.queryForObject("SELECT DB_NAME()",String.class));
         int employee=id("INSERT INTO NhanVien(HoTen,ChucVu) OUTPUT INSERTED.MaNhanVien VALUES (N'Nguyễn Minh Quang',N'Kỹ thuật viên')");
@@ -46,6 +94,14 @@ class TechnicianWorkloadSqlServerIT {
         assertThrows(ConflictException.class,()->workload.requireAssignable(employee));
         jdbc.update("UPDATE PhieuSuaChua SET TrangThai=N'HUY' WHERE MaPhieuSuaChua=?",orders.get(0));
         assignments.assign(orders.get(2),request);
+        int receiver=id("INSERT INTO NhanVien(HoTen,ChucVu) OUTPUT INSERTED.MaNhanVien VALUES (N'Lê Minh Đức',N'Kỹ thuật viên')");
+        jdbc.update("INSERT INTO KyThuatVien(MaNhanVien) VALUES (?)",receiver);
+        workload.saveSchedule(receiver,new TechnicianWorkloadService.ScheduleRequest(date,List.of(shift),2));
+        assignments.transfer(orders.get(2),employee,new TechnicianAssignmentRequest(receiver,null),"quanly");
+        var afterTransfer=workload.list(date);
+        assertEquals(1,afterTransfer.stream().filter(t->t.id()==employee).findFirst().orElseThrow().activeVehicles());
+        assertEquals(1,afterTransfer.stream().filter(t->t.id()==receiver).findFirst().orElseThrow().activeVehicles());
+        assertEquals(1,id("SELECT COUNT(*) FROM NhatKySuaChua WHERE MaPhieuSuaChua=? AND NguoiCapNhat=?",orders.get(2),"quanly"));
         workload.saveSchedule(employee,new TechnicianWorkloadService.ScheduleRequest(date,List.of(),2));
         assertThrows(ConflictException.class,()->workload.requireAssignable(employee));
     }

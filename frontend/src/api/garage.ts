@@ -112,10 +112,10 @@ export const garageApi = {
       await api.get<ApiResponse<Technician[]>>("/api/technicians", { signal }),
     )
   },
-  async assignTechnician(id: number, request: AssignmentRequest) {
+  async assignTechnician(id: number, request: AssignmentRequest, previousTechnician?: number) {
     return unwrap(
       await api.post<ApiResponse<TechnicianAssignment>>(
-        `/api/repair-orders/${id}/technicians`,
+        previousTechnician == null ? `/api/repair-orders/${id}/technicians` : `/api/repair-orders/${id}/technicians/${previousTechnician}/transfer`,
         request,
       ),
     )

@@ -14,6 +14,14 @@ public interface TechnicianAssignmentRepository extends JpaRepository<Technician
 
     boolean existsById_TechnicianId(Integer technicianId);
 
+    @org.springframework.data.jpa.repository.Modifying
+    @Query(value = """
+            INSERT INTO NhatKySuaChua(MaPhieuSuaChua,TrangThai,NoiDung,NguoiCapNhat,ThoiGian)
+            SELECT MaPhieuSuaChua,TrangThai,:note,:actor,:at FROM PhieuSuaChua WHERE MaPhieuSuaChua=:orderId
+            """, nativeQuery = true)
+    void recordTransfer(@Param("orderId") Integer orderId, @Param("note") String note,
+                        @Param("actor") String actor, @Param("at") java.time.LocalDateTime at);
+
     @Query("""
             select new com.gara.quanlygara.dto.technician.TechnicianAssignmentResponse(
                 a.id.repairOrderId, a.id.technicianId, e.fullName, a.assignedAt, a.notes)

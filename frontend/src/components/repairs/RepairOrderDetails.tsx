@@ -49,11 +49,7 @@ export default function RepairOrderDetails({
     ["MOI_TAO", "DANG_KIEM_TRA", "CHO_SUA"].includes(detail.order.status)
 
   function handleAssigned(assignment: TechnicianAssignment) {
-    query.setData((current) =>
-      current
-        ? { ...current, assignments: [...current.assignments, assignment] }
-        : current,
-    )
+    query.reload()
     setAssignmentOpen(false)
     setSuccess(`Đã phân công ${assignment.technician.fullName}.`)
   }

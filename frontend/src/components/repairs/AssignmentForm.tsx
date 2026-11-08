@@ -22,6 +22,7 @@ export default function AssignmentForm({
 }) {
   const query = useGarageQuery(garageApi.technicianWorkload)
   const [technicianId, setTechnicianId] = useState("")
+  const [previousTechnician, setPreviousTechnician] = useState("")
   const [notes, setNotes] = useState("")
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
@@ -45,7 +46,7 @@ export default function AssignmentForm({
       const assignment = await garageApi.assignTechnician(orderId, {
         technicianId: Number(technicianId),
         notes: notes.trim() || null,
-      })
+      }, previousTechnician ? Number(previousTechnician) : undefined)
       onSaved(assignment)
     } catch (reason) {
       setError(
@@ -81,6 +82,11 @@ export default function AssignmentForm({
         !query.error &&
         (available.length ? (
           <fieldset disabled={saving} className="space-y-4">
+            {assignments.length > 0 && <Select label="Hình thức phân công" value={previousTechnician}
+              onChange={event => setPreviousTechnician(event.target.value)}
+              options={[{value:"", label:"Phân công thêm"}, ...assignments.map(a => ({
+                value:String(a.technician.id), label:`Bàn giao từ ${a.technician.fullName}`,
+              }))]}/>}
             <Select
               label="Kỹ thuật viên"
               required

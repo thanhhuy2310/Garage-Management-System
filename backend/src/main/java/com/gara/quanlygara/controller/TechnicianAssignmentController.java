@@ -43,4 +43,12 @@ public class TechnicianAssignmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
                 "Phân công kỹ thuật viên thành công.", assignmentService.assign(repairOrderId, request)));
     }
+
+    @PostMapping("/{previousTechnician}/transfer")
+    public ResponseEntity<ApiResponse<TechnicianAssignmentResponse>> transfer(
+            @PathVariable int repairOrderId, @PathVariable int previousTechnician,
+            @Valid @RequestBody TechnicianAssignmentRequest request, java.security.Principal actor) {
+        return ResponseEntity.ok(ApiResponse.success("Đã bàn giao phiếu sửa chữa.",
+                assignmentService.transfer(repairOrderId, previousTechnician, request, actor.getName())));
+    }
 }
