@@ -51,6 +51,9 @@ public class SecurityConfig {
                                 writeSecurityError(response, HttpServletResponse.SC_FORBIDDEN,
                                         "Bạn không có quyền sử dụng chức năng này.")))
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.GET, "/", "/index.html", "/favicon.ico", "/assets/**", "/images/**",
+                                "/about", "/services", "/parts", "/contact", "/login", "/register",
+                                "/admin", "/admin/**", "/customer", "/customer/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/health", "/api/health/ready", "/api/public/services", "/api/public/parts").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register", "/api/auth/recovery/request", "/api/auth/recovery/verify", "/api/auth/recovery/complete", "/api/public/contact-messages").permitAll()
