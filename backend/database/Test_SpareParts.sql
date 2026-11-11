@@ -1,7 +1,7 @@
 -- TV3-TUAN7
 -- ============================================================
 -- Test_SpareParts.sql - rang buoc PhuTung + ChiTietDichVu/ChiTietPhuTung (Tuan 7 - TV3)
--- Chay trong SSMS sau khi tao database bang QuanLyGaraOTo.sql.
+-- Chay trong SSMS sau khi tao database bang Script.sql.
 -- Toan bo du lieu test nam trong mot transaction va duoc ROLLBACK cuoi script.
 -- Khong goi procedure nhap/xuat kho: script chi kiem tra rang buoc va xac nhan
 -- them dong chi tiet KHONG lam doi SoLuongTon.
@@ -27,7 +27,7 @@ SELECT TOP 1 @dv = MaDichVu FROM DichVu ORDER BY MaDichVu;
 
 IF @kho IS NULL OR @order IS NULL OR @dv IS NULL
 BEGIN
-    PRINT N'Thieu du lieu mau (Kho / PhieuSuaChua / DichVu). Hay chay QuanLyGaraOTo.sql truoc.';
+    PRINT N'Thieu du lieu mau (Kho / PhieuSuaChua / DichVu). Hay chay Script.sql truoc.';
     RETURN;
 END;
 

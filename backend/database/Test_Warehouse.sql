@@ -1,7 +1,7 @@
 -- TV3-TUAN8
 -- ============================================================
 -- Test_Warehouse.sql - kho phu tung (Tuan 8 - TV3)
--- YEU CAU: da chay QuanLyGaraOTo.sql va migrations/V002__warehouse_actual_used_and_stock_check.sql.
+-- YEU CAU: da chay Script.sql va cac migration kho.
 -- Script KHONG bao boc mot transaction: cac procedure co THROW trong TRAN se ROLLBACK ca transaction ngoai.
 -- Vi vay du lieu test dung nhan 'TEST-WH' va duoc don sach o cuoi script.
 -- ============================================================

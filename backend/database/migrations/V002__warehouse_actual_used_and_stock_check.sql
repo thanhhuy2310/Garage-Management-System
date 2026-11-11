@@ -1,7 +1,7 @@
 -- TV3-TUAN8
 -- ============================================================
 -- V002 - Tuan 8 (TV3): kho phu tung - thuc dung & kiem ke co phe duyet
--- Chay MOT LAN tren database QuanLyGaraOTo da tao bang QuanLyGaraOTo.sql (+ V001).
+-- Chay MOT LAN tren database QuanLyGaraOTo da tao bang Script.sql (+ V001).
 -- Script idempotent: chay lai khong loi, khong mat du lieu.
 --
 -- 1. ChiTietPhieuXuat: them SoLuongThucDung, SoLuongHoanTra (giu nguyen SoLuong = so luong cap phat).

@@ -13,7 +13,7 @@ Lỗi: `success = false`, `message` là thông điệp tiếng Việt, `data` l�
 
 ## 1. Điều kiện chạy (bắt buộc)
 
-1. Đã chạy `QuanLyGaraOTo.sql` rồi các migration `V001`, `V002`, `V003`, **`V004__customer_notifications_and_maintenance_reminders.sql`** (xem `backend/database/migrations/README.md`). Chạy bằng SSMS hoặc `sqlcmd -I` (cần `QUOTED_IDENTIFIER ON`).
+1. Đã chạy `Script.sql` rồi các migration theo `backend/database/migrations/README.md`. Chạy bằng SSMS hoặc `sqlcmd -I` (cần `QUOTED_IDENTIFIER ON`).
 2. Không có bảng thông báo mới: dùng lại `ThongBao`. V004 chỉ thêm cột `ThongBao.MaLichNhac`, bảng `LichNhacBaoDuong`, trigger `TRG_LichHen_ThongBao` và mở rộng `TRG_PhieuSuaChua_ThongBaoHoanTat`.
 
 ## 2. API dành cho khách hàng

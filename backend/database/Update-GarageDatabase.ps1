@@ -7,7 +7,7 @@ param(
 $ErrorActionPreference='Stop'
 Add-Type -AssemblyName System.Data
 $steps=[ordered]@{
-    'QuanLyGaraOTo.sql'="OBJECT_ID('dbo.TRG_PhieuSuaChua_ThongBaoHoanTat') IS NOT NULL AND OBJECT_ID('dbo.ThanhToan') IS NOT NULL"
+    'Script.sql'="OBJECT_ID('dbo.TRG_PhieuSuaChua_ThongBaoHoanTat') IS NOT NULL AND OBJECT_ID('dbo.ThanhToan') IS NOT NULL"
     'migrations/V001__add_customer_status.sql'="COL_LENGTH('dbo.KhachHang','TrangThai') IS NOT NULL"
     'migrations/V002__repair_progress_and_payment_requests.sql'="COL_LENGTH('dbo.ThanhToan','MaYeuCau') IS NOT NULL AND OBJECT_ID('dbo.NhatKySuaChua') IS NOT NULL"
     'migrations/V003__receiving_bank_accounts.sql'="COL_LENGTH('dbo.ThanhToan','MaTaiKhoanNhan') IS NOT NULL AND OBJECT_ID('dbo.TaiKhoanNganHangGara') IS NOT NULL"
@@ -60,7 +60,7 @@ try {
     $content=@{}; $hashes=@{}
     foreach($id in $ids){
         $source=[IO.File]::ReadAllText((Join-Path $PSScriptRoot $id)).Replace([string][char]13,'')
-        if($id -eq 'QuanLyGaraOTo.sql'){
+        if($id -eq 'Script.sql'){
             $schema=[regex]::Match($source,'(?ims)^CREATE TABLE KhachHang\b.*?^CREATE OR ALTER TRIGGER dbo\.TRG_PhieuSuaChua_ThongBaoHoanTat\b.*?^END;[ \t]*\nGO[ \t]*$')
             if(!$schema.Success){throw 'Unrecognized base schema boundaries.'}
             $source=$schema.Value
@@ -82,7 +82,8 @@ try {
     if($count -gt $ids.Count){throw 'Database ahead of this release.'}
     for($i=0;$i -lt $count;$i++){
         $id=$ids[$i]
-        if(!(Query "SELECT COUNT(*) FROM dbo.GarageSchemaHistory WHERE Step=$i AND Script='$id' AND Sha256='$($hashes[$id])'")){throw "History mismatch: $id"}
+        $acceptedScript = if($i -eq 0){"Script IN ('Script.sql','QuanLyGaraOTo.sql')"}else{"Script='$id'"}
+        if(!(Query "SELECT COUNT(*) FROM dbo.GarageSchemaHistory WHERE Step=$i AND $acceptedScript AND Sha256='$($hashes[$id])'")){throw "History mismatch: $id"}
     }
     if($count -gt ($end+1)){throw 'Refusing downgrade.'}
     for($i=$count;$i -le $end;$i++){

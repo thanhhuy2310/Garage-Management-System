@@ -5,7 +5,7 @@ Các file này là script SQL chạy thủ công, không phải Flyway. Hai nhá
 
 | Bước | File | Nội dung |
 | --- | --- | --- |
-| 1 | `../QuanLyGaraOTo.sql` | Schema và dữ liệu nền |
+| 1 | `../Script.sql` | Schema thuần, không có dữ liệu mẫu |
 | 2 | `V001__add_customer_status.sql` | Trạng thái khách hàng |
 | 3 | `V002__repair_progress_and_payment_requests.sql` | Nhật ký sửa chữa và mã chống ghi nhận thanh toán lặp |
 | 4 | `V003__receiving_bank_accounts.sql` | Tài khoản nhận tiền của gara |
@@ -28,9 +28,11 @@ Database kiểm chứng riêng có thể tạo bằng `../Initialize_Verificatio
 
 V009 không đổi nội dung báo giá cũ, không bỏ unique một báo giá hiện hành/phiếu. Nội dung trước tích hợp được lưu snapshot khi lần đầu thay đổi qua API, với actor để trống vì không thể suy đoán người thực hiện cũ. Trigger xác nhận phụ tùng bảo vệ cả API và procedure SQL cũ: nếu thực dùng vượt báo giá hoặc sai giá, transaction phải rollback. Các fixture kho phải có chi tiết báo giá thật, không chỉ một header đã xác nhận. Khi rollback ứng dụng, giữ các cột và lịch sử bổ sung; không xóa lịch sử đã duyệt. Script dùng database đang chọn, không chứa USE cố định; chạy với `sqlcmd -I -f 65001 -d <database>`.
 
-Không chạy lại `QuanLyGaraOTo.sql` trên database đã có dữ liệu. Các file từ bước 2 đến bước 8 đều giữ dữ liệu hiện có và hỗ trợ chạy lại. Khi dùng `sqlcmd`, bật `QUOTED_IDENTIFIER` bằng tùy chọn `-I`.
+Không chạy lại `Script.sql` trên database đã có dữ liệu. Các migration giữ dữ liệu hiện có. Khi dùng `sqlcmd`, bật `QUOTED_IDENTIFIER` bằng tùy chọn `-I`.
 
 Database phát triển local đã được xác nhận áp dụng tám bước đầu vào ngày 15/10/2026. Bước 9–12 phải kiểm tra, áp dụng riêng trên từng môi trường; không suy đoán chúng đã chạy. Có thể xác nhận phần kho bằng `../Test_Warehouse.sql`; script tự dọn dữ liệu kiểm thử.
+
+Để tạo database test sạch riêng và áp dụng đúng thứ tự này, chạy `../Initialize_Clean_Database.ps1 -DatabaseName <ten_database_test>`. Script từ chối database đã tồn tại và không chạy file trong `seeds/`.
 
 `V002__warehouse_actual_used_and_stock_check.sql` và `V003__confirm_usage_row_lock.sql` là phần kho tích hợp từ nhánh của Cẩm. Không đổi tên các file đã chia sẻ để tránh làm mất dấu phiên bản của thành viên.
 

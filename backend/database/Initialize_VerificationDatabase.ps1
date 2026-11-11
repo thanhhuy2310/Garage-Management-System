@@ -10,7 +10,7 @@ $exists = & sqlcmd -S $Server -E -C -d master -h -1 -W -b -Q "SET NOCOUNT ON; SE
 if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect SQL Server.' }
 if (($exists | Out-String).Trim() -ne '0') { throw 'Database already exists. Initialization is never rerun over existing data.' }
 $scripts = @(
-    'QuanLyGaraOTo.sql',
+    'Script.sql',
     'migrations/V001__add_customer_status.sql',
     'migrations/V002__repair_progress_and_payment_requests.sql',
     'migrations/V003__receiving_bank_accounts.sql',
@@ -34,7 +34,7 @@ foreach ($script in $scripts) {
     $source = $source.Replace('QuanLyGaraOTo', $Database)
     $target = Join-Path $targetFolder ([IO.Path]::GetFileName($script))
     Set-Content -LiteralPath $target -Value $source -Encoding utf8
-    $contextDatabase = if ($script -eq 'QuanLyGaraOTo.sql') { 'master' } else { $Database }
+    $contextDatabase = if ($script -eq 'Script.sql') { 'master' } else { $Database }
     & sqlcmd -S $Server -E -C -I -f 65001 -d $contextDatabase -b -i $target
     if ($LASTEXITCODE -ne 0) { throw "Failed: $script. Keep database for diagnosis; do not recreate it." }
     Write-Output "Applied: $script"
